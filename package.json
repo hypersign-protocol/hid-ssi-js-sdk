@@ -1,0 +1,17 @@
+{
+  "name": "lds",
+  "version": "1.0.0",
+  "description": "Simple Demo of linked data signature",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "crypto-ld": "^3.8.0",
+    "jsonld": "^3.1.1",
+    "jsonld-signatures": "^5.1.0"
+  }
+}
