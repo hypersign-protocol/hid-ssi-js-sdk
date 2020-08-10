@@ -122,5 +122,3 @@ export async function getCredential (name: string){
   return credential;
 }
 
-
-
