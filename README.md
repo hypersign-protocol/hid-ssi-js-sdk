@@ -1,3 +1,42 @@
+# Installation and usage
+
+## Installation
+
+```sh
+npm run build
+npm run test
+```
+
+## Usage
+
+```js
+const lib = require('../dist/index')
+const { getChallange, getUserDoc, sign, verify, getCredential} = lib
+
+let credential = {}, doc = {}, challenge = "", domain = "www.abc.com";
+const userData = {
+  name: "Vishwas",
+  email: "vishu.anand1@gmail.com",
+  telephone: "+91-8444072883",
+  birthdate: "1993-11-12",
+  jobTitle: "Software Enginner"
+}
+
+getCredential(userData.name)
+.then(cred => {
+  credential = cred
+  doc = getUserDoc(userData)
+  challenge = getChallange()
+  return sign({doc, privateKeyBase58: credential.keys.privateKeyBase58, publicKey: credential.keys.publicKey, challenge, domain })
+})
+.then((signedDoc) => {
+  return verify({doc: signedDoc, publicKey: credential.keys.publicKey, challenge, domain, controller: credential.controller })
+})
+.then((verified) => {})
+.catch(e => console.log(e))
+```
+
+
 # Linked Data Signature
 
 Simple Demo of linked data signature

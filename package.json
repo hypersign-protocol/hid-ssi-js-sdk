@@ -4,14 +4,16 @@
   "description": "Simple Demo of linked data signature",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "test": "npm run build && node test/test.js",
+    "start": "node dist/app.js",
+    "build": "tsc -p ."
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "crypto-ld": "^3.8.0",
     "jsonld": "^3.1.1",
-    "jsonld-signatures": "^5.1.0"
+    "jsonld-signatures": "^5.1.0",
+    "uuid": "^8.3.0"
   }
 }
