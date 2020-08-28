@@ -1,6 +1,6 @@
 {
   "name": "lds-sdk",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "description": "Simple Demo of linked data signature",
   "main": "dist/index.js",
   "scripts": {
@@ -15,7 +15,8 @@
     "crypto-ld": "^3.8.0",
     "jsonld": "^3.1.1",
     "jsonld-signatures": "^5.1.0",
-    "uuid": "^8.3.0"
+    "uuid": "^8.3.0",
+    "vc-js": "^0.6.4"
   },
   "devDependencies": {
     "rimraf": "^3.0.2"
