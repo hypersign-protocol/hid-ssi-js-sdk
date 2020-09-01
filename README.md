@@ -3,6 +3,9 @@
 ## Installation
 
 ```sh
+git submodule update --init --recursive
+cd libs/vc-js && npm i && cd -
+npm i
 npm run build
 npm run test
 ```

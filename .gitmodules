@@ -1,0 +1,3 @@
+[submodule "libs/vc-js"]
+	path = libs/vc-js
+	url = https://github.com/hypersign-protocol/vc-js.git
