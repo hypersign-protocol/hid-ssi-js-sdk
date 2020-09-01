@@ -16,6 +16,8 @@ const fetch = require('node-fetch');
 const { v4: uuidv4 } = require('uuid');
 const VC_PREFIX = "vc_";
 const VP_PREFIX = "vp_";
+const HYPERSIGN_NETWORK_DID_URL="http://localhost:5000/api/did/resolve/"
+const HYPERSIGN_NETWORK_SCHEMA_URL="http://localhost:5000/api/schema/get/"
 
 const getId = (type) => {
     const id = uuidv4();
@@ -109,16 +111,30 @@ const getCredentialContext = (schemaUrl, schema: ISchemaTemplate_Schema) => {
     return context
 }
 
-const getSchemaDoc = async (url) => (await (await fetch(url)).json())
+const fetchData = async (url) => (await (await fetch(url)).json())
+
+
+const resolve = async (did) => {
+    const didDoc = await fetchData(HYPERSIGN_NETWORK_DID_URL + did);
+    if(didDoc['status'] === 500) throw new Error('Could not resolve signerDid ='+ did)
+    return didDoc;
+} 
 
 export async function generateCredential (schemaUrl, params: {subjectDid, issuerDid, expirationDate, attributesMap: Object}){
     let schemaDoc:ISchemaTemplate = {} as ISchemaTemplate
+    let issuerDidDoc = {}
+    let subjectDidDoc = {}
     try{
-        schemaDoc = await getSchemaDoc(schemaUrl);
+        schemaDoc = await fetchData(schemaUrl);
     }catch(e){
         throw new Error('Could not resolve the schema from url = ' + schemaUrl)
     }
 
+    const issuerDid = params.issuerDid.split('#')[0]
+    const subjectDid = params.subjectDid.split('#')[0]
+    issuerDidDoc = await resolve(issuerDid);
+    subjectDidDoc = await resolve(subjectDid);
+    
     // TODO: do proper check for date and time
     // if(params.expirationDate < new Date()) throw  new Error("Expiration date can not be lesser than current date")
 
@@ -139,33 +155,63 @@ export async function generateCredential (schemaUrl, params: {subjectDid, issuer
     
     vc.issuanceDate = new Date().toISOString()
     
-    vc.issuer = params.issuerDid;
+    vc.issuer = issuerDid;
     
     vc.credentialSubject = getCredentialSubject(schemaDoc.schema, params.attributesMap)
-    vc.credentialSubject['id'] = params.subjectDid;
+    vc.credentialSubject['id'] = subjectDid;
 
     return vc;
 }
 
-export async function signCredential (credential, keys){
-    const { publicKey, privateKeyBase58} = keys
+
+
+export async function signCredential (credential, issuerDid, privateKey){
+    issuerDid = issuerDid.split('#')[0]
+    let signerDidDoc = await resolve(issuerDid);
+    let publicKeyId = signerDidDoc['assertionMethod'][0];
+    let publicKey = signerDidDoc['publicKey'].find(x => x.id == publicKeyId)
+
     const suite  = new Ed25519Signature2018({
-        verificationMethod: publicKey.id,
-        key: new Ed25519KeyPair({ privateKeyBase58, ...publicKey })
+        verificationMethod: publicKeyId,
+        key: new Ed25519KeyPair({ privateKeyBase58: privateKey, ...publicKey })
     })
     const signedVC = await vc.issue({ credential, suite, documentLoader });
     return signedVC
 }
 
+// type = assertionMethod | authentication
+const getControllerAndPublicKeyFromDid = async(did, type) =>{
+    let controller = {}, publicKey = {}
+    did = did.split('#')[0]
+    let didDoc = await resolve(did);
+    
+    let methodType = didDoc[type];
+    publicKey = didDoc['publicKey'].find(x => x.id == methodType[0])
+    if(!publicKey['controller']){
+        controller = {
+            '@context' : "https://w3id.org/security/v2",
+            'id': did
+        }
+        controller[type] = methodType
+    }else{
+        controller = publicKey['controller']
+    }
+
+    return {
+        controller, publicKey
+    }
+    
+}
+
 // https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
-export async function verifyCredential (credential, publicKey){
+export async function verifyCredential (credential, issuerDid){
     if(!credential) throw new Error("Credential can not be undefined")
     // TODO: this is not the correct way to fetch controller. it should comes from url present in the controller property of publickey
     // TODO work on controller object 
-
+    const {controller :  issuerController, publicKey} = await getControllerAndPublicKeyFromDid(issuerDid, 'assertionMethod')
     const purpose = new AssertionProofPurpose({
-        controller: publicKey.controller
-      })
+        controller: issuerController
+    })
 
     const suite = new Ed25519Signature2018({
         key: new Ed25519KeyPair(publicKey)
@@ -175,17 +221,21 @@ export async function verifyCredential (credential, publicKey){
     return result
 }
 
-export async function generatePresentation(verifiableCredential, holder){
+export async function generatePresentation(verifiableCredential, holderDid){
     const id = getId('VP');
-    const presentation = vc.createPresentation({ verifiableCredential, id, holder});
+    const presentation = vc.createPresentation({ verifiableCredential, id, holderDid});
     return presentation;
 }
 
-export async function signPresentation (presentation, keys, challenge = undefined){
-    const { publicKey, privateKeyBase58} = keys
+export async function signPresentation (presentation, holderDid, privateKey, challenge = undefined){
+    holderDid = holderDid.split('#')[0]
+    let signerDidDoc = await resolve(holderDid);
+    let publicKeyId = signerDidDoc['assertionMethod'][0];
+    let publicKey = signerDidDoc['publicKey'].find(x => x.id == publicKeyId)
+
     const suite  = new Ed25519Signature2018({
-        verificationMethod: publicKey.id,
-        key: new Ed25519KeyPair({ privateKeyBase58, ...publicKey })
+        verificationMethod: publicKeyId,
+        key: new Ed25519KeyPair({ privateKeyBase58: privateKey, ...publicKey })
     })
     if(!challenge || challenge == "") challenge = getId(undefined);
     const signedVP = await vc.signPresentation({ presentation, suite, challenge ,documentLoader });
@@ -193,26 +243,28 @@ export async function signPresentation (presentation, keys, challenge = undefine
 }
 
 // https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L392
-export async function verifyPresentation ({presentation, challenge, domain = undefined, vcPublicKey, vpPublicKey}){
+export async function verifyPresentation ({presentation, challenge, domain = undefined, issuerDid, holderDid}){
     if(!presentation) throw new Error("Credential can not be undefined")
     // TODO: this is not the correct way to fetch controller. it should comes from url present in the controller property of publickey
-    // TODO work on controller 
+    // TODO: work on controller 
+    // Holder
+    const {controller :  holderController, publicKey: holderPublicKey} = await getControllerAndPublicKeyFromDid(holderDid, 'authentication')
     const presentationPurpose = new AuthenticationProofPurpose({
-        controller: vpPublicKey.controller,
+        controller: holderController,
         domain,
         challenge
     })
-  
-    const purpose = new AssertionProofPurpose({
-        controller: vcPublicKey.controller
-      })
-
     const vpSuite = new Ed25519Signature2018({
-        key: new Ed25519KeyPair(vpPublicKey)
+        key: new Ed25519KeyPair(holderPublicKey)
       })
-
+  
+    // Issuer
+    const {controller :  issuerController, publicKey: issuerPublicKey} = await getControllerAndPublicKeyFromDid(issuerDid, 'assertionMethod')
+    const purpose = new AssertionProofPurpose({
+        controller: issuerController
+      })
     const vcSuite = new Ed25519Signature2018({
-        key: new Ed25519KeyPair(vcPublicKey)
+        key: new Ed25519KeyPair(issuerPublicKey)
       })
 
     const result = await vc.verify({presentation, presentationPurpose, purpose, suite: [vpSuite, vcSuite], documentLoader});

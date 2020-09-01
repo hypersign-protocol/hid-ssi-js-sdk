@@ -55,7 +55,7 @@ export function getChallange(){
   return uuidv4()
 }
 
-const getId = (name) => `${DID_SCHEME}:${name}`;
+const getId = (name) => `${DID_SCHEME}:${getChallange()}`;
 
 // Ref: https://www.w3.org/TR/did-core/
 // Also Check this: https://www.npmjs.com/package/did-veres-one
