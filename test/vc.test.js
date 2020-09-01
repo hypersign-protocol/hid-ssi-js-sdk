@@ -1,41 +1,5 @@
 const lib = require('../dist/vc')
-const { sign } = require('jsonld-signatures')
-const { Ed25519KeyPair } = require('crypto-ld');
 const { generateCredential, signCredential, verifyCredential, generatePresentation, signPresentation, verifyPresentation} = lib
-
-// const { birth_certificate_credential, example_credential, vc_keys, signed_credential} = require('./sampleCredentials');
-// Authorization Publick Key
-const keys = {
-    "publicKey": {
-        "@context": "https://w3id.org/security/v2",
-        "id": "did:hs:newDid123:nym:z6MknshWwzBaWsZ7jph8pUeJWg8rhoub7dK6upUK3WMJqd6m#z6MkjJsP7dF4ErZyvDXMTqCUquWftT3zFgu5hg5Wg6Ep1THa",
-        "type": "Ed25519VerificationKey2018",
-        "publicKeyBase58": "5rcLXNzcuK5WoigenGEdzoxg4sn8qoej1fAaqpGo6EWC",
-        "controller": {
-            '@context' : "https://w3id.org/security/v2",
-            'id': 'did:hs:newDid123:nym:z6MknshWwzBaWsZ7jph8pUeJWg8rhoub7dK6upUK3WMJqd6m',
-            "assertionMethod": ["did:hs:newDid123:nym:z6MknshWwzBaWsZ7jph8pUeJWg8rhoub7dK6upUK3WMJqd6m#z6MkjJsP7dF4ErZyvDXMTqCUquWftT3zFgu5hg5Wg6Ep1THa"]
-        }
-    },
-    "privateKeyBase58": "3m3tZVtynLqce67XxLLNg3ApSbeeSpsHHdTXsRFP8jH1JWbcbhh2igJeC6CgXD8srLTx2rggxG4YkekSBb1HiNwa"
- }
-
-// Authentication publickey
-const vpKeys = {
-    "publicKey": {
-        "@context": "https://w3id.org/security/v2",
-        "id": "did:v1:test:nym:z6MknshWwzBaWsZ7jph8pUeJWg8rhoub7dK6upUK3WMJqd6m#z6MksL9CNsMS5W9pSv1jYeGkTkdjzDKdnmP293AW38BK4Qet",
-        "type": "Ed25519VerificationKey2018",
-        "publicKeyBase58": "9RSUMjw9BL4edKrS8ugTfaartEdjhk4kDoZPDEPHvQKP",
-        "controller": {
-            '@context' : "https://w3id.org/security/v2",
-            'id': 'did:v1:test:nym:z6MknshWwzBaWsZ7jph8pUeJWg8rhoub7dK6upUK3WMJqd6m',
-            "authentication": ["did:v1:test:nym:z6MknshWwzBaWsZ7jph8pUeJWg8rhoub7dK6upUK3WMJqd6m#z6MksL9CNsMS5W9pSv1jYeGkTkdjzDKdnmP293AW38BK4Qet"]
-        }
-    },
-    "privateKeyBase58": "ZxCUJSxY8xKPwGoXDm2VHGQfvHdzwYySgXFuMgvhfFKBRs1pG39uwWgaymnwG7rFDDg23dXmyKKxGUa3bNeG8wo"
-}
-
 
 const challenge = "ch_adbshd131323"
 let sCredential = {}
@@ -47,40 +11,42 @@ const attributesMap = {
  addresss: "4th cross, LA",
 }
 
-console.log("Credentials start=======================================")
+const issuerKeys = {"publicKey":{"@context":"https://w3id.org/security/v2","id":"did:hs:45366005-5fe7-4efe-8581-ef73201a3bc4#z6Mkn8haqXgd9jotYHVsiKvtLR6MVrD9zkngdSMrDLG7rvqg","type":"Ed25519VerificationKey2018","publicKeyBase58":"8gSYFHSBpCKRRnfB2ky3VKYMgGwJasYKwRSvP4J6wi4J"},"privateKeyBase58":"6UtVLp9duZhkuEfks8kMZDpqrGDjGL5ztURxMfxxY9yXQGYs7dxR1dSMPXHjWaLaeMcKzkGqS6U3tTRWGBZWSmY"}
+const holderKeys = {"publicKey":{"@context":"https://w3id.org/security/v2","id":"did:hs:56c5952c-bf3a-490c-b601-69ba8c5633bb#z6MknGwtercwdjHSzoZRVgqksER7R5YV5Jp6BEZHpRtJ1Q6m","type":"Ed25519VerificationKey2018","publicKeyBase58":"8pgr4cNWJBnytJiip7sv28s7bWGdfRZjVDeMz9vH6BKP"},"privateKeyBase58":"k21g6A34T2knufDA2ahqd4tphWTzPpz7HJhiEHnde9oNGiWSnTdourPj7AjbgLN7AWgEhtaogYzhfqkh2rbC8rm"}
+
 generateCredential(schemaUrl, {
-    subjectDid: vpKeys.publicKey.controller.id,
-    issuerDid: keys.publicKey.controller.id,
+    subjectDid: holderKeys.publicKey.id,
+    issuerDid: issuerKeys.publicKey.id,
     expirationDate: new Date().toISOString(),
     attributesMap
 }).then(credential => {
-    //console.log(credential)
+    console.log(credential)
     console.log("Credentials end=======================================")
     console.log("SignedCredential start=======================================")
-    return signCredential(credential, keys)
+    return signCredential(credential, issuerKeys.publicKey.id, issuerKeys.privateKeyBase58)
 }).then(signedCredential => {
     console.log(signedCredential)
     sCredential = signedCredential;
     console.log("SignedCredential end=======================================")
     console.log("VerifyCredential start=======================================")
-    return verifyCredential(signedCredential, keys.publicKey)
+    return verifyCredential(signedCredential, issuerKeys.publicKey.id)
 }).then(result => {
     console.log(result)
     console.log("VerifyCredential end=======================================")
     console.log("Presentation start=======================================")
-    return generatePresentation(sCredential,vpKeys.publicKey.controller.id)
+    return generatePresentation(sCredential, holderKeys.publicKey.id)
 })
 .then(presentation => {
     console.log(presentation)
     console.log("Presentation end=======================================")
     console.log("SignedPresentation start=======================================")
-    return signPresentation(presentation,vpKeys, challenge)
+    return signPresentation(presentation, holderKeys.publicKey.id, holderKeys.privateKeyBase58, challenge)
 })
 .then(signedPresentation => {
     console.log(JSON.stringify(signedPresentation, null, 2))
     console.log("SignedPresentation end=======================================")
     console.log("VerifyPresentation start=======================================")
-    return verifyPresentation({presentation: signedPresentation, challenge, vcPublicKey: keys.publicKey, vpPublicKey: vpKeys.publicKey})
+    return verifyPresentation({presentation: signedPresentation, challenge, issuerDid: issuerKeys.publicKey.id, holderDid: holderKeys.publicKey.id})
 })
 .then(result => {
     console.log(JSON.stringify(result, null, 2))
