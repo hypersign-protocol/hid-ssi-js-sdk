@@ -58,6 +58,7 @@ export function getChallange(){
 const getId = (name) => `${DID_SCHEME}:${name}`;
 
 // Ref: https://www.w3.org/TR/did-core/
+// Also Check this: https://www.npmjs.com/package/did-veres-one
 export async function getDidDocAndKeys(user: Object){
   let didDoc = {};
   if(!user['name']) throw new Error("Name is required")

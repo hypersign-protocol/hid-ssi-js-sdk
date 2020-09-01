@@ -14,10 +14,12 @@ const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 const { documentLoader } = require('jsonld');
 const fetch = require('node-fetch');
 const { v4: uuidv4 } = require('uuid');
-const VC_PREFIX = "vc_"
+const VC_PREFIX = "vc_";
+const VP_PREFIX = "vp_";
 
-const getVCId = () => {
-    return VC_PREFIX+uuidv4();
+const getId = (type) => {
+    const id = uuidv4();
+    return type ? (type === 'VC'? VC_PREFIX+id: (type === 'VP' ? VP_PREFIX + id: id)): id;
 }
 
 interface ISchemaTemplate_Schema{
@@ -39,22 +41,32 @@ interface ISchemaTemplate {
     schema: ISchemaTemplate_Schema        
 }
 
+// https://www.w3.org/TR/vc-data-model/#basic-concepts
 interface IVerifiableCredential{
     id: string;
     type: Array<string>;
     issuer: string;
     issuanceDate: string;
     expirationDate: string;
-    credentialSubject: {};
-    proof: {}
+    credentialSubject: Object;
+    proof: Object
+}
+
+// https://www.w3.org/TR/vc-data-model/#presentations-0
+interface IVerifiablePresentation{
+    id: string;
+    type: Array<string>;
+    verifiableCredential: Array<IVerifiableCredential>;
+    holder: string;
+    proof: Object
 }
 
 const checkIfAllRequiredPropsAreSent = (sentAttributes: Array<string>, requiredProps: Array<string>) => {
     return !requiredProps.some(x => sentAttributes.indexOf(x) === -1)
 }
 
-const getCredentialSubject = (schema: ISchemaTemplate_Schema, attributesMap: Object) => {
-    const cs = {}
+const getCredentialSubject = (schema: ISchemaTemplate_Schema, attributesMap: Object):Object => {
+    const cs: Object = {};
     
     const sentPropes:Array<string>  = Object.keys(attributesMap)
     const SchemaProps:Array<string> = Object.keys(schema.properties)
@@ -75,9 +87,11 @@ const getCredentialSubject = (schema: ISchemaTemplate_Schema, attributesMap: Obj
     props.forEach(p => {
         cs[p] = attributesMap[p]
     })
+
     return cs
 }
 
+// TODO: https://www.w3.org/TR/vc-data-model/#data-schemas 
 const getCredentialContext = (schemaUrl, schema: ISchemaTemplate_Schema) => {
     const context: any = []
     context.push("https://www.w3.org/2018/credentials/v1")
@@ -115,7 +129,7 @@ export async function generateCredential (schemaUrl, params: {subjectDid, issuer
     //   ];
     vc['@context'] = await getCredentialContext(schemaUrl, schemaDoc.schema)
 
-    vc.id = getVCId();
+    vc.id = getId('VC');
 
     vc.type = []
     vc.type.push("VerifiableCredential")
@@ -127,7 +141,6 @@ export async function generateCredential (schemaUrl, params: {subjectDid, issuer
     
     vc.issuer = params.issuerDid;
     
-    vc.credentialSubject = {}
     vc.credentialSubject = getCredentialSubject(schemaDoc.schema, params.attributesMap)
     vc.credentialSubject['id'] = params.subjectDid;
 
@@ -144,25 +157,69 @@ export async function signCredential (credential, keys){
     return signedVC
 }
 
+// https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
 export async function verifyCredential (credential, publicKey){
     if(!credential) throw new Error("Credential can not be undefined")
     // TODO: this is not the correct way to fetch controller. it should comes from url present in the controller property of publickey
-    const controller = {
-        '@context' : "https://w3id.org/security/v2",
-        id: publicKey.id,
-        assertionMethod: [publicKey.id]
-      }
+    // TODO work on controller object 
 
     const purpose = new AssertionProofPurpose({
-        controller
+        controller: publicKey.controller
       })
 
     const suite = new Ed25519Signature2018({
         key: new Ed25519KeyPair(publicKey)
       })
+
     const result = await vc.verifyCredential({credential, purpose, suite, documentLoader});
     return result
 }
+
+export async function generatePresentation(verifiableCredential, holder){
+    const id = getId('VP');
+    const presentation = vc.createPresentation({ verifiableCredential, id, holder});
+    return presentation;
+}
+
+export async function signPresentation (presentation, keys, challenge = undefined){
+    const { publicKey, privateKeyBase58} = keys
+    const suite  = new Ed25519Signature2018({
+        verificationMethod: publicKey.id,
+        key: new Ed25519KeyPair({ privateKeyBase58, ...publicKey })
+    })
+    if(!challenge || challenge == "") challenge = getId(undefined);
+    const signedVP = await vc.signPresentation({ presentation, suite, challenge ,documentLoader });
+    return signedVP
+}
+
+// https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L392
+export async function verifyPresentation ({presentation, challenge, domain = undefined, vcPublicKey, vpPublicKey}){
+    if(!presentation) throw new Error("Credential can not be undefined")
+    // TODO: this is not the correct way to fetch controller. it should comes from url present in the controller property of publickey
+    // TODO work on controller 
+    const presentationPurpose = new AuthenticationProofPurpose({
+        controller: vpPublicKey.controller,
+        domain,
+        challenge
+    })
+  
+    const purpose = new AssertionProofPurpose({
+        controller: vcPublicKey.controller
+      })
+
+    const vpSuite = new Ed25519Signature2018({
+        key: new Ed25519KeyPair(vpPublicKey)
+      })
+
+    const vcSuite = new Ed25519Signature2018({
+        key: new Ed25519KeyPair(vcPublicKey)
+      })
+
+    const result = await vc.verify({presentation, presentationPurpose, purpose, suite: [vpSuite, vcSuite], documentLoader});
+    return result
+}
+
+
 
 
 
