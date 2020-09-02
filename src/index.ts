@@ -4,6 +4,7 @@ const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 const { Ed25519Signature2018 } = jsonSigs.suites;
 const { documentLoader } = require('jsonld');
 const { v4: uuidv4 } = require('uuid');
+const { resolve, getControllerAndPublicKeyFromDid } = require('./utils');
 
 const DID_SCHEME = 'did:hs';
 const compactProof = false;
@@ -29,7 +30,8 @@ interface IParams{
   publicKey: IPublicKey
   challenge: string
   domain: string
-  controller: IController
+  controller: IController,
+  did: string
 }
 
 // Generate new key pairs
@@ -99,37 +101,47 @@ export async function getDidDocAndKeys(user: Object){
 export async function verify (params: IParams){
   const { doc, challenge, domain } = params
   // TODO: checks..."All params are mandatory"
-  const publicKey  = doc['publicKey']
+  
+  // TODO: Fetch did doc from ledger and compare it here.
+  const did = doc['id']
+  const {controller, publicKey, didDoc: didDocOnLedger} = await getControllerAndPublicKeyFromDid(did, 'authentication')
+  
+  const didDocWhichIsPassedTemp = Object.assign({}, doc)
+  delete didDocWhichIsPassedTemp['proof'];
+  delete didDocOnLedger['proof'];
+  if(JSON.stringify(didDocWhichIsPassedTemp) !== JSON.stringify(didDocOnLedger)) throw new Error("Invalid didDoc for did = " + did)
 
-  const controller = {
-    '@context' : doc['@context'],
-    id: doc['id'],
-    publicKey,
-    authentication: doc['authentication']
-  }
+  const purpose = new AuthenticationProofPurpose({
+    controller,
+    domain,
+    challenge
+  })
+
+  const suite = new Ed25519Signature2018({
+      key: new Ed25519KeyPair(publicKey)
+  })
 
   const verified = await jsonSigs.verify(doc, {
-    suite: new Ed25519Signature2018({
-      key: new Ed25519KeyPair(publicKey[0])
-    }),
-    purpose: new AuthenticationProofPurpose({
-      controller,
-      challenge,
-      domain
-    }),
+    suite,
+    purpose,
     documentLoader,
     compactProof
   })
+
   return verified;
 }
 
 // Sign the doc
 export async function sign (params: IParams) {
-  const { doc, privateKeyBase58, publicKey, challenge, domain } = params
-  // TODO: checks..."All params are mandatory"
+  const { did, privateKeyBase58, challenge, domain } = params
+  
+  const doc = await resolve(did);
+  const publicKeyId = doc['authentication'][0]; // TODO: bad idea -  can not hardcode it.
+  const publicKey = doc['publicKey'].find(x => x.id == publicKeyId)
+
   const signed = await jsonSigs.sign(doc, {
     suite: new Ed25519Signature2018({
-      verificationMethod: publicKey.id,
+      verificationMethod: publicKeyId,
       key: new Ed25519KeyPair({ privateKeyBase58, ...publicKey })
     }),
     purpose: new AuthenticationProofPurpose({
