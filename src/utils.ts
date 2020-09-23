@@ -1,5 +1,5 @@
 import * as constants from './constants'
-import fetch  from 'node-fetch';
+import axios from 'axios';
 
 export default class Utils{
     nodeurl: string;
@@ -30,11 +30,14 @@ export default class Utils{
         }
     }
 
-    fetchData = async (url) => (await (await fetch(url)).json())
-
+    async fetchData(url){
+        const response  = await axios.get(url)
+        return response.data        
+    }
     
     resolve = async (did) => {
         const url = `${this.nodeurl}${constants.HYPERSIGN_NETWORK_DID_RERSOLVE_EP}${did}`
+        console.log(url)
         const didDoc = await this.fetchData(url);
         if(didDoc['status'] === 500) throw new Error('Could not resolve did ='+ did)
         return didDoc;
