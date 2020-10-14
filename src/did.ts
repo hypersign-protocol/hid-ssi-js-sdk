@@ -4,6 +4,7 @@ import jsonSigs from 'jsonld-signatures'
 import { Ed25519KeyPair } from 'crypto-ld'
 import { documentLoader } from 'jsonld'
 import { v4 as uuidv4 } from 'uuid';
+import blake from 'blakejs';
 
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 const { Ed25519Signature2018 } = jsonSigs.suites;
@@ -64,6 +65,8 @@ export default class did {
     }
   }
 
+  // TODO: this is obsolete. We can remove this later.
+  // use getDid method instead
   async getDidDocAndKeys(user: Object) {
     let didDoc = {};
     // if(!user['name']) throw new Error("Name is required")
@@ -99,6 +102,73 @@ export default class did {
       didDoc
     }
 
+  }
+
+  private formKeyPairFromPublicKey(publicKeyBase58) {
+    if(!publicKeyBase58) throw new Error("publicKeyBase58 can not be empty")
+    // TODO:  hardcoing temporarly
+    const protocol = "Ed25519VerificationKey2018"
+    const did = this.getId()
+    // TODO coule be a security flaw. we need to check later.
+    const id = did + '#' + blake.blake2sHex(publicKeyBase58 + protocol)
+    return {
+      publicKey: {
+        "@context": jsonSigs.SECURITY_CONTEXT_URL,
+        id,
+        "type": protocol,
+        publicKeyBase58
+      },
+      privateKeyBase58: null,
+      did
+    }
+  }
+
+  async getDid(options = { user: {}, publicKey: ""}){
+    let didDoc = {};
+    // if(options.user == {})  
+    // if(!user['name']) throw new Error("Name is required")
+    let kp;
+    console.log(options)
+    if(!options.publicKey || options.publicKey == ""){
+      kp = await this.generateKeys();
+      
+    }else{
+      kp = this.formKeyPairFromPublicKey(options.publicKey);
+    }
+
+    console.log(kp)
+    
+    didDoc['@context'] = ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/v1", "https://schema.org"]
+    didDoc['@type'] = "https://schema.org/Person"
+
+    // DID Subject
+    didDoc['id'] = kp.did;
+
+    if(options.user != {}){
+      Object.keys(options.user).forEach(k => {
+        didDoc[k] = options.user[k]
+      })
+    }
+    // Verification Method
+    didDoc['publicKey'] = [kp.publicKey]
+
+    // Verification Relationship
+    didDoc['authentication'] = [kp.publicKey.id]
+    didDoc['assertionMethod'] = [kp.publicKey.id]
+    didDoc['keyAgreement'] = [kp.publicKey.id]
+    didDoc['capabilityInvocation'] = [kp.publicKey.id]
+
+    didDoc['created'] = new Date()
+    didDoc['updated'] = new Date()
+
+    return {
+      keys: {
+        publicKey: kp['publicKey'],
+        privateKeyBase58: kp['privateKeyBase58']
+      },
+      did: kp['did'],
+      didDoc
+    }
   }
 
   // TODO
