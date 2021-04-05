@@ -5,6 +5,7 @@ import { Ed25519KeyPair } from 'crypto-ld'
 import { documentLoader } from 'jsonld'
 import { v4 as uuidv4 } from 'uuid';
 import blake from 'blakejs';
+import axios from "axios";
 
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 const { Ed25519Signature2018 } = jsonSigs.suites;
@@ -36,10 +37,12 @@ interface IParams {
 
 export default class did {
   didScheme: string;
-  utils: any;
+  utils: Utils;
+  didUrl: string;
   constructor(options = { nodeUrl: "", didScheme: "" }) {
     this.utils = new Utils({ nodeUrl: options.nodeUrl });
-    this.didScheme = options.didScheme || constant.DID_SCHEME
+    this.didScheme = options.didScheme || constant.DID_SCHEME;
+    this.didUrl = this.utils.nodeurl + constant.HYPERSIGN_NETWORK_DID_EP;
   }
 
   getChallange() {
@@ -128,15 +131,13 @@ export default class did {
     // if(options.user == {})  
     // if(!user['name']) throw new Error("Name is required")
     let kp;
-    console.log(options)
+    
     if(!options.publicKey || options.publicKey == ""){
       kp = await this.generateKeys();
       
     }else{
       kp = this.formKeyPairFromPublicKey(options.publicKey);
     }
-
-    console.log(kp)
     
     didDoc['@context'] = ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/v1", "https://schema.org"]
     didDoc['@type'] = "https://schema.org/Person"
@@ -172,12 +173,29 @@ export default class did {
   }
 
   // TODO
-  async register({did}){
-
+  async register(didDoc: object){
+    try{
+      console.log(this.didUrl);
+      const response = await axios.post(this.didUrl, didDoc);
+      return response.data;
+    }catch(e){
+      const { response } = e;
+      return response.data;
+    }
   }
 
   // TODO
-  async resolve(){}
+  async resolve(did: string): Promise<any>{
+    try{
+      const get_didUrl = this.didUrl + did;
+      console.log(get_didUrl);
+      const response = await axios.get(get_didUrl);
+      return response.data;
+    }catch(e){
+      const { response } = e;
+      return response.data;
+    }
+  }
 
   // verify the signature
   async verify(params: IParams) {

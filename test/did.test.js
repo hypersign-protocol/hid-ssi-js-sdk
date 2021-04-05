@@ -6,9 +6,7 @@ const sdkDid = hsdk.did(options)
 
 let challenge = ""
 const userData = {
-    name: "Vishwas",
-    phNumber: "+91-1234567890",
-    email: "vishu.anand@temp-mail.com"
+    name: "Vishwas"
 }
 const domain = "www.abc.com"
 
@@ -23,12 +21,24 @@ const keys = { "publicKey": { "@context": "https://w3id.org/security/v2", "id": 
 //     console.log(JSON.stringify(res, null, 2))
 // })
 
-// sdkDid.getDid({
-//   user: userData,
-// }).then(res => {
-//   console.log(JSON.stringify(res, null, 2))
-// })
+sdkDid.getDid({
+    user: userData,
+}).then(res => {
+    console.log(JSON.stringify(res, null, 2))
+    const { didDoc } = res;
+    return sdkDid.register(didDoc);
+}).then(res => {
+    console.log(JSON.stringify(res, null, 2))
+    const {did} = res;
+    return sdkDid.resolve(did);
+}).then(res => {
+    console.log(JSON.stringify(res, null, 2))
+}).catch(e => {
+    console.error(e);
+})
 
+
+return;
 
 sdkDid.getDidDocAndKeys(userData)
     .then(res => {
