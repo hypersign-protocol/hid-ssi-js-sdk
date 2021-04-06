@@ -1,7 +1,7 @@
 {
     "name": "hs-ssi-sdk",
-    "version": "4.0.2",
-    "description": "Simple Demo of linked data signature",
+    "version": "5.0.0",
+    "description": "sdk is an implementation of proposed DID by W3C",
     "main": "dist/index.js",
     "scripts": {
         "test": "npm run build && node test/test.js",
