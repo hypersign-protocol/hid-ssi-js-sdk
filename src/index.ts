@@ -1,27 +1,45 @@
 import Did, { IDID } from './did'
-import Credential  from './credential';
-import Schema from './schema/schema';
+import Credential, {ICredential}  from './credential';
+import Schema, {IScheme} from './schema/schema';
 import IOptions from './IOptions';
 
 interface IHsSdk{
     did: IDID;
-    credential: Credential;
-    schema: Schema;
+    credential: ICredential;
+    schema: IScheme;
 }
 
 export = class HypersignSsiSDK implements IHsSdk{
     did: IDID;
-    credential: Credential;
-    schema: Schema;
+    credential: ICredential;
+    schema: IScheme;
     constructor(options: IOptions){
-        this.did = (new Did(options)).get();
-        console.log(typeof this.did)
+        this.did = new Did(options);
         this.credential = new Credential(options);
         this.schema = new Schema(options);
     }
-
-
 }
+
+// import Test, {ITest} from './test';
+
+
+// interface IHsSdk{
+//     test: ITest;
+// }
+
+// export = class HypersignSsiSDK implements IHsSdk{
+//     test: ITest;
+//     constructor(){
+//         this.test = new Test();
+//     }
+
+//     get(){
+//         return {
+//             test: this.test
+//         }
+//     }
+
+// }
 
 // export = {
 //     did: options => {

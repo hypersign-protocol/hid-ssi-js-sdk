@@ -35,7 +35,14 @@ class SchemaTemplateSchema implements ISchemaTemplateSchema{
     }
 }
 
-export default class Schema{
+export interface IScheme{
+    schemaUrl: string;
+    generateSchema({ name, author, description, properties }: ISchema): Promise<ISchemaTemplate>;
+    registerSchema(schema: ISchemaTemplate): Promise<any>;
+    getSchema(schemaId: string): Promise<any>;
+}
+
+export default class Schema implements IScheme{
     private utils: Utils;
     schemaUrl: string;
     constructor(options: IOptions) {
@@ -79,7 +86,8 @@ export default class Schema{
           const { response } = e;
           return response.data;
         }
-      }
+    
+    }
     
 }
 

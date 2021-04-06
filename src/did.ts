@@ -36,18 +36,20 @@ interface IParams {
 }
 interface IDIDOptions{
   user: object;
-  publicKey: string
+  publicKey?: string
 }
 
 export interface IDID{
   didUrl: string;
-  generateKeys();
   getDidDocAndKeys(user: object): Promise<any>;
+
+  generateKeys(): object;
   getDid(options: IDIDOptions): Promise<any>;
   register(didDoc: object): Promise<any>;
   resolve(did: string): Promise<any>;
-  verify(params: IParams): Promise<any>;
+  
   sign(params: IParams): Promise<any>;
+  verify(params: IParams): Promise<any>;
 }
 
 export default class did implements IDID{
@@ -56,10 +58,6 @@ export default class did implements IDID{
   constructor(options: IOptions) {
     this.utils = new Utils({...options});
     this.didUrl = this.utils.nodeurl + constant.HYPERSIGN_NETWORK_DID_EP;
-  }
-
-  public get(): IDID{
-    return this;
   }
 
   private getChallange() {
@@ -143,7 +141,7 @@ export default class did implements IDID{
     }
   }
 
-  public async getDid(options = { user: {}, publicKey: ""}): Promise<any>{
+  public async getDid(options: IDIDOptions): Promise<any>{
     let didDoc = {};
     // if(options.user == {})  
     // if(!user['name']) throw new Error("Name is required")
@@ -190,7 +188,7 @@ export default class did implements IDID{
   }
 
   // TODO
-  public register(didDoc: object): Promise<any>{
+  public async register(didDoc: object): Promise<any>{
     return new Promise(async (resolve, reject) => {
       try{
         const response = await axios.post(this.didUrl, didDoc);
@@ -202,7 +200,7 @@ export default class did implements IDID{
   }
 
   // TODO
-  public resolve(did: string): Promise<any>{
+  public async resolve(did: string): Promise<any>{
     return new Promise(async (resolve, reject) => {
       const get_didUrl = this.didUrl + did;
       try{

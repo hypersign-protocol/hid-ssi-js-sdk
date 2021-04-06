@@ -51,8 +51,19 @@ interface IVerifiablePresentation {
     proof: Object
 }
 
-export default class credential {
-    utils: any;
+export interface ICredential{
+
+    generateCredential(schemaUrl, params: { subjectDid, issuerDid, expirationDate, attributesMap: Object }): Promise<any>;
+    signCredential(credential, issuerDid, privateKey): Promise<any>;
+    verifyCredential(credential: object, issuerDid: string): Promise<any>;
+    generatePresentation(verifiableCredential, holderDid): Promise<any> ;
+    signPresentation(presentation, holderDid, privateKey, challenge): Promise<any> 
+    verifyPresentation({ presentation, challenge, domain, issuerDid, holderDid }) : Promise<any>
+
+
+}
+export default class credential implements ICredential{
+    private utils: any;
     constructor(options: IOptions) {
         this.utils = new Utils({ nodeUrl: options.nodeUrl });
     }
@@ -111,7 +122,7 @@ export default class credential {
         return context;
     }
 
-    async generateCredential(schemaUrl, params: { subjectDid, issuerDid, expirationDate, attributesMap: Object }) {
+    async generateCredential(schemaUrl, params: { subjectDid, issuerDid, expirationDate, attributesMap: Object }): Promise<any> {
         let schemaDoc: ISchemaTemplate = {} as ISchemaTemplate
         let issuerDidDoc = {}
         let subjectDidDoc = {}
@@ -154,7 +165,7 @@ export default class credential {
         return vc;
     }
 
-    async signCredential(credential, issuerDid, privateKey) {
+    async signCredential(credential, issuerDid, privateKey): Promise<any> {
         issuerDid = issuerDid.split('#')[0]
         let signerDidDoc = await this.utils.resolve(issuerDid);
         let publicKeyId = signerDidDoc['assertionMethod'][0];
@@ -169,7 +180,7 @@ export default class credential {
     }
 
     // https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
-    async verifyCredential(credential, issuerDid) {
+    async verifyCredential(credential: object, issuerDid: string): Promise<any> {
         if (!credential) throw new Error("Credential can not be undefined")
         // TODO: this is not the correct way to fetch controller. it should comes from url present in the controller property of publickey
         // TODO work on controller object 
@@ -186,13 +197,13 @@ export default class credential {
         return result
     }
 
-    async generatePresentation(verifiableCredential, holderDid) {
+    async generatePresentation(verifiableCredential, holderDid): Promise<any>  {
         const id = this.getId('VP');
         const presentation = vc.createPresentation({ verifiableCredential, id, holderDid });
         return presentation;
     }
 
-    async signPresentation(presentation, holderDid, privateKey, challenge = undefined) {
+    async signPresentation(presentation, holderDid, privateKey, challenge = undefined): Promise<any>  {
         holderDid = holderDid.split('#')[0]
         let signerDidDoc = await this.utils.resolve(holderDid);
         let publicKeyId = signerDidDoc['assertionMethod'][0];
@@ -208,7 +219,7 @@ export default class credential {
     }
 
     // https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L392
-    async verifyPresentation({ presentation, challenge, domain = undefined, issuerDid, holderDid }) {
+    async verifyPresentation({ presentation, challenge, domain = undefined, issuerDid, holderDid }): Promise<any> {
         if (!presentation) throw new Error("Credential can not be undefined")
         // TODO: this is not the correct way to fetch controller. it should comes from url present in the controller property of publickey
         // TODO: work on controller 
