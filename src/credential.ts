@@ -5,6 +5,7 @@ import { Ed25519KeyPair } from 'crypto-ld'
 import jsonSigs from 'jsonld-signatures'
 import { documentLoader } from 'jsonld'
 import { v4 as uuidv4 } from 'uuid';
+import IOptions from './IOptions';
 
 const VC_PREFIX = "vc_";
 const VP_PREFIX = "vp_";
@@ -51,12 +52,9 @@ interface IVerifiablePresentation {
 }
 
 export default class credential {
-    didScheme: string;
     utils: any;
-    constructor(options = { nodeUrl: "", didScheme: "" }) {
-        this.utils = new Utils({nodeUrl: options.nodeUrl});
-        // this.nodeUrl = utils.checkUrl(options.nodeurl)
-        this.didScheme = options.didScheme || constant.DID_SCHEME
+    constructor(options: IOptions) {
+        this.utils = new Utils({ nodeUrl: options.nodeUrl });
     }
 
     private getId = (type) => {

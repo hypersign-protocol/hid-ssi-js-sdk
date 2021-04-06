@@ -1,9 +1,9 @@
+const HypersignSsiSDK = require('../dist')
 
-const hsdk =  require('../dist')
+const options = { nodeUrl: "http://localhost:5000" }
+const hsSdk = new HypersignSsiSDK(options); 
 
-const options = { nodeUrl: "http://localhost:5000/",  didScheme:  "did:v2:hs"}
-
-const sdkVc = hsdk.credential(options)
+const sdkVc = hsSdk.credential
 
 
 const challenge = "ch_adbshd131323"
@@ -15,7 +15,7 @@ const schemaUrl = "http://localhost:5000/api/v1/schema/sch_f3ab4b78-48fa-4a4d-9f
    attributesMap['myString'] = "Vishwas Anand";
    attributesMap['myNumner'] = 12;
    attributesMap['myBool'] = false;
-   
+
    const issuerKeys = {
     "publicKey": {
       "@context": "https://w3id.org/security/v2",

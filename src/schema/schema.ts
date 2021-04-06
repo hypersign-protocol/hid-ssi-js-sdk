@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as constant from '../constants'
 import Utils from '../utils';
 import axios from "axios";
+import IOptions from '../IOptions';
 
 const SC_PREFIX = "sch_";
 const SCHEMA_URL = "https://json-schema.org/draft-07/schema#";
@@ -35,16 +36,14 @@ class SchemaTemplateSchema implements ISchemaTemplateSchema{
 }
 
 export default class Schema{
-    didScheme: string;
-    utils: Utils;
+    private utils: Utils;
     schemaUrl: string;
-    constructor(options = { nodeUrl: "", didScheme: "" }) {
-        this.utils = new Utils({ nodeUrl: options.nodeUrl });
-        this.didScheme = options.didScheme || constant.DID_SCHEME;
+    constructor(options: IOptions) {
+        this.utils = new Utils({ nodeUrl: options.nodeUrl });        
         this.schemaUrl = this.utils.nodeurl + constant.HYPERSIGN_NETWORK_SCHEMA_EP;
     }
 
-    async generateSchema({ name, author, description, properties }: ISchema): Promise<ISchemaTemplate>{        
+    public async generateSchema({ name, author, description, properties }: ISchema): Promise<ISchemaTemplate>{        
         let newSchema: ISchemaTemplate = {} as ISchemaTemplate;
 
         const didDoc = await this.utils.resolve(author);
@@ -60,9 +59,8 @@ export default class Schema{
         return newSchema;
     }
 
-    async registerSchema(schema: ISchemaTemplate): Promise<any>{
-        try{
-            console.log(this.schemaUrl);
+    public async registerSchema(schema: ISchemaTemplate): Promise<any>{
+        try{            
             const response = await axios.post(this.schemaUrl, schema);
             return response.data;
         }catch(e){
@@ -72,10 +70,9 @@ export default class Schema{
         
     }
 
-    async getSchema(schemaId: string): Promise<any>{
+    public async getSchema(schemaId: string): Promise<any>{
         try{
           const get_didUrl = this.schemaUrl + schemaId;
-          console.log(get_didUrl);
           const response = await axios.get(get_didUrl);
           return response.data;
         }catch(e){

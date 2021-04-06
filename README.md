@@ -1,6 +1,7 @@
-> This is test library. Please do not use it for production!
 
-# Hs-Lds-SDK
+# Hypersign Self Soverrign Js SDK
+
+This sdk is an implementation of proposed [DID](https://www.w3.org/TR/did-core/) framework by the [W3C Credential Community Group](https://w3c-ccg.github.io/)
 
 ## Building
 
@@ -11,6 +12,11 @@ npm i
 npm run build
 npm run test
 ```
+
+## APIs
+
+
+
 
 ## Usage
 
@@ -23,3 +29,10 @@ const options = { nodeUrl: "http://localhost:5000",  didScheme:  "did:v2:hs"}
 const sdkVc = hsdk.credential(options) // for verifiable credential and presentaion realted
 const sdkDid = hsdk.did(options) // for did related
 ```
+
+## Issue
+
+This sdk is in highly under developement. In case you find any bug, kindly report it ASAP. Thank You!
+
+
+

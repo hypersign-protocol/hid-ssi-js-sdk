@@ -1,9 +1,12 @@
 import * as constants from "./constants";
 import axios from "axios";
+import IOptions from './IOptions';
 
 export default class Utils {
   nodeurl: string;
-  constructor(options = { nodeUrl: "" }) {
+  didScheme: string;
+  constructor(options: IOptions) {
+    this.didScheme = options.didScheme && options.didScheme != "" ?  options.didScheme : constants.DID_SCHEME
     this.nodeurl = this.checkUrl(options.nodeUrl);
   }
 

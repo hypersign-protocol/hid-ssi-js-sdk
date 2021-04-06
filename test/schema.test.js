@@ -1,8 +1,9 @@
-const hsdk = require('../dist');
+const HypersignSsiSDK = require('../dist')
 
-const options = { nodeUrl: "http://localhost:5000/", didScheme: "did:v2:hs" }
+const options = { nodeUrl: "http://localhost:5000" }
+const hsSdk = new HypersignSsiSDK(options); 
 
-const sdkSchema = hsdk.schema(options);
+const sdkSchema = hsSdk.schema;
 
 sdkSchema.generateSchema({
     author: "did:v2:hs:c379647a-7a07-4a4c-8a47-1de96f843085",

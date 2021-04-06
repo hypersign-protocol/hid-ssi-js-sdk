@@ -1,8 +1,13 @@
-const hsdk = require('../dist')
+const HypersignSsiSDK = require('../dist')
 
-const options = { nodeUrl: "http://localhost:5000", didScheme: "did:v2:hs" }
+const options = { nodeUrl: "http://localhost:5000" }
+const hsSdk = new HypersignSsiSDK(options); 
 
-const sdkDid = hsdk.did(options)
+// console.log(hsSdk)
+
+// return
+
+const sdkDid = hsSdk.did;
 
 let challenge = ""
 const userData = {
@@ -26,6 +31,7 @@ sdkDid.getDid({
 }).then(res => {
     console.log(JSON.stringify(res, null, 2))
     const { didDoc } = res;
+    // delete didDoc["id"];
     return sdkDid.register(didDoc);
 }).then(res => {
     console.log(JSON.stringify(res, null, 2))

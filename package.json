@@ -1,5 +1,5 @@
 {
-    "name": "lds-sdk",
+    "name": "hs-ssi-sdk",
     "version": "4.0.2",
     "description": "Simple Demo of linked data signature",
     "main": "dist/index.js",
