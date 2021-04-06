@@ -1,21 +1,39 @@
+const HypersignSsiSDK = require('../dist')
 
-const hsdk =  require('../dist')
+const options = { nodeUrl: "http://localhost:5000" }
+const hsSdk = new HypersignSsiSDK(options); 
 
-const options = { nodeUrl: "http://localhost:5000",  didScheme:  "did:v2:hs"}
-
-const sdkVc = hsdk.credential(options)
+const sdkVc = hsSdk.credential
 
 
 const challenge = "ch_adbshd131323"
 let sCredential = {}
-const schemaUrl = "http://localhost:5000/api/schema/get/sch_5fb9162c-d760-40"
+const schemaUrl = "http://localhost:5000/api/v1/schema/sch_f3ab4b78-48fa-4a4d-9fe4-8f06dc501a6b"
 
    let attributesMap = {}
    
-   attributesMap['Name'] = "Vishwas Anand";
-   attributesMap[' Email'] = "vishuanand1@hotmail.com"
-   const issuerKeys = {"publicKey":{"@context":"https://w3id.org/security/v2","id":"did:hs:d449482d-2d31-4848-9006-71c7f078f5ab#z6Mkt2VLyXdWJ36RkwqNLRj6BNQ2BCfDysLHWJJWHX2oyS3t","type":"Ed25519VerificationKey2018","publicKeyBase58":"EaEJPHP4xVbxeSzfermFLGr2MdPNZz5vpHPaTF4o4DGW"},"privateKeyBase58":"qcn2oTREBWnEFLvWDJYbk7Xa8XhwpX9sxpziEsCRZ6MMScZiBZY3Cxfxaz2kpzVqxtAU1ZynemDGSCBdt5f9bFQ"}
-   const holderKeys = {"publicKey":{"@context":"https://w3id.org/security/v2","id":"did:hs:d449482d-2d31-4848-9006-71c7f078f5ab#z6Mkt2VLyXdWJ36RkwqNLRj6BNQ2BCfDysLHWJJWHX2oyS3t","type":"Ed25519VerificationKey2018","publicKeyBase58":"EaEJPHP4xVbxeSzfermFLGr2MdPNZz5vpHPaTF4o4DGW"},"privateKeyBase58":"qcn2oTREBWnEFLvWDJYbk7Xa8XhwpX9sxpziEsCRZ6MMScZiBZY3Cxfxaz2kpzVqxtAU1ZynemDGSCBdt5f9bFQ"}
+   attributesMap['myString'] = "Vishwas Anand";
+   attributesMap['myNumner'] = 12;
+   attributesMap['myBool'] = false;
+
+   const issuerKeys = {
+    "publicKey": {
+      "@context": "https://w3id.org/security/v2",
+      "id": "did:v2:hs:3b29a5f3-8cb2-4603-8fef-b40eccbb798b#z6Mkh3BfBASqPDLrRRqSMEsDQsMantmPFq98ti7uyPz2ryTA",
+      "type": "Ed25519VerificationKey2018",
+      "publicKeyBase58": "3avcavCQ3frPJvzjffuNZmoayKVXqwtnChCz9821wkfn"
+    },
+    "privateKeyBase58": "5YUTrfquiGoMPaZnT1jeRyMQgsBy43dkwdXzywTWkhmhnyg7BW8r5f9wU71jKsuh8i49iFvBxae75DjJEkqJhQuJ"
+  }
+   const holderKeys = {
+    "publicKey": {
+      "@context": "https://w3id.org/security/v2",
+      "id": "did:v2:hs:3ea9975f-4726-479c-b69e-8f5c2e8cbc23#z6Mkn79DTEh6Fo73A2LTEYumAjGkHzqVLupMxyPGtv7tmxZs",
+      "type": "Ed25519VerificationKey2018",
+      "publicKeyBase58": "8etArzSevFca3XVkYywvKdikURZdw2a1GxUM4e9srjnV"
+    },
+    "privateKeyBase58": "3ApK2iC4sJoEQK6KrNh4g2ZzjtU7inoUYHdB1QFEezNm6n73Tw5YKx5UjYjs44yeASviyDtQaXnVnH8U43zM9ee9"
+  }
    
    sdkVc.generateCredential(schemaUrl, {
        subjectDid: holderKeys.publicKey.id,

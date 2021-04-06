@@ -5,6 +5,8 @@ import { Ed25519KeyPair } from 'crypto-ld'
 import { documentLoader } from 'jsonld'
 import { v4 as uuidv4 } from 'uuid';
 import blake from 'blakejs';
+import axios from "axios";
+import IOptions from './IOptions';
 
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 const { Ed25519Signature2018 } = jsonSigs.suites;
@@ -32,23 +34,39 @@ interface IParams {
   controller: IController,
   did: string
 }
+interface IDIDOptions{
+  user: object;
+  publicKey?: string
+}
 
+export interface IDID{
+  didUrl: string;
+  getDidDocAndKeys(user: object): Promise<any>;
 
-export default class did {
-  didScheme: string;
-  utils: any;
-  constructor(options = { nodeUrl: "", didScheme: "" }) {
-    this.utils = new Utils({ nodeUrl: options.nodeUrl });
-    this.didScheme = options.didScheme || constant.DID_SCHEME
+  generateKeys(): object;
+  getDid(options: IDIDOptions): Promise<any>;
+  register(didDoc: object): Promise<any>;
+  resolve(did: string): Promise<any>;
+  
+  sign(params: IParams): Promise<any>;
+  verify(params: IParams): Promise<any>;
+}
+
+export default class did implements IDID{
+  private utils: Utils;
+  public didUrl: string;
+  constructor(options: IOptions) {
+    this.utils = new Utils({...options});
+    this.didUrl = this.utils.nodeurl + constant.HYPERSIGN_NETWORK_DID_EP;
   }
 
-  getChallange() {
+  private getChallange() {
     return uuidv4()
   }
 
-  private getId = () => `${this.didScheme}:${this.getChallange()}`;
+  private getId = () => `${this.utils.didScheme}:${this.getChallange()}`;
 
-  async generateKeys() {
+  public async generateKeys() {
     const kp = await Ed25519KeyPair.generate();
     const did = this.getId()
     kp.id = did + '#' + kp.fingerprint();
@@ -67,7 +85,7 @@ export default class did {
 
   // TODO: this is obsolete. We can remove this later.
   // use getDid method instead
-  async getDidDocAndKeys(user: Object) {
+  public async getDidDocAndKeys(user: Object) : Promise<any>{
     let didDoc = {};
     // if(!user['name']) throw new Error("Name is required")
     const kp = await this.generateKeys();
@@ -123,20 +141,18 @@ export default class did {
     }
   }
 
-  async getDid(options = { user: {}, publicKey: ""}){
+  public async getDid(options: IDIDOptions): Promise<any>{
     let didDoc = {};
     // if(options.user == {})  
     // if(!user['name']) throw new Error("Name is required")
     let kp;
-    console.log(options)
+    
     if(!options.publicKey || options.publicKey == ""){
       kp = await this.generateKeys();
       
     }else{
       kp = this.formKeyPairFromPublicKey(options.publicKey);
     }
-
-    console.log(kp)
     
     didDoc['@context'] = ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/v1", "https://schema.org"]
     didDoc['@type'] = "https://schema.org/Person"
@@ -172,15 +188,32 @@ export default class did {
   }
 
   // TODO
-  async register({did}){
-
+  public async register(didDoc: object): Promise<any>{
+    return new Promise(async (resolve, reject) => {
+      try{
+        const response = await axios.post(this.didUrl, didDoc);
+        resolve(response.data);
+      }catch(e){
+        reject(e.response.data);
+      }
+    })
   }
 
   // TODO
-  async resolve(){}
+  public async resolve(did: string): Promise<any>{
+    return new Promise(async (resolve, reject) => {
+      const get_didUrl = this.didUrl + did;
+      try{
+        const response = await axios.get(get_didUrl);
+        resolve(response.data);
+      }catch(e){
+        reject(e.response.data);
+      }
+    })
+  }
 
   // verify the signature
-  async verify(params: IParams) {
+  public async verify(params: IParams) {
     const { doc, challenge, domain } = params
     // TODO: checks..."All params are mandatory"
 
@@ -214,7 +247,7 @@ export default class did {
   }
 
   // Sign the doc
-  async sign(params: IParams) {
+  public async sign(params: IParams) {
     const { did, privateKeyBase58, challenge, domain } = params
 
     const doc = await this.utils.resolve(did);

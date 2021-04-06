@@ -1,15 +1,36 @@
-const hsdk = require('../dist')
+const HypersignSsiSDK = require('../dist')
 
-const options = { nodeUrl: "http://localhost:5000", didScheme: "did:v2:hs" }
+const options = { nodeUrl: "http://localhost:5000" }
+const hsSdk = new HypersignSsiSDK(options); 
 
-const sdkDid = hsdk.did(options)
+const {did} = hsSdk;
 
-let challenge = ""
 const userData = {
-    name: "Vishwas",
-    phNumber: "+91-1234567890",
-    email: "vishu.anand@temp-mail.com"
+    name: "Vishwas"
 }
+
+did.getDid({
+    user: userData,
+}).then(res => {
+    console.log(JSON.stringify(res, null, 2))
+    const { didDoc } = res;
+    // delete didDoc["id"];
+    return did.register(didDoc);
+}).then(res => {
+    console.log(JSON.stringify(res, null, 2))
+    const {did: dcentId} = res;
+    return did.resolve(dcentId);
+}).then(res => {
+    console.log(JSON.stringify(res, null, 2))
+}).catch(e => {
+    console.error(e);
+})
+
+
+return;
+const sdkDid = {};
+let challenge = ""
+
 const domain = "www.abc.com"
 
 
@@ -21,12 +42,6 @@ const keys = { "publicKey": { "@context": "https://w3id.org/security/v2", "id": 
 //     publicKey: "5tW1ZDEwEKZC1aszbqL19sut8e4MJDYXBgkRqLy8mBcS"
 // }).then(res => {
 //     console.log(JSON.stringify(res, null, 2))
-// })
-
-// sdkDid.getDid({
-//   user: userData,
-// }).then(res => {
-//   console.log(JSON.stringify(res, null, 2))
 // })
 
 
