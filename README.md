@@ -32,7 +32,7 @@ const sdkDid = hsdk.did(options) // for did related
 
 ## Issue
 
-This sdk is in highly under developement. In case you find any bug, kindly report it ASAP. Thank You!
+This sdk is in highly under development. In case you find any bug, kindly report it ASAP. Thank You!
 
 
 
