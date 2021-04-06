@@ -1,5 +1,5 @@
 
-# Hypersign Self Soverrign Js SDK
+# Hypersign Self Soverign Identity (SSI) Js SDK
 
 This sdk is an implementation of proposed [DID](https://www.w3.org/TR/did-core/) framework by the [W3C Credential Community Group](https://w3c-ccg.github.io/)
 
