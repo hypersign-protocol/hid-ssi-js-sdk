@@ -168,6 +168,7 @@ export default class credential implements ICredential{
     async signCredential(credential, issuerDid, privateKey): Promise<any> {
         issuerDid = issuerDid.split('#')[0]
         let signerDidDoc = await this.utils.resolve(issuerDid);
+        if(!signerDidDoc) throw new Error("Could not resolve issuerDid = " + issuerDid);
         let publicKeyId = signerDidDoc['assertionMethod'][0];
         let publicKey = signerDidDoc['publicKey'].find(x => x.id == publicKeyId)
 
