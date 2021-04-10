@@ -8,51 +8,66 @@ const sdkVc = hsSdk.credential
 
 const challenge = "ch_adbshd131323"
 let sCredential = {}
-const schemaUrl = "http://localhost:5000/api/v1/schema/sch_f3ab4b78-48fa-4a4d-9fe4-8f06dc501a6b"
+const schemaUrl = "http://localhost:5000/api/v1/schema/sch_4bcf878a-4751-4401-af19-d5f620d47960"
 
-   let attributesMap = {}
-   
-   attributesMap['myString'] = "Vishwas Anand";
-   attributesMap['myNumner'] = 12;
-   attributesMap['myBool'] = false;
+//    let attributesMap = {
+//        name: "Vishwas Anand",
+//        email: "vishu.anand1@gmail.com",
+//        phoneNumber: "+91-123123123213"
+//    }
 
+
+
+let attributesMap = {
+    "name": "IDO App",
+    "did": "did:hs:0f49341a-20ef-43d1-bc93-de30993e6c51",
+    "owner": "did:hs:0f49341a-20ef-43d1-bc93-de30993e6c51",
+    "schemaId": "sch_d0d8488d-5bad-42fd-8ac3-7066b473bbf5",
+    "serviceEp": "http://192.168.43.43:4006",
+    "subscriptionId": "subs_9eda0fab-82d7-4",
+    "planId": "pln_1ee9aa7b-95b3-42",
+    "planName": "Tier 1",
+}
    const issuerKeys = {
     "publicKey": {
       "@context": "https://w3id.org/security/v2",
-      "id": "did:v2:hs:3b29a5f3-8cb2-4603-8fef-b40eccbb798b#z6Mkh3BfBASqPDLrRRqSMEsDQsMantmPFq98ti7uyPz2ryTA",
+      "id": "did:hs:0f49341a-20ef-43d1-bc93-de30993e6c51#z6MkjAwRoZNV1oifLPb2GzLatZ7sVxY5jZ16xYTTAgSgCqQQ",
       "type": "Ed25519VerificationKey2018",
-      "publicKeyBase58": "3avcavCQ3frPJvzjffuNZmoayKVXqwtnChCz9821wkfn"
+      "publicKeyBase58": "5igPDK83gGECDtkKbRNk3TZsgPGEKfkkGXYXLQUfHcd2"
     },
-    "privateKeyBase58": "5YUTrfquiGoMPaZnT1jeRyMQgsBy43dkwdXzywTWkhmhnyg7BW8r5f9wU71jKsuh8i49iFvBxae75DjJEkqJhQuJ"
+    "privateKeyBase58": "34uPqEWKuz4MxaPFZtRR4zCFZKrKsn3gEQgHop4crSArPZ3LHQ2HJq8jh39d6Aa7Jnqftnv6BxqCtxyq4izU2TPz"
   }
-   const holderKeys = {
-    "publicKey": {
-      "@context": "https://w3id.org/security/v2",
-      "id": "did:v2:hs:3ea9975f-4726-479c-b69e-8f5c2e8cbc23#z6Mkn79DTEh6Fo73A2LTEYumAjGkHzqVLupMxyPGtv7tmxZs",
-      "type": "Ed25519VerificationKey2018",
-      "publicKeyBase58": "8etArzSevFca3XVkYywvKdikURZdw2a1GxUM4e9srjnV"
-    },
-    "privateKeyBase58": "3ApK2iC4sJoEQK6KrNh4g2ZzjtU7inoUYHdB1QFEezNm6n73Tw5YKx5UjYjs44yeASviyDtQaXnVnH8U43zM9ee9"
-  }
+//    const holderKeys = {
+//     "publicKey": {
+//       "@context": "https://w3id.org/security/v2",
+//       "id": "did:hs:894865ee-4b45-40df-bda6-f8ee7750b908#z6Mkkhgzxs3zMjsPK8cBvPnvnzbzXFHMLx7TeXc3xZsfzTqS",
+//       "type": "Ed25519VerificationKey2018",
+//       "publicKeyBase58": "7FRxNcoZ2CNvCdmVEpq5wu3zhg1Vw4s6xWh88Huf5F44"
+//     },
+//     "privateKeyBase58": "4sN9b9rDWqXjVSiEcJoHdc2RyhxbtWVwowiKBDrmjisyUrJzaqhkL32DJv2Lez9mszK6KeSsTbuHdmhsDkpoVjLL"
+//   }
    
+const holderKeys = issuerKeys;
+
    sdkVc.generateCredential(schemaUrl, {
        subjectDid: holderKeys.publicKey.id,
        issuerDid: issuerKeys.publicKey.id,
        expirationDate: new Date().toISOString(),
        attributesMap
    }).then(credential => {
-    //    console.log(credential)
+       console.log(credential)
        console.log("Credentials end=======================================")
        console.log("SignedCredential start=======================================")
        return sdkVc.signCredential(credential, issuerKeys.publicKey.id, issuerKeys.privateKeyBase58)
    }).then(signedCredential => {
-    //    console.log(signedCredential)
+    //    console.log(JSON.stringify(signedCredential))
        sCredential = signedCredential;
        console.log("SignedCredential end=======================================")
        console.log("VerifyCredential start=======================================")
+       console.log(sCredential)
        return sdkVc.verifyCredential(signedCredential, issuerKeys.publicKey.id)
    }).then(result => {
-    //    console.log(result)
+       console.log(result)
        console.log("VerifyCredential end=======================================")
        console.log("Presentation start=======================================")
        return sdkVc.generatePresentation(sCredential, holderKeys.publicKey.id)

@@ -58,7 +58,7 @@ const { did, schema, credential } = hsSdk;
     schemaUrl: string;
     generateSchema({ name, author, description, properties }: ISchema): Promise<ISchemaTemplate>;
     registerSchema(schema: ISchemaTemplate): Promise<any>;
-    getSchema(schemaId: string): Promise<any>;
+    getSchema(options: {schemaId?: string, author?: string}): Promise<any>;
 
 ```
 

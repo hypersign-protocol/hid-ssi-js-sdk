@@ -14,10 +14,9 @@ did.getDid({
 }).then(res => {
     console.log(JSON.stringify(res, null, 2))
     const { didDoc } = res;
-    // delete didDoc["id"];
     return did.register(didDoc);
 }).then(res => {
-    console.log(JSON.stringify(res, null, 2))
+    // console.log(JSON.stringify(res, null, 2))
     const {did: dcentId} = res;
     return did.resolve(dcentId);
 }).then(res => {
