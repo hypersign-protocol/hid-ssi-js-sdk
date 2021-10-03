@@ -16,7 +16,7 @@
         "blakejs": "^1.1.0",
         "crypto-ld": "^3.8.0",
         "did-veres-one": "^12.1.1",
-        "jsonld": "^3.1.1",
+        "jsonld": "^3.3.2",
         "jsonld-signatures": "^5.1.0",
         "node-fetch": "^2.6.1",
         "uuid": "^8.3.0",
