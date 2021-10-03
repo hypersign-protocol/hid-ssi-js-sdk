@@ -19,7 +19,7 @@
         "jsonld": "^3.1.1",
         "jsonld-signatures": "^5.1.0",
         "node-fetch": "^2.6.1",
-        "uuid": "^8.3.0",
+        "uuid": "^8.3.2",
         "vc-js": "https://github.com/hypersign-protocol/vc-js.git"
     },
     "devDependencies": {
