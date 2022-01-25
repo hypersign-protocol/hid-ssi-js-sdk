@@ -19,13 +19,7 @@ export class HIDRpcFactory implements IHIDRpcFactory{
         if(!rpcName || !generatedProto[rpcName]){
             throw new Error("Invalid rpcName")
         }
-        console.log("Inside registerRPC");
-        console.log(rpcName)
-        const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
-        console.log(typeUrl)
-
-        // myRegistry.register("/hypersignprotocol.hidnode.did.MsgCreateDID", MsgCreateDID);
-        console.log(generatedProto.MsgCreateDID)
-        this.hidRPCRegistery.register(typeUrl, generatedProto.MsgCreateDID);
+        const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums[rpcName]}`;    
+        this.hidRPCRegistery.register(typeUrl, generatedProto[rpcName]);
     }  
 }
