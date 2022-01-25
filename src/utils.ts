@@ -34,13 +34,8 @@ export default class Utils {
   }
 
   async fetchData(url) {
-      try{
-        const response = await axios.get(url);
-        return response.data;
-      }catch(e){
-        const { response } = e;
-        return response.data;
-      }
+    const response = await axios.get(url);
+    return response.data;
   }
 
   resolve = async (did) => {

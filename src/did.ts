@@ -190,12 +190,8 @@ export default class did implements IDID{
   // TODO
   public async register(didDoc: object): Promise<any>{
     return new Promise(async (resolve, reject) => {
-      try{
-        const response = await axios.post(this.didUrl, didDoc);
-        resolve(response.data);
-      }catch(e){
-        reject(e.response.data);
-      }
+      const response = await axios.post(this.didUrl, didDoc);
+      resolve(response.data);
     })
   }
 
@@ -203,12 +199,8 @@ export default class did implements IDID{
   public async resolve(did: string): Promise<any>{
     return new Promise(async (resolve, reject) => {
       const get_didUrl = this.didUrl + did;
-      try{
-        const response = await axios.get(get_didUrl);
-        resolve(response.data);
-      }catch(e){
-        reject(e.response.data);
-      }
+      const response = await axios.get(get_didUrl);
+      resolve(response.data);
     })
   }
 

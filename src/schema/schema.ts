@@ -86,18 +86,12 @@ export default class Schema implements IScheme {
   }
 
   public async registerSchema(schema: ISchemaTemplate): Promise<any> {
-    try {
-      const response = await axios.post(this.schemaUrl, schema);
-      return response.data;
-    } catch (e) {
-      const { response } = e;
-      return response.data;
-    }
+    const response = await axios.post(this.schemaUrl, schema);
+    return response.data;
   }
 
   public async getSchema(options: {schemaId?: string, author?: string}): Promise<any> {
-    try {
-      let get_didUrl = "";
+    let get_didUrl = "";
       const { author, schemaId } = options;
 
       if(author != undefined && schemaId != undefined){ // 1,1
@@ -118,9 +112,5 @@ export default class Schema implements IScheme {
       
       const response = await axios.get(get_didUrl);
       return response.data;
-    } catch (e) {
-      const { response } = e;
-      return response.data;
-    }
   }
 }
