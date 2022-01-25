@@ -44,16 +44,23 @@ async function registryRPC(){
     await addSigner(rf.hidRPCRegistery);
 }
 
-
+let didrpc = null; 
 async function  call_did_create_rpc(did, didDocString){
     console.log('calling resiterDID rpc')
-    const didrpc = new DIDRpc(hdWallet);
+    didrpc = new DIDRpc(hdWallet);
     return didrpc.registerDID({
         did,
         didDocString
     })
 }
 
+async function resolve_did(did){
+    const didDoc = await didrpc.resolveDID(did)
+    return didDoc;
+}
+
+
+const did = "did:hs:0f49341a-20ef-43d1-bc93-de30993e6c51"
 initWallet()
     .then(account => {
         console.log(account)
@@ -61,18 +68,17 @@ initWallet()
     })
     .then(() => {
         return call_did_create_rpc(
-            "did:hs:0f49341a-20ef-43d1-bc93-de30993e6c51",
+            did,
             "{\"@context\":[\"https://www.w3.org/ns/did/v1\",\"https://w3id.org/security/v1\",\"https://schema.org\"],\"@type\":\"https://schema.org/Person\",\"id\":\"did:hs:0f49341a-20ef-43d1-bc93-de30993e6c51\",\"name\":\"Vishwas\",\"publicKey\":[{\"@context\":\"https://w3id.org/security/v2\",\"id\":\"did:hs:0f49341a-20ef-43d1-bc93-de30993e6c51#z6MkjAwRoZNV1oifLPb2GzLatZ7sVxY5jZ16xYTTAgSgCqQQ\",\"type\":\"Ed25519VerificationKey2018\",\"publicKeyBase58\":\"5igPDK83gGECDtkKbRNk3TZsgPGEKfkkGXYXLQUfHcd2\"}],\"authentication\":[\"did:hs:0f49341a-20ef-43d1-bc93-de30993e6c51#z6MkjAwRoZNV1oifLPb2GzLatZ7sVxY5jZ16xYTTAgSgCqQQ\"],\"assertionMethod\":[\"did:hs:0f49341a-20ef-43d1-bc93-de30993e6c51#z6MkjAwRoZNV1oifLPb2GzLatZ7sVxY5jZ16xYTTAgSgCqQQ\"],\"keyAgreement\":[\"did:hs:0f49341a-20ef-43d1-bc93-de30993e6c51#z6MkjAwRoZNV1oifLPb2GzLatZ7sVxY5jZ16xYTTAgSgCqQQ\"],\"capabilityInvocation\":[\"did:hs:0f49341a-20ef-43d1-bc93-de30993e6c51#z6MkjAwRoZNV1oifLPb2GzLatZ7sVxY5jZ16xYTTAgSgCqQQ\"],\"created\":\"2021-04-06T14:13:14.018Z\",\"updated\":\"2021-04-06T14:13:14.018Z\"}" 
         )
     })
     .then(r => {
         console.log(r)
+        return resolve_did(did)
+    })
+    .then(didDoc => {
+        console.log(didDoc)
     })
     .catch(e => {
         console.log(e)
     })
-
-
-
-
-
