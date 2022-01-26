@@ -1,13 +1,17 @@
 import * as constants from "./constants";
 import axios from "axios";
 import IOptions from './IOptions';
+import { DIDRpc, IDIDRpc } from './rpc/didRPC';
+import { IHIDWallet } from "./wallet/wallet";
 
 export default class Utils {
   nodeurl: string;
   didScheme: string;
-  constructor(options: IOptions) {
+  didRpc: IDIDRpc;
+  constructor(options: IOptions, wallet) {
     this.didScheme = options.didScheme && options.didScheme != "" ?  options.didScheme : constants.DID_SCHEME
     this.nodeurl = this.checkUrl(options.nodeUrl);
+    this.didRpc = new DIDRpc(wallet);
   }
 
   hostName({ mode }) {
@@ -39,13 +43,16 @@ export default class Utils {
   }
 
   resolve = async (did) => {
-    const url = `${this.nodeurl}${constants.HYPERSIGN_NETWORK_DID_EP}${did}`;
-    const didDoc = await this.fetchData(url);
-    if (!didDoc) throw new Error("Could not resolve did =" + did);
-    if (didDoc["status"] === 500)
-      throw new Error("Could not resolve did = " + did);
-    return didDoc;
+    // const url = `${this.nodeurl}${constants.HYPERSIGN_NETWORK_DID_EP}${did}`;
+    // const didDoc = await this.fetchData(url);
+    // if (!didDoc) throw new Error("Could not resolve did =" + did);
+    // if (didDoc["status"] === 500)
+    //   throw new Error("Could not resolve did = " + did);
+    // return didDoc;
+    return await this.didRpc.resolveDID(did);
   };
+
+
 
   getControllerAndPublicKeyFromDid = async (did, type) => {
     let controller = {},

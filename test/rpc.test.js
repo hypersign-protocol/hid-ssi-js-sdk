@@ -5,17 +5,10 @@ const { DIDRpc } = require('../dist/rpc/didRPC')
 const { HYPERSIGN_TESTNET_RPC, HIDRpcEnums } = require('../dist/constants')
 
 
-
-
 // Register RPC using factory
-
-
-
-
 // Call did_register
-
-const mnemonic = "engage start cigar bulb naive borrow damp march hotel scare basic begin nest increase maid damage march spice eternal myself nose shy eye simple"
-const toAddress =  "cosmos12g32k94y4xxzv4zq9378yl0cy5f3jh73en2yfp"
+const mnemonic = "retreat seek south invite fall eager engage endorse inquiry sample salad evidence express actor hidden fence anchor crowd two now convince convince park bag"
+const toAddress =  "cosmos1sr8l29ygryda7hn3dhnf4r6gdp5qfn7m8hc86s"
 
 let hdWallet = null;
 async function initWallet(){

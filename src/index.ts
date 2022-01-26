@@ -2,6 +2,12 @@ import Did, { IDID } from './did'
 import Credential, {ICredential}  from './credential';
 import Schema, {IScheme} from './schema/schema';
 import IOptions from './IOptions';
+import { HIDWallet } from './wallet/wallet';
+const { HYPERSIGN_TESTNET_RPC, HYPERSIGN_NETWORK_SCHEMA_EP, HIDRpcEnums } = require('./constants')
+import { HIDRpcFactory } from './rpc/rpcFactory'
+
+
+// const options = { rpc: 'TEST' | 'MAIN' | 'http://localhost:26657', mnemonic? : "" }
 
 interface IHsSdk{
     did: IDID;
@@ -9,49 +15,34 @@ interface IHsSdk{
     schema: IScheme;
 }
 
+
+
 export = class HypersignSsiSDK implements IHsSdk{
-    did: IDID;
-    credential: ICredential;
-    schema: IScheme;
+    did: any;
+    credential: any;
+    schema: any;
+    wallet: any;
+    options: IOptions;
     constructor(options: IOptions){
-        this.did = new Did(options);
-        this.credential = new Credential(options);
-        this.schema = new Schema(options);
+        this.wallet = new HIDWallet({
+            mnemonic: options.mnemonic,
+            rpc: options.rpc
+        })
+        this.options = options;
     }
+
+    async init(){
+        await this.wallet.init();    
+        const rf = new HIDRpcFactory()
+        
+        /// TODO: need to make it dynamic later
+        rf.registerRpc(HIDRpcEnums.MsgCreateDID);
+        await this.wallet.connectSigner(rf.hidRPCRegistery);  
+
+        this.did = new Did(this.options, this.wallet);
+        this.credential = new Credential(this.options, this.wallet);
+        this.schema = new Schema(this.options, this.wallet);
+    }
+
 }
 
-// import Test, {ITest} from './test';
-
-
-// interface IHsSdk{
-//     test: ITest;
-// }
-
-// export = class HypersignSsiSDK implements IHsSdk{
-//     test: ITest;
-//     constructor(){
-//         this.test = new Test();
-//     }
-
-//     get(){
-//         return {
-//             test: this.test
-//         }
-//     }
-
-// }
-
-// export = {
-//     did: options => {
-//         return new Did(options)
-//     },
-
-//     credential: options => {
-//         return new Credential(options)
-//     },
-
-//     schema: (options) => {
-//         return new Schema(options)
-//     }
-    
-// }

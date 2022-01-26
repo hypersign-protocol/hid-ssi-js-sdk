@@ -37,11 +37,9 @@ export class DIDRpc implements IDIDRpc{
     async resolveDID(did:string):Promise<Object>{
         did = did + ":"; // TODO:  we need to sort this out ... need to remove later
         const get_didUrl = `${HYPERSIGN_TESTNET_REST}${HYPERSIGN_NETWORK_DID_PATH}/${did}`;
-        console.log(get_didUrl)
         const response = await axios.get(get_didUrl);
-        console.log(response.data)
         const { didDoc } = response.data;
-        return didDoc;
+        return JSON.parse(didDoc);
     }
 
 }

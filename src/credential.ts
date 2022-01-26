@@ -64,8 +64,8 @@ export interface ICredential{
 }
 export default class credential implements ICredential{
     private utils: any;
-    constructor(options: IOptions) {
-        this.utils = new Utils({ nodeUrl: options.nodeUrl });
+    constructor(options: IOptions, wallet) {
+        this.utils = new Utils(options, wallet);
     }
 
     private getId = (type) => {

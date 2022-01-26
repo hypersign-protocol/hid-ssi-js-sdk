@@ -55,8 +55,8 @@ export interface IScheme {
 export default class Schema implements IScheme {
   private utils: Utils;
   schemaUrl: string;
-  constructor(options: IOptions) {
-    this.utils = new Utils({ nodeUrl: options.nodeUrl });
+  constructor(options: IOptions, wallet) {
+    this.utils = new Utils(options, wallet);
     this.schemaUrl = this.utils.nodeurl + constant.HYPERSIGN_NETWORK_SCHEMA_EP;
   }
 

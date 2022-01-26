@@ -4,7 +4,7 @@ import {
 } from "@cosmjs/stargate";
 
 export interface IHIDWallet {
-    rpcEndpoint: string;
+    rpc: string;
     mnemonic: string;
     account: string;
     connectSigner(registry?: any): Promise<any>;
@@ -18,22 +18,22 @@ export interface IHIDWallet {
 export class HIDWallet implements IHIDWallet {
     mnemonic: string;
     wallet : any;
-    rpcEndpoint: string;
+    rpc: string;
     client: any;
     account: string;
     constructor({
         mnemonic,
-        rpcEndpoint
+        rpc
     }){
         if(!mnemonic){
             throw new Error("mnemonic is required");
         }
 
-        if(!rpcEndpoint){
-            throw new Error("rpcEndpoint is required");
+        if(!rpc){
+            throw new Error("rpc is required");
         }
 
-        this.rpcEndpoint = rpcEndpoint;
+        this.rpc = rpc;
         this.mnemonic = mnemonic;
         this.account = "";
     }
@@ -54,8 +54,7 @@ export class HIDWallet implements IHIDWallet {
 
     // step2: 
     public async connectSigner(registry?: any){
-        
-        this.client = await SigningStargateClient.connectWithSigner(this.rpcEndpoint, this.wallet, { registry });
+        this.client = await SigningStargateClient.connectWithSigner(this.rpc, this.wallet, { registry });
         if(!this.client) throw new Error("Client could not inistliaed")
     }
 

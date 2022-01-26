@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import blake from 'blakejs';
 import axios from "axios";
 import IOptions from './IOptions';
+import { DIDRpc, IDIDRpc } from './rpc/didRPC'
 
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 const { Ed25519Signature2018 } = jsonSigs.suites;
@@ -55,9 +56,11 @@ export interface IDID{
 export default class did implements IDID{
   private utils: Utils;
   public didUrl: string;
-  constructor(options: IOptions) {
-    this.utils = new Utils({...options});
+  private didrpc: IDIDRpc;
+  constructor(options: IOptions, wallet) {
+    this.utils = new Utils(options, wallet );
     this.didUrl = this.utils.nodeurl + constant.HYPERSIGN_NETWORK_DID_EP;
+    this.didrpc = new DIDRpc(wallet);
   }
 
   private getChallange() {
@@ -189,19 +192,29 @@ export default class did implements IDID{
 
   // TODO
   public async register(didDoc: object): Promise<any>{
-    return new Promise(async (resolve, reject) => {
-      const response = await axios.post(this.didUrl, didDoc);
-      resolve(response.data);
+    if(!didDoc){
+      throw new Error('')
+    }
+    const did = didDoc['id']
+    return await this.didrpc.registerDID({
+      did,
+      didDocString: JSON.stringify(didDoc)
     })
+
+    // return new Promise(async (resolve, reject) => {
+    //   const response = await axios.post(this.didUrl, didDoc);
+    //   resolve(response.data);
+    // })
   }
 
   // TODO
   public async resolve(did: string): Promise<any>{
-    return new Promise(async (resolve, reject) => {
-      const get_didUrl = this.didUrl + did;
-      const response = await axios.get(get_didUrl);
-      resolve(response.data);
-    })
+    return await this.didrpc.resolveDID(did)
+    // return new Promise(async (resolve, reject) => {
+    //   const get_didUrl = this.didUrl + did;
+    //   const response = await axios.get(get_didUrl);
+    //   resolve(response.data);
+    // })
   }
 
   // verify the signature
@@ -241,8 +254,7 @@ export default class did implements IDID{
   // Sign the doc
   public async sign(params: IParams) {
     const { did, privateKeyBase58, challenge, domain } = params
-
-    const doc = await this.utils.resolve(did);
+    const doc = await this.didrpc.resolveDID(did);
     const publicKeyId = doc['authentication'][0]; // TODO: bad idea -  can not hardcode it.
     const publicKey = doc['publicKey'].find(x => x.id == publicKeyId)
 

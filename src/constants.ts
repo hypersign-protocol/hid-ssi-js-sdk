@@ -10,7 +10,7 @@ export const HYPERSIGN_TESTNET_RPC ="http://localhost:26657"
 export const HYPERSIGN_TESTNET_REST="http://localhost:1318"
 
 export const HYPERSIGN_MAINNET_RPC ="http://localhost:26657"
-export const HYPERSIGN_MAINNET_REST="http://localhost:1317"
+export const HYPERSIGN_MAINNET_REST="http://localhost:1318"
 
 export const HID_COSMOS_MODULE='/hypersignprotocol.hidnode.did'
 
