@@ -100,6 +100,6 @@ export default class Schema implements IScheme {
   }
   
   public async getSchema(schemaId: string): Promise<any> {
-    return await this.schemaRpc.getScehma(schemaId)
+    return await this.schemaRpc.getSchema(schemaId)
   }
 }

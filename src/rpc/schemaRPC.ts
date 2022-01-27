@@ -6,7 +6,7 @@ import axios from "axios";
 
 export interface ISchemaRPC {
     createSchema({schemaId, schemaStr}):Promise<Object>;
-    getScehma(schemaId: string):Promise<Object>
+    getSchema(schemaId: string):Promise<Object>
 }
 
 export class SchemaRpc implements ISchemaRPC{
@@ -31,7 +31,7 @@ export class SchemaRpc implements ISchemaRPC{
             return await this.hidWallet.signAndBroadcastMessages(message, this.hidWallet.getFee());
     }
 
-    async getScehma(schemaId:string):Promise<Object>{
+    async getSchema(schemaId:string):Promise<Object>{
         const get_didUrl = `${HYPERSIGN_TESTNET_REST}${HYPERSIGN_NETWORK_SCHEMA_PATH}/${schemaId}`;
         const response = await axios.get(get_didUrl);
         const { schema } = response.data;
