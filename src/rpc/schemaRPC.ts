@@ -37,5 +37,4 @@ export class SchemaRpc implements ISchemaRPC{
         const { schema } = response.data;
         return JSON.parse(schema);
     }
-
 }

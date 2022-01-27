@@ -6,6 +6,8 @@ import jsonSigs from 'jsonld-signatures'
 import { documentLoader } from 'jsonld'
 import { v4 as uuidv4 } from 'uuid';
 import IOptions from './IOptions';
+import { SchemaRpc, ISchemaRPC } from './rpc/schemaRPC'
+
 
 const VC_PREFIX = "vc_";
 const VP_PREFIX = "vp_";
@@ -53,7 +55,7 @@ interface IVerifiablePresentation {
 
 export interface ICredential{
 
-    generateCredential(schemaUrl, params: { subjectDid, issuerDid, expirationDate, attributesMap: Object }): Promise<any>;
+    generateCredential(schemaId, params: { subjectDid, issuerDid, expirationDate, attributesMap: Object }): Promise<any>;
     signCredential(credential, issuerDid, privateKey): Promise<any>;
     verifyCredential(credential: object, issuerDid: string): Promise<any>;
     generatePresentation(verifiableCredential, holderDid): Promise<any> ;
@@ -64,8 +66,10 @@ export interface ICredential{
 }
 export default class credential implements ICredential{
     private utils: any;
+    schemaRpc: ISchemaRPC;
     constructor(options: IOptions, wallet) {
         this.utils = new Utils(options, wallet);
+        this.schemaRpc = new SchemaRpc(wallet);
     }
 
     private getId = (type) => {
@@ -105,8 +109,9 @@ export default class credential implements ICredential{
 
     // TODO: https://www.w3.org/TR/vc-data-model/#data-schemas 
     // TODO: handle schemaUrl variable properly later.
-    private getCredentialContext = (schemaUrl, schema: ISchemaTemplate_Schema) => {
+    private getCredentialContext = (schemaId, schema: ISchemaTemplate_Schema) => {
         const context: any = []
+        const schemaUrl = `${constant.HYPERSIGN_TESTNET_REST}${constant.HYPERSIGN_NETWORK_SCHEMA_PATH}/${schemaId}`;
         context.push("https://www.w3.org/2018/credentials/v1")
         context.push({
             'hsscheme': schemaUrl
@@ -122,14 +127,14 @@ export default class credential implements ICredential{
         return context;
     }
 
-    async generateCredential(schemaUrl, params: { subjectDid, issuerDid, expirationDate, attributesMap: Object }): Promise<any> {
-        let schemaDoc: ISchemaTemplate = {} as ISchemaTemplate
+    async generateCredential(schemaId, params: { subjectDid, issuerDid, expirationDate, attributesMap: Object }): Promise<any> {
+        let schemaDoc: any = {} as ISchemaTemplate
         let issuerDidDoc = {}
         let subjectDidDoc = {}
         try {
-            schemaDoc = await this.utils.fetchData(schemaUrl);
+            schemaDoc = await this.schemaRpc.getScehma(schemaId);
         } catch (e) {
-            throw new Error('Could not resolve the schema from url = ' + schemaUrl)
+            throw new Error('Could not resolve the schema from schemaId = ' + schemaId)
         }
 
         const issuerDid = params.issuerDid.split('#')[0]
@@ -145,7 +150,7 @@ export default class credential implements ICredential{
         //     "https://www.w3.org/2018/credentials/v1",
         //     schemaUrl
         //   ];
-        vc['@context'] = await this.getCredentialContext(schemaUrl, schemaDoc.schema)
+        vc['@context'] = await this.getCredentialContext(schemaId, schemaDoc.schema)
 
         vc.id = this.getId('VC');
 
