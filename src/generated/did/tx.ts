@@ -4,15 +4,6 @@ import * as Long from "long";
 
 export const protobufPackage = "hypersignprotocol.hidnode.did";
 
-export interface MsgDeleteDID {
-  creator: string;
-  did: string;
-}
-
-export interface MsgDeleteDIDResponse {
-  success: boolean;
-}
-
 export interface MsgCreateDID {
   creator: string;
   did: string;
@@ -24,135 +15,15 @@ export interface MsgCreateDIDResponse {
   id: number;
 }
 
-const baseMsgDeleteDID: object = { creator: "", did: "" };
+export interface MsgCreateSchema {
+  creator: string;
+  schemaID: string;
+  schemaStr: string;
+}
 
-export const MsgDeleteDID = {
-  encode(message: MsgDeleteDID, writer: Writer = Writer.create()): Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
-    }
-    if (message.did !== "") {
-      writer.uint32(18).string(message.did);
-    }
-    return writer;
-  },
-
-  decode(input: Reader | Uint8Array, length?: number): MsgDeleteDID {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseMsgDeleteDID } as MsgDeleteDID;
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.creator = reader.string();
-          break;
-        case 2:
-          message.did = reader.string();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): MsgDeleteDID {
-    const message = { ...baseMsgDeleteDID } as MsgDeleteDID;
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = String(object.creator);
-    } else {
-      message.creator = "";
-    }
-    if (object.did !== undefined && object.did !== null) {
-      message.did = String(object.did);
-    } else {
-      message.did = "";
-    }
-    return message;
-  },
-
-  toJSON(message: MsgDeleteDID): unknown {
-    const obj: any = {};
-    message.creator !== undefined && (obj.creator = message.creator);
-    message.did !== undefined && (obj.did = message.did);
-    return obj;
-  },
-
-  fromPartial(object: DeepPartial<MsgDeleteDID>): MsgDeleteDID {
-    const message = { ...baseMsgDeleteDID } as MsgDeleteDID;
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = object.creator;
-    } else {
-      message.creator = "";
-    }
-    if (object.did !== undefined && object.did !== null) {
-      message.did = object.did;
-    } else {
-      message.did = "";
-    }
-    return message;
-  },
-};
-
-const baseMsgDeleteDIDResponse: object = { success: false };
-
-export const MsgDeleteDIDResponse = {
-  encode(
-    message: MsgDeleteDIDResponse,
-    writer: Writer = Writer.create()
-  ): Writer {
-    if (message.success === true) {
-      writer.uint32(8).bool(message.success);
-    }
-    return writer;
-  },
-
-  decode(input: Reader | Uint8Array, length?: number): MsgDeleteDIDResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseMsgDeleteDIDResponse } as MsgDeleteDIDResponse;
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.success = reader.bool();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): MsgDeleteDIDResponse {
-    const message = { ...baseMsgDeleteDIDResponse } as MsgDeleteDIDResponse;
-    if (object.success !== undefined && object.success !== null) {
-      message.success = Boolean(object.success);
-    } else {
-      message.success = false;
-    }
-    return message;
-  },
-
-  toJSON(message: MsgDeleteDIDResponse): unknown {
-    const obj: any = {};
-    message.success !== undefined && (obj.success = message.success);
-    return obj;
-  },
-
-  fromPartial(object: DeepPartial<MsgDeleteDIDResponse>): MsgDeleteDIDResponse {
-    const message = { ...baseMsgDeleteDIDResponse } as MsgDeleteDIDResponse;
-    if (object.success !== undefined && object.success !== null) {
-      message.success = object.success;
-    } else {
-      message.success = false;
-    }
-    return message;
-  },
-};
+export interface MsgCreateSchemaResponse {
+  id: number;
+}
 
 const baseMsgCreateDID: object = {
   creator: "",
@@ -324,11 +195,170 @@ export const MsgCreateDIDResponse = {
   },
 };
 
+const baseMsgCreateSchema: object = {
+  creator: "",
+  schemaID: "",
+  schemaStr: "",
+};
+
+export const MsgCreateSchema = {
+  encode(message: MsgCreateSchema, writer: Writer = Writer.create()): Writer {
+    if (message.creator !== "") {
+      writer.uint32(10).string(message.creator);
+    }
+    if (message.schemaID !== "") {
+      writer.uint32(18).string(message.schemaID);
+    }
+    if (message.schemaStr !== "") {
+      writer.uint32(26).string(message.schemaStr);
+    }
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): MsgCreateSchema {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = { ...baseMsgCreateSchema } as MsgCreateSchema;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.creator = reader.string();
+          break;
+        case 2:
+          message.schemaID = reader.string();
+          break;
+        case 3:
+          message.schemaStr = reader.string();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgCreateSchema {
+    const message = { ...baseMsgCreateSchema } as MsgCreateSchema;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = String(object.creator);
+    } else {
+      message.creator = "";
+    }
+    if (object.schemaID !== undefined && object.schemaID !== null) {
+      message.schemaID = String(object.schemaID);
+    } else {
+      message.schemaID = "";
+    }
+    if (object.schemaStr !== undefined && object.schemaStr !== null) {
+      message.schemaStr = String(object.schemaStr);
+    } else {
+      message.schemaStr = "";
+    }
+    return message;
+  },
+
+  toJSON(message: MsgCreateSchema): unknown {
+    const obj: any = {};
+    message.creator !== undefined && (obj.creator = message.creator);
+    message.schemaID !== undefined && (obj.schemaID = message.schemaID);
+    message.schemaStr !== undefined && (obj.schemaStr = message.schemaStr);
+    return obj;
+  },
+
+  fromPartial(object: DeepPartial<MsgCreateSchema>): MsgCreateSchema {
+    const message = { ...baseMsgCreateSchema } as MsgCreateSchema;
+    if (object.creator !== undefined && object.creator !== null) {
+      message.creator = object.creator;
+    } else {
+      message.creator = "";
+    }
+    if (object.schemaID !== undefined && object.schemaID !== null) {
+      message.schemaID = object.schemaID;
+    } else {
+      message.schemaID = "";
+    }
+    if (object.schemaStr !== undefined && object.schemaStr !== null) {
+      message.schemaStr = object.schemaStr;
+    } else {
+      message.schemaStr = "";
+    }
+    return message;
+  },
+};
+
+const baseMsgCreateSchemaResponse: object = { id: 0 };
+
+export const MsgCreateSchemaResponse = {
+  encode(
+    message: MsgCreateSchemaResponse,
+    writer: Writer = Writer.create()
+  ): Writer {
+    if (message.id !== 0) {
+      writer.uint32(8).uint64(message.id);
+    }
+    return writer;
+  },
+
+  decode(input: Reader | Uint8Array, length?: number): MsgCreateSchemaResponse {
+    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = {
+      ...baseMsgCreateSchemaResponse,
+    } as MsgCreateSchemaResponse;
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.id = longToNumber(reader.uint64() as Long);
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgCreateSchemaResponse {
+    const message = {
+      ...baseMsgCreateSchemaResponse,
+    } as MsgCreateSchemaResponse;
+    if (object.id !== undefined && object.id !== null) {
+      message.id = Number(object.id);
+    } else {
+      message.id = 0;
+    }
+    return message;
+  },
+
+  toJSON(message: MsgCreateSchemaResponse): unknown {
+    const obj: any = {};
+    message.id !== undefined && (obj.id = message.id);
+    return obj;
+  },
+
+  fromPartial(
+    object: DeepPartial<MsgCreateSchemaResponse>
+  ): MsgCreateSchemaResponse {
+    const message = {
+      ...baseMsgCreateSchemaResponse,
+    } as MsgCreateSchemaResponse;
+    if (object.id !== undefined && object.id !== null) {
+      message.id = object.id;
+    } else {
+      message.id = 0;
+    }
+    return message;
+  },
+};
+
 /** Msg defines the Msg service. */
 export interface Msg {
   CreateDID(request: MsgCreateDID): Promise<MsgCreateDIDResponse>;
   /** this line is used by starport scaffolding # proto/tx/rpc */
-  DeleteDID(request: MsgDeleteDID): Promise<MsgDeleteDIDResponse>;
+  CreateSchema(request: MsgCreateSchema): Promise<MsgCreateSchemaResponse>;
 }
 
 export class MsgClientImpl implements Msg {
@@ -348,15 +378,15 @@ export class MsgClientImpl implements Msg {
     );
   }
 
-  DeleteDID(request: MsgDeleteDID): Promise<MsgDeleteDIDResponse> {
-    const data = MsgDeleteDID.encode(request).finish();
+  CreateSchema(request: MsgCreateSchema): Promise<MsgCreateSchemaResponse> {
+    const data = MsgCreateSchema.encode(request).finish();
     const promise = this.rpc.request(
       "hypersignprotocol.hidnode.did.Msg",
-      "DeleteDID",
+      "CreateSchema",
       data
     );
     return promise.then((data) =>
-      MsgDeleteDIDResponse.decode(new Reader(data))
+      MsgCreateSchemaResponse.decode(new Reader(data))
     );
   }
 }

@@ -36,12 +36,14 @@ export = class HypersignSsiSDK implements IHsSdk{
         const rf = new HIDRpcFactory()
         
         /// TODO: need to make it dynamic later
-        rf.registerRpc(HIDRpcEnums.MsgCreateDID);
+        Object.keys(HIDRpcEnums).forEach(rpc =>{
+            rf.registerRpc(HIDRpcEnums[rpc]);
+        })
         await this.wallet.connectSigner(rf.hidRPCRegistery);  
 
         this.did = new Did(this.options, this.wallet);
-        this.credential = new Credential(this.options, this.wallet);
         this.schema = new Schema(this.options, this.wallet);
+        this.credential = new Credential(this.options, this.wallet);
     }
 
 }

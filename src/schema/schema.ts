@@ -4,6 +4,7 @@ import * as constant from "../constants";
 import Utils from "../utils";
 import axios from "axios";
 import IOptions from "../IOptions";
+import { SchemaRpc, ISchemaRPC } from '../rpc/schemaRPC'
 
 const SC_PREFIX = "sch_";
 const SCHEMA_URL = "https://json-schema.org/draft-07/schema#";
@@ -49,15 +50,17 @@ export interface IScheme {
     properties,
   }: ISchema): Promise<ISchemaTemplate>;
   registerSchema(schema: ISchemaTemplate): Promise<any>;
-  getSchema(options: {schemaId?: string, author?: string}): Promise<any>;
+  getSchema(schemaId: string): Promise<any>;
 }
 
 export default class Schema implements IScheme {
   private utils: Utils;
   schemaUrl: string;
+  schemaRpc: ISchemaRPC;
   constructor(options: IOptions, wallet) {
     this.utils = new Utils(options, wallet);
     this.schemaUrl = this.utils.nodeurl + constant.HYPERSIGN_NETWORK_SCHEMA_EP;
+    this.schemaRpc = new SchemaRpc(wallet);
   }
 
   public async generateSchema({
@@ -86,31 +89,17 @@ export default class Schema implements IScheme {
   }
 
   public async registerSchema(schema: ISchemaTemplate): Promise<any> {
-    const response = await axios.post(this.schemaUrl, schema);
-    return response.data;
+    const schemaId = schema["id"];
+    if(!schemaId){
+      throw new Error('Invalid schema')
+    }
+    return this.schemaRpc.createSchema({
+      schemaId,
+      schemaStr: JSON.stringify(schema)
+    });
   }
-
-  public async getSchema(options: {schemaId?: string, author?: string}): Promise<any> {
-    let get_didUrl = "";
-      const { author, schemaId } = options;
-
-      if(author != undefined && schemaId != undefined){ // 1,1
-        get_didUrl = this.schemaUrl + schemaId + "?author=" + author;
-      }
-
-      else if(author == undefined && schemaId != undefined){ // 1,0
-        get_didUrl = this.schemaUrl + schemaId;
-      }
-
-      else if(author != undefined && schemaId == undefined){ // 0,1
-        get_didUrl = this.schemaUrl + "?author=" + author;
-      }
-
-      else if(author == undefined && schemaId == undefined){ // 0,0
-        get_didUrl = this.schemaUrl;
-      }
-      
-      const response = await axios.get(get_didUrl);
-      return response.data;
+  
+  public async getSchema(schemaId: string): Promise<any> {
+    return await this.schemaRpc.getScehma(schemaId)
   }
 }
