@@ -2,6 +2,8 @@ import { DirectSecp256k1HdWallet } from "@cosmjs/proto-signing";
 import {
   SigningStargateClient,
 } from "@cosmjs/stargate";
+import axios from 'axios';
+import { HYPERSIGN_NETWORK_BANK_BALANCE_PATH, HYPERSIGN_TESTNET_REST } from '../constants'
 
 export interface IHIDWallet {
     rpc: string;
@@ -25,10 +27,6 @@ export class HIDWallet implements IHIDWallet {
         mnemonic,
         rpc
     }){
-        if(!mnemonic){
-            throw new Error("mnemonic is required");
-        }
-
         if(!rpc){
             throw new Error("rpc is required");
         }
@@ -40,7 +38,27 @@ export class HIDWallet implements IHIDWallet {
     
     private async createWallet(){
         console.log('Createing wallet with mnemonic ', this.mnemonic);
-        this.wallet = await DirectSecp256k1HdWallet.fromMnemonic(this.mnemonic);
+        if(!this.mnemonic){
+            this.wallet =  await DirectSecp256k1HdWallet.generate(); 
+            this.mnemonic = this.wallet.mnemonic;
+        }else {
+            this.wallet = await DirectSecp256k1HdWallet.fromMnemonic(this.mnemonic);
+        }
+    }
+
+    public async encryptWalletWithPassword(password){
+        return await this.wallet.serialize(password);
+    }
+
+    public async recoverWalletFromPassword(encryptedWalletStr, password){
+        this.wallet =  await DirectSecp256k1HdWallet.deserialize(encryptedWalletStr, password); 
+        await this.setAccounts();
+    }
+
+    private async setAccounts(){
+        const accounts = await this.wallet.getAccounts()
+        this.mnemonic = this.wallet.mnemonic; 
+        this.account = accounts[0].address;
     }
 
     /**
@@ -48,8 +66,7 @@ export class HIDWallet implements IHIDWallet {
      */
     public async init(){
         await this.createWallet();
-        const accounts = await this.wallet.getAccounts()
-        this.account = accounts[0].address;
+        await this.setAccounts();
     }
 
     // step2: 
@@ -82,5 +99,27 @@ export class HIDWallet implements IHIDWallet {
             throw new Error("Wallet is not initialize")
         }
         return await this.client.sendTokens(this.account, recipientAddress, amount, fee? fee: this.getFee(), memo);
+    }
+
+    public async fundWalletViaFaucet(recipientAddress:string){
+        const faucetUrl = 'http://localhost:4500/'
+
+        const req_body = {
+            "address": recipientAddress,
+            "coins": [
+              "20uatom"
+            ]
+        }
+        const response = await axios.post(faucetUrl, req_body);
+        if(response.data.error){
+            throw new Error(response.data.error)
+        }
+        return "success";
+    }
+
+    public  async balance(){
+        const url = `${HYPERSIGN_TESTNET_REST}${HYPERSIGN_NETWORK_BANK_BALANCE_PATH}${this.account}`
+        const response = await axios.get(url)
+        return response.data;
     }
 }

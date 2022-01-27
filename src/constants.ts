@@ -16,6 +16,7 @@ export const HID_COSMOS_MODULE='/hypersignprotocol.hidnode.did'
 
 export const HYPERSIGN_NETWORK_DID_PATH="/hypersign-protocol/hidnode/did"
 export const HYPERSIGN_NETWORK_SCHEMA_PATH="/hypersign-protocol/hidnode/did/schema"
+export const HYPERSIGN_NETWORK_BANK_BALANCE_PATH="/bank/balances/"
 
 export enum HIDRpcEnums {
     MsgCreateDID = "MsgCreateDID",

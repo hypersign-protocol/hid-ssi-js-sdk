@@ -8,15 +8,37 @@ async function initWallet(){
 
     console.log('Initiating wallet')
     hdWallet = new HIDWallet({
-        mnemonic,
-        rpcEndpoint: HYPERSIGN_TESTNET_RPC
+        mnemonic: "",
+        rpc: HYPERSIGN_TESTNET_RPC
     })
+    
     await hdWallet.init();    
     console.log('Wallet inislized account', hdWallet.account)
+    let accounts = await hdWallet.wallet.getAccounts()
+    let mnemonic = hdWallet.mnemonic;
+    console.log({
+        mnemonic,
+        accounts
+    })
+
+    const password = 'Passowd1@';
+    const encryptedStr = await hdWallet.encryptWalletWithPassword(password)
+    console.log(encryptedStr)
+    
+    
+    await hdWallet.recoverWalletFromPassword(encryptedStr, password)
+     accounts = await hdWallet.wallet.getAccounts()
+     mnemonic = hdWallet.mnemonic;
+    console.log({
+        mnemonic,
+        accounts
+    })
+
+    await hdWallet.fundWalletViaFaucet(hdWallet.account)
+    console.log(await hdWallet.balance())
     await addSigner();
     return hdWallet.account;  
 }
-
 
 async function addSigner(){
     console.log('connecting signer')
@@ -39,7 +61,7 @@ async function transfer(toAddress, amount){
 initWallet()
     .then(account => {
         console.log(account)
-        return transfer(toAddress, "200")
+        return transfer(toAddress, "1")
     })
     .then(txHash => {
         console.log(txHash)
