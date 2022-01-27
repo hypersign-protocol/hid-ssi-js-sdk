@@ -1,4 +1,4 @@
-const { hsSdk } = require('./config')
+const { hsSdk, writeDataInFile, readDateFromFile } = require('./config')
 
 const userData = {
     name: "asdadasd222"
@@ -17,6 +17,7 @@ hsSdk.init()
 .then(res => {
     console.log(JSON.stringify(res, null, 2))
     const { didDoc, did, keys } = res;
+    writeDataInFile('keys.json', JSON.stringify(keys));
     privateKeyBase58 = keys.privateKeyBase58;
     newDID = did;
     console.log("===============REGISTER DID=======================")

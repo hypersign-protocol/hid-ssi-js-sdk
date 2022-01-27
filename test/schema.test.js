@@ -1,16 +1,10 @@
-const { hsSdk } = require('./config')
-const sdkSchema = hsSdk.schema;
-
-
-const props = {
-    "name": "",
-    "email": "",
-    "phoneNumber": ""
-}
+const { hsSdk, props, writeDataInFile } = require('./config')
 
 const author = "did:hs:72ed2dbc-4970-4bdd-8dd0-41cc7c9377d1";
 let schemaId = ""
-hsSdk.init().then(() => {
+
+hsSdk.init()
+.then(() => {
     console.log("===============GENERATE SCHEMA=======================")
     return hsSdk.schema.generateSchema({
         author,
@@ -20,6 +14,7 @@ hsSdk.init().then(() => {
     })
 })
 .then(schema => {
+    writeDataInFile('schema.json', JSON.stringify(schema))
     schemaId = schema["id"];
     console.log({schemaId, schema});
     console.log("===============CREATE SCHEMA=======================")
