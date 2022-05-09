@@ -1,12 +1,9 @@
 import * as constant from './constants'
-import Utils from './utils'
 import jsonSigs from 'jsonld-signatures'
 import { Ed25519KeyPair } from 'crypto-ld'
 import { documentLoader } from 'jsonld'
 import { v4 as uuidv4 } from 'uuid';
 import blake from 'blakejs';
-import axios from "axios";
-import IOptions from './IOptions';
 import { DIDRpc, IDIDRpc } from './rpc/didRPC'
 
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
@@ -35,16 +32,13 @@ interface IParams {
   controller: IController,
   did: string
 }
+
 interface IDIDOptions{
   user: object;
   publicKey?: string
 }
 
 export interface IDID{
-  didUrl: string;
-  getDidDocAndKeys(user: object): Promise<any>;
-
-  generateKeys(): object;
   getDid(options: IDIDOptions): Promise<any>;
   register(didDoc: object): Promise<any>;
   resolve(did: string): Promise<any>;
@@ -54,76 +48,17 @@ export interface IDID{
 }
 
 export default class did implements IDID{
-  private utils: Utils;
-  public didUrl: string;
   private didrpc: IDIDRpc;
-  constructor(options: IOptions, wallet) {
-    this.utils = new Utils(options, wallet );
-    this.didUrl = this.utils.nodeurl + constant.HYPERSIGN_NETWORK_DID_EP;
-    this.didrpc = new DIDRpc(wallet);
+  constructor() {
+    this.didrpc = new DIDRpc();    
   }
 
+  // TODO: It should conforms did:hid method
   private getChallange() {
     return uuidv4()
   }
 
-  private getId = () => `${this.utils.didScheme}:${this.getChallange()}`;
-
-  public async generateKeys() {
-    const kp = await Ed25519KeyPair.generate();
-    const did = this.getId()
-    kp.id = did + '#' + kp.fingerprint();
-    const eKp = await kp.export();
-    const publicKey = {
-      '@context': jsonSigs.SECURITY_CONTEXT_URL,
-      ...eKp
-    }
-    delete publicKey['privateKeyBase58']
-    return {
-      did,
-      privateKeyBase58: eKp.privateKeyBase58,
-      publicKey
-    }
-  }
-
-  // TODO: this is obsolete. We can remove this later.
-  // use getDid method instead
-  public async getDidDocAndKeys(user: Object) : Promise<any>{
-    let didDoc = {};
-    // if(!user['name']) throw new Error("Name is required")
-    const kp = await this.generateKeys();
-    didDoc['@context'] = ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/v1", "https://schema.org"]
-    didDoc['@type'] = "https://schema.org/Person"
-
-    // DID Subject
-    didDoc['id'] = kp.did;
-
-    Object.keys(user).forEach(k => {
-      didDoc[k] = user[k]
-    })
-
-    // Verification Method
-    didDoc['publicKey'] = [kp.publicKey]
-
-    // Verification Relationship
-    didDoc['authentication'] = [kp.publicKey.id]
-    didDoc['assertionMethod'] = [kp.publicKey.id]
-    didDoc['keyAgreement'] = [kp.publicKey.id]
-    didDoc['capabilityInvocation'] = [kp.publicKey.id]
-
-    didDoc['created'] = new Date()
-    didDoc['updated'] = new Date()
-
-    return {
-      keys: {
-        publicKey: kp['publicKey'],
-        privateKeyBase58: kp['privateKeyBase58']
-      },
-      did: kp['did'],
-      didDoc
-    }
-
-  }
+  private getId = () => `${constant.DID_SCHEME}:${this.getChallange()}`;
 
   private formKeyPairFromPublicKey(publicKeyBase58) {
     if(!publicKeyBase58) throw new Error("publicKeyBase58 can not be empty")
@@ -144,6 +79,24 @@ export default class did implements IDID{
     }
   }
 
+  private async generateKeys() {
+    const kp = await Ed25519KeyPair.generate();
+    const did = this.getId()
+    kp.id = did + '#' + kp.fingerprint();
+    const eKp = await kp.export();
+    const publicKey = {
+      '@context': jsonSigs.SECURITY_CONTEXT_URL,
+      ...eKp
+    }
+    delete publicKey['privateKeyBase58']
+    return {
+      did,
+      privateKeyBase58: eKp.privateKeyBase58,
+      publicKey
+    }
+  }
+
+  /// Public methods
   public async getDid(options: IDIDOptions): Promise<any>{
     let didDoc = {};
     // if(options.user == {})  
@@ -157,6 +110,7 @@ export default class did implements IDID{
       kp = this.formKeyPairFromPublicKey(options.publicKey);
     }
     
+    // TODO: Need to make this dynamic. Fix this.
     didDoc['@context'] = ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/v1", "https://schema.org"]
     didDoc['@type'] = "https://schema.org/Person"
 
@@ -190,7 +144,7 @@ export default class did implements IDID{
     }
   }
 
-  // TODO
+  // TODO:  this method MUST also accept signature/proof 
   public async register(didDoc: object): Promise<any>{
     if(!didDoc){
       throw new Error('')
@@ -200,55 +154,10 @@ export default class did implements IDID{
       did,
       didDocString: JSON.stringify(didDoc)
     })
-
-    // return new Promise(async (resolve, reject) => {
-    //   const response = await axios.post(this.didUrl, didDoc);
-    //   resolve(response.data);
-    // })
   }
 
-  // TODO
   public async resolve(did: string): Promise<any>{
     return await this.didrpc.resolveDID(did)
-    // return new Promise(async (resolve, reject) => {
-    //   const get_didUrl = this.didUrl + did;
-    //   const response = await axios.get(get_didUrl);
-    //   resolve(response.data);
-    // })
-  }
-
-  // verify the signature
-  public async verify(params: IParams) {
-    const { doc, challenge, domain } = params
-    // TODO: checks..."All params are mandatory"
-
-    // TODO: Fetch did doc from ledger and compare it here.
-    const did = doc['id']
-    const { controller, publicKey, didDoc: didDocOnLedger } = await this.utils.getControllerAndPublicKeyFromDid(did, 'authentication')
-
-    const didDocWhichIsPassedTemp = Object.assign({}, doc)
-    delete didDocWhichIsPassedTemp['proof'];
-    delete didDocOnLedger['proof'];
-    if (JSON.stringify(didDocWhichIsPassedTemp) !== JSON.stringify(didDocOnLedger)) throw new Error("Invalid didDoc for did = " + did)
-
-    const purpose = new AuthenticationProofPurpose({
-      controller,
-      domain,
-      challenge
-    })
-
-    const suite = new Ed25519Signature2018({
-      key: new Ed25519KeyPair(publicKey)
-    })
-
-    const verified = await jsonSigs.verify(doc, {
-      suite,
-      purpose,
-      documentLoader,
-      compactProof: constant.compactProof
-    })
-
-    return verified;
   }
 
   // Sign the doc
@@ -273,4 +182,39 @@ export default class did implements IDID{
     return signed;
   }
 
+  // verify the signature
+  public async verify(params: IParams) {
+    throw new Error("Method not implemented");
+
+    const { doc, challenge, domain } = params
+    //// TODO: checks..."All params are mandatory"
+
+    //// TODO: Fetch did doc from ledger and compare it here.
+    // const did = doc['id']
+    // const { controller, publicKey, didDoc: didDocOnLedger } = await this.utils.getControllerAndPublicKeyFromDid(did, 'authentication')
+
+    // const didDocWhichIsPassedTemp = Object.assign({}, doc)
+    // delete didDocWhichIsPassedTemp['proof'];
+    // delete didDocOnLedger['proof'];
+    // if (JSON.stringify(didDocWhichIsPassedTemp) !== JSON.stringify(didDocOnLedger)) throw new Error("Invalid didDoc for did = " + did)
+
+    // const purpose = new AuthenticationProofPurpose({
+    //   controller,
+    //   domain,
+    //   challenge
+    // })
+
+    // const suite = new Ed25519Signature2018({
+    //   key: new Ed25519KeyPair(publicKey)
+    // })
+
+    // const verified = await jsonSigs.verify(doc, {
+    //   suite,
+    //   purpose,
+    //   documentLoader,
+    //   compactProof: constant.compactProof
+    // })
+
+    // return verified;
+  }
 }

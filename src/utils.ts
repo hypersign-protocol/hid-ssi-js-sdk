@@ -8,20 +8,20 @@ export default class Utils {
   nodeurl: string;
   didScheme: string;
   didRpc: IDIDRpc;
-  constructor(options: IOptions, wallet) {
+  constructor(options: IOptions, wallet?) {
     this.didScheme = options.didScheme && options.didScheme != "" ?  options.didScheme : constants.DID_SCHEME
-    this.nodeurl = this.checkUrl(options.nodeUrl);
-    this.didRpc = new DIDRpc(wallet);
+    this.nodeurl = Utils.checkUrl(options.nodeUrl);
+    this.didRpc = new DIDRpc();
   }
 
   hostName({ mode }) {
     let nodeUrl;
     switch (mode) {
       case "live":
-        nodeUrl = this.checkUrl(constants.HYPERSIGN_NETWORK_LIVE);
+        nodeUrl = Utils.checkUrl(constants.HYPERSIGN_NETWORK_LIVE);
         break;
       case "test":
-        nodeUrl = this.checkUrl(constants.HYPERSIGN_NETWORK_LIVE);
+        nodeUrl = Utils.checkUrl(constants.HYPERSIGN_NETWORK_LIVE);
         break;
       default:
         throw new Error("Invalid mode");
@@ -29,7 +29,8 @@ export default class Utils {
     return nodeUrl;
   }
 
-  checkUrl(url: string) {
+  public static checkUrl(url: string) {
+    // TODO: check if the url is a valid url
     if (url.charAt(url.length - 1) === "/") {
       return url;
     } else {

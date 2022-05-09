@@ -10,7 +10,7 @@ export interface IHIDRpcFactory{
 }
 
 export class HIDRpcFactory implements IHIDRpcFactory{
-    hidRPCRegistery: any
+    hidRPCRegistery: Registry
     constructor(){
         this.hidRPCRegistery = new Registry(defaultRegistryTypes);
     }
