@@ -9,7 +9,7 @@ import axios from "axios";
 import { HIDClient } from '../hid/hidClient';
 
 export interface IDIDRpc {
-    registerDID({did, didDocString}):Promise<Object>;
+    registerDID({didDocString, signatures}):Promise<Object>;
     resolveDID(did):Promise<Object>
 }
 
@@ -21,16 +21,16 @@ export class DIDRpc implements IDIDRpc{
 
     // TODO:  this RPC MUST also accept signature/proof 
     async registerDID({
-        did,
-        didDocString
+        didDocString,
+        signatures
     }):Promise<Object>{
         const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
+        console.log("The wallet address is (rpc/didRPC.ts): ", HIDClient.getHidWalletAddress())
         const txMessage = {
             typeUrl, // Same as above
             value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
-                    did,
                     didDocString,
-                    createdAt: Date.now().toString(),
+                    signatures,
                     creator: HIDClient.getHidWalletAddress(),
                 }),
             }; 
@@ -38,7 +38,7 @@ export class DIDRpc implements IDIDRpc{
         // TODO: need to find a way to make it dynamic
         const fee = {
             amount: [{
-                denom: 'uatom',
+                denom: 'uhid',
                 amount: '5000',
             }, ],
             gas: '200000',

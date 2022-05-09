@@ -3,6 +3,7 @@ import Credential  from './credential';
 import Schema from './schema/schema';
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { HIDClient } from './hid/hidClient';
+import IOptions from './IOptions';
 
 export = class HypersignSSISdk{
     did: Did;
@@ -11,7 +12,7 @@ export = class HypersignSSISdk{
     
     private signer: OfflineSigner;
     private nodeEndpoint: string; // http://localhost:26657 | 'TEST' | 'MAIN'
-    private nodeRestEndpoint: string; // "" | http://localhost:1318
+    private nodeRestEndpoint: string; // "" | http://localhost:1317
     constructor(offlineSigner: OfflineSigner, nodeEndpoint: string, nodeRestEndpoint?: string){
         
         // TODO validate if offlinesigner is of type OfflineSiner
@@ -28,8 +29,8 @@ export = class HypersignSSISdk{
 
     async init(){
         const hidClient = new HIDClient(this.signer, this.nodeEndpoint, this.nodeRestEndpoint);
-        await hidClient.init();
         this.did = new Did();
+        await hidClient.init();
         // this.schema = new Schema(this.options, this.wallet);
         // this.credential = new Credential(this.options, this.wallet);
     }

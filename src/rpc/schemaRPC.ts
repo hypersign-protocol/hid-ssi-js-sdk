@@ -5,7 +5,7 @@ import { IHIDWallet } from '../wallet/wallet';
 import axios from "axios";
 
 export interface ISchemaRPC {
-    createSchema({schemaId, schemaStr}):Promise<Object>;
+    createSchema({schema, signatures}):Promise<Object>;
     getSchema(schemaId: string):Promise<Object>
 }
 
@@ -16,15 +16,15 @@ export class SchemaRpc implements ISchemaRPC{
     }
 
     async createSchema({
-        schemaId,
-        schemaStr
+        schema,
+        signatures
     }):Promise<Object>{
         const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateSchema}`;
         const message = {
             typeUrl, // Same as above
             value: generatedProto[HIDRpcEnums.MsgCreateSchema].fromPartial({
-                    schemaID: schemaId,
-                    schemaStr,
+                    schema,
+                    signatures,
                     creator: this.hidWallet.account,
                 }),
             };

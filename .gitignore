@@ -3,3 +3,4 @@ dist
 libs
 test/keys.json
 test/schema.json
+keys.json

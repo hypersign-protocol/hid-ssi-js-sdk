@@ -1,61 +1,77 @@
-const { hsSdk, writeDataInFile, readDateFromFile } = require('./config')
+const { writeDataInFile, readDateFromFile, createWallet } = require('./config')
+const HypersignSsiSDK = require('../dist')
 
 const userData = {
     name: "asdadasd222"
 }
-let newDID = "";
+let newDID = "";``
 let challenge = "";
 let privateKeyBase58 = "";
 const domain = "www.hypersign.id"
-hsSdk.init()
-.then(() => {
-    console.log("===============GENERATE DID-DIDDOC-KEYS=======================")
-    return hsSdk.did.getDid({
-        user: userData,
-    })
+
+
+createWallet()
+.then((offlineSigner) => {
+    const hsSdk = new HypersignSsiSDK(offlineSigner, "http://localhost:26657", "http://localhost:1317");
+    hsSdk.init()
+    return hsSdk
 })
-.then(res => {
+.then((hsSdk) => {
+    console.log("===============GENERATE DID-DIDDOC-KEYS=======================")
+    const res = hsSdk.did.getDid()
     console.log(JSON.stringify(res, null, 2))
     const { didDoc, did, keys } = res;
     writeDataInFile('keys.json', JSON.stringify(keys));
-    privateKeyBase58 = keys.privateKeyBase58;
-    newDID = did;
-    console.log("===============REGISTER DID=======================")
-    return hsSdk.did.register(didDoc);
-})
-.then(res => {
-    console.log(res)
-    // const {did: dcentId} = res;
-    console.log("===============RESOLVE DID=======================")
-    return hsSdk.did.resolve(newDID);
-})
-.then(res => {
-    console.log(res)
-    challenge = "123123123chs"
-    console.log("===============SIGN DIDDOC=======================")
-    return  hsSdk.did.sign({
-        did: newDID,
-        privateKeyBase58,
-        challenge,
-        domain
+    console.log("===============Sign DID=======================")
+    //return hsSdk.did.register(didDoc);
+    const signature = hsSdk.did.sign({
+        doc: didDoc,
+        privateKey: keys["privateKeyMultibase"]
+    })
+    console.log("Signature", Buffer.from(signature).toString('base64'))
+    console.log("===============Register DID=======================")
+    return hsSdk.did.register({
+        didDoc,
+        signature
     })
 })
-.then((signedDoc) => {
-    console.log("signedDoc =", signedDoc)
-    console.log("===============VERIFY DOC=======================")
-    return  hsSdk.did.verify({
-        doc: signedDoc,
-        challenge,
-        domain
-    })
+.then((res) => {
+    console.log(res)
+    console.log("Done")
 })
-.then((verified) => {
-    console.log("verified =", verified)
-    console.log("Finised.")
-})
-.catch(e => {
-    console.error(e);
-})
+// .then(res => {
+//     console.log(res)
+//     // const {did: dcentId} = res;
+//     console.log("===============RESOLVE DID=======================")
+//     return hsSdk.did.resolve(newDID);
+// })
+// .then(res => {
+//     console.log(res)
+//     challenge = "123123123chs"
+//     console.log("===============SIGN DIDDOC=======================")
+//     return  hsSdk.did.sign({
+//         did: newDID,
+//         privateKeyBase58,
+//         challenge,
+//         domain
+//     })
+// })
+// .then((signedDoc) => {
+//     console.log("signedDoc =", signedDoc)
+//     console.log("===============VERIFY DOC=======================")
+//     return  hsSdk.did.verify({
+//         doc: signedDoc,
+//         challenge,
+//         domain
+//     })
+// })
+// .then((verified) => {
+//     console.log("verified =", verified)
+//     console.log("Finised.")
+// })
+// .catch(e => {
+//     console.error(e);
+// })
 
 
 return;

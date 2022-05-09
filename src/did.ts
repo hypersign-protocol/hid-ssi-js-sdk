@@ -4,7 +4,13 @@ import { Ed25519KeyPair } from 'crypto-ld'
 import { documentLoader } from 'jsonld'
 import { v4 as uuidv4 } from 'uuid';
 import blake from 'blakejs';
+import axios from "axios";
 import { DIDRpc, IDIDRpc } from './rpc/didRPC'
+
+const ed25519 = require('@stablelib/ed25519');
+const {encode} = require('base58-universal');
+const webCrypto = require('crypto').webcrypto
+import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 const { Ed25519Signature2018 } = jsonSigs.suites;
@@ -25,7 +31,7 @@ interface IController {
 
 interface IParams {
   doc: Object
-  privateKeyBase58?: string
+  privateKey?: string
   publicKey: IPublicKey
   challenge: string
   domain: string
@@ -39,8 +45,8 @@ interface IDIDOptions{
 }
 
 export interface IDID{
-  getDid(options: IDIDOptions): Promise<any>;
-  register(didDoc: object): Promise<any>;
+  getDid(): Object;
+  register(didDoc: object, signature: string): Promise<any>;
   resolve(did: string): Promise<any>;
   
   sign(params: IParams): Promise<any>;
@@ -50,6 +56,7 @@ export interface IDID{
 export default class did implements IDID{
   private didrpc: IDIDRpc;
   constructor() {
+    
     this.didrpc = new DIDRpc();    
   }
 
@@ -79,80 +86,73 @@ export default class did implements IDID{
     }
   }
 
-  private async generateKeys() {
-    const kp = await Ed25519KeyPair.generate();
+  private generateKeys() {
     const did = this.getId()
-    kp.id = did + '#' + kp.fingerprint();
-    const eKp = await kp.export();
-    const publicKey = {
-      '@context': jsonSigs.SECURITY_CONTEXT_URL,
-      ...eKp
+
+    const seed = new Uint8Array(32)
+    webCrypto.getRandomValues(seed)
+    const generatedKeyPair = ed25519.generateKeyPairFromSeed(seed);
+    
+    const pubKey = "z" + encode(Buffer.from(generatedKeyPair["publicKey"]))
+    const privKey = generatedKeyPair["secretKey"]
+
+    const keyObject = {
+      id: did + '#' + pubKey,
+      type: "Ed25519VerificationKey2020",
+      controller: did,
+      publicKeyMultbase: pubKey,
     }
-    delete publicKey['privateKeyBase58']
+
     return {
       did,
-      privateKeyBase58: eKp.privateKeyBase58,
-      publicKey
+      privateKeyMultibase: privKey,
+      keyObject
     }
   }
 
   /// Public methods
-  public async getDid(options: IDIDOptions): Promise<any>{
+  public getDid(): Object{
     let didDoc = {};
     // if(options.user == {})  
     // if(!user['name']) throw new Error("Name is required")
-    let kp;
-    
-    if(!options.publicKey || options.publicKey == ""){
-      kp = await this.generateKeys();
-      
-    }else{
-      kp = this.formKeyPairFromPublicKey(options.publicKey);
-    }
+    let kp = this.generateKeys();
+
     
     // TODO: Need to make this dynamic. Fix this.
-    didDoc['@context'] = ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/v1", "https://schema.org"]
-    didDoc['@type'] = "https://schema.org/Person"
+    didDoc['context'] = ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/v1", "https://schema.org"]
 
     // DID Subject
     didDoc['id'] = kp.did;
+    didDoc['controller'] = [didDoc['id']];
 
-    if(options.user != {}){
-      Object.keys(options.user).forEach(k => {
-        didDoc[k] = options.user[k]
-      })
-    }
     // Verification Method
-    didDoc['publicKey'] = [kp.publicKey]
+    didDoc['verificationMethod'] = [kp.keyObject]
 
     // Verification Relationship
-    didDoc['authentication'] = [kp.publicKey.id]
-    didDoc['assertionMethod'] = [kp.publicKey.id]
-    didDoc['keyAgreement'] = [kp.publicKey.id]
-    didDoc['capabilityInvocation'] = [kp.publicKey.id]
-
-    didDoc['created'] = new Date()
-    didDoc['updated'] = new Date()
+    didDoc['authentication'] = [kp.keyObject.id]
+    didDoc['assertionMethod'] = [kp.keyObject.id]
+    didDoc['keyAgreement'] = [kp.keyObject.id]
+    didDoc['capabilityInvocation'] = [kp.keyObject.id]
 
     return {
       keys: {
-        publicKey: kp['publicKey'],
-        privateKeyBase58: kp['privateKeyBase58']
+        publicKey: kp.keyObject.publicKeyMultbase,
+        privateKeyMultibase: kp.privateKeyMultibase
       },
-      did: kp['did'],
+      did: kp.did,
       didDoc
     }
   }
 
   // TODO:  this method MUST also accept signature/proof 
-  public async register(didDoc: object): Promise<any>{
+  public async register(didDoc: object, signature: string): Promise<any>{
     if(!didDoc){
       throw new Error('')
     }
     const did = didDoc['id']
     return await this.didrpc.registerDID({
-      did,
-      didDocString: JSON.stringify(didDoc)
+      didDocString: JSON.stringify(didDoc),
+      signatures: signature
     })
   }
 
@@ -161,24 +161,9 @@ export default class did implements IDID{
   }
 
   // Sign the doc
-  public async sign(params: IParams) {
-    const { did, privateKeyBase58, challenge, domain } = params
-    const doc = await this.didrpc.resolveDID(did);
-    const publicKeyId = doc['authentication'][0]; // TODO: bad idea -  can not hardcode it.
-    const publicKey = doc['publicKey'].find(x => x.id == publicKeyId)
-
-    const signed = await jsonSigs.sign(doc, {
-      suite: new Ed25519Signature2018({
-        verificationMethod: publicKeyId,
-        key: new Ed25519KeyPair({ privateKeyBase58, ...publicKey })
-      }),
-      purpose: new AuthenticationProofPurpose({
-        challenge,
-        domain
-      }),
-      documentLoader,
-      compactProof: constant.compactProof
-    });
+  public sign(params: IParams) {
+    const { doc, privateKey } = params
+    const signed = ed25519.sign(privateKey, doc)
     return signed;
   }
 

@@ -49,7 +49,7 @@ export interface IScheme {
     description,
     properties,
   }: ISchema): Promise<ISchemaTemplate>;
-  registerSchema(schema: ISchemaTemplate): Promise<any>;
+  registerSchema(schema: ISchemaTemplate, signatures?: string): Promise<any>;
   getSchema(schemaId: string): Promise<any>;
 }
 
@@ -88,14 +88,14 @@ export default class Schema implements IScheme {
     return newSchema;
   }
 
-  public async registerSchema(schema: ISchemaTemplate): Promise<any> {
+  public async registerSchema(schema: ISchemaTemplate, signatures?: string): Promise<any> {
     const schemaId = schema["id"];
     if(!schemaId){
       throw new Error('Invalid schema')
     }
     return this.schemaRpc.createSchema({
-      schemaId,
-      schemaStr: JSON.stringify(schema)
+      schema,
+      signatures
     });
   }
   
