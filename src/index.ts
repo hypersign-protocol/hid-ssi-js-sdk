@@ -1,4 +1,4 @@
-import Did from './did';
+import Did, { IDID } from './did';
 import Credential  from './credential';
 import Schema from './schema/schema';
 import { OfflineSigner } from "@cosmjs/proto-signing";
@@ -6,7 +6,8 @@ import { HIDClient } from './hid/hidClient';
 import IOptions from './IOptions';
 
 export = class HypersignSSISdk{
-    did: Did;
+    // TODO: Make sure to use proper type so that dev can see list of available methods.
+    did: any;
     credential: any;
     schema: any;
     
@@ -24,13 +25,19 @@ export = class HypersignSSISdk{
 
         this.nodeEndpoint = nodeEndpoint; 
         this.nodeRestEndpoint = nodeRestEndpoint ? nodeRestEndpoint : "";
-        this.did = {} as Did;
+
+        
+        // this.did = {} as Did;
     }
 
     async init(){
         const hidClient = new HIDClient(this.signer, this.nodeEndpoint, this.nodeRestEndpoint);
-        this.did = new Did();
         await hidClient.init();
+
+        console.log('hID wallet address in init()' + HIDClient.getHidWalletAddress())
+
+
+        this.did = new Did();
         // this.schema = new Schema(this.options, this.wallet);
         // this.credential = new Credential(this.options, this.wallet);
     }
