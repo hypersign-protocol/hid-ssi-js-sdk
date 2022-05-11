@@ -14,7 +14,7 @@ let hsSdk = null;
 const mnemonic = "retreat seek south invite fall eager engage endorse inquiry sample salad evidence express actor hidden fence anchor crowd two now convince convince park bag"
 createWallet(mnemonic)
     .then((offlineSigner) => {
-        hsSdk = new HypersignSsiSDK(offlineSigner, "http://60fa-2405-201-a002-231e-38c9-d292-d44b-40b8.ngrok.io", "http://localhost:1317");
+        hsSdk = new HypersignSsiSDK(offlineSigner, "http://62f1-2405-201-a002-231e-dbb7-fb77-f897-e6a8.ngrok.io", "http://localhost:1317");
         return hsSdk.init();
     })
     .then(() => {
@@ -32,10 +32,11 @@ createWallet(mnemonic)
         })
         console.log("Signature", Buffer.from(signature).toString('base64'))
         console.log("===============Register DID=======================")
-        return hsSdk.did.register({
+        const signatures = [{ signature, verificationMethodId: didDoc['authentication'][0] }]
+        return hsSdk.did.register(
             didDoc,
-            signature
-        })
+            signatures
+        )
     })
     .then((res) => {
         console.log(res)

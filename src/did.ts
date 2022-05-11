@@ -46,7 +46,7 @@ interface IDIDOptions{
 
 export interface IDID{
   getDid(): Object;
-  register(didDoc: object, signature: string): Promise<any>;
+  register(didDoc: object, signatures: Array<object>): Promise<any>;
   resolve(did: string): Promise<any>;
   
   sign(params: IParams): Promise<any>;
@@ -100,7 +100,7 @@ export default class did implements IDID{
       id: did + '#' + pubKey,
       type: "Ed25519VerificationKey2020",
       controller: did,
-      publicKeyMultbase: pubKey,
+      publicKeyMultibase: pubKey,
     }
 
     return {
@@ -136,7 +136,7 @@ export default class did implements IDID{
 
     return {
       keys: {
-        publicKey: kp.keyObject.publicKeyMultbase,
+        publicKey: kp.keyObject.publicKeyMultibase,
         privateKeyMultibase: kp.privateKeyMultibase
       },
       did: kp.did,
@@ -145,14 +145,14 @@ export default class did implements IDID{
   }
 
   // TODO:  this method MUST also accept signature/proof 
-  public async register(didDoc: object, signature: string): Promise<any>{
+  public async register(didDoc: object, signatures: Array<object>): Promise<any>{
     if(!didDoc){
       throw new Error('')
     }
     const did = didDoc['id']
     return await this.didrpc.registerDID({
-      didDocString: JSON.stringify(didDoc),
-      signatures: signature
+      didDocString:didDoc,
+      signatures
     })
   }
 
