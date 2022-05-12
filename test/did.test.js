@@ -65,6 +65,12 @@ createWallet(mnemonic)
     .then((res) => {
         console.log(res)
         console.log("Done")
+        const didId = JSON.parse(didDocString)["id"]
+        return hsSdk.did.resolve(didId)
+    })
+    .then(res => {
+        console.log("===============RESOLVE DID=======================")
+        console.log(res)
     })
     .catch((e) => {
         console.error(e)

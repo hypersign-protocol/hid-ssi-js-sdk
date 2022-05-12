@@ -1,4 +1,4 @@
-import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_TESTNET_REST, HYPERSIGN_NETWORK_DID_PATH, HYPERSIGN_NETWORK_DID_REST_PATH } from '../constants'
+import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_TESTNET_REST, HYPERSIGN_NETWORK_DID_PATH, HYPERSIGN_NETWORK_DID_REST_PATH,  } from '../constants'
 import * as generatedProto from '../generated/did/tx';
 import { Did, SignInfo } from "../generated/did/did";
 import {
@@ -17,7 +17,7 @@ export interface IDIDRpc {
 export class DIDRpc implements IDIDRpc{
     private didRestEp: string;
     constructor(){
-        this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_REST_PATH;
+        this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_PATH;
     }
 
     // TODO:  this RPC MUST also accept signature/proof 
@@ -56,8 +56,8 @@ export class DIDRpc implements IDIDRpc{
         const get_didUrl = `${this.didRestEp}/${did}`;
         console.log("Get didUrl = " +  get_didUrl)
         const response = await axios.get(get_didUrl);
-        const { didDoc } = response.data;
-        return JSON.parse(didDoc);
+        const didDoc = response.data;
+        return didDoc;
     }
 
 }
