@@ -11,10 +11,12 @@ let privateKeyBase58 = "";
 const domain = "www.hypersign.id"
 
 let hsSdk = null;
+let didDocString;
+
 const mnemonic = "retreat seek south invite fall eager engage endorse inquiry sample salad evidence express actor hidden fence anchor crowd two now convince convince park bag"
 createWallet(mnemonic)
     .then((offlineSigner) => {
-        hsSdk = new HypersignSsiSDK(offlineSigner, "http://62f1-2405-201-a002-231e-dbb7-fb77-f897-e6a8.ngrok.io", "http://localhost:1317");
+        hsSdk = new HypersignSsiSDK(offlineSigner, "http://localhost:26657", "http://localhost:1317");
         return hsSdk.init();
     })
     .then(() => {
@@ -26,18 +28,12 @@ createWallet(mnemonic)
             privateKeyMultibase
         })
         console.log("===============GENERATE DID-DIDDOC-KEYS=======================")
-        const didDocString = hsSdk.did.generateDID(publicKeyMultibase);
+        didDocString = hsSdk.did.generateDID(publicKeyMultibase);
         console.log(JSON.parse(didDocString))
-
+        
         console.log("===============GENERATE DID SIGNATURE =======================")
-        const signature = hsSdk.did.sign({ didDocString, privateKeyMultibase })
-        console.log(signature)
-
-
-        console.log("===============REGISTER DID=======================")
-        const vermthId = JSON.parse(didDocString)['verificationMethod'][0].id
-        console.log(vermthId)
-        return hsSdk.did.register(didDocString, signature, vermthId)
+        return hsSdk.did.sign({ didDocString, privateKeyMultibase })
+        
 
         // console.log(hsSdk.did)
         // const res = hsSdk.did.getDid()
@@ -57,6 +53,14 @@ createWallet(mnemonic)
         //     didDoc,
         //     signatures
         // )
+    })
+    .then(signature => {
+        console.log(signature)
+
+        console.log("===============REGISTER DID=======================")
+        const vermthId = JSON.parse(didDocString)['verificationMethod'][0].id
+        console.log(vermthId)
+        return hsSdk.did.register(didDocString, signature, vermthId)
     })
     .then((res) => {
         console.log(res)

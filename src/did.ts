@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import blake from 'blakejs';
 import axios from "axios";
 import { DIDRpc, IDIDRpc } from './rpc/didRPC'
+import { getByteArray } from './utils';
 
 const ed25519 = require('@stablelib/ed25519');
 const {encode} = require('base58-universal');
@@ -52,7 +53,7 @@ export interface IDID{
   register(didDocString: string , signature: string, verificationMethodId: string): Promise<any>;
   resolve(did: string): Promise<any>;
   
-  sign(params: { didDocString: string, privateKeyMultibase: Uint8Array} ): string;
+  sign(params: { didDocString: string, privateKeyMultibase: Uint8Array} ): Promise<any>;
   signDid(params: IParams): Promise<any>;
   verify(params: IParams): Promise<any>;
 }
@@ -173,12 +174,15 @@ export default class did implements IDID{
   }
 
   // Sign the doc
-  public sign(params: { didDocString: string, privateKeyMultibase: Uint8Array} ): string {
+  public async sign(params: { didDocString: string, privateKeyMultibase: Uint8Array} ): Promise<any> {
     const { didDocString, privateKeyMultibase } = params; 
     // TODO:  do proper checck of paramaters
     const did: Did = JSON.parse(didDocString);
-    // const didBytes = Uint8Array.from()
-    const signed = ed25519.sign(privateKeyMultibase,  did);
+    // TODO: Temporary addition: Until a fix for data encoding is found, we are going use a temporary API call
+    // to hid-node which will return the Unmarshalled Output for an input String
+    // Refer PR: https://github.com/hypersign-protocol/hid-node/pull/142
+    const didBytes = await getByteArray(did)
+    const signed = ed25519.sign(privateKeyMultibase,  didBytes);
     return Buffer.from(signed).toString('base64');  
   }
 

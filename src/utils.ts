@@ -4,6 +4,22 @@ import IOptions from './IOptions';
 import { DIDRpc, IDIDRpc } from './rpc/didRPC';
 import { IHIDWallet } from "./wallet/wallet";
 
+export async function getByteArray(payload) {
+  let stringPayload = JSON.stringify(payload)
+  let finalPayload = {stringInput: stringPayload}
+  let res = await axios.post('http://localhost:1317/hypersign-protocol/hidnode/ssi/unmarshal', finalPayload);
+
+  let data = formatString(res.data["unmarshalOutput"]);
+  console.log(data)
+  let byteArrayData = new Uint8Array(JSON.parse(data))
+  return byteArrayData
+}
+
+function formatString(inputString) {
+  return inputString.toString().replaceAll(" ", ",")
+}
+
+
 export default class Utils {
   nodeurl: string;
   didScheme: string;
