@@ -10,7 +10,7 @@ import axios from "axios";
 import { HIDClient } from '../hid/hidClient';
 
 export interface IDIDRpc {
-    registerDID({didDocString, signatures}):Promise<Object>;
+    registerDID(didDoc: Did, signature: string, verificationMethodId: string):Promise<Object>;
     resolveDID(did):Promise<Object>
 }
 
@@ -21,17 +21,19 @@ export class DIDRpc implements IDIDRpc{
     }
 
     // TODO:  this RPC MUST also accept signature/proof 
-    async registerDID({
-        didDocString,
-        signatures
-    }):Promise<Object>{
+    async registerDID(didDoc: Did, signature: string, verificationMethodId: string):Promise<Object>{
         const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
         console.log("The wallet address is (rpc/didRPC.ts): ", HIDClient.getHidWalletAddress())
+        const signInfo :SignInfo = {
+            verificationMethodId,
+            signature
+        }
+
         const txMessage = {
             typeUrl, // Same as above
             value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
-                    didDocString,
-                    signatures,
+                    didDocString:didDoc,
+                    signatures: [signInfo],
                     creator: HIDClient.getHidWalletAddress(),
                 }),
             }; 

@@ -15,6 +15,9 @@ import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 const { Ed25519Signature2018 } = jsonSigs.suites;
 
+import { Did, SignInfo, VerificationMethod, Service} from './generated/did/did';
+
+
 interface IPublicKey {
   '@context': string
   id: string
@@ -45,13 +48,65 @@ interface IDIDOptions{
 }
 
 export interface IDID{
-  getDid(): Object;
-  register(didDoc: object, signatures: Array<object>): Promise<any>;
+  generateDID(publicKeyMultibase: string): string;
+  register(didDocString: string , signature: string, verificationMethodId: string): Promise<any>;
   resolve(did: string): Promise<any>;
   
-  sign(params: IParams): Promise<any>;
+  sign(params: { didDocString: string, privateKeyMultibase: Uint8Array} ): string;
+  signDid(params: IParams): Promise<any>;
   verify(params: IParams): Promise<any>;
 }
+
+
+class DID implements Did{
+  context: string[];
+  id: string;
+  controller: string[];
+  alsoKnownAs: string[];
+  verificationMethod: VerificationMethod[];
+  authentication: string[];
+  assertionMethod: string[];
+  keyAgreement: string[];
+  capabilityInvocation: string[];
+  capabilityDelegation: string[];
+  service: Service[];
+  constructor(publicKey: string){
+    // TODO:  need to remove this hardcoding
+    this.context = ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/v1", "https://schema.org"];
+
+    this.id = this.getId();
+    this.controller = [this.id];
+    this.alsoKnownAs = [this.id];
+
+    const verificationMethod: VerificationMethod = {
+      id: this.id + '#' + publicKey,
+      type: "Ed25519VerificationKey2020", // TODO: need to remove this hardcoding
+      controller: this.id,
+      publicKeyMultibase: publicKey,
+    }
+
+    this.verificationMethod = [verificationMethod];
+    this.authentication = [verificationMethod.id];
+    this.assertionMethod = [verificationMethod.id];
+    this.keyAgreement = [verificationMethod.id];
+    this.capabilityInvocation = [verificationMethod.id];
+    this.capabilityDelegation = [verificationMethod.id];
+    // TODO: we should take services object in consntructor
+    this.service = [];
+  }
+
+  public getDidString(): string{
+    return JSON.stringify(this);
+  }
+   // TODO: It should conforms did:hid method
+  private getChallange() {
+    return uuidv4()
+  }
+
+  private getId = () => `${constant.DID_SCHEME}:${this.getChallange()}`;
+
+}
+
 
 export default class did implements IDID{
   private didrpc: IDIDRpc;
@@ -60,35 +115,29 @@ export default class did implements IDID{
     this.didrpc = new DIDRpc();    
   }
 
-  // TODO: It should conforms did:hid method
-  private getChallange() {
-    return uuidv4()
-  }
+ 
 
-  private getId = () => `${constant.DID_SCHEME}:${this.getChallange()}`;
+  // private formKeyPairFromPublicKey(publicKeyBase58) {
+  //   if(!publicKeyBase58) throw new Error("publicKeyBase58 can not be empty")
+  //   // TODO:  hardcoing temporarly
+  //   const protocol = "Ed25519VerificationKey2018"
+  //   const did = this.getId()
+  //   // TODO coule be a security flaw. we need to check later.
+  //   const id = did + '#' + blake.blake2sHex(publicKeyBase58 + protocol)
+  //   return {
+  //     publicKey: {
+  //       "@context": jsonSigs.SECURITY_CONTEXT_URL,
+  //       id,
+  //       "type": protocol,
+  //       publicKeyBase58
+  //     },
+  //     privateKeyBase58: null,
+  //     did
+  //   }
+  // }
 
-  private formKeyPairFromPublicKey(publicKeyBase58) {
-    if(!publicKeyBase58) throw new Error("publicKeyBase58 can not be empty")
-    // TODO:  hardcoing temporarly
-    const protocol = "Ed25519VerificationKey2018"
-    const did = this.getId()
-    // TODO coule be a security flaw. we need to check later.
-    const id = did + '#' + blake.blake2sHex(publicKeyBase58 + protocol)
-    return {
-      publicKey: {
-        "@context": jsonSigs.SECURITY_CONTEXT_URL,
-        id,
-        "type": protocol,
-        publicKeyBase58
-      },
-      privateKeyBase58: null,
-      did
-    }
-  }
 
-  private generateKeys() {
-    const did = this.getId()
-
+  public generateKeys(): { privateKeyMultibase:Uint8Array, publicKeyMultibase: string } {
     const seed = new Uint8Array(32)
     webCrypto.getRandomValues(seed)
     const generatedKeyPair = ed25519.generateKeyPairFromSeed(seed);
@@ -96,64 +145,27 @@ export default class did implements IDID{
     const pubKey = "z" + encode(Buffer.from(generatedKeyPair["publicKey"]))
     const privKey = generatedKeyPair["secretKey"]
 
-    const keyObject = {
-      id: did + '#' + pubKey,
-      type: "Ed25519VerificationKey2020",
-      controller: did,
-      publicKeyMultibase: pubKey,
-    }
-
     return {
-      did,
       privateKeyMultibase: privKey,
-      keyObject
+      publicKeyMultibase: pubKey
     }
   }
 
+ 
   /// Public methods
-  public getDid(): Object{
-    let didDoc = {};
-    // if(options.user == {})  
-    // if(!user['name']) throw new Error("Name is required")
-    let kp = this.generateKeys();
-
-    
-    // TODO: Need to make this dynamic. Fix this.
-    didDoc['context'] = ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/v1", "https://schema.org"]
-
-    // DID Subject
-    didDoc['id'] = kp.did;
-    didDoc['controller'] = [didDoc['id']];
-
-    // Verification Method
-    didDoc['verificationMethod'] = [kp.keyObject]
-
-    // Verification Relationship
-    didDoc['authentication'] = [kp.keyObject.id]
-    didDoc['assertionMethod'] = [kp.keyObject.id]
-    didDoc['keyAgreement'] = [kp.keyObject.id]
-    didDoc['capabilityInvocation'] = [kp.keyObject.id]
-
-    return {
-      keys: {
-        publicKey: kp.keyObject.publicKeyMultibase,
-        privateKeyMultibase: kp.privateKeyMultibase
-      },
-      did: kp.did,
-      didDoc
-    }
+  public generateDID(publicKeyMultibase:string): string{
+    const newDid = new DID(publicKeyMultibase)
+    return newDid.getDidString();
   }
 
   // TODO:  this method MUST also accept signature/proof 
-  public async register(didDoc: object, signatures: Array<object>): Promise<any>{
-    if(!didDoc){
-      throw new Error('')
-    }
-    const did = didDoc['id']
-    return await this.didrpc.registerDID({
-      didDocString:didDoc,
-      signatures
-    })
+  public async register(didDocString: string , signature: string, verificationMethodId: string): Promise<any>{
+    const didDoc: Did = JSON.parse(didDocString);
+    return await this.didrpc.registerDID(
+      didDoc,
+      signature,
+      verificationMethodId
+    )
   }
 
   public async resolve(did: string): Promise<any>{
@@ -161,10 +173,17 @@ export default class did implements IDID{
   }
 
   // Sign the doc
-  public sign(params: IParams) {
-    const { doc, privateKey } = params
-    const signed = ed25519.sign(privateKey, doc)
-    return signed;
+  public sign(params: { didDocString: string, privateKeyMultibase: Uint8Array} ): string {
+    const { didDocString, privateKeyMultibase } = params; 
+    // TODO:  do proper checck of paramaters
+    const did: Did = JSON.parse(didDocString);
+    // const didBytes = Uint8Array.from()
+    const signed = ed25519.sign(privateKeyMultibase,  did);
+    return Buffer.from(signed).toString('base64');  
+  }
+
+  public signDid(params: IParams): Promise<any>{
+    throw new Error('Method not impplemented')
   }
 
   // verify the signature

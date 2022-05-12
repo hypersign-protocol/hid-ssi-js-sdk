@@ -18,29 +18,52 @@ createWallet(mnemonic)
         return hsSdk.init();
     })
     .then(() => {
-        console.log("===============GENERATE DID-DIDDOC-KEYS=======================")
-        console.log(hsSdk.did)
-        const res = hsSdk.did.getDid()
-        console.log(JSON.stringify(res, null, 2))
-        const { didDoc, did, keys } = res;
-        writeDataInFile('keys.json', JSON.stringify(keys));
-        console.log("===============Sign DID=======================")
-            //return hsSdk.did.register(didDoc);
-        const signature = hsSdk.did.sign({
-            doc: didDoc,
-            privateKey: keys["privateKeyMultibase"]
+        console.log("===============GENERATE DID-KEYS=======================")
+        const { publicKeyMultibase, privateKeyMultibase } = hsSdk.did.generateKeys();
+
+        console.log({
+            publicKeyMultibase,
+            privateKeyMultibase
         })
-        console.log("Signature", Buffer.from(signature).toString('base64'))
-        console.log("===============Register DID=======================")
-        const signatures = [{ signature, verificationMethodId: didDoc['authentication'][0] }]
-        return hsSdk.did.register(
-            didDoc,
-            signatures
-        )
+        console.log("===============GENERATE DID-DIDDOC-KEYS=======================")
+        const didDocString = hsSdk.did.generateDID(publicKeyMultibase);
+        console.log(JSON.parse(didDocString))
+
+        console.log("===============GENERATE DID SIGNATURE =======================")
+        const signature = hsSdk.did.sign({ didDocString, privateKeyMultibase })
+        console.log(signature)
+
+
+        console.log("===============REGISTER DID=======================")
+        const vermthId = JSON.parse(didDocString)['verificationMethod'][0].id
+        console.log(vermthId)
+        return hsSdk.did.register(didDocString, signature, vermthId)
+
+        // console.log(hsSdk.did)
+        // const res = hsSdk.did.getDid()
+        // console.log(JSON.stringify(res, null, 2))
+        // const { didDoc, did, keys } = res;
+        // writeDataInFile('keys.json', JSON.stringify(keys));
+        // console.log("===============Sign DID=======================")
+        //     //return hsSdk.did.register(didDoc);
+        // const signature = hsSdk.did.sign({
+        //     doc: didDoc,
+        //     privateKey: keys["privateKeyMultibase"]
+        // })
+        // console.log("Signature", Buffer.from(signature).toString('base64'))
+        // console.log("===============Register DID=======================")
+        // const signatures = [{ signature, verificationMethodId: didDoc['authentication'][0] }]
+        // return hsSdk.did.register(
+        //     didDoc,
+        //     signatures
+        // )
     })
     .then((res) => {
         console.log(res)
         console.log("Done")
+    })
+    .catch((e) => {
+        console.error(e)
     })
     // .then(res => {
     //     console.log(res)
@@ -76,8 +99,6 @@ createWallet(mnemonic)
     //     console.error(e);
     // })
 
-
-return;
 
 // const sdkDid = {};
 // let challenge = ""
