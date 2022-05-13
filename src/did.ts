@@ -138,9 +138,15 @@ export default class did implements IDID{
   // }
 
 
-  public generateKeys(): { privateKeyMultibase:Uint8Array, publicKeyMultibase: string } {
+  public generateKeys(cryptoObj?): { privateKeyMultibase:Uint8Array, publicKeyMultibase: string } {
     const seed = new Uint8Array(32)
-    webCrypto.getRandomValues(seed)
+    // If the SDK is run from browser, use window.crypto object
+    if (cryptoObj) {
+      cryptoObj.getRandomValues(seed)
+    } else {
+      webCrypto.getRandomValues(seed)
+    }
+    
     const generatedKeyPair = ed25519.generateKeyPairFromSeed(seed);
     
     const pubKey = "z" + encode(Buffer.from(generatedKeyPair["publicKey"]))

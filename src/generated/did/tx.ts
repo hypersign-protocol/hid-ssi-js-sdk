@@ -834,7 +834,7 @@ function longToNumber(long: Long): number {
   return long.toNumber();
 }
 
-if (true) {
-  util.Long = Long as any;
-  configure();
-}
+// if (true) {
+//   util.Long = Long as any;
+//   configure();
+// }

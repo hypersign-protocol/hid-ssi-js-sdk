@@ -48,7 +48,8 @@ export class DIDRpc implements IDIDRpc{
         }
     
         const hidClient: SigningStargateClient = HIDClient.getHidClient();
-        return await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
+        const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
+        return txResult
     }
 
     async resolveDID(did:string):Promise<Object>{

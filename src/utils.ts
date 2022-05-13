@@ -10,7 +10,6 @@ export async function getByteArray(payload) {
   let res = await axios.post('http://localhost:1317/hypersign-protocol/hidnode/ssi/unmarshal', finalPayload);
 
   let data = formatString(res.data["unmarshalOutput"]);
-  console.log(data)
   let byteArrayData = new Uint8Array(JSON.parse(data))
   return byteArrayData
 }
