@@ -3,21 +3,15 @@ import axios from "axios";
 import IOptions from './IOptions';
 import { DIDRpc, IDIDRpc } from './rpc/didRPC';
 import { IHIDWallet } from "./wallet/wallet";
+import protobuf from 'protobufjs'
 
 export async function getByteArray(payload) {
-  let stringPayload = JSON.stringify(payload)
-  let finalPayload = {stringInput: stringPayload}
-  let res = await axios.post('http://localhost:1317/hypersign-protocol/hidnode/ssi/unmarshal', finalPayload);
+  const DidProto = await protobuf.load('./proto/did.proto');
+  const Did = DidProto.lookupType('hypersignprotocol.hidnode.ssi.Did');
 
-  let data = formatString(res.data["unmarshalOutput"]);
-  let byteArrayData = new Uint8Array(JSON.parse(data))
+  const byteArrayData = new Uint8Array(Did.encode(payload).finish())
   return byteArrayData
 }
-
-function formatString(inputString) {
-  return inputString.toString().replaceAll(" ", ",")
-}
-
 
 export default class Utils {
   nodeurl: string;
