@@ -79,6 +79,9 @@ createWallet(mnemonic)
     
     return hsSdk.schema.registerSchema(schemaString, signature, verificationMethodId)
 }).then(res => {
-    console.log("Done")
+    console.log(res)
+    console.log("=========Resolve Schema========")
+    return hsSdk.schema.resolve(JSON.parse(schemaString)["id"])
+}).then(res => {
     console.log(res)
 })

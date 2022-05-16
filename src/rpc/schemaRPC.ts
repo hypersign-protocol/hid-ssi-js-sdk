@@ -13,7 +13,7 @@ import {
 
 export interface ISchemaRPC {
     createSchema(schema: Schema, signature: string, verificationMethodId: string):Promise<Object>;
-    getSchema(schemaId: string):Promise<Object>
+    resolveSchema(schemaId: string):Promise<Object>
 }
 
 export class SchemaRpc implements ISchemaRPC{
@@ -53,10 +53,11 @@ export class SchemaRpc implements ISchemaRPC{
         return txResult
     }
 
-    async getSchema(schemaId:string):Promise<Object>{
-        const get_didUrl = `${HYPERSIGN_TESTNET_REST}${HYPERSIGN_NETWORK_SCHEMA_PATH}/${schemaId}`;
-        const response = await axios.get(get_didUrl);
-        const { schema } = response.data;
-        return JSON.parse(schema);
+    async resolveSchema(schemaId: string): Promise<Object>{
+        const getSchemaUrl = `${this.didRestEp}/${schemaId}:`;
+        console.log("Schema Resolve URL: ", getSchemaUrl)
+        const response = await axios.get(getSchemaUrl);
+        const schema  = response.data;
+        return schema;
     }
 }

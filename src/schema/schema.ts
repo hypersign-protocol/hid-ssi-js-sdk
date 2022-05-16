@@ -18,7 +18,11 @@ export default class Schema implements schema {
     authored: string;
     schema: SchemaProperty;
 
+    schemaRpc: SchemaRpc;
+
     constructor(author: string){
+        this.schemaRpc = new SchemaRpc()
+
         this.type = "https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json",
         this.modelVersion = "1.0",
         this.id = this.getSchemaId(),
@@ -80,7 +84,10 @@ export default class Schema implements schema {
         verificationMethodId: string): Promise<any> 
     {
         const schema = JSON.parse(schemaString)
-        const schemaRpc = new SchemaRpc()
-        return schemaRpc.createSchema(schema, signature, verificationMethodId)
-    }    
+        return this.schemaRpc.createSchema(schema, signature, verificationMethodId)
+    }
+
+    public async resolve(schemaId: string): Promise<any>{
+        return await this.schemaRpc.resolveSchema(schemaId)
+    }
 }

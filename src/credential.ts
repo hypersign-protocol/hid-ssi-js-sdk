@@ -132,7 +132,7 @@ export default class credential implements ICredential{
         let issuerDidDoc = {}
         let subjectDidDoc = {}
         try {
-            schemaDoc = await this.schemaRpc.getSchema(schemaId);
+            schemaDoc = await this.schemaRpc.resolveSchema(schemaId);
         } catch (e) {
             throw new Error('Could not resolve the schema from schemaId = ' + schemaId)
         }
