@@ -16,7 +16,7 @@ import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 const { Ed25519Signature2018 } = jsonSigs.suites;
 
-import { Did, SignInfo, VerificationMethod, Service} from './generated/did/did';
+import { Did, SignInfo, VerificationMethod, Service} from './generated/ssi/did';
 
 
 interface IPublicKey {
@@ -113,7 +113,7 @@ export default class did implements IDID{
   private didrpc: IDIDRpc;
   constructor() {
     
-    this.didrpc = new DIDRpc();    
+    this.didrpc = new DIDRpc();  
   }
 
  
@@ -187,7 +187,7 @@ export default class did implements IDID{
     // TODO: Temporary addition: Until a fix for data encoding is found, we are going use a temporary API call
     // to hid-node which will return the Unmarshalled Output for an input String
     // Refer PR: https://github.com/hypersign-protocol/hid-node/pull/142
-    const didBytes = await getByteArray(did)
+    const didBytes = await getByteArray(did, './proto/did.proto', 'hypersignprotocol.hidnode.ssi.Did')
     const signed = ed25519.sign(privateKeyMultibase,  didBytes);
     return Buffer.from(signed).toString('base64');  
   }

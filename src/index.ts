@@ -38,7 +38,7 @@ export = class HypersignSSISdk{
 
 
         this.did = new Did();
-        // this.schema = new Schema(this.options, this.wallet);
+        this.schema = new Schema("did:hs:b0c9f766-c155-43ec-be2b-1a0c651501e9");
         // this.credential = new Credential(this.options, this.wallet);
     }
 

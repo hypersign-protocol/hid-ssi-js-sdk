@@ -1,105 +1,86 @@
-import { ISchema, ISchemaTemplateSchema, ISchemaTemplate } from "./ISchema";
-import { v4 as uuidv4 } from "uuid";
-import * as constant from "../constants";
-import Utils from "../utils";
-import axios from "axios";
-import IOptions from "../IOptions";
-import { SchemaRpc, ISchemaRPC } from '../rpc/schemaRPC'
+import { Schema as schema, SchemaProperty } from '../generated/ssi/schema';
+import { v4 as uuidv4 } from 'uuid';
+import * as constant from '../constants'
+import { getByteArray, getByteArraySchema } from '../utils';
+import { SchemaRpc } from '../rpc/schemaRPC';
 
-const SC_PREFIX = "sch_";
-const SCHEMA_URL = "https://json-schema.org/draft-07/schema#";
-const W3_SCHEMA_JSON_URL =
-  "https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json";
+const fs = require('fs')
 
-class SchemaTemplateSchema implements ISchemaTemplateSchema {
-  $schema: string;
-  description: string;
-  type: string;
-  properties: any;
-  required: Array<string>;
-  additionalProperties: boolean;
-  constructor({
-    properties,
-    additionalProperties,
-    description,
-  }: ISchemaTemplateSchema) {
-    this.$schema = SCHEMA_URL;
-    this.description = description;
-    this.type = "object";
-    this.properties = {};
-    this.required = Object.keys(properties); // TODO: right now all requried... later we can change this.
-    this.additionalProperties = additionalProperties as boolean;
-    this.required.forEach((key) => {
-      this.properties[`${key}`] = {
-        type: typeof properties[key] ? typeof properties[key] : "string",
-      };
-    });
-  }
+const ed25519 = require('@stablelib/ed25519');
 
-  get(): ISchemaTemplateSchema {
-    return this;
-  }
-}
 
-export interface IScheme {
-  schemaUrl: string;
-  generateSchema({
-    name,
-    author,
-    description,
-    properties,
-  }: ISchema): Promise<ISchemaTemplate>;
-  registerSchema(schema: ISchemaTemplate, signatures?: string): Promise<any>;
-  getSchema(schemaId: string): Promise<any>;
-}
+export default class Schema implements schema {
+    type: string;
+    modelVersion: string;
+    id: string;
+    name: string;
+    author: string;
+    authored: string;
+    schema: SchemaProperty;
 
-export default class Schema implements IScheme {
-  private utils: Utils;
-  schemaUrl: string;
-  schemaRpc: ISchemaRPC;
-  constructor(options: IOptions, wallet) {
-    this.utils = new Utils(options, wallet);
-    this.schemaUrl = this.utils.nodeurl + constant.HYPERSIGN_NETWORK_SCHEMA_EP;
-    this.schemaRpc = new SchemaRpc(wallet);
-  }
-
-  public async generateSchema({
-    name,
-    author,
-    description,
-    properties,
-  }: ISchema): Promise<ISchemaTemplate> {
-    let newSchema: ISchemaTemplate = {} as ISchemaTemplate;
-
-    const didDoc = await this.utils.resolve(author);
-    if (!didDoc) throw new Error("Could not resolve author did");
-
-    newSchema.type = W3_SCHEMA_JSON_URL;
-    newSchema.modelVersion = "v1.0";
-    newSchema.id = SC_PREFIX + uuidv4();
-    newSchema.name = name;
-    newSchema.author = author;
-    newSchema.authored = new Date().toString();
-    newSchema.schema = new SchemaTemplateSchema({
-      properties,
-      additionalProperties: false,
-      description,
-    }).get();
-    return newSchema;
-  }
-
-  public async registerSchema(schema: ISchemaTemplate, signatures?: string): Promise<any> {
-    const schemaId = schema["id"];
-    if(!schemaId){
-      throw new Error('Invalid schema')
+    constructor(author: string){
+        this.type = "https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json",
+        this.modelVersion = "1.0",
+        this.id = this.getSchemaId(),
+        this.name = "EmailCredentialSchema",
+        this.author = author,
+        this.authored = "2018-01-01T00:00:00+00:00"
+        this.schema = {
+            schema: "http://json-schema.org/draft-07/schema",
+            description: "email",
+            type: "object",
+            properties: "emailAddress",
+            required: ["emailAddress"],
+            additionalProperties: false
+        }
     }
-    return this.schemaRpc.createSchema({
-      schema,
-      signatures
-    });
-  }
-  
-  public async getSchema(schemaId: string): Promise<any> {
-    return await this.schemaRpc.getSchema(schemaId)
-  }
+
+    public setFields(options: object) {
+        this.name = options["name"]
+        this.schema = options["schemaProperty"]
+        this.authored = new Date().toISOString().slice(0, -5) + 'Z'
+    }
+
+    private randomString(len) {
+        const charSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let randomString = '';
+        for (let i = 0; i < len; i++) {
+            let randomPoz = Math.floor(Math.random() * charSet.length);
+            randomString += charSet.substring(randomPoz,randomPoz+1);
+        }
+        return randomString;
+    }
+    
+    private getSchemaId(): string {
+        const a = `${constant.DID_SCHEME}:${uuidv4()}`
+        const b = this.randomString(32)    
+        const id = `${a};id=${b};version=1.0` // ID Structure ->  did:hs:<a>;id=<b>;version=1.0
+        return id 
+    }
+
+    public getSchemaString(): string {
+        return JSON.stringify(this)
+    }
+
+    public async signSchema(privateKey: Uint8Array, schemaString: string): Promise<any> {
+        const data: Schema = JSON.parse(schemaString)
+        //const dataBytes = await getByteArray(data, './proto/schema.proto', 'hypersignprotocol.hidnode.ssi.Schema')
+        const dataBytes = (await getByteArraySchema(data)).finish()
+        // const newArr = Array.from(dataBytes)
+        // const newArrString = newArr.toString()
+        // await fs.writeFileSync('./somelist.txt', newArrString)
+        console.log("This must be it: ", dataBytes)
+        const signed = ed25519.sign(privateKey, dataBytes)
+        return Buffer.from(signed).toString('base64')
+    }
+
+    public async registerSchema( 
+        schemaString: string,
+        signature: string,
+        verificationMethodId: string): Promise<any> 
+    {
+        const schema = JSON.parse(schemaString)
+        const schemaRpc = new SchemaRpc()
+        return schemaRpc.createSchema(schema, signature, verificationMethodId)
+    }    
 }

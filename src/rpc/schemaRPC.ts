@@ -1,34 +1,56 @@
 import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_TESTNET_REST, HYPERSIGN_NETWORK_SCHEMA_PATH } from '../constants'
-import * as generatedProto from '../generated/did/tx';
+import * as generatedProto from '../generated/ssi/tx';
 import { IHIDWallet } from '../wallet/wallet';
 
+
 import axios from "axios";
+import { HIDClient } from '../hid/hidClient';
+import { Schema } from '../generated/ssi/schema'
+import { SignInfo } from "../generated/ssi/did";
+import {
+    SigningStargateClient,
+} from "@cosmjs/stargate";
 
 export interface ISchemaRPC {
-    createSchema({schema, signatures}):Promise<Object>;
+    createSchema(schema: Schema, signature: string, verificationMethodId: string):Promise<Object>;
     getSchema(schemaId: string):Promise<Object>
 }
 
 export class SchemaRpc implements ISchemaRPC{
-    hidWallet: IHIDWallet;
-    constructor(wallet: IHIDWallet){
-        this.hidWallet = wallet;
+    private didRestEp: string;
+    constructor(){
+        this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_SCHEMA_PATH;
     }
 
-    async createSchema({
-        schema,
-        signatures
-    }):Promise<Object>{
+    async createSchema(schema: Schema, signature: string, verificationMethodId: string):Promise<Object>{
         const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateSchema}`;
-        const message = {
+        
+        const signInfo: SignInfo = {
+            verificationMethodId,
+            signature
+        }
+
+        const txMessage = {
             typeUrl, // Same as above
-            value: generatedProto[HIDRpcEnums.MsgCreateSchema].fromPartial({
+            value: generatedProto[HIDRpcEnums.MsgCreateSchema].fromJSON({
                     schema,
-                    signatures,
-                    creator: this.hidWallet.account,
-                }),
-            };
-            return await this.hidWallet.signAndBroadcastMessages(message, this.hidWallet.getFee());
+                    signatures: [signInfo],
+                    creator: HIDClient.getHidWalletAddress(),
+            }),
+        }; 
+
+        // TODO: need to find a way to make it dynamic
+        const fee = {
+            amount: [{
+                denom: 'uhid',
+                amount: '5000',
+            }, ],
+            gas: '200000',
+        }
+
+        const hidClient: SigningStargateClient = HIDClient.getHidClient();
+        const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
+        return txResult
     }
 
     async getSchema(schemaId:string):Promise<Object>{

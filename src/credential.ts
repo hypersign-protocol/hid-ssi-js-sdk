@@ -69,7 +69,7 @@ export default class credential implements ICredential{
     schemaRpc: ISchemaRPC;
     constructor(options: IOptions, wallet) {
         this.utils = new Utils(options, wallet);
-        this.schemaRpc = new SchemaRpc(wallet);
+        this.schemaRpc = new SchemaRpc();
     }
 
     private getId = (type) => {
