@@ -159,10 +159,16 @@ export default class did implements IDID{
   }
 
  
-  /// Public methods
+  /// Generate Did Document
   public generateDID(publicKeyMultibase:string): string{
     const newDid = new DID(publicKeyMultibase)
     return newDid.getDidString();
+  }
+
+  // Update DID Document
+  public async update(didDocString: string, signature: string, verificationMethodId: string, versionId: string): Promise<any> {
+    const didDoc: Did = JSON.parse(didDocString)
+    return await this.didrpc.updateDID(didDoc, signature, verificationMethodId, versionId)
   }
 
   // TODO:  this method MUST also accept signature/proof 

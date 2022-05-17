@@ -11,6 +11,7 @@ import { HIDClient } from '../hid/hidClient';
 
 export interface IDIDRpc {
     registerDID(didDoc: Did, signature: string, verificationMethodId: string):Promise<Object>;
+    updateDID(didDoc: Did, signature: string, verificationMethodId: string, versionId: string):Promise<Object>
     resolveDID(did):Promise<Object>
 }
 
@@ -20,7 +21,6 @@ export class DIDRpc implements IDIDRpc{
         this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_PATH;
     }
 
-    // TODO:  this RPC MUST also accept signature/proof 
     async registerDID(didDoc: Did, signature: string, verificationMethodId: string):Promise<Object>{
         const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
         console.log("The wallet address is (rpc/didRPC.ts): ", HIDClient.getHidWalletAddress())
@@ -35,6 +35,39 @@ export class DIDRpc implements IDIDRpc{
                     didDocString:didDoc,
                     signatures: [signInfo],
                     creator: HIDClient.getHidWalletAddress(),
+                }),
+            }; 
+
+        // TODO: need to find a way to make it dynamic
+        const fee = {
+            amount: [{
+                denom: 'uhid',
+                amount: '5000',
+            }, ],
+            gas: '200000',
+        }
+    
+        const hidClient: SigningStargateClient = HIDClient.getHidClient();
+        const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
+        return txResult
+    }
+
+    async updateDID(didDoc: Did, signature: string, verificationMethodId: string, versionId: string):Promise<Object>{
+        const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgUpdateDID}`;
+        console.log("The wallet address is (rpc/didRPC.ts): ", HIDClient.getHidWalletAddress())
+        
+        const signInfo :SignInfo = {
+            verificationMethodId,
+            signature
+        }
+
+        const txMessage = {
+            typeUrl, // Same as above
+            value: generatedProto[HIDRpcEnums.MsgUpdateDID].fromPartial({
+                    didDocString:didDoc,
+                    signatures: [signInfo],
+                    creator: HIDClient.getHidWalletAddress(),
+                    versionId
                 }),
             }; 
 
