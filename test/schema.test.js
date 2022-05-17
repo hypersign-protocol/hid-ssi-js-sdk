@@ -46,6 +46,7 @@ createWallet(mnemonic)
     console.log("======Generate Schema=====")
     const schemaOptions = {
         name: "Email Schema",
+        author: "did:hs:deb2310d-05ae-44cf-9048-b314616cf673",
         schemaProperty: {
             schema: "http://json-schema.org/draft-07/schema",
             description: "email",
@@ -60,22 +61,15 @@ createWallet(mnemonic)
 })
 .then(() => {
     console.log(schemaString)
-    console.log("======Sign Schema=====")
-    const privKeyBytes = new Uint8Array([
-        179,  50,  21, 242,   5,  62,   4, 198, 159,  61,  41,
-        138, 132,  93, 112, 224,   6, 234,  32,  81, 195, 160,
-        101, 121, 231, 204, 145, 188, 118, 104, 175, 223,  64,
-        154, 202, 244, 242, 232,  80,  66, 141, 114, 147, 204,
-         86,  46,  21, 178, 243,  58,  35,  53,  71,  71, 108,
-        157,  45, 187,  75,  55, 203,  49, 159, 103
-      ])
+    console.log("========Sign Schema=======")
+    const privKey = "f/vYFEtmAQ1rD+SrhALTV/XcG2ElRVIZxOyM7HVS6ihyZ9mAT3uTwwK1sEV5T2gVyyIY7Pqm4hBejFsPz0pptA=="
     
-    return hsSdk.schema.signSchema(privKeyBytes, schemaString)
+    return hsSdk.schema.signSchema(privKey, schemaString)
 })
 .then(signature => {
     console.log("Signature: ", signature)
     console.log("=========Register Schema========")
-    const verificationMethodId = "did:hs:b0c9f766-c155-43ec-be2b-1a0c651501e9#z5MBzYjvm1cGSmX2B27x5BqY835KbC9vghmkcka7hJPCi"
+    const verificationMethodId = "did:hs:deb2310d-05ae-44cf-9048-b314616cf673#z8hbKiTnGpwgk4xjAjdGGtdZPueiTm5DW8oFhH4Rg1QdZ"
     
     return hsSdk.schema.registerSchema(schemaString, signature, verificationMethodId)
 }).then(res => {

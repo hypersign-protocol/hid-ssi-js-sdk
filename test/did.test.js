@@ -23,10 +23,8 @@ createWallet(mnemonic)
         console.log("===============GENERATE DID-KEYS=======================")
         const { publicKeyMultibase, privateKeyMultibase } = hsSdk.did.generateKeys();
 
-        console.log({
-            publicKeyMultibase,
-            privateKeyMultibase
-        })
+        console.log(publicKeyMultibase) 
+        console.log("Priv Key: ", Buffer.from(privateKeyMultibase).toString('base64'))
         console.log("===============GENERATE DID-DIDDOC-KEYS=======================")
         didDocString = hsSdk.did.generateDID(publicKeyMultibase);
         console.log(JSON.parse(didDocString))

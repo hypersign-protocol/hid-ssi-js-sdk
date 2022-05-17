@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as constant from '../constants'
 import { getByteArray, getByteArraySchema } from '../utils';
 import { SchemaRpc } from '../rpc/schemaRPC';
+import { TextEncoder } from 'util';
 
 const fs = require('fs')
 
@@ -20,29 +21,31 @@ export default class Schema implements schema {
 
     schemaRpc: SchemaRpc;
 
-    constructor(author: string){
+    constructor() {
         this.schemaRpc = new SchemaRpc()
 
         this.type = "https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json",
         this.modelVersion = "1.0",
-        this.id = this.getSchemaId(),
-        this.name = "EmailCredentialSchema",
-        this.author = author,
-        this.authored = "2018-01-01T00:00:00+00:00"
+        this.id = "",
+        this.name = "",
+        this.author = "",
+        this.authored = ""
         this.schema = {
-            schema: "http://json-schema.org/draft-07/schema",
-            description: "email",
-            type: "object",
-            properties: "emailAddress",
-            required: ["emailAddress"],
+            schema: "",
+            description: "",
+            type: "",
+            properties: "",
+            required: [],
             additionalProperties: false
         }
     }
 
     public setFields(options: object) {
+        this.id = this.getSchemaId()
         this.name = options["name"]
-        this.schema = options["schemaProperty"]
+        this.author = options["author"]
         this.authored = new Date().toISOString().slice(0, -5) + 'Z'
+        this.schema = options["schemaProperty"]
     }
 
     private randomString(len) {
@@ -66,15 +69,11 @@ export default class Schema implements schema {
         return JSON.stringify(this)
     }
 
-    public async signSchema(privateKey: Uint8Array, schemaString: string): Promise<any> {
+    public async signSchema(privateKey: string, schemaString: string): Promise<any> {
         const data: Schema = JSON.parse(schemaString)
-        //const dataBytes = await getByteArray(data, './proto/schema.proto', 'hypersignprotocol.hidnode.ssi.Schema')
         const dataBytes = (await getByteArraySchema(data)).finish()
-        // const newArr = Array.from(dataBytes)
-        // const newArrString = newArr.toString()
-        // await fs.writeFileSync('./somelist.txt', newArrString)
-        console.log("This must be it: ", dataBytes)
-        const signed = ed25519.sign(privateKey, dataBytes)
+        const privateKeyBytes = new Uint8Array(Buffer.from(privateKey, 'base64'))
+        const signed = ed25519.sign(privateKeyBytes, dataBytes)
         return Buffer.from(signed).toString('base64')
     }
 
