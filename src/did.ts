@@ -184,10 +184,7 @@ export default class did implements IDID{
     const { didDocString, privateKeyMultibase } = params; 
     // TODO:  do proper checck of paramaters
     const did: Did = JSON.parse(didDocString);
-    // TODO: Temporary addition: Until a fix for data encoding is found, we are going use a temporary API call
-    // to hid-node which will return the Unmarshalled Output for an input String
-    // Refer PR: https://github.com/hypersign-protocol/hid-node/pull/142
-    const didBytes = await getByteArray(did, './proto/did.proto', 'hypersignprotocol.hidnode.ssi.Did')
+    const didBytes = (await Did.encode(did)).finish()
     const signed = ed25519.sign(privateKeyMultibase,  didBytes);
     return Buffer.from(signed).toString('base64');  
   }
