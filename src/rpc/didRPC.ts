@@ -12,6 +12,7 @@ import { HIDClient } from '../hid/hidClient';
 export interface IDIDRpc {
     registerDID(didDoc: Did, signature: string, verificationMethodId: string):Promise<Object>;
     updateDID(didDoc: Did, signature: string, verificationMethodId: string, versionId: string):Promise<Object>
+    deactivateDID(didDoc: Did, signature: string, verificationMethodId: string, versionId: string):Promise<Object>
     resolveDID(did):Promise<Object>
 }
 
@@ -64,6 +65,39 @@ export class DIDRpc implements IDIDRpc{
         const txMessage = {
             typeUrl, // Same as above
             value: generatedProto[HIDRpcEnums.MsgUpdateDID].fromPartial({
+                    didDocString:didDoc,
+                    signatures: [signInfo],
+                    creator: HIDClient.getHidWalletAddress(),
+                    versionId
+                }),
+            }; 
+
+        // TODO: need to find a way to make it dynamic
+        const fee = {
+            amount: [{
+                denom: 'uhid',
+                amount: '5000',
+            }, ],
+            gas: '200000',
+        }
+    
+        const hidClient: SigningStargateClient = HIDClient.getHidClient();
+        const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
+        return txResult
+    }
+
+    async deactivateDID(didDoc: Did, signature: string, verificationMethodId: string, versionId: string):Promise<Object>{
+        const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgDeactivateDID}`;
+        console.log("The wallet address is (rpc/didRPC.ts): ", HIDClient.getHidWalletAddress())
+        
+        const signInfo :SignInfo = {
+            verificationMethodId,
+            signature
+        }
+
+        const txMessage = {
+            typeUrl, // Same as above
+            value: generatedProto[HIDRpcEnums.MsgDeactivateDID].fromPartial({
                     didDocString:didDoc,
                     signatures: [signInfo],
                     creator: HIDClient.getHidWalletAddress(),

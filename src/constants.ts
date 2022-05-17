@@ -21,5 +21,6 @@ export const HYPERSIGN_NETWORK_BANK_BALANCE_PATH="/bank/balances/"
 export enum HIDRpcEnums {
     MsgCreateDID = "MsgCreateDID",
     MsgUpdateDID = "MsgUpdateDID",
+    MsgDeactivateDID = "MsgDeactivateDID",
     MsgCreateSchema = "MsgCreateSchema",
 }

@@ -171,6 +171,12 @@ export default class did implements IDID{
     return await this.didrpc.updateDID(didDoc, signature, verificationMethodId, versionId)
   }
 
+  // Update DID Document
+  public async deactivate(didDocString: string, signature: string, verificationMethodId: string, versionId: string): Promise<any> {
+    const didDoc: Did = JSON.parse(didDocString)
+    return await this.didrpc.deactivateDID(didDoc, signature, verificationMethodId, versionId)
+  }
+
   // TODO:  this method MUST also accept signature/proof 
   public async register(didDocString: string , signature: string, verificationMethodId: string): Promise<any>{
     const didDoc: Did = JSON.parse(didDocString);
