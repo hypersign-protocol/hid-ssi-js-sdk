@@ -1,7 +1,6 @@
 import { Schema as schema, SchemaProperty } from '../generated/ssi/schema';
 import { v4 as uuidv4 } from 'uuid';
 import * as constant from '../constants'
-import { getByteArray, getByteArraySchema } from '../utils';
 import { SchemaRpc } from '../rpc/schemaRPC';
 import { TextEncoder } from 'util';
 
@@ -71,7 +70,7 @@ export default class Schema implements schema {
 
     public async signSchema(privateKey: string, schemaString: string): Promise<any> {
         const data: Schema = JSON.parse(schemaString)
-        const dataBytes = (await getByteArraySchema(data)).finish()
+        const dataBytes = (await schema.encode(data)).finish()
         const privateKeyBytes = new Uint8Array(Buffer.from(privateKey, 'base64'))
         const signed = ed25519.sign(privateKeyBytes, dataBytes)
         return Buffer.from(signed).toString('base64')

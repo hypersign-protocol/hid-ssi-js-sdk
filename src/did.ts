@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from 'uuid';
 import blake from 'blakejs';
 import axios from "axios";
 import { DIDRpc, IDIDRpc } from './rpc/didRPC'
-import { getByteArray } from './utils';
 
 const ed25519 = require('@stablelib/ed25519');
 const {encode} = require('base58-universal');
@@ -116,28 +115,6 @@ export default class did implements IDID{
     this.didrpc = new DIDRpc();  
   }
 
- 
-
-  // private formKeyPairFromPublicKey(publicKeyBase58) {
-  //   if(!publicKeyBase58) throw new Error("publicKeyBase58 can not be empty")
-  //   // TODO:  hardcoing temporarly
-  //   const protocol = "Ed25519VerificationKey2018"
-  //   const did = this.getId()
-  //   // TODO coule be a security flaw. we need to check later.
-  //   const id = did + '#' + blake.blake2sHex(publicKeyBase58 + protocol)
-  //   return {
-  //     publicKey: {
-  //       "@context": jsonSigs.SECURITY_CONTEXT_URL,
-  //       id,
-  //       "type": protocol,
-  //       publicKeyBase58
-  //     },
-  //     privateKeyBase58: null,
-  //     did
-  //   }
-  // }
-
-
   public generateKeys(cryptoObj?): { privateKeyMultibase:Uint8Array, publicKeyMultibase: string } {
     const seed = new Uint8Array(32)
     // If the SDK is run from browser, use window.crypto object
@@ -171,7 +148,19 @@ export default class did implements IDID{
     return await this.didrpc.updateDID(didDoc, signature, verificationMethodId, versionId)
   }
 
-  // Update DID Document
+  public updateDIDFields(didDoc: Did, options: object[]): Did {
+    let updateDIDDoc = didDoc    
+    
+    options.forEach((option, index) => {
+      Object.keys(option).forEach((field) => {
+        updateDIDDoc[field] = option[field]
+      })
+    });
+
+    return updateDIDDoc
+  }
+
+  // Deactivate DID Document
   public async deactivate(didDocString: string, signature: string, verificationMethodId: string, versionId: string): Promise<any> {
     const didDoc: Did = JSON.parse(didDocString)
     return await this.didrpc.deactivateDID(didDoc, signature, verificationMethodId, versionId)

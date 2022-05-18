@@ -3,20 +3,6 @@ import axios from "axios";
 import IOptions from './IOptions';
 import { DIDRpc, IDIDRpc } from './rpc/didRPC';
 import { IHIDWallet } from "./wallet/wallet";
-import protobuf from 'protobufjs'
-import { Schema } from './generated/ssi/schema'
-
-export async function getByteArray(payload, protoRoot, typeUrl) {
-  const protoRootFile = await protobuf.load(protoRoot);
-  const protoMessage = protoRootFile.lookupType(typeUrl);
-  //'hypersignprotocol.hidnode.ssi.Did'
-  const byteArrayData = new Uint8Array(protoMessage.encode(payload).finish())
-  return byteArrayData
-}
-
-export async function getByteArraySchema(payload) {
-  return Schema.encode(payload)
-}
 
 export default class Utils {
   nodeurl: string;

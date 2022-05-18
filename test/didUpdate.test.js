@@ -19,9 +19,14 @@ createWallet(mnemonic)
     .then((didDoc) => {
         // Change DID Params
         console.log(didDoc)
+        fieldUpdateOptions = [
+            { "context": ["something.com", "another.com"] }
+        ]
+
         versionId = didDoc["didDocumentMetadata"]["versionId"]
-        didDoc["didDocument"]["context"] = ["https://example.com"]
-        didDocString = JSON.stringify(didDoc["didDocument"])
+        didDocString = JSON.stringify(
+            hsSdk.did.updateDIDFields(didDoc["didDocument"], fieldUpdateOptions)
+        )
 
         console.log("===============GENERATE DID SIGNATURE =======================")
         const privateKeyMultibase = new Uint8Array(Buffer.from("mK8uv4KdzCVjYgd+wlr05FGo8buhMY8ixVTba7pR/Up/wtIBXNjniYsconY8FtYkx+Kcx73ezfAD9TKQUCQw5g==", "base64"))
@@ -37,7 +42,6 @@ createWallet(mnemonic)
     })
     .then((res) => {
         console.log(res)
-        console.log("Done")
         const didId = JSON.parse(didDocString)["id"]
         return hsSdk.did.resolve(didId)
     })
