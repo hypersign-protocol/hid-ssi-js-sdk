@@ -1,91 +1,148 @@
-import { Schema as schema, SchemaProperty } from '../generated/ssi/schema';
-import { v4 as uuidv4 } from 'uuid';
-import * as constant from '../constants'
-import { SchemaRpc } from '../rpc/schemaRPC';
-import { TextEncoder } from 'util';
+import { Schema as ISchema, SchemaProperty } from "../generated/ssi/schema";
+import { v4 as uuidv4 } from "uuid";
+import * as constant from "../constants";
+import { SchemaRpc } from "../rpc/schemaRPC";
 
-const fs = require('fs')
+const ed25519 = require("@stablelib/ed25519");
 
-const ed25519 = require('@stablelib/ed25519');
+interface ISchemaFields {
+  type: string;
+  format?: string;
+  name: string;
+  isRequired: boolean;
+}
 
+export default class Schema implements ISchema {
+  type: string;
+  modelVersion: string;
+  id: string;
+  name: string;
+  author: string;
+  authored: string;
+  schema: SchemaProperty;
 
-export default class Schema implements schema {
-    type: string;
-    modelVersion: string;
-    id: string;
+  schemaRpc: SchemaRpc;
+
+  constructor() {
+    this.schemaRpc = new SchemaRpc();
+
+    (this.type =
+      "https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json"),
+      (this.modelVersion = "1.0"),
+      (this.id = ""),
+      (this.name = ""),
+      (this.author = ""),
+      (this.authored = "");
+    this.schema = {
+      schema: "",
+      description: "",
+      type: "",
+      properties: "",
+      required: [],
+      additionalProperties: false,
+    };
+  }
+
+  private randomString(len) {
+    const charSet =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let randomString = "";
+    for (let i = 0; i < len; i++) {
+      let randomPoz = Math.floor(Math.random() * charSet.length);
+      randomString += charSet.substring(randomPoz, randomPoz + 1);
+    }
+    return randomString;
+  }
+
+  // Ref:
+  private getSchemaId(): string {
+    const a = `${constant.DID_SCHEME}:${uuidv4()}`;
+    const b = this.randomString(32);
+    const id = `${a};id=${b};version=${this.modelVersion}`; // ID Structure ->  did:hs:<a>;id=<b>;version=1.0
+    return id;
+  }
+
+  public getSchema(params: {
     name: string;
+    description?: string;
     author: string;
-    authored: string;
-    schema: SchemaProperty;
+    fields?: Array<ISchemaFields>;
+    additionalProperties: boolean;
+  }): ISchema {
+    this.id = this.getSchemaId();
+    this.name = params.name;
+    this.author = params.author;
+    this.authored = new Date().toISOString().slice(0, -5) + "Z";
+    this.schema = {
+      schema: "http://json-schema.org/draft-07/schema",
+      description: params.description ? params.description : "",
+      type: "object",
+      properties: "",
+      required: [],
+      additionalProperties: params.additionalProperties,
+    };
 
-    schemaRpc: SchemaRpc;
+    // { type: string; format?: string }
 
-    constructor() {
-        this.schemaRpc = new SchemaRpc()
+    let t = {};
+    if (params.fields && params.fields.length > 0) {
+      params.fields.forEach((prop) => {
+        const schemaPropsObj: {
+          propName: string;
+          val: { type: string; format?: string };
+        } = {} as { propName: string; val: { type: string; format?: string } };
+        schemaPropsObj.propName = prop.name;
+        schemaPropsObj.val = {} as { type: string; format?: string };
+        schemaPropsObj.val.type = prop.type;
+        
+        if(prop.format) schemaPropsObj.val.format = prop.format;
 
-        this.type = "https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json",
-        this.modelVersion = "1.0",
-        this.id = "",
-        this.name = "",
-        this.author = "",
-        this.authored = ""
-        this.schema = {
-            schema: "",
-            description: "",
-            type: "",
-            properties: "",
-            required: [],
-            additionalProperties: false
+        t[schemaPropsObj.propName] = schemaPropsObj.val;
+
+        if (prop.isRequired) {
+          this.schema.required.push(prop.name);
         }
+      });
+
+      this.schema.properties = JSON.stringify(t);
     }
 
-    public setFields(options: object) {
-        this.id = this.getSchemaId()
-        this.name = options["name"]
-        this.author = options["author"]
-        this.authored = new Date().toISOString().slice(0, -5) + 'Z'
-        this.schema = options["schemaProperty"]
-    }
+    return this;
+  }
 
-    private randomString(len) {
-        const charSet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let randomString = '';
-        for (let i = 0; i < len; i++) {
-            let randomPoz = Math.floor(Math.random() * charSet.length);
-            randomString += charSet.substring(randomPoz,randomPoz+1);
-        }
-        return randomString;
-    }
-    
-    private getSchemaId(): string {
-        const a = `${constant.DID_SCHEME}:${uuidv4()}`
-        const b = this.randomString(32)    
-        const id = `${a};id=${b};version=1.0` // ID Structure ->  did:hs:<a>;id=<b>;version=1.0
-        return id 
-    }
+  public async signSchema(params: {
+    privateKey: string;
+    schema: ISchema;
+  }): Promise<any> {
+    if (!params.privateKey) throw new Error("PrivateKey must be passed");
+    if (!params.schema) throw new Error("Schema must be passed");
 
-    public getSchemaString(): string {
-        return JSON.stringify(this)
-    }
+    const dataBytes = (await ISchema.encode(params.schema)).finish();
+    const privateKeyBytes = new Uint8Array(
+      Buffer.from(params.privateKey, "base64")
+    );
+    const signed = ed25519.sign(privateKeyBytes, dataBytes);
+    return Buffer.from(signed).toString("base64");
+  }
 
-    public async signSchema(privateKey: string, schemaString: string): Promise<any> {
-        const data: Schema = JSON.parse(schemaString)
-        const dataBytes = (await schema.encode(data)).finish()
-        const privateKeyBytes = new Uint8Array(Buffer.from(privateKey, 'base64'))
-        const signed = ed25519.sign(privateKeyBytes, dataBytes)
-        return Buffer.from(signed).toString('base64')
-    }
+  public async registerSchema(params: {
+    schema: ISchema;
+    signature: string;
+    verificationMethodId: string;
+  }): Promise<any> {
+    if (!params.schema) throw new Error("Schema must be passed");
+    if (!params.signature) throw new Error("Signature must be passed");
+    if (!params.verificationMethodId)
+      throw new Error("VerificationMethodId must be passed");
+    return this.schemaRpc.createSchema(
+      params.schema,
+      params.signature,
+      params.verificationMethodId
+    );
+  }
 
-    public async registerSchema( 
-        schemaString: string,
-        signature: string,
-        verificationMethodId: string): Promise<any> 
-    {
-        const schema = JSON.parse(schemaString)
-        return this.schemaRpc.createSchema(schema, signature, verificationMethodId)
-    }
-
-    public async resolve(schemaId: string): Promise<any>{
-        return await this.schemaRpc.resolveSchema(schemaId)
-    }
+  public async resolve(params: { schemaId: string }): Promise<any> {
+    if (!params.schemaId) throw new Error("SchemaId must be passed");
+    return await this.schemaRpc.resolveSchema(params.schemaId);
+  }
 }
