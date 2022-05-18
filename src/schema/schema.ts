@@ -25,7 +25,6 @@ export default class Schema implements ISchema {
 
   constructor() {
     this.schemaRpc = new SchemaRpc();
-
     (this.type =
       "https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json"),
       (this.modelVersion = "1.0"),
@@ -43,21 +42,10 @@ export default class Schema implements ISchema {
     };
   }
 
-  private randomString(len) {
-    const charSet =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let randomString = "";
-    for (let i = 0; i < len; i++) {
-      let randomPoz = Math.floor(Math.random() * charSet.length);
-      randomString += charSet.substring(randomPoz, randomPoz + 1);
-    }
-    return randomString;
-  }
-
   // Ref:
-  private getSchemaId(): string {
-    const a = `${constant.DID_SCHEME}:${uuidv4()}`;
-    const b = this.randomString(32);
+  private getSchemaId(author: string): string {
+    const a = author;
+    const b = uuidv4();
     const id = `${a};id=${b};version=${this.modelVersion}`; // ID Structure ->  did:hs:<a>;id=<b>;version=1.0
     return id;
   }
@@ -69,7 +57,9 @@ export default class Schema implements ISchema {
     fields?: Array<ISchemaFields>;
     additionalProperties: boolean;
   }): ISchema {
-    this.id = this.getSchemaId();
+    if (!params.author) throw new Error("Author must be passed");
+
+    this.id = this.getSchemaId(params.author);
     this.name = params.name;
     this.author = params.author;
     this.authored = new Date().toISOString().slice(0, -5) + "Z";
@@ -94,8 +84,8 @@ export default class Schema implements ISchema {
         schemaPropsObj.propName = prop.name;
         schemaPropsObj.val = {} as { type: string; format?: string };
         schemaPropsObj.val.type = prop.type;
-        
-        if(prop.format) schemaPropsObj.val.format = prop.format;
+
+        if (prop.format) schemaPropsObj.val.format = prop.format;
 
         t[schemaPropsObj.propName] = schemaPropsObj.val;
 
