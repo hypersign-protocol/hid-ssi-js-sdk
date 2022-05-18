@@ -1,6 +1,5 @@
-import { Schema as ISchema, SchemaProperty } from "../generated/ssi/schema";
+import { Schema as ISchemaProto, Schema,  SchemaProperty } from "../generated/ssi/schema";
 import { v4 as uuidv4 } from "uuid";
-import * as constant from "../constants";
 import { SchemaRpc } from "../rpc/schemaRPC";
 
 const ed25519 = require("@stablelib/ed25519");
@@ -12,7 +11,30 @@ interface ISchemaFields {
   isRequired: boolean;
 }
 
-export default class Schema implements ISchema {
+interface ISchemaMethods{
+  getSchema(params: {
+    name: string;
+    description?: string;
+    author: string;
+    fields?: Array<ISchemaFields>;
+    additionalProperties: boolean;
+  }): Schema;
+ 
+  signSchema(params: {
+    privateKey: string;
+    schema: ISchemaProto;
+  }): Promise<any>;
+
+  registerSchema(params: {
+    schema: Schema;
+    signature: string;
+    verificationMethodId: string;
+  }): Promise<any>;
+
+  resolve(params: { schemaId: string }): Promise<Schema>;
+}
+
+export default class HyperSignSchema implements ISchemaMethods, Schema{
   type: string;
   modelVersion: string;
   id: string;
@@ -20,7 +42,6 @@ export default class Schema implements ISchema {
   author: string;
   authored: string;
   schema: SchemaProperty;
-
   schemaRpc: SchemaRpc;
 
   constructor() {
@@ -56,7 +77,7 @@ export default class Schema implements ISchema {
     author: string;
     fields?: Array<ISchemaFields>;
     additionalProperties: boolean;
-  }): ISchema {
+  }): Schema {
     if (!params.author) throw new Error("Author must be passed");
 
     this.id = this.getSchemaId(params.author);
@@ -71,8 +92,6 @@ export default class Schema implements ISchema {
       required: [],
       additionalProperties: params.additionalProperties,
     };
-
-    // { type: string; format?: string }
 
     let t = {};
     if (params.fields && params.fields.length > 0) {
@@ -97,17 +116,25 @@ export default class Schema implements ISchema {
       this.schema.properties = JSON.stringify(t);
     }
 
-    return this;
+    return {
+        type: this.type,
+        modelVersion: this.modelVersion,
+        id: this.id,
+        name: this.name,
+        author: this.author,
+        authored: this.authored,
+        schema: this.schema    
+    };
   }
 
   public async signSchema(params: {
     privateKey: string;
-    schema: ISchema;
+    schema: Schema;
   }): Promise<any> {
     if (!params.privateKey) throw new Error("PrivateKey must be passed");
     if (!params.schema) throw new Error("Schema must be passed");
 
-    const dataBytes = (await ISchema.encode(params.schema)).finish();
+    const dataBytes = (await ISchemaProto.encode(params.schema)).finish();
     const privateKeyBytes = new Uint8Array(
       Buffer.from(params.privateKey, "base64")
     );
@@ -116,23 +143,28 @@ export default class Schema implements ISchema {
   }
 
   public async registerSchema(params: {
-    schema: ISchema;
+    schema: Schema;
     signature: string;
     verificationMethodId: string;
-  }): Promise<any> {
+  }): Promise<object> {
     if (!params.schema) throw new Error("Schema must be passed");
     if (!params.signature) throw new Error("Signature must be passed");
-    if (!params.verificationMethodId)
-      throw new Error("VerificationMethodId must be passed");
+    if (!params.verificationMethodId) throw new Error("VerificationMethodId must be passed");
+
     return this.schemaRpc.createSchema(
       params.schema,
       params.signature,
       params.verificationMethodId
-    );
+    )
   }
 
-  public async resolve(params: { schemaId: string }): Promise<any> {
+  public async resolve(params: { schemaId: string }): Promise<Schema> {
     if (!params.schemaId) throw new Error("SchemaId must be passed");
-    return await this.schemaRpc.resolveSchema(params.schemaId);
+    const schemaArr: Array<object> =  await this.schemaRpc.resolveSchema(params.schemaId);
+    if(!schemaArr || schemaArr.length < 0){
+      throw new Error("No schema found, id = " + params.schemaId)
+    }
+    const schema = schemaArr[0] as Schema;
+    return schema;
   }
 }

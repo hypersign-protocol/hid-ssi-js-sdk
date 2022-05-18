@@ -53,11 +53,11 @@ export class SchemaRpc implements ISchemaRPC{
         return txResult
     }
 
-    async resolveSchema(schemaId: string): Promise<Object>{
+    async resolveSchema(schemaId: string): Promise<Array<object>>{
         const getSchemaUrl = `${this.didRestEp}/${schemaId}:`;
         console.log("Schema Resolve URL: ", getSchemaUrl)
         const response = await axios.get(getSchemaUrl);
-        const schema  = response.data;
+        const { schema }  = response.data;
         return schema;
     }
 }
