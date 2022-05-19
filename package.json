@@ -16,7 +16,8 @@
         "@cosmjs/stargate": "^0.27.0",
         "@digitalbazaar/ed25519-signature-2020": "^3.0.0",
         "@digitalbazaar/ed25519-verification-key-2018": "^3.1.2",
-        "@digitalbazaar/ed25519-verification-key-2020": "^3.2.0",
+        "@digitalbazaar/ed25519-verification-key-2020": "^3.3.0",
+        "@noble/ed25519": "^1.6.0",
         "@stablelib/ed25519": "^1.0.2",
         "axios": "^0.19.0",
         "blakejs": "^1.1.0",
@@ -27,7 +28,7 @@
         "node-fetch": "^2.6.1",
         "protobufjs": "^6.11.2",
         "uuid": "^8.3.0",
-        "vc-js": "https://github.com/hypersign-protocol/vc-js.git"
+        "vc-js": "https://github.com/digitalbazaar/vc-js"
     },
     "devDependencies": {
         "@types/node": "^14.11.2",

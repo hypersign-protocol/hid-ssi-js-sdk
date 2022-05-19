@@ -1,5 +1,5 @@
 import Did, { IDID } from './did';
-import Credential  from './credential';
+import VC  from './credential/vc'
 import Schema from './schema/schema';
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { HIDClient } from './hid/hidClient';
@@ -8,7 +8,7 @@ import IOptions from './IOptions';
 export = class HypersignSSISdk{
     // TODO: Make sure to use proper type so that dev can see list of available methods.
     did: any;
-    credential: any;
+    vc: any;
     schema: any;
     
     private signer: OfflineSigner;
@@ -39,7 +39,7 @@ export = class HypersignSSISdk{
 
         this.did = new Did();
         this.schema = new Schema();
-        // this.credential = new Credential(this.options, this.wallet);
+        this.vc = new VC();
     }
 
 }

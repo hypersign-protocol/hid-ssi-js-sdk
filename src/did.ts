@@ -72,7 +72,7 @@ class DID implements Did{
   service: Service[];
   constructor(publicKey: string){
     // TODO:  need to remove this hardcoding
-    this.context = ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/v1", "https://schema.org"];
+    this.context = ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/suites/ed25519-2020/v1"];
 
     this.id = this.getId();
     this.controller = [this.id];

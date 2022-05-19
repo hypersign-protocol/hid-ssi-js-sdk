@@ -17,9 +17,9 @@ export interface ISchemaRPC {
 }
 
 export class SchemaRpc implements ISchemaRPC{
-    private didRestEp: string;
+    public schemaRestEp: string;
     constructor(){
-        this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_SCHEMA_PATH;
+        this.schemaRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_SCHEMA_PATH;
     }
 
     async createSchema(schema: Schema, signature: string, verificationMethodId: string):Promise<Object>{
@@ -54,7 +54,7 @@ export class SchemaRpc implements ISchemaRPC{
     }
 
     async resolveSchema(schemaId: string): Promise<Array<object>>{
-        const getSchemaUrl = `${this.didRestEp}/${schemaId}:`;
+        const getSchemaUrl = `${this.schemaRestEp}/${schemaId}:`;
         console.log("Schema Resolve URL: ", getSchemaUrl)
         const response = await axios.get(getSchemaUrl);
         const { schema }  = response.data;
