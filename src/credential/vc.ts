@@ -271,6 +271,7 @@ export default class HypersignVerifiableCredential
 
     // TODO: confusion here is, what would be the status of this credential at the time of its creation?
     // If this properpty is present , then checkStatus() must be passed at the time of verification of the credential
+    // Ref: https://github.com/digitalbazaar/vc-js/blob/7e14ef27bc688194635077d243d9025c0020448b/test/10-verify.spec.js#L188
     // vc.credentialStatus = {
     //     id: "asasdasds", // TODO: need to implement credential status in the RPC,
     //     type: this.credentialStatus.type

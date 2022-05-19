@@ -1,15 +1,8 @@
 const HypersignSsiSDK = require('../dist')
-
-const { props, writeDataInFile, createWallet } = require('./config')
-
-
-
-
-
+const { createWallet } = require('./config')
 let hsSdk;
-
-
 const mnemonic = "retreat seek south invite fall eager engage endorse inquiry sample salad evidence express actor hidden fence anchor crowd two now convince convince park bag"
+
 createWallet(mnemonic)
     .then((offlineSigner) => {
         hsSdk = new HypersignSsiSDK(offlineSigner, "http://localhost:26657", "http://localhost:1317");
@@ -38,21 +31,6 @@ createWallet(mnemonic)
         const privateKey = "axnVlW2g5pnNe2lWCkPGQZ02GII4qUEYmokXmVHIvmogu6/FjZdh9HPqPz4kPLe4eMrKFCUaO2jI5h0eeAoDcA==";
         const issuerDid = "did:hs:092fe5aa-1e27-4705-9ed2-b389b962cd83";
         console.log('================Sign Verifiable Credential================')
-
-        // const vc1 = {
-        //     "@context": [
-        //         "https://www.w3.org/2018/credentials/v1",
-        //         "https://www.w3.org/2018/credentials/examples/v1"
-        //     ],
-        //     "id": "https://example.com/credentials/1872",
-        //     "type": ["VerifiableCredential", "AlumniCredential"],
-        //     "issuer": "did:hs:092fe5aa-1e27-4705-9ed2-b389b962cd83",
-        //     "issuanceDate": "2010-01-01T19:23:24Z",
-        //     "credentialSubject": {
-        //         "id": "did:hs:092fe5aa-1e27-4705-9ed2-b389b962cd83",
-        //         "alumniOf": "Example University"
-        //     }
-        // }
         return hsSdk.vc.signCredential({
             credential: vc,
             issuerDid,
