@@ -4,7 +4,6 @@ import VP  from './credential/vp'
 import Schema from './schema/schema';
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { HIDClient } from './hid/hidClient';
-import IOptions from './IOptions';
 
 export = class HypersignSSISdk{
     // TODO: Make sure to use proper type so that dev can see list of available methods.

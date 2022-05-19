@@ -1,6 +1,5 @@
 import * as constants from "./constants";
 import axios from "axios";
-import IOptions from './IOptions';
 import { DIDRpc, IDIDRpc } from './rpc/didRPC';
 import { IHIDWallet } from "./wallet/wallet";
 
@@ -8,7 +7,7 @@ export default class Utils {
   nodeurl: string;
   didScheme: string;
   didRpc: IDIDRpc;
-  constructor(options: IOptions, wallet?) {
+  constructor(options, wallet?) {
     this.didScheme = options.didScheme && options.didScheme != "" ?  options.didScheme : constants.DID_SCHEME
     this.nodeurl = Utils.checkUrl(options.nodeUrl);
     this.didRpc = new DIDRpc();
@@ -43,40 +42,4 @@ export default class Utils {
     return response.data;
   }
 
-  resolve = async (did) => {
-    // const url = `${this.nodeurl}${constants.HYPERSIGN_NETWORK_DID_EP}${did}`;
-    // const didDoc = await this.fetchData(url);
-    // if (!didDoc) throw new Error("Could not resolve did =" + did);
-    // if (didDoc["status"] === 500)
-    //   throw new Error("Could not resolve did = " + did);
-    // return didDoc;
-    return await this.didRpc.resolveDID(did);
-  };
-
-
-
-  getControllerAndPublicKeyFromDid = async (did, type) => {
-    let controller = {},
-      publicKey = {};
-    did = did.split("#")[0];
-    let didDoc = await this.resolve(did);
-
-    let methodType = didDoc[type];
-    publicKey = didDoc["publicKey"].find((x) => x.id == methodType[0]);
-    if (!publicKey["controller"]) {
-      controller = {
-        "@context": "https://w3id.org/security/v2",
-        id: did,
-      };
-      controller[type] = methodType;
-    } else {
-      controller = publicKey["controller"];
-    }
-
-    return {
-      controller,
-      publicKey,
-      didDoc,
-    };
-  };
 }
