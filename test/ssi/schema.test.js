@@ -1,5 +1,5 @@
-const { props, writeDataInFile, createWallet } = require('./config')
-const HypersignSsiSDK = require('../dist')
+const { props, writeDataInFile, createWallet } = require('../config')
+const HypersignSsiSDK = require('../../dist')
 
 const author = "did:hs:72ed2dbc-4970-4bdd-8dd0-41cc7c9377d1";
 let schemaId = ""

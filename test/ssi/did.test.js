@@ -1,5 +1,5 @@
-const { createWallet } = require('./config')
-const HypersignSsiSDK = require('../dist')
+const { createWallet } = require('../config')
+const HypersignSsiSDK = require('../../dist')
 
 let hsSdk = null;
 let didDocString;
