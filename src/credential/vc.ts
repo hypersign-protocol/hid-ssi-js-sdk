@@ -45,8 +45,12 @@ export interface ICredentialMethods {
     expirationDate: string;
     fields: Object;
   }): Promise<IVerifiableCredential>;
-  signCredential(credential, issuerDid, privateKey): Promise<any>;
-  verifyCredential(credential: object, issuerDid: string): Promise<any>;
+  signCredential(params: {
+    credential: IVerifiableCredential;
+    issuerDid: string;
+    privateKey: string;
+  }): Promise<any>;
+  verifyCredential(params: {credential: IVerifiableCredential, issuerDid: string}): Promise<any>;
 }
 
 export default class HypersignVerifiableCredential
@@ -201,9 +205,9 @@ export default class HypersignVerifiableCredential
     const issuerDid = params.issuerDid;
     const subjectDid = params.subjectDid;
 
-    const { didDocument: issuerDidDoc } = await this.hsDid.resolve(issuerDid);
+    const { didDocument: issuerDidDoc } = await this.hsDid.resolve({did: issuerDid});
 
-    const { didDocument: subjectDidDoc } = await this.hsDid.resolve(subjectDid);
+    const { didDocument: subjectDidDoc } = await this.hsDid.resolve({did: subjectDid});
 
     // TODO: do proper check for date and time
     // if(params.expirationDate < new Date()) throw  new Error("Expiration date can not be lesser than current date")
@@ -268,7 +272,7 @@ export default class HypersignVerifiableCredential
     privateKey: string;
   }): Promise<any> {
     const { didDocument: signerDidDoc } = await this.hsDid.resolve(
-      params.issuerDid
+      {did: params.issuerDid}
     );
     if (!signerDidDoc)
       throw new Error("Could not resolve issuerDid = " + params.issuerDid);
@@ -317,7 +321,7 @@ export default class HypersignVerifiableCredential
     if (!params.credential) throw new Error("Credential can not be undefined");
 
     const { didDocument: issuerDID } = await this.hsDid.resolve(
-      params.issuerDid
+      {did: params.issuerDid}
     );
     const issuerDidDoc: Did = issuerDID as Did;
     const publicKeyId = issuerDidDoc.assertionMethod[0];

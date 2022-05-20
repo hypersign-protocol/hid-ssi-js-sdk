@@ -39,19 +39,22 @@ interface IVerifiablePresentation {
 }
 
 export interface IPresentationMethods {
-  getPresentation(verifiableCredential, holderDid): Promise<any>;
-  signPresentation(
-    presentation,
-    holderDid,
-    privateKey,
-    challenge
-  ): Promise<any>;
-  verifyPresentation({
-    signedPresentation,
-    challenge,
-    domain,
-    issuerDid,
-    holderDid,
+  getPresentation(params: {
+    verifiableCredential: IVerifiableCredential;
+    holderDid: string;
+  }): Promise<any>;
+  signPresentation(params: {
+    presentation: IVerifiablePresentation;
+    holderDid: string;
+    privateKey: string;
+    challenge: string;
+  }): Promise<any>;
+  verifyPresentation(params: {
+    signedPresentation: IVerifiablePresentation ,
+    challenge: string,
+    domain?: string,
+    issuerDid: string,
+    holderDid: string,
   }): Promise<any>;
 }
 
@@ -123,7 +126,7 @@ export default class HypersignVerifiablePresentation
     }
 
     let { didDocument: signerDidDoc } = await this.hsDid.resolve(
-      params.holderDid
+      { did: params.holderDid}
     );
 
     let publicKeyId = signerDidDoc["assertionMethod"][0]; // TODO: bad idea -  should not hardcode it.
@@ -174,11 +177,34 @@ export default class HypersignVerifiablePresentation
     holderDid: string,
   }): Promise<any> {
     
-    
+     if (!params.holderDid) {
+      throw new Error(
+        "params.signedPresentation is required for verifying a presentation"
+      );
+    }
+
+    if (!params.issuerDid) {
+      throw new Error(
+        "params.issuerDid is required for verifying a presentation"
+      );
+    }
+
+    if (!params.holderDid) {
+      throw new Error(
+        "params.holderDid is required for verifying a presentation"
+      );
+    }
+
+    if (!params.challenge) {
+      throw new Error(
+        "params.challenge is required for verifying a presentation"
+      );
+    }
+
     ///---------------------------------------
     /// Holder
     const { didDocument: holderDID } = await this.hsDid.resolve(
-      params.holderDid
+      {did: params.holderDid}
     );
 
     const holderDidDoc: Did = holderDID as Did;
@@ -222,7 +248,7 @@ export default class HypersignVerifiablePresentation
     ///---------------------------------------
     /// Issuer
     const { didDocument: issuerDID } = await this.hsDid.resolve(
-      params.issuerDid
+      {did: params.issuerDid}
     );
 
     const issuerDidDoc: Did = issuerDID as Did;
