@@ -32,8 +32,20 @@ export const VC = {
     CREDENTAIL_BASE_CONTEXT: "https://www.w3.org/2018/credentials/v1",
     CREDENTAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1"
 }
+Object.freeze(VC);
+
+export const VP = {
+    PREFIX: "vp_"
+}
+Object.freeze(VP)
 
 export const DID = {
     CONTROLLER_CONTEXT: "https://w3id.org/security/v2"
 }
+Object.freeze(DID)
 
+export const KEY_HEADERS = {
+    MULTICODEC_ED25519_PUB_HEADER : new Uint8Array([0xed, 0x01]),
+    MULTICODEC_ED25519_PRIV_HEADER : new Uint8Array([0x80, 0x26])
+}
+Object.freeze(KEY_HEADERS)

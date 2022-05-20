@@ -1,18 +1,8 @@
 import * as constants from "./constants";
 const { encode, decode } = require("base58-universal");
 
-
-const MULTICODEC_ED25519_PUB_HEADER = new Uint8Array([0xed, 0x01]);
-// multicodec ed25519-priv header as varint
-const MULTICODEC_ED25519_PRIV_HEADER = new Uint8Array([0x80, 0x26]);
-
-
 export default class Utils {
-
-  constructor() {
-   
-  }
-
+  constructor() {}
   hostName({ mode }) {
     let nodeUrl;
     switch (mode) {
@@ -39,14 +29,11 @@ export default class Utils {
 
   static _encodeMbKey(header, key) {
     const mbKey = new Uint8Array(header.length + key.length);
-
     mbKey.set(header);
     mbKey.set(key, header.length);
-
     return "z" + encode(mbKey);
   }
   
-
   // Converting 45byte public key to 48 by padding header 
   // Converting 88byte private key to 91 by padding header
   public static convertedStableLibKeysIntoEd25519verificationkey2020(stableLibKp: {
@@ -58,14 +45,14 @@ export default class Utils {
       const stableLibPubKeyWithoutZ = stableLibKp.publicKey.substr(1);
       const stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
       result['publicKeyMultibase'] = Utils._encodeMbKey(
-        MULTICODEC_ED25519_PUB_HEADER,
+        constants.KEY_HEADERS.MULTICODEC_ED25519_PUB_HEADER,
         stableLibPubKeyWithoutZDecode
       );
     }
     
     if(stableLibKp.privKey){
       result['privateKeyMultibase'] = Utils._encodeMbKey(
-        MULTICODEC_ED25519_PRIV_HEADER,
+        constants.KEY_HEADERS.MULTICODEC_ED25519_PRIV_HEADER,
         stableLibKp.privKey
       );
     }

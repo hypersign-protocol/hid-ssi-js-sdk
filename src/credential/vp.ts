@@ -1,26 +1,15 @@
 import vc from "vc-js";
-import { Ed25519KeyPair } from "crypto-ld";
 import jsonSigs from "jsonld-signatures";
 import { documentLoader } from "jsonld";
 import { v4 as uuidv4 } from "uuid";
-
-import HypersignSchema from "../schema/schema";
-import { Schema, SchemaProperty } from "../generated/ssi/schema";
 import HypersignDID from "../did";
 import { Did, VerificationMethod } from "../generated/ssi/did";
 import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
-
-const { encode, decode } = require("base58-universal");
-
-const MULTICODEC_ED25519_PUB_HEADER = new Uint8Array([0xed, 0x01]);
-// multicodec ed25519-priv header as varint
-const MULTICODEC_ED25519_PRIV_HEADER = new Uint8Array([0x80, 0x26]);
-
-const VC_PREFIX = "vc_";
-const VP_PREFIX = "vp_";
-const { Ed25519Signature2018 } = jsonSigs.suites;
+import Utils from '../utils';
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
+import { VP, DID } from '../constants';
+
 
 interface ISchema {
   id: string;
@@ -69,7 +58,6 @@ export interface IPresentationMethods {
 export default class HypersignVerifiablePresentation
   implements IPresentationMethods, IVerifiablePresentation
 {
-  private hsSchema: HypersignSchema;
   private hsDid: HypersignDID;
 
   id: string;
@@ -78,7 +66,6 @@ export default class HypersignVerifiablePresentation
   holder: string;
   proof: Object;
   constructor() {
-    this.hsSchema = new HypersignSchema();
     this.hsDid = new HypersignDID();
 
     this.id = "";
@@ -88,53 +75,21 @@ export default class HypersignVerifiablePresentation
     this.proof = "";
   }
 
-  private getId = (type) => {
-    const id = uuidv4();
-    return type
-      ? type === "VC"
-        ? VC_PREFIX + id
-        : type === "VP"
-        ? VP_PREFIX + id
-        : id
-      : id;
+  private getId = () => {
+    return VP.PREFIX + uuidv4()
   };
 
   async getPresentation(params: {
     verifiableCredential: IVerifiableCredential;
     holderDid: string;
   }): Promise<any> {
-    const id = this.getId("VP");
+    const id = this.getId();
     const presentation = vc.createPresentation({
       verifiableCredential: params.verifiableCredential,
       id: id,
       holder: params.holderDid,
     });
     return presentation;
-  }
-
-  private convertedStableLibKeysIntoEd25519verificationkey2020(stableLibKp: {
-    privKey: Uint8Array;
-    publicKeyMultibase: string;
-  }) {
-    // const stableLibKp = generateStableLibKeys();
-    // console.log(stableLibKp)
-
-    const stableLibPubKeyWithoutZ = stableLibKp.publicKeyMultibase.substr(1);
-    const stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
-    const publicKeyMultibase = this._encodeMbKey(
-      MULTICODEC_ED25519_PUB_HEADER,
-      stableLibPubKeyWithoutZDecode
-    );
-
-    const privateKeyMultibase = this._encodeMbKey(
-      MULTICODEC_ED25519_PRIV_HEADER,
-      stableLibKp.privKey
-    );
-
-    return {
-      publicKeyMultibase,
-      privateKeyMultibase,
-    };
   }
 
   async signPresentation(params: {
@@ -181,9 +136,9 @@ export default class HypersignVerifiablePresentation
     );
 
     const convertedKeyPair =
-      this.convertedStableLibKeysIntoEd25519verificationkey2020({
+      Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
         privKey: Uint8ArrayPrivKey,
-        publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase,
+        publicKey: publicKeyVerMethod.publicKeyMultibase,
       });
 
     publicKeyVerMethod["publicKeyMultibase"] =
@@ -210,16 +165,6 @@ export default class HypersignVerifiablePresentation
     return signedVP;
   }
 
-
-  private _encodeMbKey(header, key) {
-    const mbKey = new Uint8Array(header.length + key.length);
-
-    mbKey.set(header);
-    mbKey.set(key, header.length);
-
-    return "z" + encode(mbKey);
-  }
-  
   // https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L392
   async verifyPresentation(params: {
     signedPresentation: IVerifiablePresentation ,
@@ -244,43 +189,35 @@ export default class HypersignVerifiablePresentation
         (x) => x.id == holderPublicKeyId
       ) as VerificationMethod;
 
-    const holderStableLibPubKeyWithoutZ =
-      holderPublicKeyVerMethod.publicKeyMultibase.substr(1);
-    const holderStableLibPubKeyWithoutZDecode = decode(holderStableLibPubKeyWithoutZ);
-    const holderPublicKeyMultibase = this._encodeMbKey(
-      MULTICODEC_ED25519_PUB_HEADER,
-      holderStableLibPubKeyWithoutZDecode
-    );
+    // Connvert the 45 byte pub key of holder into 48 byte 
+    const { publicKeyMultibase: holderPublicKeyMultibase } =Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
+      publicKey: holderPublicKeyVerMethod.publicKeyMultibase
+    })
     holderPublicKeyVerMethod.publicKeyMultibase = holderPublicKeyMultibase;
 
     const holderController = {
-      "@context": "https://w3id.org/security/v2",
+      "@context": DID.CONTROLLER_CONTEXT,
       id: holderDidDoc.id,
       authentication: holderDidDoc.authentication,
     };
 
-    console.log(holderController)
 
+    // TODO:  need to use domainname.
     const presentationPurpose = new AuthenticationProofPurpose({
       controller: holderController,
       challenge: params.challenge,
     });
-    // domain: params.domain,
-// 
 
-console.log(presentationPurpose)
     const keyPair = await Ed25519VerificationKey2020.from({
       privateKeyMultibase: "",
       ...holderPublicKeyVerMethod,
     });
-
 
     const vpSuite_holder = new Ed25519Signature2020({
       verificationMethod: holderPublicKeyId,
       key: keyPair,
     });
 
-//    console.log(vpSuite_holder)
 
     ///---------------------------------------
     /// Issuer
@@ -296,17 +233,15 @@ console.log(presentationPurpose)
         (x) => x.id == issuerPublicKeyId
       ) as VerificationMethod;
 
-    const issuerStableLibPubKeyWithoutZ =
-      issuerPublicKeyVerMethod.publicKeyMultibase.substr(1);
-    const issuerStableLibPubKeyWithoutZDecode = decode(issuerStableLibPubKeyWithoutZ);
-    const issuerPublicKeyMultibase = this._encodeMbKey(
-      MULTICODEC_ED25519_PUB_HEADER,
-      issuerStableLibPubKeyWithoutZDecode
-    );
+
+    // Connvert the 45 byte pub key of issuer into 48 byte 
+    const { publicKeyMultibase:  issuerPublicKeyMultibase} = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
+      publicKey: issuerPublicKeyVerMethod.publicKeyMultibase
+    })
     issuerPublicKeyVerMethod.publicKeyMultibase = issuerPublicKeyMultibase;
 
     const issuerController = {
-      "@context": "https://w3id.org/security/v2",
+      "@context": DID.CONTROLLER_CONTEXT,
       id: issuerDidDoc.id,
       assertionMethod: issuerDidDoc.assertionMethod,
     };
@@ -315,28 +250,15 @@ console.log(presentationPurpose)
       controller: issuerController,
     });
 
-
     const issuerKeyPair = await Ed25519VerificationKey2020.from({
       privateKeyMultibase: "",
       ...issuerPublicKeyVerMethod,
     });
 
-
     const vcSuite_issuer = new Ed25519Signature2020({
       verificationMethod: issuerPublicKeyId,
       key: issuerKeyPair,
     });
-
-
-    // console.log(vcSuite_issuer)
-    ///---------------------------------------
-
-    // const result = await vc.verify({
-    //   presentation: params.signedPresentation,
-    //   purpose,
-    //   suite: [vcSuite_issuer, vpSuite_holder],
-    //   documentLoader,
-    // });
 
     const result = await vc.verify({
             presentation:  params.signedPresentation,
@@ -345,17 +267,8 @@ console.log(presentationPurpose)
             suite:[vpSuite_holder, vcSuite_issuer],
             documentLoader
             
-        })
+    })
 
-
-        
-        // const result = await vc.verify({
-        //     challenge: para,
-        //     suite,
-        //     documentLoader,
-        //     presentation
-        // });
-    //console.log(JSON.stringify(result))
     return result;
   }
 }
