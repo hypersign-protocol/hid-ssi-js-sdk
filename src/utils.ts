@@ -1,16 +1,16 @@
 import * as constants from "./constants";
-import axios from "axios";
-import { DIDRpc, IDIDRpc } from './rpc/didRPC';
-import { IHIDWallet } from "./wallet/wallet";
+const { encode, decode } = require("base58-universal");
+
+
+const MULTICODEC_ED25519_PUB_HEADER = new Uint8Array([0xed, 0x01]);
+// multicodec ed25519-priv header as varint
+const MULTICODEC_ED25519_PRIV_HEADER = new Uint8Array([0x80, 0x26]);
+
 
 export default class Utils {
-  nodeurl: string;
-  didScheme: string;
-  didRpc: IDIDRpc;
-  constructor(options, wallet?) {
-    this.didScheme = options.didScheme && options.didScheme != "" ?  options.didScheme : constants.DID_SCHEME
-    this.nodeurl = Utils.checkUrl(options.nodeUrl);
-    this.didRpc = new DIDRpc();
+
+  constructor() {
+   
   }
 
   hostName({ mode }) {
@@ -37,9 +37,41 @@ export default class Utils {
     }
   }
 
-  async fetchData(url) {
-    const response = await axios.get(url);
-    return response.data;
+  static _encodeMbKey(header, key) {
+    const mbKey = new Uint8Array(header.length + key.length);
+
+    mbKey.set(header);
+    mbKey.set(key, header.length);
+
+    return "z" + encode(mbKey);
   }
+  
+
+  // Converting 45byte public key to 48 by padding header 
+  // Converting 88byte private key to 91 by padding header
+  public static convertedStableLibKeysIntoEd25519verificationkey2020(stableLibKp: {
+    privKey?: Uint8Array;
+    publicKey?: string;
+  }): {publicKeyMultibase: string, privateKeyMultibase: string} {
+    const result = {} as {publicKeyMultibase: string, privateKeyMultibase: string};
+    if(stableLibKp.publicKey){
+      const stableLibPubKeyWithoutZ = stableLibKp.publicKey.substr(1);
+      const stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
+      result['publicKeyMultibase'] = Utils._encodeMbKey(
+        MULTICODEC_ED25519_PUB_HEADER,
+        stableLibPubKeyWithoutZDecode
+      );
+    }
+    
+    if(stableLibKp.privKey){
+      result['privateKeyMultibase'] = Utils._encodeMbKey(
+        MULTICODEC_ED25519_PRIV_HEADER,
+        stableLibKp.privKey
+      );
+    }
+    
+    return result;
+  }
+
 
 }

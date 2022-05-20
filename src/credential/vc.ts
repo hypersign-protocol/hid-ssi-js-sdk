@@ -1,26 +1,14 @@
 import vc from "vc-js";
-import { Ed25519KeyPair } from "crypto-ld";
-import jsonSigs from "jsonld-signatures";
+import Utils from '../utils';
 import { documentLoader } from "jsonld";
 import { v4 as uuidv4 } from "uuid";
-
 import HypersignSchema from "../schema/schema";
 import { Schema, SchemaProperty } from "../generated/ssi/schema";
 import HypersignDID from "../did";
 import { Did, VerificationMethod } from "../generated/ssi/did";
-import { chownSync } from "fs";
-
-const VC_PREFIX = "vc_";
-const VP_PREFIX = "vp_";
-const { Ed25519Signature2018 } = jsonSigs.suites;
-const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
 import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
-const { encode, decode } = require("base58-universal");
-
-const MULTICODEC_ED25519_PUB_HEADER = new Uint8Array([0xed, 0x01]);
-// multicodec ed25519-priv header as varint
-const MULTICODEC_ED25519_PRIV_HEADER = new Uint8Array([0x80, 0x26]);
+import { VC, DID } from '../constants'; 
 
 interface ISchema {
   id: string;
@@ -90,24 +78,17 @@ export default class HypersignVerifiableCredential
     this.credentialSubject = "";
     this.credentialSchema = {
       id: "",
-      type: "JsonSchemaValidator2018",
+      type: VC.CREDENTAIL_SCHEMA_VALIDATOR_TYPE,
     };
     this.credentialStatus = {
       id: "",
-      type: "CredentialStatusList2017",
+      type: VC.CREDENTAIL_STATUS_TYPE,
     };
     this.proof = "";
   }
 
-  private getId = (type) => {
-    const id = uuidv4();
-    return type
-      ? type === "VC"
-        ? VC_PREFIX + id
-        : type === "VP"
-        ? VP_PREFIX + id
-        : id
-      : id;
+  private getId = () => {
+    return VC.PREFIX + uuidv4();
   };
 
   private checkIfAllRequiredPropsAreSent = (
@@ -180,9 +161,9 @@ export default class HypersignVerifiableCredential
 
     const schemaUrl = `${this.hsSchema.schemaRpc.schemaRestEp}/${schemaId}:`;
 
-    context.push("https://www.w3.org/2018/credentials/v1");
-    //context.push("https://w3id.org/security/suites/ed25519-2020/v1");
-    //context.push('https://www.w3.org/2018/credentials/examples/v1')
+    context.push(VC.CREDENTAIL_BASE_CONTEXT);
+    //context.push(VC.CREDENTAIL_SECURITY_SUITE);
+    
     context.push({
       hs: schemaUrl,
     });
@@ -244,7 +225,7 @@ export default class HypersignVerifiableCredential
         subjectDidDoc.id
     );
     /// TODO:  need to implement this properly
-    vc.id = this.getId("VC");
+    vc.id = this.getId();
 
     // Type
     vc.type = [];
@@ -280,39 +261,6 @@ export default class HypersignVerifiableCredential
     return vc;
   }
 
-  private _encodeMbKey(header, key) {
-    const mbKey = new Uint8Array(header.length + key.length);
-
-    mbKey.set(header);
-    mbKey.set(key, header.length);
-
-    return "z" + encode(mbKey);
-  }
-  
-  private convertedStableLibKeysIntoEd25519verificationkey2020(stableLibKp: {
-    privKey: Uint8Array;
-    publicKeyMultibase: string;
-  }) {
-    // const stableLibKp = generateStableLibKeys();
-    // console.log(stableLibKp)
-
-    const stableLibPubKeyWithoutZ = stableLibKp.publicKeyMultibase.substr(1);
-    const stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
-    const publicKeyMultibase = this._encodeMbKey(
-      MULTICODEC_ED25519_PUB_HEADER,
-      stableLibPubKeyWithoutZDecode
-    );
-
-    const privateKeyMultibase = this._encodeMbKey(
-      MULTICODEC_ED25519_PRIV_HEADER,
-      stableLibKp.privKey
-    );
-
-    return {
-      publicKeyMultibase,
-      privateKeyMultibase,
-    };
-  }
 
   public async signCredential(params: {
     credential: IVerifiableCredential;
@@ -335,9 +283,9 @@ export default class HypersignVerifiableCredential
     );
 
     const convertedKeyPair =
-      this.convertedStableLibKeysIntoEd25519verificationkey2020({
+      Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
         privKey: Uint8ArrayPrivKey,
-        publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase,
+        publicKey: publicKeyVerMethod.publicKeyMultibase,
       });
 
     publicKeyVerMethod["publicKeyMultibase"] =
@@ -378,18 +326,16 @@ export default class HypersignVerifiableCredential
         (x) => x.id == publicKeyId
       ) as VerificationMethod;
 
-    const stableLibPubKeyWithoutZ =
-      publicKeyVerMethod.publicKeyMultibase.substr(1);
-    const stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
-    const publicKeyMultibase = this._encodeMbKey(
-      MULTICODEC_ED25519_PUB_HEADER,
-      stableLibPubKeyWithoutZDecode
-    );
+
+    // Convert 45 byte publick key into 48
+    const { publicKeyMultibase } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
+      publicKey: publicKeyVerMethod.publicKeyMultibase
+    })
 
     publicKeyVerMethod.publicKeyMultibase = publicKeyMultibase;
 
     const assertionController = {
-      "@context": "https://w3id.org/security/v2",
+      "@context": DID.CONTROLLER_CONTEXT,
       id: issuerDidDoc.id,
       assertionMethod: issuerDidDoc.assertionMethod,
     };

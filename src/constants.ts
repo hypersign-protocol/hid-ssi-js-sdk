@@ -24,3 +24,16 @@ export enum HIDRpcEnums {
     MsgDeactivateDID = "MsgDeactivateDID",
     MsgCreateSchema = "MsgCreateSchema",
 }
+
+export const VC = {
+    PREFIX: "vc_",
+    CREDENTAIL_SCHEMA_VALIDATOR_TYPE: "JsonSchemaValidator2018",
+    CREDENTAIL_STATUS_TYPE: "CredentialStatusList2017",
+    CREDENTAIL_BASE_CONTEXT: "https://www.w3.org/2018/credentials/v1",
+    CREDENTAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1"
+}
+
+export const DID = {
+    CONTROLLER_CONTEXT: "https://w3id.org/security/v2"
+}
+
