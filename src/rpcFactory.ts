@@ -2,8 +2,8 @@ import { Registry } from "@cosmjs/proto-signing";
 import {
   defaultRegistryTypes,
 } from "@cosmjs/stargate";
-import * as generatedProto from '../generated/ssi/tx';
-import { HIDRpcEnums, HID_COSMOS_MODULE } from '../constants';
+import * as generatedProto from './generated/ssi/tx';
+import { HIDRpcEnums, HID_COSMOS_MODULE } from './constants';
 
 export interface IHIDRpcFactory{
     registerRpc: any;

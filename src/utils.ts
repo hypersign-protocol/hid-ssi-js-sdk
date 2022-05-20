@@ -3,21 +3,7 @@ const { encode, decode } = require("base58-universal");
 
 export default class Utils {
   constructor() {}
-  hostName({ mode }) {
-    let nodeUrl;
-    switch (mode) {
-      case "live":
-        nodeUrl = Utils.checkUrl(constants.HYPERSIGN_NETWORK_LIVE);
-        break;
-      case "test":
-        nodeUrl = Utils.checkUrl(constants.HYPERSIGN_NETWORK_LIVE);
-        break;
-      default:
-        throw new Error("Invalid mode");
-    }
-    return nodeUrl;
-  }
-
+  
   public static checkUrl(url: string) {
     // TODO: check if the url is a valid url
     if (url.charAt(url.length - 1) === "/") {

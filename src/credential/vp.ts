@@ -2,7 +2,7 @@ import vc from "vc-js";
 import jsonSigs from "jsonld-signatures";
 import { documentLoader } from "jsonld";
 import { v4 as uuidv4 } from "uuid";
-import HypersignDID from "../did";
+import HypersignDID from "../did/did";
 import { Did, VerificationMethod } from "../generated/ssi/did";
 import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";

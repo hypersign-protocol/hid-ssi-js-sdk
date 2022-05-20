@@ -3,7 +3,7 @@ import { OfflineSigner } from "@cosmjs/proto-signing";
 import {
     SigningStargateClient, StargateClient,
 } from "@cosmjs/stargate";
-import { HIDRpcFactory } from '../rpc/rpcFactory';
+import { HIDRpcFactory } from '../rpcFactory'
 import Utils from "../utils";
 const { HYPERSIGN_TESTNET_RPC, HYPERSIGN_TESTNET_REST , HYPERSIGN_MAINNET_RPC, HYPERSIGN_MAINNET_REST, HIDRpcEnums } = require('../constants')
 export class HIDClient {

@@ -1,11 +1,11 @@
-import * as constant from './constants'
+import * as constant from '../constants'
 import jsonSigs from 'jsonld-signatures'
 import { Ed25519KeyPair } from 'crypto-ld'
 import { documentLoader } from 'jsonld'
 import { v4 as uuidv4 } from 'uuid';
 import blake from 'blakejs';
 import axios from "axios";
-import { DIDRpc, IDIDRpc } from './rpc/didRPC'
+import { DIDRpc, IDIDRpc } from './didRPC';
 
 const ed25519 = require('@stablelib/ed25519');
 const {encode} = require('base58-universal');
@@ -15,7 +15,7 @@ import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 const { Ed25519Signature2018 } = jsonSigs.suites;
 
-import { Did, SignInfo, VerificationMethod, Service} from './generated/ssi/did';
+import { Did, SignInfo, VerificationMethod, Service} from '../generated/ssi/did';
 
 
 interface IPublicKey {
@@ -98,20 +98,15 @@ class DID implements Did{
   public getDidString(): string{
     return JSON.stringify(this);
   }
-   // TODO: It should conforms did:hid method
-  private getChallange() {
-    return uuidv4()
-  }
 
-  private getId = () => `${constant.DID_SCHEME}:${this.getChallange()}`;
+  private getId = () => `${constant.DID.SCHEME}:${uuidv4()}`;
 
 }
 
 
-export default class did implements IDID{
+export default class HypersignDID implements IDID{
   private didrpc: IDIDRpc;
   constructor() {
-    
     this.didrpc = new DIDRpc();  
   }
 

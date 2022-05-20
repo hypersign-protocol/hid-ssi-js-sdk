@@ -1,6 +1,6 @@
 import { Schema as ISchemaProto, Schema,  SchemaProperty } from "../generated/ssi/schema";
 import { v4 as uuidv4 } from "uuid";
-import { SchemaRpc } from "../rpc/schemaRPC";
+import { SchemaRpc } from "./schemaRPC";
 
 const ed25519 = require("@stablelib/ed25519");
 

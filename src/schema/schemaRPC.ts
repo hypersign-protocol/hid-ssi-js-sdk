@@ -1,10 +1,10 @@
 import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_TESTNET_REST, HYPERSIGN_NETWORK_SCHEMA_PATH } from '../constants'
 import * as generatedProto from '../generated/ssi/tx';
-import { IHIDWallet } from '../wallet/wallet';
+import { IHIDWallet } from '../hid/wallet'
 
 
 import axios from "axios";
-import { HIDClient } from '../hid/hidClient';
+import { HIDClient } from '../hid/client'
 import { Schema } from '../generated/ssi/schema'
 import { SignInfo } from "../generated/ssi/did";
 import {

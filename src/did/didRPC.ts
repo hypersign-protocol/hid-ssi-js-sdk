@@ -7,7 +7,7 @@ import {
 
 
 import axios from "axios";
-import { HIDClient } from '../hid/hidClient';
+import { HIDClient } from '../hid/client'
 
 export interface IDIDRpc {
     registerDID(didDoc: Did, signature: string, verificationMethodId: string):Promise<Object>;
