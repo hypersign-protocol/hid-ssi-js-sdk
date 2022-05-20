@@ -8,6 +8,7 @@ import {
 
 import axios from "axios";
 import { HIDClient } from '../hid/client'
+import Utils from '../utils';
 
 export interface IDIDRpc {
     registerDID(didDoc: Did, signature: string, verificationMethodId: string):Promise<Object>;
@@ -38,15 +39,7 @@ export class DIDRpc implements IDIDRpc{
                 }),
             }; 
 
-        // TODO: need to find a way to make it dynamic
-        const fee = {
-            amount: [{
-                denom: 'uhid',
-                amount: '5000',
-            }, ],
-            gas: '200000',
-        }
-    
+        const fee = Utils.getFee();
         const hidClient: SigningStargateClient = HIDClient.getHidClient();
         const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
         return txResult

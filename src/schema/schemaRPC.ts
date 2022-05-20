@@ -1,7 +1,5 @@
-import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_TESTNET_REST, HYPERSIGN_NETWORK_SCHEMA_PATH } from '../constants'
+import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_SCHEMA_PATH } from '../constants'
 import * as generatedProto from '../generated/ssi/tx';
-import { IHIDWallet } from '../hid/wallet'
-
 
 import axios from "axios";
 import { HIDClient } from '../hid/client'
@@ -10,6 +8,7 @@ import { SignInfo } from "../generated/ssi/did";
 import {
     SigningStargateClient,
 } from "@cosmjs/stargate";
+import Utils from '../utils';
 
 export interface ISchemaRPC {
     createSchema(schema: Schema, signature: string, verificationMethodId: string):Promise<Object>;
@@ -40,14 +39,7 @@ export class SchemaRpc implements ISchemaRPC{
         }; 
 
         // TODO: need to find a way to make it dynamic
-        const fee = {
-            amount: [{
-                denom: 'uhid',
-                amount: '5000',
-            }, ],
-            gas: '200000',
-        }
-
+        const fee = Utils.getFee();
         const hidClient: SigningStargateClient = HIDClient.getHidClient();
         const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
         return txResult
