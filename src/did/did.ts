@@ -37,12 +37,12 @@ interface IParams {
 }
 
 export interface IDID{
-  generateKeys(seed:string): Promise<{ privateKeyMultibase: string, publicKeyMultibase: string }>;
-  generate(publicKeyMultibase: string): string;
-  register(didDocString: string , privateKeyMultibase: string, verificationMethodId: string): Promise<any>;
-  resolve(did: string): Promise<any>;
-  update(didDocString: string , privateKeyMultibase: string, verificationMethodId: string, versionId: string): Promise<any>;
-  deactivate(didDocString: string , privateKeyMultibase: string, verificationMethodId: string, versionId: string): Promise<any>;
+  generateKeys(params: {seed:string}): Promise<{ privateKeyMultibase: string, publicKeyMultibase: string }>;
+  generate(params: {publicKeyMultibase: string}): string;
+  register(params: {didDocString: string , privateKeyMultibase: string, verificationMethodId: string}): Promise<any>;
+  resolve(params: {did: string}): Promise<any>;
+  update(params:{didDocString: string , privateKeyMultibase: string, verificationMethodId: string, versionId: string}): Promise<any>;
+  deactivate(params: {didDocString: string , privateKeyMultibase: string, verificationMethodId: string, versionId: string}): Promise<any>;
   
   // didAuth
   signDid(params: IParams): Promise<any>;
@@ -115,11 +115,11 @@ export default class HypersignDID implements IDID{
 
 
   // Generate a new key pair of type Ed25519VerificationKey2020
-  public async generateKeys(seed: string): Promise<{ privateKeyMultibase: string, publicKeyMultibase: string }> {
+  public async generateKeys(params: {seed:string}): Promise<{ privateKeyMultibase: string, publicKeyMultibase: string }> {
     
     let edKeyPair;
-    if(seed){
-       const seedBytes = new Uint8Array(Buffer.from(seed))
+    if(params.seed){
+       const seedBytes = new Uint8Array(Buffer.from(params.seed))
        edKeyPair = await Ed25519VerificationKey2020.generate({ seed: seedBytes });
     } else {
         edKeyPair= await Ed25519VerificationKey2020.generate();
@@ -132,31 +132,32 @@ export default class HypersignDID implements IDID{
   }
 
   /// Generate Did Document
-  public generate(publicKeyMultibase:string): string{
+  public generate(params: {publicKeyMultibase: string}): string{
+    if(!params.publicKeyMultibase) {
+      throw new Error('params.publicKeyMultibase is required to generate new did didoc')
+    }
     const {publicKeyMultibase: publicKeyMultibase1} = Utils.convertEd25519verificationkey2020toStableLibKeysInto({
-      publicKey: publicKeyMultibase
+      publicKey: params.publicKeyMultibase
     })
     const newDid = new DID(publicKeyMultibase1)
     return newDid.getDidString();
   }
 
-  // Update DID Document
-  public async update(didDocString: string , privateKeyMultibase: string, verificationMethodId: string, versionId: string): Promise<any> {
-    if(!didDocString) throw new Error('didDocString is required to udpate DID')
-    if(!privateKeyMultibase) throw new Error('privateKeyMultibase is required to udpate DID')
-    const signature = await this.sign({didDocString, privateKeyMultibase })
-    const didDoc: Did = JSON.parse(didDocString)
-    return await this.didrpc.updateDID(didDoc, signature, verificationMethodId, versionId)
-  }
-
-  public async deactivate(didDocString: string , privateKeyMultibase: string, verificationMethodId: string, versionId: string): Promise<any> {
-    const signature = await this.sign({didDocString, privateKeyMultibase })
-    const didDoc: Did = JSON.parse(didDocString)
-    return await this.didrpc.deactivateDID(didDoc, signature, verificationMethodId, versionId)
-  }
 
   // TODO:  this method MUST also accept signature/proof 
-  public async register(didDocString: string , privateKeyMultibase: string, verificationMethodId: string): Promise<any>{
+  public async register(params: {didDocString: string , privateKeyMultibase: string, verificationMethodId: string}): Promise<any>{
+    if(!params.didDocString){
+      throw new Error('params.didDocString is required to register a did')
+    }
+    if(!params.privateKeyMultibase){
+      throw new Error('params.privateKeyMultibase is required to register a did')
+    }
+
+    if(!params.privateKeyMultibase){
+      throw new Error('params.verificationMethodId is required to register a did')
+    }
+
+    const {didDocString, privateKeyMultibase, verificationMethodId} = params;
     const signature = await this.sign({didDocString, privateKeyMultibase })
     const didDoc: Did = JSON.parse(didDocString);
     return await this.didrpc.registerDID(
@@ -166,10 +167,58 @@ export default class HypersignDID implements IDID{
     )
   }
 
-  public async resolve(did: string): Promise<any>{
-    return await this.didrpc.resolveDID(did)
+  public async resolve(params: {did: string}): Promise<any>{
+    if(!params.did){
+      throw new Error('params.did is required to resolve a did')
+    }
+    return await this.didrpc.resolveDID(params.did)
   }
 
+
+  
+  // Update DID Document
+  public async update(params:{didDocString: string , privateKeyMultibase: string, verificationMethodId: string, versionId: string}): Promise<any> {
+    if(!params.didDocString){
+      throw new Error('params.didDocString is required to update a did')
+    }
+    if(!params.privateKeyMultibase){
+      throw new Error('params.privateKeyMultibase is required to update a did')
+    }
+
+    if(!params.privateKeyMultibase){
+      throw new Error('params.verificationMethodId is required to update a did')
+    }
+    if(!params.versionId){
+      throw new Error('params.versionId is required to update a did')
+    }
+
+
+    const {didDocString, privateKeyMultibase, verificationMethodId, versionId} = params;
+    const signature = await this.sign({didDocString, privateKeyMultibase })
+    const didDoc: Did = JSON.parse(didDocString)
+    return await this.didrpc.updateDID(didDoc, signature, verificationMethodId, versionId)
+  }
+
+  public async deactivate(params: {didDocString: string , privateKeyMultibase: string, verificationMethodId: string, versionId: string}): Promise<any> {
+    if(!params.didDocString){
+      throw new Error('params.didDocString is required to deactivate a did')
+    }
+    if(!params.privateKeyMultibase){
+      throw new Error('params.privateKeyMultibase is required to deactivate a did')
+    }
+
+    if(!params.privateKeyMultibase){
+      throw new Error('params.verificationMethodId is required to deactivate a did')
+    }
+    if(!params.versionId){
+      throw new Error('params.versionId is required to deactivate a did')
+    }
+
+    const {didDocString, privateKeyMultibase, verificationMethodId, versionId} = params;
+    const signature = await this.sign({didDocString, privateKeyMultibase })
+    const didDoc: Did = JSON.parse(didDocString)
+    return await this.didrpc.deactivateDID(didDoc, signature, verificationMethodId, versionId)
+  }
   /// Did Auth
   public signDid(params: IParams): Promise<any>{
     throw new Error('Method not impplemented')
