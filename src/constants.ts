@@ -38,7 +38,9 @@ Object.freeze(VP)
 
 export const DID = {
     CONTROLLER_CONTEXT: "https://w3id.org/security/v2",
-    SCHEME: "did:hs"
+    SCHEME: "did:hs",
+    DID_BASE_CONTEXT: "https://www.w3.org/ns/did/v1",
+    VERIFICATION_METHOD_TYPE: "Ed25519VerificationKey2020"
 }
 Object.freeze(DID)
 

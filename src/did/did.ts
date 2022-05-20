@@ -1,22 +1,16 @@
 import * as constant from '../constants'
-import jsonSigs from 'jsonld-signatures'
-import { Ed25519KeyPair } from 'crypto-ld'
-import { documentLoader } from 'jsonld'
 import { v4 as uuidv4 } from 'uuid';
-import blake from 'blakejs';
-import axios from "axios";
 import { DIDRpc, IDIDRpc } from './didRPC';
-
+import Utils from '../utils'
 const ed25519 = require('@stablelib/ed25519');
 const {encode} = require('base58-universal');
-const webCrypto = require('crypto').webcrypto
-import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
-
-const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
-const { Ed25519Signature2018 } = jsonSigs.suites;
+const webCrypto = require('crypto').webcrypto;
 
 import { Did, SignInfo, VerificationMethod, Service} from '../generated/ssi/did';
 
+
+import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
+import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 
 interface IPublicKey {
   '@context': string
@@ -42,17 +36,15 @@ interface IParams {
   did: string
 }
 
-interface IDIDOptions{
-  user: object;
-  publicKey?: string
-}
-
 export interface IDID{
-  generateDID(publicKeyMultibase: string): string;
-  register(didDocString: string , signature: string, verificationMethodId: string): Promise<any>;
+  generateKeys(seed:string): Promise<{ privateKeyMultibase: string, publicKeyMultibase: string }>;
+  generate(publicKeyMultibase: string): string;
+  register(didDocString: string , privateKeyMultibase: string, verificationMethodId: string): Promise<any>;
   resolve(did: string): Promise<any>;
+  update(didDocString: string , privateKeyMultibase: string, verificationMethodId: string, versionId: string): Promise<any>;
+  deactivate(didDocString: string , privateKeyMultibase: string, verificationMethodId: string, versionId: string): Promise<any>;
   
-  sign(params: { didDocString: string, privateKeyMultibase: Uint8Array} ): Promise<any>;
+  // didAuth
   signDid(params: IParams): Promise<any>;
   verify(params: IParams): Promise<any>;
 }
@@ -71,20 +63,16 @@ class DID implements Did{
   capabilityDelegation: string[];
   service: Service[];
   constructor(publicKey: string){
-    // TODO:  need to remove this hardcoding
-    this.context = ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/suites/ed25519-2020/v1"];
-
+    this.context = [constant.DID.DID_BASE_CONTEXT];
     this.id = this.getId();
     this.controller = [this.id];
     this.alsoKnownAs = [this.id];
-
     const verificationMethod: VerificationMethod = {
       id: this.id + '#' + publicKey,
-      type: "Ed25519VerificationKey2020", // TODO: need to remove this hardcoding
+      type: constant.DID.VERIFICATION_METHOD_TYPE, 
       controller: this.id,
       publicKeyMultibase: publicKey,
     }
-
     this.verificationMethod = [verificationMethod];
     this.authentication = [verificationMethod.id];
     this.assertionMethod = [verificationMethod.id];
@@ -110,59 +98,66 @@ export default class HypersignDID implements IDID{
     this.didrpc = new DIDRpc();  
   }
 
-  public generateKeys(cryptoObj?): { privateKeyMultibase:Uint8Array, publicKeyMultibase: string } {
-    const seed = new Uint8Array(32)
-    // If the SDK is run from browser, use window.crypto object
-    if (cryptoObj) {
-      cryptoObj.getRandomValues(seed)
-    } else {
-      webCrypto.getRandomValues(seed)
-    }
+   // Sign the doc
+  private async sign(params: { didDocString: string, privateKeyMultibase: string} ): Promise<any> {
     
-    const generatedKeyPair = ed25519.generateKeyPairFromSeed(seed);
-    
-    const pubKey = "z" + encode(Buffer.from(generatedKeyPair["publicKey"]))
-    const privKey = generatedKeyPair["secretKey"]
+    const { privateKeyMultibase : privateKeyMultibaseConverted } = Utils.convertEd25519verificationkey2020toStableLibKeysInto({
+        privKey: params.privateKeyMultibase
+    });
 
+    const { didDocString } = params; 
+    // TODO:  do proper checck of paramaters
+    const did: Did = JSON.parse(didDocString);
+    const didBytes = (await Did.encode(did)).finish()
+    const signed = ed25519.sign(privateKeyMultibaseConverted,  didBytes);
+    return Buffer.from(signed).toString('base64');  
+  }
+
+
+  // Generate a new key pair of type Ed25519VerificationKey2020
+  public async generateKeys(seed: string): Promise<{ privateKeyMultibase: string, publicKeyMultibase: string }> {
+    
+    let edKeyPair;
+    if(seed){
+       const seedBytes = new Uint8Array(Buffer.from(seed))
+       edKeyPair = await Ed25519VerificationKey2020.generate({ seed: seedBytes });
+    } else {
+        edKeyPair= await Ed25519VerificationKey2020.generate();
+    }
+    const exportedKp = await edKeyPair.export({publicKey: true, privateKey: true});
     return {
-      privateKeyMultibase: privKey,
-      publicKeyMultibase: pubKey
+      privateKeyMultibase: exportedKp.privateKeyMultibase,  // 91byte //zbase58
+      publicKeyMultibase: exportedKp.publicKeyMultibase //48 bytes
     }
   }
 
- 
   /// Generate Did Document
-  public generateDID(publicKeyMultibase:string): string{
-    const newDid = new DID(publicKeyMultibase)
+  public generate(publicKeyMultibase:string): string{
+    const {publicKeyMultibase: publicKeyMultibase1} = Utils.convertEd25519verificationkey2020toStableLibKeysInto({
+      publicKey: publicKeyMultibase
+    })
+    const newDid = new DID(publicKeyMultibase1)
     return newDid.getDidString();
   }
 
   // Update DID Document
-  public async update(didDocString: string, signature: string, verificationMethodId: string, versionId: string): Promise<any> {
+  public async update(didDocString: string , privateKeyMultibase: string, verificationMethodId: string, versionId: string): Promise<any> {
+    if(!didDocString) throw new Error('didDocString is required to udpate DID')
+    if(!privateKeyMultibase) throw new Error('privateKeyMultibase is required to udpate DID')
+    const signature = await this.sign({didDocString, privateKeyMultibase })
     const didDoc: Did = JSON.parse(didDocString)
     return await this.didrpc.updateDID(didDoc, signature, verificationMethodId, versionId)
   }
 
-  public updateDIDFields(didDoc: Did, options: object[]): Did {
-    let updateDIDDoc = didDoc    
-    
-    options.forEach((option, index) => {
-      Object.keys(option).forEach((field) => {
-        updateDIDDoc[field] = option[field]
-      })
-    });
-
-    return updateDIDDoc
-  }
-
-  // Deactivate DID Document
-  public async deactivate(didDocString: string, signature: string, verificationMethodId: string, versionId: string): Promise<any> {
+  public async deactivate(didDocString: string , privateKeyMultibase: string, verificationMethodId: string, versionId: string): Promise<any> {
+    const signature = await this.sign({didDocString, privateKeyMultibase })
     const didDoc: Did = JSON.parse(didDocString)
     return await this.didrpc.deactivateDID(didDoc, signature, verificationMethodId, versionId)
   }
 
   // TODO:  this method MUST also accept signature/proof 
-  public async register(didDocString: string , signature: string, verificationMethodId: string): Promise<any>{
+  public async register(didDocString: string , privateKeyMultibase: string, verificationMethodId: string): Promise<any>{
+    const signature = await this.sign({didDocString, privateKeyMultibase })
     const didDoc: Did = JSON.parse(didDocString);
     return await this.didrpc.registerDID(
       didDoc,
@@ -175,16 +170,7 @@ export default class HypersignDID implements IDID{
     return await this.didrpc.resolveDID(did)
   }
 
-  // Sign the doc
-  public async sign(params: { didDocString: string, privateKeyMultibase: Uint8Array} ): Promise<any> {
-    const { didDocString, privateKeyMultibase } = params; 
-    // TODO:  do proper checck of paramaters
-    const did: Did = JSON.parse(didDocString);
-    const didBytes = (await Did.encode(did)).finish()
-    const signed = ed25519.sign(privateKeyMultibase,  didBytes);
-    return Buffer.from(signed).toString('base64');  
-  }
-
+  /// Did Auth
   public signDid(params: IParams): Promise<any>{
     throw new Error('Method not impplemented')
   }
@@ -224,4 +210,5 @@ export default class HypersignDID implements IDID{
 
     // return verified;
   }
+
 }
