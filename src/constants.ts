@@ -1,8 +1,6 @@
 "use strict"
 export const compactProof = false;
 
-export const HYPERSIGN_NETWORK_DID_REST_PATH="api/v1/did/"
-export const HYPERSIGN_NETWORK_SCHEMA_EP="api/v1/schema/"
 
 export const HYPERSIGN_TESTNET_RPC ="http://localhost:26657"
 export const HYPERSIGN_TESTNET_REST="http://localhost:1317"
@@ -14,6 +12,7 @@ export const HID_COSMOS_MODULE='/hypersignprotocol.hidnode.ssi'
 export const HYPERSIGN_NETWORK_DID_PATH="hypersign-protocol/hidnode/ssi/did"
 export const HYPERSIGN_NETWORK_SCHEMA_PATH="hypersign-protocol/hidnode/ssi/schema"
 export const HYPERSIGN_NETWORK_BANK_BALANCE_PATH="/bank/balances/"
+
 export enum HIDRpcEnums {
     MsgCreateDID = "MsgCreateDID",
     MsgUpdateDID = "MsgUpdateDID",
@@ -49,3 +48,9 @@ export const KEY_HEADERS = {
     MULTICODEC_ED25519_PRIV_HEADER : new Uint8Array([0x80, 0x26])
 }
 Object.freeze(KEY_HEADERS)
+
+export const HID_DNOMINATION = 'uhid';
+export const HID_MIN_GAS='200000'
+export const HID_MIN_FEE='5000'
+
+
