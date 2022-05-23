@@ -12,8 +12,8 @@
     "author": "Vishwas Anand Bhushan",
     "license": "ISC",
     "dependencies": {
-        "@cosmjs/proto-signing": "^0.27.0",
-        "@cosmjs/stargate": "^0.27.0",
+        "@cosmjs/proto-signing": "^0.28.0",
+        "@cosmjs/stargate": "^0.28.0",
         "@digitalbazaar/ed25519-signature-2020": "^3.0.0",
         "@digitalbazaar/ed25519-verification-key-2018": "^3.1.2",
         "@digitalbazaar/ed25519-verification-key-2020": "^3.3.0",
