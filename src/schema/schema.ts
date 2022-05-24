@@ -1,8 +1,8 @@
-import { Schema as ISchemaProto, Schema,  SchemaProperty } from "../generated/ssi/schema";
-import { v4 as uuidv4 } from "uuid";
-import { SchemaRpc } from "./schemaRPC";
+import { Schema as ISchemaProto, Schema, SchemaProperty } from '../generated/ssi/schema';
+import { v4 as uuidv4 } from 'uuid';
+import { SchemaRpc } from './schemaRPC';
 
-const ed25519 = require("@stablelib/ed25519");
+const ed25519 = require('@stablelib/ed25519');
 
 interface ISchemaFields {
   type: string;
@@ -11,7 +11,7 @@ interface ISchemaFields {
   isRequired: boolean;
 }
 
-interface ISchemaMethods{
+interface ISchemaMethods {
   getSchema(params: {
     name: string;
     description?: string;
@@ -19,22 +19,15 @@ interface ISchemaMethods{
     fields?: Array<ISchemaFields>;
     additionalProperties: boolean;
   }): Schema;
- 
-  signSchema(params: {
-    privateKey: string;
-    schema: ISchemaProto;
-  }): Promise<any>;
 
-  registerSchema(params: {
-    schema: Schema;
-    signature: string;
-    verificationMethodId: string;
-  }): Promise<any>;
+  signSchema(params: { privateKey: string; schema: ISchemaProto }): Promise<any>;
+
+  registerSchema(params: { schema: Schema; signature: string; verificationMethodId: string }): Promise<any>;
 
   resolve(params: { schemaId: string }): Promise<Schema>;
 }
 
-export default class HyperSignSchema implements ISchemaMethods, Schema{
+export default class HyperSignSchema implements ISchemaMethods, Schema {
   type: string;
   modelVersion: string;
   id: string;
@@ -46,18 +39,17 @@ export default class HyperSignSchema implements ISchemaMethods, Schema{
 
   constructor() {
     this.schemaRpc = new SchemaRpc();
-    (this.type =
-      "https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json"),
-      (this.modelVersion = "1.0"),
-      (this.id = ""),
-      (this.name = ""),
-      (this.author = ""),
-      (this.authored = "");
+    (this.type = 'https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json'),
+      (this.modelVersion = '1.0'),
+      (this.id = ''),
+      (this.name = ''),
+      (this.author = ''),
+      (this.authored = '');
     this.schema = {
-      schema: "",
-      description: "",
-      type: "",
-      properties: "",
+      schema: '',
+      description: '',
+      type: '',
+      properties: '',
       required: [],
       additionalProperties: false,
     };
@@ -78,17 +70,17 @@ export default class HyperSignSchema implements ISchemaMethods, Schema{
     fields?: Array<ISchemaFields>;
     additionalProperties: boolean;
   }): Schema {
-    if (!params.author) throw new Error("Author must be passed");
+    if (!params.author) throw new Error('Author must be passed');
 
     this.id = this.getSchemaId(params.author);
     this.name = params.name;
     this.author = params.author;
-    this.authored = new Date().toISOString().slice(0, -5) + "Z";
+    this.authored = new Date().toISOString().slice(0, -5) + 'Z';
     this.schema = {
-      schema: "http://json-schema.org/draft-07/schema",
-      description: params.description ? params.description : "",
-      type: "object",
-      properties: "",
+      schema: 'http://json-schema.org/draft-07/schema',
+      description: params.description ? params.description : '',
+      type: 'object',
+      properties: '',
       required: [],
       additionalProperties: params.additionalProperties,
     };
@@ -117,29 +109,24 @@ export default class HyperSignSchema implements ISchemaMethods, Schema{
     }
 
     return {
-        type: this.type,
-        modelVersion: this.modelVersion,
-        id: this.id,
-        name: this.name,
-        author: this.author,
-        authored: this.authored,
-        schema: this.schema    
+      type: this.type,
+      modelVersion: this.modelVersion,
+      id: this.id,
+      name: this.name,
+      author: this.author,
+      authored: this.authored,
+      schema: this.schema,
     };
   }
 
-  public async signSchema(params: {
-    privateKey: string;
-    schema: Schema;
-  }): Promise<any> {
-    if (!params.privateKey) throw new Error("PrivateKey must be passed");
-    if (!params.schema) throw new Error("Schema must be passed");
+  public async signSchema(params: { privateKey: string; schema: Schema }): Promise<any> {
+    if (!params.privateKey) throw new Error('PrivateKey must be passed');
+    if (!params.schema) throw new Error('Schema must be passed');
 
     const dataBytes = (await ISchemaProto.encode(params.schema)).finish();
-    const privateKeyBytes = new Uint8Array(
-      Buffer.from(params.privateKey, "base64")
-    );
+    const privateKeyBytes = new Uint8Array(Buffer.from(params.privateKey, 'base64'));
     const signed = ed25519.sign(privateKeyBytes, dataBytes);
-    return Buffer.from(signed).toString("base64");
+    return Buffer.from(signed).toString('base64');
   }
 
   public async registerSchema(params: {
@@ -147,22 +134,18 @@ export default class HyperSignSchema implements ISchemaMethods, Schema{
     signature: string;
     verificationMethodId: string;
   }): Promise<object> {
-    if (!params.schema) throw new Error("Schema must be passed");
-    if (!params.signature) throw new Error("Signature must be passed");
-    if (!params.verificationMethodId) throw new Error("VerificationMethodId must be passed");
+    if (!params.schema) throw new Error('Schema must be passed');
+    if (!params.signature) throw new Error('Signature must be passed');
+    if (!params.verificationMethodId) throw new Error('VerificationMethodId must be passed');
 
-    return this.schemaRpc.createSchema(
-      params.schema,
-      params.signature,
-      params.verificationMethodId
-    )
+    return this.schemaRpc.createSchema(params.schema, params.signature, params.verificationMethodId);
   }
 
   public async resolve(params: { schemaId: string }): Promise<Schema> {
-    if (!params.schemaId) throw new Error("SchemaId must be passed");
-    const schemaArr: Array<object> =  await this.schemaRpc.resolveSchema(params.schemaId);
-    if(!schemaArr || schemaArr.length < 0){
-      throw new Error("No schema found, id = " + params.schemaId)
+    if (!params.schemaId) throw new Error('SchemaId must be passed');
+    const schemaArr: Array<object> = await this.schemaRpc.resolveSchema(params.schemaId);
+    if (!schemaArr || schemaArr.length < 0) {
+      throw new Error('No schema found, id = ' + params.schemaId);
     }
     const schema = schemaArr[0] as Schema;
     return schema;

@@ -1,14 +1,14 @@
-import vc from "vc-js";
+import vc from 'vc-js';
 import Utils from '../utils';
-import { documentLoader } from "jsonld";
-import { v4 as uuidv4 } from "uuid";
-import HypersignSchema from "../schema/schema";
-import { Schema, SchemaProperty } from "../generated/ssi/schema";
-import HypersignDID from "../did/did";
-import { Did, VerificationMethod } from "../generated/ssi/did";
-import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
-import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
-import { VC, DID } from '../constants'; 
+import { documentLoader } from 'jsonld';
+import { v4 as uuidv4 } from 'uuid';
+import HypersignSchema from '../schema/schema';
+import { Schema, SchemaProperty } from '../generated/ssi/schema';
+import HypersignDID from '../did/did';
+import { Did, VerificationMethod } from '../generated/ssi/did';
+import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
+import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
+import { VC, DID } from '../constants';
 
 interface ISchema {
   id: string;
@@ -45,17 +45,11 @@ export interface ICredentialMethods {
     expirationDate: string;
     fields: Object;
   }): Promise<IVerifiableCredential>;
-  signCredential(params: {
-    credential: IVerifiableCredential;
-    issuerDid: string;
-    privateKey: string;
-  }): Promise<any>;
-  verifyCredential(params: {credential: IVerifiableCredential, issuerDid: string}): Promise<any>;
+  signCredential(params: { credential: IVerifiableCredential; issuerDid: string; privateKey: string }): Promise<any>;
+  verifyCredential(params: { credential: IVerifiableCredential; issuerDid: string }): Promise<any>;
 }
 
-export default class HypersignVerifiableCredential
-  implements ICredentialMethods, IVerifiableCredential
-{
+export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
   public context: Array<string>;
   public id: string;
   public type: Array<string>;
@@ -74,49 +68,39 @@ export default class HypersignVerifiableCredential
     this.hsDid = new HypersignDID();
 
     this.context = [];
-    this.id = "";
+    this.id = '';
     this.type = [];
-    this.issuer = "";
-    this.issuanceDate = "";
-    this.expirationDate = "";
-    this.credentialSubject = "";
+    this.issuer = '';
+    this.issuanceDate = '';
+    this.expirationDate = '';
+    this.credentialSubject = '';
     this.credentialSchema = {
-      id: "",
+      id: '',
       type: VC.CREDENTAIL_SCHEMA_VALIDATOR_TYPE,
     };
     this.credentialStatus = {
-      id: "",
+      id: '',
       type: VC.CREDENTAIL_STATUS_TYPE,
     };
-    this.proof = "";
+    this.proof = '';
   }
 
   private getId = () => {
     return VC.PREFIX + uuidv4();
   };
 
-  private checkIfAllRequiredPropsAreSent = (
-    sentAttributes: Array<string>,
-    requiredProps: Array<string>
-  ) => {
+  private checkIfAllRequiredPropsAreSent = (sentAttributes: Array<string>, requiredProps: Array<string>) => {
     return !requiredProps.some((x) => sentAttributes.indexOf(x) === -1);
   };
 
-  private getCredentialSubject = (
-    schemaProperty: SchemaProperty,
-    attributesMap: Object
-  ): Object => {
+  private getCredentialSubject = (schemaProperty: SchemaProperty, attributesMap: Object): Object => {
     const cs: Object = {};
 
     const sentPropes: Array<string> = Object.keys(attributesMap);
     if (schemaProperty.properties) {
-      schemaProperty["propertiesParsed"] = JSON.parse(
-        schemaProperty.properties
-      );
+      schemaProperty['propertiesParsed'] = JSON.parse(schemaProperty.properties);
     }
-    const SchemaProps: Array<string> = Object.keys(
-      schemaProperty["propertiesParsed"]
-    );
+    const SchemaProps: Array<string> = Object.keys(schemaProperty['propertiesParsed']);
     let props: Array<string> = [];
 
     console.log({
@@ -126,14 +110,9 @@ export default class HypersignVerifiableCredential
 
     // Check for "additionalProperties" in schemaProperty
     if (!schemaProperty.additionalProperties) {
-      if (
-        sentPropes.length > SchemaProps.length ||
-        !this.checkIfAllRequiredPropsAreSent(SchemaProps, sentPropes)
-      )
+      if (sentPropes.length > SchemaProps.length || !this.checkIfAllRequiredPropsAreSent(SchemaProps, sentPropes))
         throw new Error(
-          `Only ${JSON.stringify(
-            SchemaProps
-          )} attributes are possible. additionalProperties is false in the schema`
+          `Only ${JSON.stringify(SchemaProps)} attributes are possible. additionalProperties is false in the schema`
         );
       props = SchemaProps;
     } else {
@@ -143,9 +122,7 @@ export default class HypersignVerifiableCredential
     // Check all required propes
     const requiredPros: Array<string> = Object.values(schemaProperty.required);
     if (!this.checkIfAllRequiredPropsAreSent(sentPropes, requiredPros))
-      throw new Error(
-        `${JSON.stringify(requiredPros)} are required properties`
-      );
+      throw new Error(`${JSON.stringify(requiredPros)} are required properties`);
 
     // Attach the values of props
     props.forEach((p) => {
@@ -155,19 +132,17 @@ export default class HypersignVerifiableCredential
     return cs;
   };
 
+  // 
   // TODO: https://www.w3.org/TR/vc-data-model/#data-schemas
   // TODO: handle schemaUrl variable properly later.
-  private getCredentialContext = (
-    schemaId: string,
-    schemaProperties: Object
-  ) => {
+  private getCredentialContext = (schemaId: string, schemaProperties: Object) => {
     const context: any = [];
 
     const schemaUrl = `${this.hsSchema.schemaRpc.schemaRestEp}/${schemaId}:`;
 
     context.push(VC.CREDENTAIL_BASE_CONTEXT);
     //context.push(VC.CREDENTAIL_SECURITY_SUITE);
-    
+
     context.push({
       hs: schemaUrl,
     });
@@ -183,7 +158,7 @@ export default class HypersignVerifiableCredential
   };
 
   // encode a multibase base58-btc multicodec key
-
+// TEST
   public async getCredential(params: {
     schemaId: string;
     subjectDid: string;
@@ -197,17 +172,15 @@ export default class HypersignVerifiableCredential
     try {
       schemaDoc = await this.hsSchema.resolve({ schemaId: params.schemaId });
     } catch (e) {
-      throw new Error(
-        "Could not resolve the schema from schemaId = " + params.schemaId
-      );
+      throw new Error('Could not resolve the schema from schemaId = ' + params.schemaId);
     }
 
     const issuerDid = params.issuerDid;
     const subjectDid = params.subjectDid;
 
-    const { didDocument: issuerDidDoc } = await this.hsDid.resolve({did: issuerDid});
+    const { didDocument: issuerDidDoc } = await this.hsDid.resolve({ did: issuerDid });
 
-    const { didDocument: subjectDidDoc } = await this.hsDid.resolve({did: subjectDid});
+    const { didDocument: subjectDidDoc } = await this.hsDid.resolve({ did: subjectDid });
 
     // TODO: do proper check for date and time
     // if(params.expirationDate < new Date()) throw  new Error("Expiration date can not be lesser than current date")
@@ -217,38 +190,26 @@ export default class HypersignVerifiableCredential
     const schemaInternal = schemaDoc.schema as SchemaProperty;
     const schemaProperties = JSON.parse(schemaInternal.properties);
     // context
-    vc["@context"] = this.getCredentialContext(
-      params.schemaId,
-      schemaProperties
-    );
+    vc['@context'] = this.getCredentialContext(params.schemaId, schemaProperties);
 
-    console.log(
-      "After fetchin issuerDId and subject did " +
-        issuerDidDoc.id +
-        " || " +
-        subjectDidDoc.id
-    );
+    console.log('After fetchin issuerDId and subject did ' + issuerDidDoc.id + ' || ' + subjectDidDoc.id);
     /// TODO:  need to implement this properly
     vc.id = this.getId();
 
     // Type
     vc.type = [];
-    vc.type.push("VerifiableCredential");
+    vc.type.push('VerifiableCredential');
     vc.type.push(schemaDoc.name);
 
-    vc.expirationDate =
-      new Date(params.expirationDate).toISOString().slice(0, -5) + "Z";
-    vc.issuanceDate = new Date().toISOString().slice(0, -5) + "Z";
+    vc.expirationDate = new Date(params.expirationDate).toISOString().slice(0, -5) + 'Z';
+    vc.issuanceDate = new Date().toISOString().slice(0, -5) + 'Z';
 
     vc.issuer = issuerDid;
     vc.credentialSubject = {};
     vc.credentialSubject = {
-      ...this.getCredentialSubject(
-        schemaDoc.schema as SchemaProperty,
-        params.fields
-      ),
+      ...this.getCredentialSubject(schemaDoc.schema as SchemaProperty, params.fields),
     };
-    vc.credentialSubject["id"] = subjectDid;
+    vc.credentialSubject['id'] = subjectDid;
     vc.credentialSchema = {
       id: schemaDoc.id,
       type: this.credentialSchema.type,
@@ -265,35 +226,25 @@ export default class HypersignVerifiableCredential
     return vc;
   }
 
-
   public async signCredential(params: {
     credential: IVerifiableCredential;
     issuerDid: string;
     privateKey: string;
   }): Promise<any> {
-    const { didDocument: signerDidDoc } = await this.hsDid.resolve(
-      {did: params.issuerDid}
-    );
-    if (!signerDidDoc)
-      throw new Error("Could not resolve issuerDid = " + params.issuerDid);
+    const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
+    if (!signerDidDoc) throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
 
-    let publicKeyId = signerDidDoc["assertionMethod"][0]; // TODO: bad idea -  should not hardcode it.
-    let publicKeyVerMethod = signerDidDoc["verificationMethod"].find(
-      (x) => x.id == publicKeyId
-    );
+    let publicKeyId = signerDidDoc['assertionMethod'][0]; // TODO: bad idea -  should not hardcode it.
+    let publicKeyVerMethod = signerDidDoc['verificationMethod'].find((x) => x.id == publicKeyId);
 
-    const Uint8ArrayPrivKey = new Uint8Array(
-      Buffer.from(params.privateKey, "base64")
-    );
+    const Uint8ArrayPrivKey = new Uint8Array(Buffer.from(params.privateKey, 'base64'));
 
-    const convertedKeyPair =
-      Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
-        privKey: Uint8ArrayPrivKey,
-        publicKey: publicKeyVerMethod.publicKeyMultibase,
-      });
+    const convertedKeyPair = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
+      privKey: Uint8ArrayPrivKey,
+      publicKey: publicKeyVerMethod.publicKeyMultibase,
+    });
 
-    publicKeyVerMethod["publicKeyMultibase"] =
-      convertedKeyPair.publicKeyMultibase;
+    publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
 
     const keyPair = await Ed25519VerificationKey2020.from({
       privateKeyMultibase: convertedKeyPair.privateKeyMultibase,
@@ -314,38 +265,31 @@ export default class HypersignVerifiableCredential
   }
 
   //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
-  public async verifyCredential(params: {
-    credential: IVerifiableCredential;
-    issuerDid: string;
-  }): Promise<any> {
-    if (!params.credential) throw new Error("Credential can not be undefined");
+  public async verifyCredential(params: { credential: IVerifiableCredential; issuerDid: string }): Promise<any> {
+    if (!params.credential) throw new Error('Credential can not be undefined');
 
-    const { didDocument: issuerDID } = await this.hsDid.resolve(
-      {did: params.issuerDid}
-    );
+    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.issuerDid });
     const issuerDidDoc: Did = issuerDID as Did;
     const publicKeyId = issuerDidDoc.assertionMethod[0];
-    let publicKeyVerMethod: VerificationMethod =
-      issuerDidDoc.verificationMethod.find(
-        (x) => x.id == publicKeyId
-      ) as VerificationMethod;
-
+    let publicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+      (x) => x.id == publicKeyId
+    ) as VerificationMethod;
 
     // Convert 45 byte publick key into 48
     const { publicKeyMultibase } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
-      publicKey: publicKeyVerMethod.publicKeyMultibase
-    })
+      publicKey: publicKeyVerMethod.publicKeyMultibase,
+    });
 
     publicKeyVerMethod.publicKeyMultibase = publicKeyMultibase;
 
     const assertionController = {
-      "@context": DID.CONTROLLER_CONTEXT,
+      '@context': DID.CONTROLLER_CONTEXT,
       id: issuerDidDoc.id,
       assertionMethod: issuerDidDoc.assertionMethod,
     };
 
     const keyPair = await Ed25519VerificationKey2020.from({
-      privateKeyMultibase: "",
+      privateKeyMultibase: '',
       ...publicKeyVerMethod,
     });
 
