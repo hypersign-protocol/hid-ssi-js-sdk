@@ -1,6 +1,7 @@
 import { Schema as ISchemaProto, Schema, SchemaProperty } from '../generated/ssi/schema';
 import { v4 as uuidv4 } from 'uuid';
 import { SchemaRpc } from './schemaRPC';
+import * as constants from '../constants';
 
 const ed25519 = require('@stablelib/ed25519');
 
@@ -39,7 +40,7 @@ export default class HyperSignSchema implements ISchemaMethods, Schema {
 
   constructor() {
     this.schemaRpc = new SchemaRpc();
-    (this.type = 'https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json'),
+    (this.type = constants.SCHEMA.SCHEMA_TYPE),
       (this.modelVersion = '1.0'),
       (this.id = ''),
       (this.name = ''),
@@ -77,7 +78,7 @@ export default class HyperSignSchema implements ISchemaMethods, Schema {
     this.author = params.author;
     this.authored = new Date().toISOString().slice(0, -5) + 'Z';
     this.schema = {
-      schema: 'http://json-schema.org/draft-07/schema',
+      schema: constants.SCHEMA.SCHEMA_JSON,
       description: params.description ? params.description : '',
       type: 'object',
       properties: '',
