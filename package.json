@@ -8,9 +8,11 @@
         "start": "node dist/index.js",
         "build": "rimraf dist && tsc -p .",
         "prettier": "prettier --config .prettierrc.json --write src/**/*.ts",
-        "prepublish": "npm run build"
+        "prepublish": "npm run build",
+        "lint": "eslint . --ext .ts",
+        "lint:fix": "npm run lint -- --fix"
     },
-    "author": "Vishwas Anand Bhushan",
+    "author": "Hypersign Team",
     "license": "ISC",
     "dependencies": {
         "@cosmjs/proto-signing": "^0.27.0",
@@ -18,12 +20,9 @@
         "@digitalbazaar/ed25519-signature-2020": "^3.0.0",
         "@digitalbazaar/ed25519-verification-key-2018": "^3.1.2",
         "@digitalbazaar/ed25519-verification-key-2020": "^3.3.0",
-        "@noble/ed25519": "^1.6.0",
         "@stablelib/ed25519": "^1.0.2",
         "axios": "^0.19.0",
-        "blakejs": "^1.1.0",
         "crypto-ld": "^6.0.0",
-        "did-veres-one": "^12.1.1",
         "jsonld": "^3.1.1",
         "jsonld-signatures": "^5.1.0",
         "node-fetch": "^2.6.1",
@@ -32,9 +31,12 @@
         "vc-js": "https://github.com/hypersign-protocol/vc-js"
     },
     "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^5.4.0",
+        "@typescript-eslint/parser": "^5.4.0",
         "@types/node": "^14.11.2",
         "rimraf": "^3.0.2",
         "typescript": "^4.5.5",
-        "prettier": "^2.4.1"
+        "prettier": "^2.4.1",
+        "eslint": "^7.32.0"
     }
 }
