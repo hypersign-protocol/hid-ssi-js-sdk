@@ -10,7 +10,8 @@
         "prettier": "prettier --config .prettierrc.json --write src/**/*.ts",
         "prepublish": "npm run build",
         "lint": "eslint . --ext .ts",
-        "lint:fix": "npm run lint -- --fix"
+        "lint:fix": "npm run lint -- --fix",
+        "prepare": "husky install"
     },
     "author": "Hypersign Team",
     "license": "ISC",
@@ -37,6 +38,7 @@
         "rimraf": "^3.0.2",
         "typescript": "^4.5.5",
         "prettier": "^2.4.1",
-        "eslint": "^7.32.0"
+        "eslint": "^7.32.0",
+        "husky": "^7.0.4"
     }
 }
