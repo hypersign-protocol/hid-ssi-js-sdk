@@ -2,7 +2,6 @@ import * as constants from "./constants";
 const { encode, decode } = require("base58-universal");
 
 export default class Utils {
-  constructor() {}
   
   public static checkUrl(url: string) {
     // TODO: check if the url is a valid url

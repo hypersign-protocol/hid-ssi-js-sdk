@@ -28,13 +28,13 @@ interface IVerifiableCredential {
   issuer: string;
   issuanceDate: string;
   expirationDate: string;
-  credentialSubject: Object;
+  credentialSubject: object;
   credentialSchema: ISchema;
 
   // Ref: https://www.w3.org/TR/vc-data-model/#status
   credentialStatus: ICredentialStatus;
 
-  proof: Object;
+  proof: object;
 }
 
 export interface ICredentialMethods {
@@ -43,10 +43,10 @@ export interface ICredentialMethods {
     subjectDid: string;
     issuerDid: string;
     expirationDate: string;
-    fields: Object;
+    fields: object;
   }): Promise<IVerifiableCredential>;
-  signCredential(params: { credential: IVerifiableCredential; issuerDid: string; privateKey: string }): Promise<any>;
-  verifyCredential(params: { credential: IVerifiableCredential; issuerDid: string }): Promise<any>;
+  signCredential(params: { credential: IVerifiableCredential; issuerDid: string; privateKey: string }): Promise<object>;
+  verifyCredential(params: { credential: IVerifiableCredential; issuerDid: string }): Promise<object>;
 }
 
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
@@ -56,9 +56,9 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public issuer: string;
   public issuanceDate: string;
   public expirationDate: string;
-  public credentialSubject: Object;
+  public credentialSubject: object;
   public credentialSchema: ISchema;
-  public proof: Object;
+  public proof: object;
   public credentialStatus: ICredentialStatus;
 
   private hsSchema: HypersignSchema;
@@ -73,7 +73,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     this.issuer = '';
     this.issuanceDate = '';
     this.expirationDate = '';
-    this.credentialSubject = '';
+    this.credentialSubject = {};
     this.credentialSchema = {
       id: '',
       type: VC.CREDENTAIL_SCHEMA_VALIDATOR_TYPE,
@@ -82,7 +82,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       id: '',
       type: VC.CREDENTAIL_STATUS_TYPE,
     };
-    this.proof = '';
+    this.proof = {};
   }
 
   private getId = () => {
@@ -93,8 +93,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return !requiredProps.some((x) => sentAttributes.indexOf(x) === -1);
   };
 
-  private getCredentialSubject = (schemaProperty: SchemaProperty, attributesMap: Object): Object => {
-    const cs: Object = {};
+  private getCredentialSubject = (schemaProperty: SchemaProperty, attributesMap: object): object => {
+    const cs: object = {};
 
     const sentPropes: Array<string> = Object.keys(attributesMap);
     if (schemaProperty.properties) {
@@ -132,10 +132,10 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return cs;
   };
 
-  // 
+  //
   // TODO: https://www.w3.org/TR/vc-data-model/#data-schemas
   // TODO: handle schemaUrl variable properly later.
-  private getCredentialContext = (schemaId: string, schemaProperties: Object) => {
+  private getCredentialContext = (schemaId: string, schemaProperties: object) => {
     const context: any = [];
 
     const schemaUrl = `${this.hsSchema.schemaRpc.schemaRestEp}/${schemaId}:`;
@@ -158,13 +158,13 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   };
 
   // encode a multibase base58-btc multicodec key
-// TEST
+  // TEST
   public async getCredential(params: {
     schemaId: string;
     subjectDid: string;
     issuerDid: string;
     expirationDate: string;
-    fields: Object;
+    fields: object;
   }): Promise<IVerifiableCredential> {
     let schemaDoc: Schema = {} as Schema;
     // let issuerDidDoc:Did = {} as Did
@@ -185,7 +185,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     // TODO: do proper check for date and time
     // if(params.expirationDate < new Date()) throw  new Error("Expiration date can not be lesser than current date")
 
-    let vc: IVerifiableCredential = {} as IVerifiableCredential;
+    const vc: IVerifiableCredential = {} as IVerifiableCredential;
 
     const schemaInternal = schemaDoc.schema as SchemaProperty;
     const schemaProperties = JSON.parse(schemaInternal.properties);
@@ -230,12 +230,14 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     credential: IVerifiableCredential;
     issuerDid: string;
     privateKey: string;
-  }): Promise<any> {
+  }): Promise<object> {
     const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
     if (!signerDidDoc) throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
 
-    let publicKeyId = signerDidDoc['assertionMethod'][0]; // TODO: bad idea -  should not hardcode it.
-    let publicKeyVerMethod = signerDidDoc['verificationMethod'].find((x) => x.id == publicKeyId);
+    const publicKeyId = signerDidDoc['assertionMethod'][0]; // TODO: bad idea -  should not hardcode it.
+    const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
+      (x) => x.id == publicKeyId
+    ) as VerificationMethod;
 
     const Uint8ArrayPrivKey = new Uint8Array(Buffer.from(params.privateKey, 'base64'));
 
@@ -265,13 +267,13 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   }
 
   //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
-  public async verifyCredential(params: { credential: IVerifiableCredential; issuerDid: string }): Promise<any> {
+  public async verifyCredential(params: { credential: IVerifiableCredential; issuerDid: string }): Promise<object> {
     if (!params.credential) throw new Error('Credential can not be undefined');
 
     const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.issuerDid });
     const issuerDidDoc: Did = issuerDID as Did;
     const publicKeyId = issuerDidDoc.assertionMethod[0];
-    let publicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+    const publicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
       (x) => x.id == publicKeyId
     ) as VerificationMethod;
 

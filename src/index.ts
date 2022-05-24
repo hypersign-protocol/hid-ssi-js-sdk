@@ -1,4 +1,4 @@
-import Did, { IDID } from './did/did';
+import Did from './did/did';
 import VC  from './credential/vc'
 import VP  from './credential/vp'
 import Schema from './schema/schema';
@@ -7,10 +7,10 @@ import { HIDClient } from './hid/client'
 
 export = class HypersignSSISdk{
     // TODO: Make sure to use proper type so that dev can see list of available methods.
-    did: any;
-    vc: any;
-    vp: any;
-    schema: any;
+    did: Did;
+    vc: VC;
+    vp: VP;
+    schema: Schema;
     
     private signer: OfflineSigner;
     private nodeEndpoint: string; // http://localhost:26657 | 'TEST' | 'MAIN'
@@ -26,6 +26,10 @@ export = class HypersignSSISdk{
 
         this.nodeEndpoint = nodeEndpoint; 
         this.nodeRestEndpoint = nodeRestEndpoint ? nodeRestEndpoint : "";
+        this.did = {} as Did;
+        this.vc = {} as VC;
+        this.vp = {} as VP;
+        this.schema = {} as Schema;
 
         
         // this.did = {} as Did;

@@ -23,9 +23,9 @@ interface IVerifiableCredential {
   issuer: string;
   issuanceDate: string;
   expirationDate: string;
-  credentialSubject: Object;
+  credentialSubject: object;
   credentialSchema: ISchema;
-  proof: Object;
+  proof: object;
 }
 
 // https://www.w3.org/TR/vc-data-model/#presentations-0
@@ -34,24 +34,24 @@ interface IVerifiablePresentation {
   type: Array<string>;
   verifiableCredential: Array<IVerifiableCredential>;
   holder: string;
-  proof: Object;
+  proof: object;
 }
 
 export interface IPresentationMethods {
-  getPresentation(params: { verifiableCredential: IVerifiableCredential; holderDid: string }): Promise<any>;
+  getPresentation(params: { verifiableCredential: IVerifiableCredential; holderDid: string }): Promise<object>;
   signPresentation(params: {
     presentation: IVerifiablePresentation;
     holderDid: string;
     privateKey: string;
     challenge: string;
-  }): Promise<any>;
+  }): Promise<object>;
   verifyPresentation(params: {
     signedPresentation: IVerifiablePresentation;
     challenge: string;
     domain?: string;
     issuerDid: string;
     holderDid: string;
-  }): Promise<any>;
+  }): Promise<object>;
 }
 
 export default class HypersignVerifiablePresentation implements IPresentationMethods, IVerifiablePresentation {
@@ -61,7 +61,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
   type: Array<string>;
   verifiableCredential: Array<IVerifiableCredential>;
   holder: string;
-  proof: Object;
+  proof: object;
   constructor() {
     this.hsDid = new HypersignDID();
 
@@ -69,14 +69,14 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     this.type = [];
     this.verifiableCredential = [];
     this.holder = '';
-    this.proof = '';
+    this.proof = {};
   }
 
   private getId = () => {
     return VP.PREFIX + uuidv4();
   };
 
-  async getPresentation(params: { verifiableCredential: IVerifiableCredential; holderDid: string }): Promise<any> {
+  async getPresentation(params: { verifiableCredential: IVerifiableCredential; holderDid: string }): Promise<object> {
     const id = this.getId();
     const presentation = vc.createPresentation({
       verifiableCredential: params.verifiableCredential,
@@ -91,7 +91,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     holderDid: string;
     privateKey: string;
     challenge: string;
-  }): Promise<any> {
+  }): Promise<object> {
     if (!params.holderDid) {
       throw new Error('params.holderDid is required for signinng a presentation');
     }
@@ -108,10 +108,12 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       throw new Error('params.challenge is required for signinng a presentation');
     }
 
-    let { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.holderDid });
+    const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.holderDid });
 
-    let publicKeyId = signerDidDoc['assertionMethod'][0]; // TODO: bad idea -  should not hardcode it.
-    let publicKeyVerMethod = signerDidDoc['verificationMethod'].find((x) => x.id == publicKeyId);
+    const publicKeyId = signerDidDoc['assertionMethod'][0]; // TODO: bad idea -  should not hardcode it.
+    const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
+      (x) => x.id == publicKeyId
+    ) as VerificationMethod;
 
     const Uint8ArrayPrivKey = new Uint8Array(Buffer.from(params.privateKey, 'base64'));
 
@@ -149,7 +151,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     domain?: string;
     issuerDid: string;
     holderDid: string;
-  }): Promise<any> {
+  }): Promise<object> {
     if (!params.holderDid) {
       throw new Error('params.signedPresentation is required for verifying a presentation');
     }
@@ -173,7 +175,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     const holderDidDoc: Did = holderDID as Did;
     const holderPublicKeyId = holderDidDoc.authentication[0];
 
-    let holderPublicKeyVerMethod: VerificationMethod = holderDidDoc.verificationMethod.find(
+    const holderPublicKeyVerMethod: VerificationMethod = holderDidDoc.verificationMethod.find(
       (x) => x.id == holderPublicKeyId
     ) as VerificationMethod;
 
@@ -214,7 +216,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     const issuerDidDoc: Did = issuerDID as Did;
     const issuerPublicKeyId = issuerDidDoc.assertionMethod[0];
 
-    let issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+    const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
       (x) => x.id == issuerPublicKeyId
     ) as VerificationMethod;
 

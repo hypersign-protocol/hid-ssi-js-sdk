@@ -8,10 +8,10 @@ export interface IHIDWallet {
   mnemonic: string;
   account: string;
   connectSigner(registry?: any): Promise<any>;
-  signAndBroadcastMessages(message: Object, fee: Object, memo?: string): Promise<any>;
-  transferTokens(recipientAddress: string, amount: Array<object>, fee: Object, memo?: string): Promise<any>;
+  signAndBroadcastMessages(message: object, fee: object, memo?: string): Promise<any>;
+  transferTokens(recipientAddress: string, amount: Array<object>, fee: object, memo?: string): Promise<any>;
   init(): Promise<any>;
-  getFee(): Object;
+  getFee(): object;
 }
 
 export class HIDWallet implements IHIDWallet {
@@ -69,7 +69,7 @@ export class HIDWallet implements IHIDWallet {
     if (!this.client) throw new Error('Client could not inistliaed');
   }
 
-  public getFee(): Object {
+  public getFee(): object {
     return {
       amount: [
         {
@@ -81,7 +81,7 @@ export class HIDWallet implements IHIDWallet {
     };
   }
 
-  public async signAndBroadcastMessages(message: Object, fee?: Object, memo?: string): Promise<any> {
+  public async signAndBroadcastMessages(message: object, fee?: object, memo?: string): Promise<any> {
     if (!this.account || !this.client) {
       throw new Error('Wallet is not initialize');
     }
@@ -91,7 +91,7 @@ export class HIDWallet implements IHIDWallet {
   public async transferTokens(
     recipientAddress: string,
     amount: Array<object>,
-    fee?: Object,
+    fee?: object,
     memo?: string
   ): Promise<any> {
     if (!this.account || !this.client) {

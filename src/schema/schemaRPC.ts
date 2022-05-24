@@ -9,8 +9,8 @@ import { SigningStargateClient } from '@cosmjs/stargate';
 import Utils from '../utils';
 
 export interface ISchemaRPC {
-  createSchema(schema: Schema, signature: string, verificationMethodId: string): Promise<Object>;
-  resolveSchema(schemaId: string): Promise<Object>;
+  createSchema(schema: Schema, signature: string, verificationMethodId: string): Promise<object>;
+  resolveSchema(schemaId: string): Promise<object>;
 }
 
 export class SchemaRpc implements ISchemaRPC {
@@ -19,7 +19,7 @@ export class SchemaRpc implements ISchemaRPC {
     this.schemaRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_SCHEMA_PATH;
   }
 
-  async createSchema(schema: Schema, signature: string, verificationMethodId: string): Promise<Object> {
+  async createSchema(schema: Schema, signature: string, verificationMethodId: string): Promise<object> {
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateSchema}`;
 
     const signInfo: SignInfo = {

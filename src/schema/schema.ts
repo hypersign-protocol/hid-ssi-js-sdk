@@ -2,31 +2,8 @@ import { Schema as ISchemaProto, Schema, SchemaProperty } from '../generated/ssi
 import { v4 as uuidv4 } from 'uuid';
 import { SchemaRpc } from './schemaRPC';
 import * as constants from '../constants';
-
+import { ISchemaFields, ISchemaMethods } from './ISchema';
 const ed25519 = require('@stablelib/ed25519');
-
-interface ISchemaFields {
-  type: string;
-  format?: string;
-  name: string;
-  isRequired: boolean;
-}
-
-interface ISchemaMethods {
-  getSchema(params: {
-    name: string;
-    description?: string;
-    author: string;
-    fields?: Array<ISchemaFields>;
-    additionalProperties: boolean;
-  }): Schema;
-
-  signSchema(params: { privateKey: string; schema: ISchemaProto }): Promise<any>;
-
-  registerSchema(params: { schema: Schema; signature: string; verificationMethodId: string }): Promise<any>;
-
-  resolve(params: { schemaId: string }): Promise<Schema>;
-}
 
 export default class HyperSignSchema implements ISchemaMethods, Schema {
   type: string;
@@ -86,7 +63,7 @@ export default class HyperSignSchema implements ISchemaMethods, Schema {
       additionalProperties: params.additionalProperties,
     };
 
-    let t = {};
+    const t = {};
     if (params.fields && params.fields.length > 0) {
       params.fields.forEach((prop) => {
         const schemaPropsObj: {
@@ -120,7 +97,7 @@ export default class HyperSignSchema implements ISchemaMethods, Schema {
     };
   }
 
-  public async signSchema(params: { privateKey: string; schema: Schema }): Promise<any> {
+  public async signSchema(params: { privateKey: string; schema: Schema }): Promise<string> {
     if (!params.privateKey) throw new Error('PrivateKey must be passed');
     if (!params.schema) throw new Error('Schema must be passed');
 

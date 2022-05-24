@@ -1,5 +1,5 @@
 import { OfflineSigner } from '@cosmjs/proto-signing';
-import { SigningStargateClient, StargateClient } from '@cosmjs/stargate';
+import { SigningStargateClient } from '@cosmjs/stargate';
 import { HIDRpcFactory } from '../rpcFactory';
 import Utils from '../utils';
 const {

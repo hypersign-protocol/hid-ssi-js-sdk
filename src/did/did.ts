@@ -1,62 +1,11 @@
 import * as constant from '../constants';
 import { v4 as uuidv4 } from 'uuid';
-import { DIDRpc, IDIDRpc } from './didRPC';
+import { DIDRpc } from './didRPC';
 import Utils from '../utils';
 const ed25519 = require('@stablelib/ed25519');
-const { encode } = require('base58-universal');
-const webCrypto = require('crypto').webcrypto;
-
-import { Did, SignInfo, VerificationMethod, Service } from '../generated/ssi/did';
-
+import { Did, VerificationMethod, Service } from '../generated/ssi/did';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
-import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
-
-interface IPublicKey {
-  '@context': string;
-  id: string;
-  type: string;
-  publicKeyBase58: string;
-}
-
-interface IController {
-  '@context': string;
-  id: string;
-  publicKey: Array<IPublicKey>;
-  authentication: Array<string>;
-}
-
-interface IParams {
-  doc: Object;
-  privateKey?: string;
-  publicKey: IPublicKey;
-  challenge: string;
-  domain: string;
-  controller: IController;
-  did: string;
-}
-
-export interface IDID {
-  generateKeys(params: { seed: string }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }>;
-  generate(params: { publicKeyMultibase: string }): string;
-  register(params: { didDocString: string; privateKeyMultibase: string; verificationMethodId: string }): Promise<any>;
-  resolve(params: { did: string }): Promise<any>;
-  update(params: {
-    didDocString: string;
-    privateKeyMultibase: string;
-    verificationMethodId: string;
-    versionId: string;
-  }): Promise<any>;
-  deactivate(params: {
-    didDocString: string;
-    privateKeyMultibase: string;
-    verificationMethodId: string;
-    versionId: string;
-  }): Promise<any>;
-
-  // didAuth
-  signDid(params: IParams): Promise<any>;
-  verify(params: IParams): Promise<any>;
-}
+import { IParams, IDID, IDIDResolve, IDIDRpc } from './IDID';
 
 class DID implements Did {
   context: string[];
@@ -105,7 +54,7 @@ export default class HypersignDID implements IDID {
   }
 
   // Sign the doc
-  private async sign(params: { didDocString: string; privateKeyMultibase: string }): Promise<any> {
+  private async sign(params: { didDocString: string; privateKeyMultibase: string }): Promise<string> {
     const { privateKeyMultibase: privateKeyMultibaseConverted } =
       Utils.convertEd25519verificationkey2020toStableLibKeysInto({
         privKey: params.privateKeyMultibase,
@@ -154,7 +103,7 @@ export default class HypersignDID implements IDID {
     didDocString: string;
     privateKeyMultibase: string;
     verificationMethodId: string;
-  }): Promise<any> {
+  }): Promise<object> {
     if (!params.didDocString) {
       throw new Error('params.didDocString is required to register a did');
     }
@@ -167,12 +116,12 @@ export default class HypersignDID implements IDID {
     }
 
     const { didDocString, privateKeyMultibase, verificationMethodId } = params;
-    const signature = await this.sign({ didDocString, privateKeyMultibase });
+    const signature: string = await this.sign({ didDocString, privateKeyMultibase });
     const didDoc: Did = JSON.parse(didDocString);
     return await this.didrpc.registerDID(didDoc, signature, verificationMethodId);
   }
 
-  public async resolve(params: { did: string }): Promise<any> {
+  public async resolve(params: { did: string }): Promise<IDIDResolve> {
     if (!params.did) {
       throw new Error('params.did is required to resolve a did');
     }
@@ -185,7 +134,7 @@ export default class HypersignDID implements IDID {
     privateKeyMultibase: string;
     verificationMethodId: string;
     versionId: string;
-  }): Promise<any> {
+  }): Promise<object> {
     if (!params.didDocString) {
       throw new Error('params.didDocString is required to update a did');
     }
@@ -211,7 +160,7 @@ export default class HypersignDID implements IDID {
     privateKeyMultibase: string;
     verificationMethodId: string;
     versionId: string;
-  }): Promise<any> {
+  }): Promise<object> {
     if (!params.didDocString) {
       throw new Error('params.didDocString is required to deactivate a did');
     }
@@ -232,15 +181,15 @@ export default class HypersignDID implements IDID {
     return await this.didrpc.deactivateDID(didDoc, signature, verificationMethodId, versionId);
   }
   /// Did Auth
-  public signDid(params: IParams): Promise<any> {
+  public signDid(params: IParams): Promise<object> {
     throw new Error('Method not impplemented');
   }
 
   // verify the signature
-  public async verify(params: IParams) {
+  public async verify(params: IParams): Promise<object> {
     throw new Error('Method not implemented');
 
-    const { doc, challenge, domain } = params;
+    // const { doc, challenge, domain } = params;
     //// TODO: checks..."All params are mandatory"
 
     //// TODO: Fetch did doc from ledger and compare it here.

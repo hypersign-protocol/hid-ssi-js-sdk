@@ -1,18 +1,12 @@
-import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_TESTNET_REST, HYPERSIGN_NETWORK_DID_PATH } from '../constants';
+import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_DID_PATH } from '../constants';
 import * as generatedProto from '../generated/ssi/tx';
-import { Did, SignInfo } from '../generated/ssi/did';
+import { Did as IDidProto, SignInfo } from '../generated/ssi/did';
 import { SigningStargateClient } from '@cosmjs/stargate';
 
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
 import Utils from '../utils';
-
-export interface IDIDRpc {
-  registerDID(didDoc: Did, signature: string, verificationMethodId: string): Promise<Object>;
-  updateDID(didDoc: Did, signature: string, verificationMethodId: string, versionId: string): Promise<Object>;
-  deactivateDID(didDoc: Did, signature: string, verificationMethodId: string, versionId: string): Promise<Object>;
-  resolveDID(did): Promise<Object>;
-}
+import { IDIDResolve, IDIDRpc } from './IDID';
 
 export class DIDRpc implements IDIDRpc {
   private didRestEp: string;
@@ -20,7 +14,7 @@ export class DIDRpc implements IDIDRpc {
     this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_PATH;
   }
 
-  async registerDID(didDoc: Did, signature: string, verificationMethodId: string): Promise<Object> {
+  async registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string): Promise<object> {
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
     const signInfo: SignInfo = {
       verificationMethodId,
@@ -42,7 +36,12 @@ export class DIDRpc implements IDIDRpc {
     return txResult;
   }
 
-  async updateDID(didDoc: Did, signature: string, verificationMethodId: string, versionId: string): Promise<Object> {
+  async updateDID(
+    didDoc: IDidProto,
+    signature: string,
+    verificationMethodId: string,
+    versionId: string
+  ): Promise<object> {
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgUpdateDID}`;
     console.log('The wallet address is (rpc/didRPC.ts): ', HIDClient.getHidWalletAddress());
 
@@ -62,15 +61,7 @@ export class DIDRpc implements IDIDRpc {
     };
 
     // TODO: need to find a way to make it dynamic
-    const fee = {
-      amount: [
-        {
-          denom: 'uhid',
-          amount: '5000',
-        },
-      ],
-      gas: '200000',
-    };
+    const fee = Utils.getFee();
 
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
@@ -78,11 +69,11 @@ export class DIDRpc implements IDIDRpc {
   }
 
   async deactivateDID(
-    didDoc: Did,
+    didDoc: IDidProto,
     signature: string,
     verificationMethodId: string,
     versionId: string
-  ): Promise<Object> {
+  ): Promise<object> {
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgDeactivateDID}`;
     console.log('The wallet address is (rpc/didRPC.ts): ', HIDClient.getHidWalletAddress());
 
@@ -102,22 +93,13 @@ export class DIDRpc implements IDIDRpc {
     };
 
     // TODO: need to find a way to make it dynamic
-    const fee = {
-      amount: [
-        {
-          denom: 'uhid',
-          amount: '5000',
-        },
-      ],
-      gas: '200000',
-    };
-
+    const fee = Utils.getFee();
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
     return txResult;
   }
 
-  async resolveDID(did: string): Promise<Object> {
+  async resolveDID(did: string): Promise<IDIDResolve> {
     did = did + ':'; // TODO:  we need to sort this out ... need to remove later
     const get_didUrl = `${this.didRestEp}/${did}`;
     console.log('Get didUrl = ' + get_didUrl);

@@ -6,7 +6,7 @@
     "scripts": {
         "test": "npm run build && node test/test.js",
         "start": "node dist/index.js",
-        "build": "rimraf dist && tsc -p .",
+        "build": "npm run lint:fix && npm run prettier && rimraf dist && tsc -p .",
         "prettier": "prettier --config .prettierrc.json --write src/**/*.ts",
         "prepublish": "npm run build",
         "lint": "eslint . --ext .ts",
