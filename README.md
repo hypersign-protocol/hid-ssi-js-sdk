@@ -5,8 +5,6 @@ This sdk is an implementation of proposed [DID](https://www.w3.org/TR/did-core/)
 ## Building
 
 ```sh
-git submodule update --init --recursive
-cd libs/vc-js && npm i && cd -
 npm i
 npm run build
 npm run test
@@ -27,6 +25,7 @@ const hsSdk = new HypersignSsiSDK(
   "http://localhost:26657", // RPC
   "http://localhost:1317"  // REST Endpoint
 );
+await hsSdk.init();
 const { did, schema, vc, vp } = hsSdk;
 ```
 
