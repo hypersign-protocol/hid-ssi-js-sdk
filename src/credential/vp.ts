@@ -115,17 +115,14 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       (x) => x.id == publicKeyId
     ) as VerificationMethod;
 
-    const Uint8ArrayPrivKey = new Uint8Array(Buffer.from(params.privateKey, 'base64'));
-
     const convertedKeyPair = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
-      privKey: Uint8ArrayPrivKey,
       publicKey: publicKeyVerMethod.publicKeyMultibase,
     });
 
     publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
 
     const keyPair = await Ed25519VerificationKey2020.from({
-      privateKeyMultibase: convertedKeyPair.privateKeyMultibase,
+      privateKeyMultibase: params.privateKey,
       ...publicKeyVerMethod,
     });
 

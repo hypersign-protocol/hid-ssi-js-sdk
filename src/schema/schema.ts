@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { SchemaRpc } from './schemaRPC';
 import * as constants from '../constants';
 import { ISchemaFields, ISchemaMethods } from './ISchema';
+import Utils from '../utils';
 const ed25519 = require('@stablelib/ed25519');
 
 export default class HyperSignSchema implements ISchemaMethods, Schema {
@@ -101,9 +102,13 @@ export default class HyperSignSchema implements ISchemaMethods, Schema {
     if (!params.privateKey) throw new Error('PrivateKey must be passed');
     if (!params.schema) throw new Error('Schema must be passed');
 
+    const { privateKeyMultibase: privateKeyMultibaseConverted } =
+      Utils.convertEd25519verificationkey2020toStableLibKeysInto({
+        privKey: params.privateKey,
+      });
+
     const dataBytes = (await ISchemaProto.encode(params.schema)).finish();
-    const privateKeyBytes = new Uint8Array(Buffer.from(params.privateKey, 'base64'));
-    const signed = ed25519.sign(privateKeyBytes, dataBytes);
+    const signed = ed25519.sign(privateKeyMultibaseConverted, dataBytes);
     return Buffer.from(signed).toString('base64');
   }
 
