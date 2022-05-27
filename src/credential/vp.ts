@@ -97,7 +97,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     }
 
     if (!params.privateKey) {
-      throw new Error('params.holderDid is required for signinng a presentation');
+      throw new Error('params.privateKey is required for signinng a presentation');
     }
 
     if (!params.presentation) {
