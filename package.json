@@ -2,7 +2,7 @@
     "name": "hs-ssi-sdk",
     "version": "5.0.1",
     "description": "sdk is an implementation of proposed DID by W3C",
-    "main": "dist/index.js",
+    "main": "dist/src/index.js",
     "scripts": {
         "test": "jest",
         "start": "node dist/index.js",
