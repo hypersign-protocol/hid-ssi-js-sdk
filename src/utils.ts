@@ -89,13 +89,7 @@ export default class Utils {
 
   // TODO: need to find a way to make it dynamic
   public static getFee(){
-     return {
-        amount: [{
-            denom: constants.HID_DNOMINATION,
-            amount: constants.HID_MIN_FEE,
-        }],
-        gas: constants.HID_MIN_GAS,
-     }
+    return "auto";
   }
 
 }

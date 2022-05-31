@@ -73,7 +73,7 @@ export default class HypersignDID implements IDID {
     seed: string;
   }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }> {
     let edKeyPair;
-    if (params.seed) {
+    if (params && params.seed) {
       const seedBytes = new Uint8Array(Buffer.from(params.seed));
       edKeyPair = await Ed25519VerificationKey2020.generate({ seed: seedBytes });
     } else {

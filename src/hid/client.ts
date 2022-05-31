@@ -1,6 +1,8 @@
 import { OfflineSigner } from '@cosmjs/proto-signing';
-import { SigningStargateClient } from '@cosmjs/stargate';
+import { SigningStargateClient, GasPrice } from '@cosmjs/stargate';
+import { Decimal } from '@cosmjs/math';
 import { HIDRpcFactory } from '../rpcFactory';
+import { GAS_PRICE, HID_DNOMINATION, HID_DECIMAL } from '../constants';
 import Utils from '../utils';
 const {
   HYPERSIGN_TESTNET_RPC,
@@ -48,7 +50,9 @@ export class HIDClient {
       this.registry.registerRpc(HIDRpcEnums[rpc]);
     });
 
+    const gasPrice = new GasPrice(Decimal.fromUserInput(GAS_PRICE, HID_DECIMAL), HID_DNOMINATION);
     HIDClient.hidNodeClient = await SigningStargateClient.connectWithSigner(HIDClient.hidNodeEndpoint, this.signer, {
+      gasPrice,
       registry: this.registry.hidRPCRegistery,
     });
 

@@ -55,6 +55,8 @@ export const KEY_HEADERS = {
 }
 Object.freeze(KEY_HEADERS)
 
+export const GAS_PRICE='0.0001';
+export const HID_DECIMAL = 18;
 export const HID_DNOMINATION = 'uhid';
 export const HID_MIN_GAS='200000'
 export const HID_MIN_FEE='5000'

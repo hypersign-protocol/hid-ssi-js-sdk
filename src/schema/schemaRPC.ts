@@ -37,7 +37,7 @@ export class SchemaRpc implements ISchemaRPC {
     };
 
     // TODO: need to find a way to make it dynamic
-    const fee = Utils.getFee();
+    const fee = 'auto';
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
     return txResult;
