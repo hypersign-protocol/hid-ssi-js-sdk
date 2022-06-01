@@ -6,7 +6,6 @@ import { HIDClient } from '../hid/client';
 import { Schema } from '../generated/ssi/schema';
 import { SignInfo } from '../generated/ssi/did';
 import { SigningStargateClient } from '@cosmjs/stargate';
-import Utils from '../utils';
 
 export interface ISchemaRPC {
   createSchema(schema: Schema, signature: string, verificationMethodId: string): Promise<object>;
@@ -45,7 +44,6 @@ export class SchemaRpc implements ISchemaRPC {
 
   async resolveSchema(schemaId: string): Promise<Array<object>> {
     const getSchemaUrl = `${this.schemaRestEp}/${schemaId}:`;
-    console.log('Schema Resolve URL: ', getSchemaUrl);
     const response = await axios.get(getSchemaUrl);
     const { schema } = response.data;
     return schema;

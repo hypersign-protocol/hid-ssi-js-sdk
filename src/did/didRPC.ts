@@ -5,7 +5,6 @@ import { SigningStargateClient } from '@cosmjs/stargate';
 
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
-import Utils from '../utils';
 import { IDIDResolve, IDIDRpc } from './IDID';
 
 export class DIDRpc implements IDIDRpc {
@@ -43,7 +42,6 @@ export class DIDRpc implements IDIDRpc {
     versionId: string
   ): Promise<object> {
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgUpdateDID}`;
-    console.log('The wallet address is (rpc/didRPC.ts): ', HIDClient.getHidWalletAddress());
 
     const signInfo: SignInfo = {
       verificationMethodId,
@@ -75,8 +73,6 @@ export class DIDRpc implements IDIDRpc {
     versionId: string
   ): Promise<object> {
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgDeactivateDID}`;
-    console.log('The wallet address is (rpc/didRPC.ts): ', HIDClient.getHidWalletAddress());
-
     const signInfo: SignInfo = {
       verificationMethodId,
       signature,
@@ -102,7 +98,6 @@ export class DIDRpc implements IDIDRpc {
   async resolveDID(did: string): Promise<IDIDResolve> {
     did = did + ':'; // TODO:  we need to sort this out ... need to remove later
     const get_didUrl = `${this.didRestEp}/${did}`;
-    console.log('Get didUrl = ' + get_didUrl);
     const response = await axios.get(get_didUrl);
     const didDoc = response.data;
     return didDoc;
