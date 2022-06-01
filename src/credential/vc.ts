@@ -172,7 +172,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     try {
       schemaDoc = await this.hsSchema.resolve({ schemaId: params.schemaId });
     } catch (e) {
-      throw new Error('Could not resolve the schema from schemaId = ' + params.schemaId);
+      throw new Error('HID-SSI-SDK:: Error: Could not resolve the schema from schemaId = ' + params.schemaId);
     }
 
     const issuerDid = params.issuerDid;
@@ -181,6 +181,14 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     const { didDocument: issuerDidDoc } = await this.hsDid.resolve({ did: issuerDid });
 
     const { didDocument: subjectDidDoc } = await this.hsDid.resolve({ did: subjectDid });
+
+    if (!issuerDidDoc) {
+      throw new Error('HID-SSI-SDK:: Error: Could not fetch issuer did doc, issuer did = ' + issuerDid);
+    }
+
+    if (!subjectDidDoc) {
+      throw new Error('HID-SSI-SDK:: Error: Could not fetch subject did doc, subject did = ' + subjectDid);
+    }
 
     // TODO: do proper check for date and time
     // if(params.expirationDate < new Date()) throw  new Error("Expiration date can not be lesser than current date")
@@ -192,7 +200,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     // context
     vc['@context'] = this.getCredentialContext(params.schemaId, schemaProperties);
 
-    console.log('After fetchin issuerDId and subject did ' + issuerDidDoc.id + ' || ' + subjectDidDoc.id);
     /// TODO:  need to implement this properly
     vc.id = this.getId();
 

@@ -49,7 +49,7 @@ export default class HyperSignSchema implements ISchemaMethods, Schema {
     fields?: Array<ISchemaFields>;
     additionalProperties: boolean;
   }): Schema {
-    if (!params.author) throw new Error('Author must be passed');
+    if (!params.author) throw new Error('HID-SSI-SDK:: Error: Author must be passed');
 
     this.id = this.getSchemaId(params.author);
     this.name = params.name;
@@ -99,8 +99,8 @@ export default class HyperSignSchema implements ISchemaMethods, Schema {
   }
 
   public async signSchema(params: { privateKey: string; schema: Schema }): Promise<string> {
-    if (!params.privateKey) throw new Error('PrivateKey must be passed');
-    if (!params.schema) throw new Error('Schema must be passed');
+    if (!params.privateKey) throw new Error('HID-SSI-SDK:: Error: PrivateKey must be passed');
+    if (!params.schema) throw new Error('HID-SSI-SDK:: Error: Schema must be passed');
 
     const { privateKeyMultibase: privateKeyMultibaseConverted } =
       Utils.convertEd25519verificationkey2020toStableLibKeysInto({
@@ -117,18 +117,18 @@ export default class HyperSignSchema implements ISchemaMethods, Schema {
     signature: string;
     verificationMethodId: string;
   }): Promise<object> {
-    if (!params.schema) throw new Error('Schema must be passed');
-    if (!params.signature) throw new Error('Signature must be passed');
-    if (!params.verificationMethodId) throw new Error('VerificationMethodId must be passed');
+    if (!params.schema) throw new Error('HID-SSI-SDK:: Error: Schema must be passed');
+    if (!params.signature) throw new Error('HID-SSI-SDK:: Error: Signature must be passed');
+    if (!params.verificationMethodId) throw new Error('HID-SSI-SDK:: Error: VerificationMethodId must be passed');
 
     return this.schemaRpc.createSchema(params.schema, params.signature, params.verificationMethodId);
   }
 
   public async resolve(params: { schemaId: string }): Promise<Schema> {
-    if (!params.schemaId) throw new Error('SchemaId must be passed');
+    if (!params.schemaId) throw new Error('HID-SSI-SDK:: Error: SchemaId must be passed');
     const schemaArr: Array<object> = await this.schemaRpc.resolveSchema(params.schemaId);
     if (!schemaArr || schemaArr.length < 0) {
-      throw new Error('No schema found, id = ' + params.schemaId);
+      throw new Error('HID-SSI-SDK:: Error: No schema found, id = ' + params.schemaId);
     }
     const schema = schemaArr[0] as Schema;
     return schema;

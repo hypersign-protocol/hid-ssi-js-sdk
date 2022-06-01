@@ -89,7 +89,7 @@ export default class HypersignDID implements IDID {
   /// Generate Did Document
   public generate(params: { publicKeyMultibase: string }): string {
     if (!params.publicKeyMultibase) {
-      throw new Error('params.publicKeyMultibase is required to generate new did didoc');
+      throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
     }
     const { publicKeyMultibase: publicKeyMultibase1 } = Utils.convertEd25519verificationkey2020toStableLibKeysInto({
       publicKey: params.publicKeyMultibase,
@@ -105,14 +105,14 @@ export default class HypersignDID implements IDID {
     verificationMethodId: string;
   }): Promise<object> {
     if (!params.didDocString) {
-      throw new Error('params.didDocString is required to register a did');
+      throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
     }
     if (!params.privateKeyMultibase) {
-      throw new Error('params.privateKeyMultibase is required to register a did');
+      throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to register a did');
     }
 
     if (!params.privateKeyMultibase) {
-      throw new Error('params.verificationMethodId is required to register a did');
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
     }
 
     const { didDocString, privateKeyMultibase, verificationMethodId } = params;
@@ -123,7 +123,7 @@ export default class HypersignDID implements IDID {
 
   public async resolve(params: { did: string }): Promise<IDIDResolve> {
     if (!params.did) {
-      throw new Error('params.did is required to resolve a did');
+      throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
     }
     return await this.didrpc.resolveDID(params.did);
   }
@@ -136,17 +136,17 @@ export default class HypersignDID implements IDID {
     versionId: string;
   }): Promise<object> {
     if (!params.didDocString) {
-      throw new Error('params.didDocString is required to update a did');
+      throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to update a did');
     }
     if (!params.privateKeyMultibase) {
-      throw new Error('params.privateKeyMultibase is required to update a did');
+      throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to update a did');
     }
 
     if (!params.privateKeyMultibase) {
-      throw new Error('params.verificationMethodId is required to update a did');
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update a did');
     }
     if (!params.versionId) {
-      throw new Error('params.versionId is required to update a did');
+      throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
     }
 
     const { didDocString, privateKeyMultibase, verificationMethodId, versionId } = params;
@@ -162,17 +162,17 @@ export default class HypersignDID implements IDID {
     versionId: string;
   }): Promise<object> {
     if (!params.didDocString) {
-      throw new Error('params.didDocString is required to deactivate a did');
+      throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to deactivate a did');
     }
     if (!params.privateKeyMultibase) {
-      throw new Error('params.privateKeyMultibase is required to deactivate a did');
+      throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to deactivate a did');
     }
 
     if (!params.privateKeyMultibase) {
-      throw new Error('params.verificationMethodId is required to deactivate a did');
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to deactivate a did');
     }
     if (!params.versionId) {
-      throw new Error('params.versionId is required to deactivate a did');
+      throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
     }
 
     const { didDocString, privateKeyMultibase, verificationMethodId, versionId } = params;
@@ -182,12 +182,12 @@ export default class HypersignDID implements IDID {
   }
   /// Did Auth
   public signDid(params: IParams): Promise<object> {
-    throw new Error('Method not impplemented');
+    throw new Error('HID-SSI-SDK:: Error: Method not impplemented');
   }
 
   // verify the signature
   public async verify(params: IParams): Promise<object> {
-    throw new Error('Method not implemented');
+    throw new Error('HID-SSI-SDK:: Error: Method not implemented');
 
     // const { doc, challenge, domain } = params;
     //// TODO: checks..."All params are mandatory"

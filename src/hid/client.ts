@@ -27,7 +27,9 @@ export class HIDClient {
     this.registry = new HIDRpcFactory();
 
     if (!hidNodeEndpoint) {
-      throw new Error("HID Node enpoint must be passed. Possible values:  'TEST' | 'MAIN' | <custom node url>");
+      throw new Error(
+        "HID-SSI-SDK:: Error: HID Node enpoint must be passed. Possible values:  'TEST' | 'MAIN' | <custom node url>"
+      );
     }
 
     if (hidNodeEndpoint === 'TEST') {
@@ -39,7 +41,7 @@ export class HIDClient {
     } else {
       HIDClient.hidNodeEndpoint = Utils.checkUrl(hidNodeEndpoint);
       if (!hidNodeRestEndpoint) {
-        throw new Error('HID node REST endpoint can not be empty for custom network');
+        throw new Error('HID-SSI-SDK:: Error: HID node REST endpoint can not be empty for custom network');
       }
       HIDClient.hidNodeRestEndpoint = Utils.checkUrl(hidNodeRestEndpoint);
     }
