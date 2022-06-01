@@ -92,7 +92,7 @@ var HyperSignSchema = /** @class */ (function () {
     HyperSignSchema.prototype.getSchema = function (params) {
         var _this = this;
         if (!params.author)
-            throw new Error('Author must be passed');
+            throw new Error('HID-SSI-SDK:: Error: Author must be passed');
         this.id = this.getSchemaId(params.author);
         this.name = params.name;
         this.author = params.author;
@@ -138,9 +138,9 @@ var HyperSignSchema = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         if (!params.privateKey)
-                            throw new Error('PrivateKey must be passed');
+                            throw new Error('HID-SSI-SDK:: Error: PrivateKey must be passed');
                         if (!params.schema)
-                            throw new Error('Schema must be passed');
+                            throw new Error('HID-SSI-SDK:: Error: Schema must be passed');
                         privateKeyMultibaseConverted = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
                             privKey: params.privateKey,
                         }).privateKeyMultibase;
@@ -157,11 +157,11 @@ var HyperSignSchema = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 if (!params.schema)
-                    throw new Error('Schema must be passed');
+                    throw new Error('HID-SSI-SDK:: Error: Schema must be passed');
                 if (!params.signature)
-                    throw new Error('Signature must be passed');
+                    throw new Error('HID-SSI-SDK:: Error: Signature must be passed');
                 if (!params.verificationMethodId)
-                    throw new Error('VerificationMethodId must be passed');
+                    throw new Error('HID-SSI-SDK:: Error: VerificationMethodId must be passed');
                 return [2 /*return*/, this.schemaRpc.createSchema(params.schema, params.signature, params.verificationMethodId)];
             });
         });
@@ -173,12 +173,12 @@ var HyperSignSchema = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         if (!params.schemaId)
-                            throw new Error('SchemaId must be passed');
+                            throw new Error('HID-SSI-SDK:: Error: SchemaId must be passed');
                         return [4 /*yield*/, this.schemaRpc.resolveSchema(params.schemaId)];
                     case 1:
                         schemaArr = _a.sent();
                         if (!schemaArr || schemaArr.length < 0) {
-                            throw new Error('No schema found, id = ' + params.schemaId);
+                            throw new Error('HID-SSI-SDK:: Error: No schema found, id = ' + params.schemaId);
                         }
                         schema = schemaArr[0];
                         return [2 /*return*/, schema];

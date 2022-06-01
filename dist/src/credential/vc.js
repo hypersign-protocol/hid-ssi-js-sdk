@@ -155,7 +155,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 3:
                         e_1 = _a.sent();
-                        throw new Error('Could not resolve the schema from schemaId = ' + params.schemaId);
+                        throw new Error('HID-SSI-SDK:: Error: Could not resolve the schema from schemaId = ' + params.schemaId);
                     case 4:
                         issuerDid = params.issuerDid;
                         subjectDid = params.subjectDid;
@@ -165,12 +165,17 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         return [4 /*yield*/, this.hsDid.resolve({ did: subjectDid })];
                     case 6:
                         subjectDidDoc = (_a.sent()).didDocument;
+                        if (!issuerDidDoc) {
+                            throw new Error('HID-SSI-SDK:: Error: Could not fetch issuer did doc, issuer did = ' + issuerDid);
+                        }
+                        if (!subjectDidDoc) {
+                            throw new Error('HID-SSI-SDK:: Error: Could not fetch subject did doc, subject did = ' + subjectDid);
+                        }
                         vc = {};
                         schemaInternal = schemaDoc.schema;
                         schemaProperties = JSON.parse(schemaInternal.properties);
                         // context
                         vc['@context'] = this.getCredentialContext(params.schemaId, schemaProperties);
-                        console.log('After fetchin issuerDId and subject did ' + issuerDidDoc.id + ' || ' + subjectDidDoc.id);
                         /// TODO:  need to implement this properly
                         vc.id = this.getId();
                         // Type

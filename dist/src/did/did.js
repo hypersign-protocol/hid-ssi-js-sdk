@@ -148,7 +148,7 @@ var HypersignDID = /** @class */ (function () {
     /// Generate Did Document
     HypersignDID.prototype.generate = function (params) {
         if (!params.publicKeyMultibase) {
-            throw new Error('params.publicKeyMultibase is required to generate new did didoc');
+            throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
         }
         var publicKeyMultibase1 = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
             publicKey: params.publicKeyMultibase,
@@ -164,13 +164,13 @@ var HypersignDID = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         if (!params.didDocString) {
-                            throw new Error('params.didDocString is required to register a did');
+                            throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
                         }
                         if (!params.privateKeyMultibase) {
-                            throw new Error('params.privateKeyMultibase is required to register a did');
+                            throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to register a did');
                         }
                         if (!params.privateKeyMultibase) {
-                            throw new Error('params.verificationMethodId is required to register a did');
+                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
                         }
                         didDocString = params.didDocString, privateKeyMultibase = params.privateKeyMultibase, verificationMethodId = params.verificationMethodId;
                         return [4 /*yield*/, this.sign({ didDocString: didDocString, privateKeyMultibase: privateKeyMultibase })];
@@ -189,7 +189,7 @@ var HypersignDID = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         if (!params.did) {
-                            throw new Error('params.did is required to resolve a did');
+                            throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
                         }
                         return [4 /*yield*/, this.didrpc.resolveDID(params.did)];
                     case 1: return [2 /*return*/, _a.sent()];
@@ -205,16 +205,16 @@ var HypersignDID = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         if (!params.didDocString) {
-                            throw new Error('params.didDocString is required to update a did');
+                            throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to update a did');
                         }
                         if (!params.privateKeyMultibase) {
-                            throw new Error('params.privateKeyMultibase is required to update a did');
+                            throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to update a did');
                         }
                         if (!params.privateKeyMultibase) {
-                            throw new Error('params.verificationMethodId is required to update a did');
+                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update a did');
                         }
                         if (!params.versionId) {
-                            throw new Error('params.versionId is required to update a did');
+                            throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
                         }
                         didDocString = params.didDocString, privateKeyMultibase = params.privateKeyMultibase, verificationMethodId = params.verificationMethodId, versionId = params.versionId;
                         return [4 /*yield*/, this.sign({ didDocString: didDocString, privateKeyMultibase: privateKeyMultibase })];
@@ -234,16 +234,16 @@ var HypersignDID = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         if (!params.didDocString) {
-                            throw new Error('params.didDocString is required to deactivate a did');
+                            throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to deactivate a did');
                         }
                         if (!params.privateKeyMultibase) {
-                            throw new Error('params.privateKeyMultibase is required to deactivate a did');
+                            throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to deactivate a did');
                         }
                         if (!params.privateKeyMultibase) {
-                            throw new Error('params.verificationMethodId is required to deactivate a did');
+                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to deactivate a did');
                         }
                         if (!params.versionId) {
-                            throw new Error('params.versionId is required to deactivate a did');
+                            throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
                         }
                         didDocString = params.didDocString, privateKeyMultibase = params.privateKeyMultibase, verificationMethodId = params.verificationMethodId, versionId = params.versionId;
                         return [4 /*yield*/, this.sign({ didDocString: didDocString, privateKeyMultibase: privateKeyMultibase })];
@@ -258,13 +258,13 @@ var HypersignDID = /** @class */ (function () {
     };
     /// Did Auth
     HypersignDID.prototype.signDid = function (params) {
-        throw new Error('Method not impplemented');
+        throw new Error('HID-SSI-SDK:: Error: Method not impplemented');
     };
     // verify the signature
     HypersignDID.prototype.verify = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                throw new Error('Method not implemented');
+                throw new Error('HID-SSI-SDK:: Error: Method not implemented');
             });
         });
     };

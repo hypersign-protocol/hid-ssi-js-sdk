@@ -52,7 +52,7 @@ var HIDClient = /** @class */ (function () {
         this.signer = signer;
         this.registry = new rpcFactory_1.HIDRpcFactory();
         if (!hidNodeEndpoint) {
-            throw new Error("HID Node enpoint must be passed. Possible values:  'TEST' | 'MAIN' | <custom node url>");
+            throw new Error("HID-SSI-SDK:: Error: HID Node enpoint must be passed. Possible values:  'TEST' | 'MAIN' | <custom node url>");
         }
         if (hidNodeEndpoint === 'TEST') {
             HIDClient.hidNodeEndpoint = utils_1.default.checkUrl(HYPERSIGN_TESTNET_RPC);
@@ -65,7 +65,7 @@ var HIDClient = /** @class */ (function () {
         else {
             HIDClient.hidNodeEndpoint = utils_1.default.checkUrl(hidNodeEndpoint);
             if (!hidNodeRestEndpoint) {
-                throw new Error('HID node REST endpoint can not be empty for custom network');
+                throw new Error('HID-SSI-SDK:: Error: HID node REST endpoint can not be empty for custom network');
             }
             HIDClient.hidNodeRestEndpoint = utils_1.default.checkUrl(hidNodeRestEndpoint);
         }
