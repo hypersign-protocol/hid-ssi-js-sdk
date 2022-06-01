@@ -1,5 +1,4 @@
 node_modules
-dist
 libs
 test/keys.json
 test/schema.json
