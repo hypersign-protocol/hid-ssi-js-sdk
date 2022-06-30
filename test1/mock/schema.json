@@ -1,16 +1,1 @@
-{
-    "type": "https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json",
-    "modelVersion": "1.0",
-    "id": "did:hs:b3780119-3b02-4717-89fe-acf7d92ad616;id=6d6a5b1d-b736-4086-bba7-b4c33fca551c;version=1.0",
-    "name": "Email Schema",
-    "author": "did:hs:b3780119-3b02-4717-89fe-acf7d92ad616",
-    "authored": "2022-06-30T04:50:24Z",
-    "schema": {
-        "schema": "http://json-schema.org/draft-07/schema",
-        "description": "This is email credential",
-        "type": "object",
-        "properties": "{\"email\":{\"type\":\"string\",\"format\":\"email\"},\"name\":{\"type\":\"string\"},\"modelname\":{\"type\":\"string\"}}",
-        "required": ["email", "name"],
-        "additionalProperties": false
-    }
-}
+{"type":"https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json","modelVersion":"1.0","id":"did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1;id=5d9eeea6-ca81-47e9-89b3-b72f96c174f6;version=1.0","name":"Email Schema","author":"did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1","authored":"2022-06-30T08:43:51Z","schema":{"schema":"http://json-schema.org/draft-07/schema","description":"This is email credential","type":"object","properties":"{\"email\":{\"type\":\"string\",\"format\":\"email\"},\"name\":{\"type\":\"string\"},\"modelname\":{\"type\":\"string\"}}","required":["email","name"],"additionalProperties":false}}
