@@ -1,23 +1,30 @@
-const { props, writeDataInFile, createWallet } = require('../config')
+const { props, writeDataInFile, createWallet, mnemonic, hidNodeEp } = require('../config')
 const HypersignSsiSDK = require('../../dist/src')
+const { privateKeyMultibase } = require('../mock/keys.json')
+const { verificationMethod, id } = require('../mock/did.json')
 
-const author = "did:hs:72ed2dbc-4970-4bdd-8dd0-41cc7c9377d1";
-let schemaId = ""
+console.log({
+    verificationMethod,
+    id,
+    privateKeyMultibase
+})
+if (!privateKeyMultibase || !verificationMethod || !id) {
+    throw new Error('Please run did test case before proceeding')
+}
 
+const author = id;
 let hsSdk;
 let schema;
-
-const mnemonic = "retreat seek south invite fall eager engage endorse inquiry sample salad evidence express actor hidden fence anchor crowd two now convince convince park bag"
 createWallet(mnemonic)
     .then((offlineSigner) => {
-        hsSdk = new HypersignSsiSDK(offlineSigner, "http://localhost:26657", "http://localhost:1317");
+        hsSdk = new HypersignSsiSDK(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest);
         return hsSdk.init();
     })
     .then(() => {
         console.log("======Generate Schema=====")
         const schemaOptions = {
             name: "Email Schema",
-            author: "did:hs:a58d3f48-7f29-47a9-ae73-a0800b409be7",
+            author,
             schemaProperty: {
                 properties: [{
                         name: "email",
@@ -49,20 +56,20 @@ createWallet(mnemonic)
     .then(() => {
         console.log(schema)
         console.log("========Sign Schema=======")
-        const privKey = "zrv2c2grj4PBRgc9j6WMHpDnWWChdXfQuMoLc6FJXFFh8CucEJvReQf93HnyPLCh7PynmogPjSqjXHbJ4tX5UN5KzWg"
-
+        const privKey = privateKeyMultibase
         return hsSdk.schema.signSchema({ privateKey: privKey, schema })
     })
     .then(signature => {
         console.log("Signature: ", signature)
         console.log("=========Register Schema========")
-        const verificationMethodId = "did:hs:a58d3f48-7f29-47a9-ae73-a0800b409be7#zBz7vTui6K5q4DarumG8cMEC1TZ19MvyPcMqSRjMfJVWc"
-
+        const verificationMethodId = verificationMethod[0].id
+        console.log(verificationMethodId)
         return hsSdk.schema.registerSchema({ schema, signature, verificationMethodId })
     }).then(res => {
         console.log(res)
         console.log("=========Resolve Schema========")
         return hsSdk.schema.resolve({ schemaId: schema.id })
     }).then(res => {
+        writeDataInFile('../mock/schema.json', JSON.stringify(res))
         console.log(JSON.stringify(res, null, 2))
     })

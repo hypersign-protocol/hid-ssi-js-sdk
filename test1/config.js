@@ -2,8 +2,8 @@ const { DirectSecp256k1HdWallet } = require("@cosmjs/proto-signing");
 
 const fs = require('fs')
 
+const mnemonic = "retreat seek south invite fall eager engage endorse inquiry sample salad evidence express actor hidden fence anchor crowd two now convince convince park bag"
 
-//const options = { nodeUrl: "https://stage.hypermine.in/core", mnemonic, rpc: HYPERSIGN_TESTNET_RPC }
 const createWallet = async(mnemonic) => {
     if (!mnemonic) {
         return await DirectSecp256k1HdWallet.generate(24, options = {
@@ -15,7 +15,6 @@ const createWallet = async(mnemonic) => {
         });
     }
 }
-
 
 const writeDataInFile = (fileName, data) => {
     return fs.writeFile(fileName, data, (error) => {
@@ -47,10 +46,17 @@ const props = {
     "phoneNumber": ""
 }
 
+const hidNodeEp = {
+    rpc: "http://localhost:26657",
+    rest: "http://localhost:1317"
+}
+
 module.exports = {
     props,
     writeDataInFile,
     readDateFromFile,
     ifFileExists,
-    createWallet
+    createWallet,
+    mnemonic,
+    hidNodeEp
 }

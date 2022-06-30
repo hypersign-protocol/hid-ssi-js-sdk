@@ -1,4 +1,4 @@
-const { createWallet } = require('../config')
+const { createWallet, writeDataInFile, mnemonic, hidNodeEp } = require('../config')
 const HypersignSsiSDK = require('../../dist/src')
 
 let hsSdk = null;
@@ -7,21 +7,22 @@ let versionId;
 let verificationMethodId;
 let didDoc;
 let privateKeyMultibase;
-const mnemonic = "retreat seek south invite fall eager engage endorse inquiry sample salad evidence express actor hidden fence anchor crowd two now convince convince park bag"
 createWallet(mnemonic)
     .then((offlineSigner) => {
-        hsSdk = new HypersignSsiSDK(offlineSigner, "http://localhost:26657", "http://localhost:1317");
+        hsSdk = new HypersignSsiSDK(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest);
         return hsSdk.init();
     })
     .then(async() => {
         console.log("===============GENERATE DID-KEYS=======================")
         const seedParam = "blade sting surge cube valid scr"; // 32 bytes
         const kp = await hsSdk.did.generateKeys({ seed: seedParam });
+        writeDataInFile('../mock/keys.json', JSON.stringify(kp))
         privateKeyMultibase = kp.privateKeyMultibase
         const publicKeyMultibase = kp.publicKeyMultibase
         console.log(kp)
         console.log("===============GENERATE DID&DIDDoc=======================")
         didDocString = hsSdk.did.generate({ publicKeyMultibase });
+        writeDataInFile('../mock/did.json', didDocString)
         didDoc = JSON.parse(didDocString);
         verificationMethodId = didDoc['verificationMethod'][0].id
         console.log("===============REGISTER DID=======================")
