@@ -59,7 +59,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var constant = __importStar(require("../constants"));
-var uuid_1 = require("uuid");
 var didRPC_1 = require("./didRPC");
 var utils_1 = __importDefault(require("../utils"));
 var ed25519 = require('@stablelib/ed25519');
@@ -67,13 +66,13 @@ var did_1 = require("../generated/ssi/did");
 var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
 var DID = /** @class */ (function () {
     function DID(publicKey) {
-        this.getId = function () { return "".concat(constant.DID.SCHEME, ":").concat((0, uuid_1.v4)()); };
+        this.getId = function (publicKey) { return "".concat(constant.DID.SCHEME, ":").concat(publicKey); };
         this.context = [constant.DID.DID_BASE_CONTEXT];
-        this.id = this.getId();
+        this.id = this.getId(publicKey);
         this.controller = [this.id];
         this.alsoKnownAs = [this.id];
         var verificationMethod = {
-            id: this.id + '#' + publicKey,
+            id: this.id + '#key-1',
             type: constant.DID.VERIFICATION_METHOD_TYPE,
             controller: this.id,
             publicKeyMultibase: publicKey,
@@ -250,7 +249,7 @@ var HypersignDID = /** @class */ (function () {
                     case 1:
                         signature = _a.sent();
                         didDoc = JSON.parse(didDocString);
-                        return [4 /*yield*/, this.didrpc.deactivateDID(didDoc, signature, verificationMethodId, versionId)];
+                        return [4 /*yield*/, this.didrpc.deactivateDID(didDoc.id, signature, verificationMethodId, versionId)];
                     case 2: return [2 /*return*/, _a.sent()];
                 }
             });

@@ -21,11 +21,11 @@ class DID implements Did {
   service: Service[];
   constructor(publicKey: string) {
     this.context = [constant.DID.DID_BASE_CONTEXT];
-    this.id = this.getId();
+    this.id = this.getId(publicKey);
     this.controller = [this.id];
     this.alsoKnownAs = [this.id];
     const verificationMethod: VerificationMethod = {
-      id: this.id + '#' + publicKey,
+      id: this.id + '#key-1',
       type: constant.DID.VERIFICATION_METHOD_TYPE,
       controller: this.id,
       publicKeyMultibase: publicKey,
@@ -44,7 +44,13 @@ class DID implements Did {
     return JSON.stringify(this);
   }
 
-  private getId = () => `${constant.DID.SCHEME}:${uuidv4()}`;
+  private getId = (publicKey) => `${constant.DID.SCHEME}:${publicKey}`;
+
+  // {
+  //   const edKeyPair = await Ed25519VerificationKey2020.generate();
+  //   const exportedKp = await edKeyPair.export({ publicKey: true });
+  //   return;
+  // };
 }
 
 export default class HypersignDID implements IDID {
@@ -178,7 +184,7 @@ export default class HypersignDID implements IDID {
     const { didDocString, privateKeyMultibase, verificationMethodId, versionId } = params;
     const signature = await this.sign({ didDocString, privateKeyMultibase });
     const didDoc: Did = JSON.parse(didDocString);
-    return await this.didrpc.deactivateDID(didDoc, signature, verificationMethodId, versionId);
+    return await this.didrpc.deactivateDID(didDoc.id, signature, verificationMethodId, versionId);
   }
   /// Did Auth
   public signDid(params: IParams): Promise<object> {

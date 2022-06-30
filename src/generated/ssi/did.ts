@@ -25,11 +25,6 @@ export interface Metadata {
   versionId: string;
 }
 
-export interface DidResolveMeta {
-  retrieved: string;
-  error: string;
-}
-
 export interface VerificationMethod {
   id: string;
   type: string;
@@ -44,7 +39,7 @@ export interface Service {
 }
 
 export interface SignInfo {
-  verificationMethodId: string;
+  verification_method_id: string;
   signature: string;
 }
 
@@ -500,78 +495,6 @@ export const Metadata = {
   },
 };
 
-const baseDidResolveMeta: object = { retrieved: "", error: "" };
-
-export const DidResolveMeta = {
-  encode(message: DidResolveMeta, writer: Writer = Writer.create()): Writer {
-    if (message.retrieved !== "") {
-      writer.uint32(18).string(message.retrieved);
-    }
-    if (message.error !== "") {
-      writer.uint32(26).string(message.error);
-    }
-    return writer;
-  },
-
-  decode(input: Reader | Uint8Array, length?: number): DidResolveMeta {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseDidResolveMeta } as DidResolveMeta;
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 2:
-          message.retrieved = reader.string();
-          break;
-        case 3:
-          message.error = reader.string();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): DidResolveMeta {
-    const message = { ...baseDidResolveMeta } as DidResolveMeta;
-    if (object.retrieved !== undefined && object.retrieved !== null) {
-      message.retrieved = String(object.retrieved);
-    } else {
-      message.retrieved = "";
-    }
-    if (object.error !== undefined && object.error !== null) {
-      message.error = String(object.error);
-    } else {
-      message.error = "";
-    }
-    return message;
-  },
-
-  toJSON(message: DidResolveMeta): unknown {
-    const obj: any = {};
-    message.retrieved !== undefined && (obj.retrieved = message.retrieved);
-    message.error !== undefined && (obj.error = message.error);
-    return obj;
-  },
-
-  fromPartial(object: DeepPartial<DidResolveMeta>): DidResolveMeta {
-    const message = { ...baseDidResolveMeta } as DidResolveMeta;
-    if (object.retrieved !== undefined && object.retrieved !== null) {
-      message.retrieved = object.retrieved;
-    } else {
-      message.retrieved = "";
-    }
-    if (object.error !== undefined && object.error !== null) {
-      message.error = object.error;
-    } else {
-      message.error = "";
-    }
-    return message;
-  },
-};
-
 const baseVerificationMethod: object = {
   id: "",
   type: "",
@@ -789,12 +712,12 @@ export const Service = {
   },
 };
 
-const baseSignInfo: object = { verificationMethodId: "", signature: "" };
+const baseSignInfo: object = { verification_method_id: "", signature: "" };
 
 export const SignInfo = {
   encode(message: SignInfo, writer: Writer = Writer.create()): Writer {
-    if (message.verificationMethodId !== "") {
-      writer.uint32(10).string(message.verificationMethodId);
+    if (message.verification_method_id !== "") {
+      writer.uint32(10).string(message.verification_method_id);
     }
     if (message.signature !== "") {
       writer.uint32(18).string(message.signature);
@@ -810,7 +733,7 @@ export const SignInfo = {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.verificationMethodId = reader.string();
+          message.verification_method_id = reader.string();
           break;
         case 2:
           message.signature = reader.string();
@@ -826,12 +749,12 @@ export const SignInfo = {
   fromJSON(object: any): SignInfo {
     const message = { ...baseSignInfo } as SignInfo;
     if (
-      object.verificationMethodId !== undefined &&
-      object.verificationMethodId !== null
+      object.verification_method_id !== undefined &&
+      object.verification_method_id !== null
     ) {
-      message.verificationMethodId = String(object.verificationMethodId);
+      message.verification_method_id = String(object.verification_method_id);
     } else {
-      message.verificationMethodId = "";
+      message.verification_method_id = "";
     }
     if (object.signature !== undefined && object.signature !== null) {
       message.signature = String(object.signature);
@@ -843,8 +766,8 @@ export const SignInfo = {
 
   toJSON(message: SignInfo): unknown {
     const obj: any = {};
-    message.verificationMethodId !== undefined &&
-      (obj.verificationMethodId = message.verificationMethodId);
+    message.verification_method_id !== undefined &&
+      (obj.verification_method_id = message.verification_method_id);
     message.signature !== undefined && (obj.signature = message.signature);
     return obj;
   },
@@ -852,12 +775,12 @@ export const SignInfo = {
   fromPartial(object: DeepPartial<SignInfo>): SignInfo {
     const message = { ...baseSignInfo } as SignInfo;
     if (
-      object.verificationMethodId !== undefined &&
-      object.verificationMethodId !== null
+      object.verification_method_id !== undefined &&
+      object.verification_method_id !== null
     ) {
-      message.verificationMethodId = object.verificationMethodId;
+      message.verification_method_id = object.verification_method_id;
     } else {
-      message.verificationMethodId = "";
+      message.verification_method_id = "";
     }
     if (object.signature !== undefined && object.signature !== null) {
       message.signature = object.signature;

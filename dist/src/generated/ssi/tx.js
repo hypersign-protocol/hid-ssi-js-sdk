@@ -11,11 +11,12 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MsgClientImpl = exports.MsgDeactivateDIDResponse = exports.MsgDeactivateDID = exports.MsgCreateSchemaResponse = exports.MsgCreateSchema = exports.MsgUpdateDIDResponse = exports.MsgUpdateDID = exports.MsgCreateDIDResponse = exports.MsgCreateDID = exports.protobufPackage = void 0;
+exports.MsgClientImpl = exports.MsgRegisterCredentialStatusResponse = exports.MsgRegisterCredentialStatus = exports.MsgDeactivateDIDResponse = exports.MsgDeactivateDID = exports.MsgCreateSchemaResponse = exports.MsgCreateSchema = exports.MsgUpdateDIDResponse = exports.MsgUpdateDID = exports.MsgCreateDIDResponse = exports.MsgCreateDID = exports.protobufPackage = void 0;
 /* eslint-disable */
 var minimal_1 = require("protobufjs/minimal");
 var did_1 = require("./did");
 var schema_1 = require("./schema");
+var credential_1 = require("./credential");
 exports.protobufPackage = "hypersignprotocol.hidnode.ssi";
 var baseMsgCreateDID = { creator: "" };
 exports.MsgCreateDID = {
@@ -173,15 +174,15 @@ exports.MsgCreateDIDResponse = {
         return message;
     },
 };
-var baseMsgUpdateDID = { versionId: "", creator: "" };
+var baseMsgUpdateDID = { version_id: "", creator: "" };
 exports.MsgUpdateDID = {
     encode: function (message, writer) {
         if (writer === void 0) { writer = minimal_1.Writer.create(); }
         if (message.didDocString !== undefined) {
             did_1.Did.encode(message.didDocString, writer.uint32(10).fork()).ldelim();
         }
-        if (message.versionId !== "") {
-            writer.uint32(18).string(message.versionId);
+        if (message.version_id !== "") {
+            writer.uint32(18).string(message.version_id);
         }
         for (var _i = 0, _a = message.signatures; _i < _a.length; _i++) {
             var v = _a[_i];
@@ -204,7 +205,7 @@ exports.MsgUpdateDID = {
                     message.didDocString = did_1.Did.decode(reader, reader.uint32());
                     break;
                 case 2:
-                    message.versionId = reader.string();
+                    message.version_id = reader.string();
                     break;
                 case 3:
                     message.signatures.push(did_1.SignInfo.decode(reader, reader.uint32()));
@@ -228,11 +229,11 @@ exports.MsgUpdateDID = {
         else {
             message.didDocString = undefined;
         }
-        if (object.versionId !== undefined && object.versionId !== null) {
-            message.versionId = String(object.versionId);
+        if (object.version_id !== undefined && object.version_id !== null) {
+            message.version_id = String(object.version_id);
         }
         else {
-            message.versionId = "";
+            message.version_id = "";
         }
         if (object.signatures !== undefined && object.signatures !== null) {
             for (var _i = 0, _a = object.signatures; _i < _a.length; _i++) {
@@ -254,7 +255,7 @@ exports.MsgUpdateDID = {
             (obj.didDocString = message.didDocString
                 ? did_1.Did.toJSON(message.didDocString)
                 : undefined);
-        message.versionId !== undefined && (obj.versionId = message.versionId);
+        message.version_id !== undefined && (obj.version_id = message.version_id);
         if (message.signatures) {
             obj.signatures = message.signatures.map(function (e) {
                 return e ? did_1.SignInfo.toJSON(e) : undefined;
@@ -275,11 +276,11 @@ exports.MsgUpdateDID = {
         else {
             message.didDocString = undefined;
         }
-        if (object.versionId !== undefined && object.versionId !== null) {
-            message.versionId = object.versionId;
+        if (object.version_id !== undefined && object.version_id !== null) {
+            message.version_id = object.version_id;
         }
         else {
-            message.versionId = "";
+            message.version_id = "";
         }
         if (object.signatures !== undefined && object.signatures !== null) {
             for (var _i = 0, _a = object.signatures; _i < _a.length; _i++) {
@@ -502,18 +503,18 @@ exports.MsgCreateSchemaResponse = {
         return message;
     },
 };
-var baseMsgDeactivateDID = { creator: "", versionId: "" };
+var baseMsgDeactivateDID = { creator: "", didId: "", version_id: "" };
 exports.MsgDeactivateDID = {
     encode: function (message, writer) {
         if (writer === void 0) { writer = minimal_1.Writer.create(); }
         if (message.creator !== "") {
             writer.uint32(10).string(message.creator);
         }
-        if (message.didDocString !== undefined) {
-            did_1.Did.encode(message.didDocString, writer.uint32(18).fork()).ldelim();
+        if (message.didId !== "") {
+            writer.uint32(18).string(message.didId);
         }
-        if (message.versionId !== "") {
-            writer.uint32(26).string(message.versionId);
+        if (message.version_id !== "") {
+            writer.uint32(26).string(message.version_id);
         }
         for (var _i = 0, _a = message.signatures; _i < _a.length; _i++) {
             var v = _a[_i];
@@ -533,10 +534,10 @@ exports.MsgDeactivateDID = {
                     message.creator = reader.string();
                     break;
                 case 2:
-                    message.didDocString = did_1.Did.decode(reader, reader.uint32());
+                    message.didId = reader.string();
                     break;
                 case 3:
-                    message.versionId = reader.string();
+                    message.version_id = reader.string();
                     break;
                 case 4:
                     message.signatures.push(did_1.SignInfo.decode(reader, reader.uint32()));
@@ -557,17 +558,17 @@ exports.MsgDeactivateDID = {
         else {
             message.creator = "";
         }
-        if (object.didDocString !== undefined && object.didDocString !== null) {
-            message.didDocString = did_1.Did.fromJSON(object.didDocString);
+        if (object.didId !== undefined && object.didId !== null) {
+            message.didId = String(object.didId);
         }
         else {
-            message.didDocString = undefined;
+            message.didId = "";
         }
-        if (object.versionId !== undefined && object.versionId !== null) {
-            message.versionId = String(object.versionId);
+        if (object.version_id !== undefined && object.version_id !== null) {
+            message.version_id = String(object.version_id);
         }
         else {
-            message.versionId = "";
+            message.version_id = "";
         }
         if (object.signatures !== undefined && object.signatures !== null) {
             for (var _i = 0, _a = object.signatures; _i < _a.length; _i++) {
@@ -580,11 +581,8 @@ exports.MsgDeactivateDID = {
     toJSON: function (message) {
         var obj = {};
         message.creator !== undefined && (obj.creator = message.creator);
-        message.didDocString !== undefined &&
-            (obj.didDocString = message.didDocString
-                ? did_1.Did.toJSON(message.didDocString)
-                : undefined);
-        message.versionId !== undefined && (obj.versionId = message.versionId);
+        message.didId !== undefined && (obj.didId = message.didId);
+        message.version_id !== undefined && (obj.version_id = message.version_id);
         if (message.signatures) {
             obj.signatures = message.signatures.map(function (e) {
                 return e ? did_1.SignInfo.toJSON(e) : undefined;
@@ -604,17 +602,17 @@ exports.MsgDeactivateDID = {
         else {
             message.creator = "";
         }
-        if (object.didDocString !== undefined && object.didDocString !== null) {
-            message.didDocString = did_1.Did.fromPartial(object.didDocString);
+        if (object.didId !== undefined && object.didId !== null) {
+            message.didId = object.didId;
         }
         else {
-            message.didDocString = undefined;
+            message.didId = "";
         }
-        if (object.versionId !== undefined && object.versionId !== null) {
-            message.versionId = object.versionId;
+        if (object.version_id !== undefined && object.version_id !== null) {
+            message.version_id = object.version_id;
         }
         else {
-            message.versionId = "";
+            message.version_id = "";
         }
         if (object.signatures !== undefined && object.signatures !== null) {
             for (var _i = 0, _a = object.signatures; _i < _a.length; _i++) {
@@ -677,6 +675,156 @@ exports.MsgDeactivateDIDResponse = {
         return message;
     },
 };
+var baseMsgRegisterCredentialStatus = { creator: "" };
+exports.MsgRegisterCredentialStatus = {
+    encode: function (message, writer) {
+        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+        if (message.creator !== "") {
+            writer.uint32(10).string(message.creator);
+        }
+        if (message.credentialStatus !== undefined) {
+            credential_1.CredentialStatus.encode(message.credentialStatus, writer.uint32(18).fork()).ldelim();
+        }
+        if (message.proof !== undefined) {
+            credential_1.CredentialProof.encode(message.proof, writer.uint32(26).fork()).ldelim();
+        }
+        return writer;
+    },
+    decode: function (input, length) {
+        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        var end = length === undefined ? reader.len : reader.pos + length;
+        var message = __assign({}, baseMsgRegisterCredentialStatus);
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+                case 1:
+                    message.creator = reader.string();
+                    break;
+                case 2:
+                    message.credentialStatus = credential_1.CredentialStatus.decode(reader, reader.uint32());
+                    break;
+                case 3:
+                    message.proof = credential_1.CredentialProof.decode(reader, reader.uint32());
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+            }
+        }
+        return message;
+    },
+    fromJSON: function (object) {
+        var message = __assign({}, baseMsgRegisterCredentialStatus);
+        if (object.creator !== undefined && object.creator !== null) {
+            message.creator = String(object.creator);
+        }
+        else {
+            message.creator = "";
+        }
+        if (object.credentialStatus !== undefined &&
+            object.credentialStatus !== null) {
+            message.credentialStatus = credential_1.CredentialStatus.fromJSON(object.credentialStatus);
+        }
+        else {
+            message.credentialStatus = undefined;
+        }
+        if (object.proof !== undefined && object.proof !== null) {
+            message.proof = credential_1.CredentialProof.fromJSON(object.proof);
+        }
+        else {
+            message.proof = undefined;
+        }
+        return message;
+    },
+    toJSON: function (message) {
+        var obj = {};
+        message.creator !== undefined && (obj.creator = message.creator);
+        message.credentialStatus !== undefined &&
+            (obj.credentialStatus = message.credentialStatus
+                ? credential_1.CredentialStatus.toJSON(message.credentialStatus)
+                : undefined);
+        message.proof !== undefined &&
+            (obj.proof = message.proof
+                ? credential_1.CredentialProof.toJSON(message.proof)
+                : undefined);
+        return obj;
+    },
+    fromPartial: function (object) {
+        var message = __assign({}, baseMsgRegisterCredentialStatus);
+        if (object.creator !== undefined && object.creator !== null) {
+            message.creator = object.creator;
+        }
+        else {
+            message.creator = "";
+        }
+        if (object.credentialStatus !== undefined &&
+            object.credentialStatus !== null) {
+            message.credentialStatus = credential_1.CredentialStatus.fromPartial(object.credentialStatus);
+        }
+        else {
+            message.credentialStatus = undefined;
+        }
+        if (object.proof !== undefined && object.proof !== null) {
+            message.proof = credential_1.CredentialProof.fromPartial(object.proof);
+        }
+        else {
+            message.proof = undefined;
+        }
+        return message;
+    },
+};
+var baseMsgRegisterCredentialStatusResponse = { id: 0 };
+exports.MsgRegisterCredentialStatusResponse = {
+    encode: function (message, writer) {
+        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+        if (message.id !== 0) {
+            writer.uint32(8).uint64(message.id);
+        }
+        return writer;
+    },
+    decode: function (input, length) {
+        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        var end = length === undefined ? reader.len : reader.pos + length;
+        var message = __assign({}, baseMsgRegisterCredentialStatusResponse);
+        while (reader.pos < end) {
+            var tag = reader.uint32();
+            switch (tag >>> 3) {
+                case 1:
+                    message.id = longToNumber(reader.uint64());
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+            }
+        }
+        return message;
+    },
+    fromJSON: function (object) {
+        var message = __assign({}, baseMsgRegisterCredentialStatusResponse);
+        if (object.id !== undefined && object.id !== null) {
+            message.id = Number(object.id);
+        }
+        else {
+            message.id = 0;
+        }
+        return message;
+    },
+    toJSON: function (message) {
+        var obj = {};
+        message.id !== undefined && (obj.id = message.id);
+        return obj;
+    },
+    fromPartial: function (object) {
+        var message = __assign({}, baseMsgRegisterCredentialStatusResponse);
+        if (object.id !== undefined && object.id !== null) {
+            message.id = object.id;
+        }
+        else {
+            message.id = 0;
+        }
+        return message;
+    },
+};
 var MsgClientImpl = /** @class */ (function () {
     function MsgClientImpl(rpc) {
         this.rpc = rpc;
@@ -709,6 +857,13 @@ var MsgClientImpl = /** @class */ (function () {
             return exports.MsgDeactivateDIDResponse.decode(new minimal_1.Reader(data));
         });
     };
+    MsgClientImpl.prototype.RegisterCredentialStatus = function (request) {
+        var data = exports.MsgRegisterCredentialStatus.encode(request).finish();
+        var promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "RegisterCredentialStatus", data);
+        return promise.then(function (data) {
+            return exports.MsgRegisterCredentialStatusResponse.decode(new minimal_1.Reader(data));
+        });
+    };
     return MsgClientImpl;
 }());
 exports.MsgClientImpl = MsgClientImpl;
@@ -729,7 +884,7 @@ function longToNumber(long) {
     }
     return long.toNumber();
 }
-// if (true) {
+// if (util.Long !== Long) {
 //   util.Long = Long as any;
 //   configure();
 // }

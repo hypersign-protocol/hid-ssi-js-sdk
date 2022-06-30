@@ -1,4 +1,4 @@
-import { Did as IDidProto, Metadata, DidResolveMeta } from '../generated/ssi/did';
+import { Did as IDidProto, Metadata } from '../generated/ssi/did';
 export interface IPublicKey {
   '@context': string;
   id: string;
@@ -54,12 +54,11 @@ export interface IDIDResolve {
   _at_content: string;
   didDocument: IDidProto;
   didDocumentMetadata: Metadata;
-  didResolutionMetadata: DidResolveMeta;
 }
 
 export interface IDIDRpc {
   registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string): Promise<object>;
   updateDID(didDoc: IDidProto, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
-  deactivateDID(didDoc: IDidProto, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
-  resolveDID(did): Promise<IDIDResolve>;
+  deactivateDID(did: string, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
+  resolveDID(did: string): Promise<IDIDResolve>;
 }

@@ -11,7 +11,7 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DidDocument = exports.SignInfo = exports.Service = exports.VerificationMethod = exports.DidResolveMeta = exports.Metadata = exports.Did = exports.protobufPackage = void 0;
+exports.DidDocument = exports.SignInfo = exports.Service = exports.VerificationMethod = exports.Metadata = exports.Did = exports.protobufPackage = void 0;
 /* eslint-disable */
 var minimal_1 = require("protobufjs/minimal");
 exports.protobufPackage = "hypersignprotocol.hidnode.ssi";
@@ -484,77 +484,6 @@ exports.Metadata = {
         return message;
     },
 };
-var baseDidResolveMeta = { retrieved: "", error: "" };
-exports.DidResolveMeta = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
-        if (message.retrieved !== "") {
-            writer.uint32(18).string(message.retrieved);
-        }
-        if (message.error !== "") {
-            writer.uint32(26).string(message.error);
-        }
-        return writer;
-    },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseDidResolveMeta);
-        while (reader.pos < end) {
-            var tag = reader.uint32();
-            switch (tag >>> 3) {
-                case 2:
-                    message.retrieved = reader.string();
-                    break;
-                case 3:
-                    message.error = reader.string();
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
-            }
-        }
-        return message;
-    },
-    fromJSON: function (object) {
-        var message = __assign({}, baseDidResolveMeta);
-        if (object.retrieved !== undefined && object.retrieved !== null) {
-            message.retrieved = String(object.retrieved);
-        }
-        else {
-            message.retrieved = "";
-        }
-        if (object.error !== undefined && object.error !== null) {
-            message.error = String(object.error);
-        }
-        else {
-            message.error = "";
-        }
-        return message;
-    },
-    toJSON: function (message) {
-        var obj = {};
-        message.retrieved !== undefined && (obj.retrieved = message.retrieved);
-        message.error !== undefined && (obj.error = message.error);
-        return obj;
-    },
-    fromPartial: function (object) {
-        var message = __assign({}, baseDidResolveMeta);
-        if (object.retrieved !== undefined && object.retrieved !== null) {
-            message.retrieved = object.retrieved;
-        }
-        else {
-            message.retrieved = "";
-        }
-        if (object.error !== undefined && object.error !== null) {
-            message.error = object.error;
-        }
-        else {
-            message.error = "";
-        }
-        return message;
-    },
-};
 var baseVerificationMethod = {
     id: "",
     type: "",
@@ -765,12 +694,12 @@ exports.Service = {
         return message;
     },
 };
-var baseSignInfo = { verificationMethodId: "", signature: "" };
+var baseSignInfo = { verification_method_id: "", signature: "" };
 exports.SignInfo = {
     encode: function (message, writer) {
         if (writer === void 0) { writer = minimal_1.Writer.create(); }
-        if (message.verificationMethodId !== "") {
-            writer.uint32(10).string(message.verificationMethodId);
+        if (message.verification_method_id !== "") {
+            writer.uint32(10).string(message.verification_method_id);
         }
         if (message.signature !== "") {
             writer.uint32(18).string(message.signature);
@@ -785,7 +714,7 @@ exports.SignInfo = {
             var tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
-                    message.verificationMethodId = reader.string();
+                    message.verification_method_id = reader.string();
                     break;
                 case 2:
                     message.signature = reader.string();
@@ -799,12 +728,12 @@ exports.SignInfo = {
     },
     fromJSON: function (object) {
         var message = __assign({}, baseSignInfo);
-        if (object.verificationMethodId !== undefined &&
-            object.verificationMethodId !== null) {
-            message.verificationMethodId = String(object.verificationMethodId);
+        if (object.verification_method_id !== undefined &&
+            object.verification_method_id !== null) {
+            message.verification_method_id = String(object.verification_method_id);
         }
         else {
-            message.verificationMethodId = "";
+            message.verification_method_id = "";
         }
         if (object.signature !== undefined && object.signature !== null) {
             message.signature = String(object.signature);
@@ -816,19 +745,19 @@ exports.SignInfo = {
     },
     toJSON: function (message) {
         var obj = {};
-        message.verificationMethodId !== undefined &&
-            (obj.verificationMethodId = message.verificationMethodId);
+        message.verification_method_id !== undefined &&
+            (obj.verification_method_id = message.verification_method_id);
         message.signature !== undefined && (obj.signature = message.signature);
         return obj;
     },
     fromPartial: function (object) {
         var message = __assign({}, baseSignInfo);
-        if (object.verificationMethodId !== undefined &&
-            object.verificationMethodId !== null) {
-            message.verificationMethodId = object.verificationMethodId;
+        if (object.verification_method_id !== undefined &&
+            object.verification_method_id !== null) {
+            message.verification_method_id = object.verification_method_id;
         }
         else {
-            message.verificationMethodId = "";
+            message.verification_method_id = "";
         }
         if (object.signature !== undefined && object.signature !== null) {
             message.signature = object.signature;

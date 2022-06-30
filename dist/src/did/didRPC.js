@@ -75,7 +75,7 @@ var DIDRpc = /** @class */ (function () {
                     case 0:
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgCreateDID);
                         signInfo = {
-                            verificationMethodId: verificationMethodId,
+                            verification_method_id: verificationMethodId,
                             signature: signature,
                         };
                         txMessage = {
@@ -104,7 +104,7 @@ var DIDRpc = /** @class */ (function () {
                     case 0:
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgUpdateDID);
                         signInfo = {
-                            verificationMethodId: verificationMethodId,
+                            verification_method_id: verificationMethodId,
                             signature: signature,
                         };
                         txMessage = {
@@ -113,7 +113,7 @@ var DIDRpc = /** @class */ (function () {
                                 didDocString: didDoc,
                                 signatures: [signInfo],
                                 creator: client_1.HIDClient.getHidWalletAddress(),
-                                versionId: versionId,
+                                version_id: versionId,
                             }),
                         };
                         fee = 'auto';
@@ -126,7 +126,7 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
-    DIDRpc.prototype.deactivateDID = function (didDoc, signature, verificationMethodId, versionId) {
+    DIDRpc.prototype.deactivateDID = function (did, signature, verificationMethodId, versionId) {
         return __awaiter(this, void 0, void 0, function () {
             var typeUrl, signInfo, txMessage, fee, hidClient, txResult;
             return __generator(this, function (_a) {
@@ -134,16 +134,16 @@ var DIDRpc = /** @class */ (function () {
                     case 0:
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgDeactivateDID);
                         signInfo = {
-                            verificationMethodId: verificationMethodId,
+                            verification_method_id: verificationMethodId,
                             signature: signature,
                         };
                         txMessage = {
                             typeUrl: typeUrl,
                             value: generatedProto[constants_1.HIDRpcEnums.MsgDeactivateDID].fromPartial({
-                                didDocString: didDoc,
+                                didId: did,
                                 signatures: [signInfo],
                                 creator: client_1.HIDClient.getHidWalletAddress(),
-                                versionId: versionId,
+                                version_id: versionId,
                             }),
                         };
                         fee = 'auto';

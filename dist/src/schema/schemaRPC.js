@@ -75,7 +75,7 @@ var SchemaRpc = /** @class */ (function () {
                     case 0:
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgCreateSchema);
                         signInfo = {
-                            verificationMethodId: verificationMethodId,
+                            verification_method_id: verificationMethodId,
                             signature: signature,
                         };
                         txMessage = {

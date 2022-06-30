@@ -16,7 +16,7 @@ export class DIDRpc implements IDIDRpc {
   async registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string): Promise<object> {
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
     const signInfo: SignInfo = {
-      verificationMethodId,
+      verification_method_id: verificationMethodId,
       signature,
     };
 
@@ -44,7 +44,7 @@ export class DIDRpc implements IDIDRpc {
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgUpdateDID}`;
 
     const signInfo: SignInfo = {
-      verificationMethodId,
+      verification_method_id: verificationMethodId,
       signature,
     };
 
@@ -54,7 +54,7 @@ export class DIDRpc implements IDIDRpc {
         didDocString: didDoc,
         signatures: [signInfo],
         creator: HIDClient.getHidWalletAddress(),
-        versionId,
+        version_id: versionId,
       }),
     };
 
@@ -67,24 +67,24 @@ export class DIDRpc implements IDIDRpc {
   }
 
   async deactivateDID(
-    didDoc: IDidProto,
+    did: string,
     signature: string,
     verificationMethodId: string,
     versionId: string
   ): Promise<object> {
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgDeactivateDID}`;
     const signInfo: SignInfo = {
-      verificationMethodId,
+      verification_method_id: verificationMethodId,
       signature,
     };
 
     const txMessage = {
       typeUrl, // Same as above
       value: generatedProto[HIDRpcEnums.MsgDeactivateDID].fromPartial({
-        didDocString: didDoc,
+        didId: did,
         signatures: [signInfo],
         creator: HIDClient.getHidWalletAddress(),
-        versionId,
+        version_id: versionId,
       }),
     };
 

@@ -22,7 +22,7 @@ export class SchemaRpc implements ISchemaRPC {
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateSchema}`;
 
     const signInfo: SignInfo = {
-      verificationMethodId,
+      verification_method_id: verificationMethodId,
       signature,
     };
 
