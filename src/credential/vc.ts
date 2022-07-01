@@ -16,6 +16,7 @@ import { CredentialStatus, CredentialProof, Credential, Claim } from '../generat
 import { DeliverTxResponse } from '@cosmjs/stargate';
 
 import crypto from 'crypto';
+import { constants } from 'buffer';
 
 const sha256 = crypto.createHash('sha256');
 
@@ -160,12 +161,14 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       throw new Error('Error while checking credential status of credentialID ' + credentialId);
     }
     const claim: Claim = credentialStatus.claim as Claim;
-    const { currentStatus } = claim;
+    const { currentStatus, statusReason } = claim;
 
     /// TODO:  probably we should also verify the credential HASH by recalculating the hash of the crdential and
     // matching with credentialHash property.
     // const { credentialHash } = credentialStatus;
     if (currentStatus != VC.CRED_STATUS_TYPES.LIVE) {
+      console.log('WARN: Credential status is  not LIVE, currentStatus ' + currentStatus)
+      console.log('WARN: Status reason is ' + statusReason)
       return { verified: false };
     }
 
@@ -329,6 +332,9 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     });
     return signedVC;
   }
+
+
+  // TODO:  Implement a method to update credential status of a doc.
 
   //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
   public async verifyCredential(params: { credential: IVerifiableCredential; issuerDid: string }): Promise<object> {
