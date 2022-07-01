@@ -51,7 +51,7 @@ export interface IDID {
 }
 
 export interface IDIDResolve {
-  _at_content: string;
+  context: string;
   didDocument: IDidProto;
   didDocumentMetadata: Metadata;
 }

@@ -8,46 +8,16 @@ import HypersignDID from '../did/did';
 import { Did, VerificationMethod } from '../generated/ssi/did';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
+const ed25519 = require('@stablelib/ed25519');
+import { CredentialRPC } from './credRPC';
+import { ICredentialRPC, ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema } from './ICredential';
 import { VC, DID } from '../constants';
+import { CredentialStatus, CredentialProof, Credential, Claim } from '../generated/ssi/credential';
+import { DeliverTxResponse } from '@cosmjs/stargate';
 
-interface ISchema {
-  id: string;
-  type: string;
-}
+import crypto from 'crypto';
 
-interface ICredentialStatus {
-  id: string; // https://example.edu/status/24
-  type: string; // CredentialStatusList2017
-}
-
-// https://www.w3.org/TR/vc-data-model/#basic-concepts
-interface IVerifiableCredential {
-  context: Array<string>;
-  id: string;
-  type: Array<string>;
-  issuer: string;
-  issuanceDate: string;
-  expirationDate: string;
-  credentialSubject: object;
-  credentialSchema: ISchema;
-
-  // Ref: https://www.w3.org/TR/vc-data-model/#status
-  credentialStatus: ICredentialStatus;
-
-  proof: object;
-}
-
-export interface ICredentialMethods {
-  getCredential(params: {
-    schemaId: string;
-    subjectDid: string;
-    issuerDid: string;
-    expirationDate: string;
-    fields: object;
-  }): Promise<IVerifiableCredential>;
-  signCredential(params: { credential: IVerifiableCredential; issuerDid: string; privateKey: string }): Promise<object>;
-  verifyCredential(params: { credential: IVerifiableCredential; issuerDid: string }): Promise<object>;
-}
+const sha256 = crypto.createHash('sha256');
 
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
   public context: Array<string>;
@@ -60,12 +30,14 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public credentialSchema: ISchema;
   public proof: object;
   public credentialStatus: ICredentialStatus;
+  private credStatusRPC: ICredentialRPC;
 
   private hsSchema: HypersignSchema;
   private hsDid: HypersignDID;
   constructor() {
     this.hsSchema = new HypersignSchema();
     this.hsDid = new HypersignDID();
+    this.credStatusRPC = new CredentialRPC();
 
     this.context = [];
     this.id = '';
@@ -85,6 +57,32 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     this.proof = {};
   }
 
+  private async sign(params: { message: string; privateKeyMultibase: string }): Promise<string> {
+    const { privateKeyMultibase: privateKeyMultibaseConverted } =
+      Utils.convertEd25519verificationkey2020toStableLibKeysInto({
+        privKey: params.privateKeyMultibase,
+      });
+
+    // TODO:  do proper checck of paramaters
+    const credentialStatus: CredentialStatus = JSON.parse(params.message);
+    const credentialBytes = (await CredentialStatus.encode(credentialStatus)).finish();
+    // const messageBytes = Buffer.from(params.message);
+    const signed = ed25519.sign(privateKeyMultibaseConverted, credentialBytes);
+    return Buffer.from(signed).toString('base64');
+  }
+
+  private dateNow(date?: string): string {
+    if (date) {
+      return new Date(date).toISOString().slice(0, -5) + 'Z';
+    } else {
+      return new Date().toISOString().slice(0, -5) + 'Z';
+    }
+  }
+
+  private sha256Hash(message: string): string {
+    return sha256.update(message).digest('hex');
+  }
+
   private getId = () => {
     return VC.PREFIX + uuidv4();
   };
@@ -102,11 +100,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     }
     const SchemaProps: Array<string> = Object.keys(schemaProperty['propertiesParsed']);
     let props: Array<string> = [];
-
-    console.log({
-      sentPropes,
-      SchemaProps,
-    });
 
     // Check for "additionalProperties" in schemaProperty
     if (!schemaProperty.additionalProperties) {
@@ -157,6 +150,28 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return context;
   };
 
+  public async checkCredentialStatus(credentialId: string): Promise<{ verified: boolean }> {
+    if (!credentialId) {
+      throw new Error('CredentialId must be passed to check its status');
+    }
+    const credentialStatus: Credential = await this.credStatusRPC.resolveCredentialStatus(credentialId);
+
+    if (!credentialStatus) {
+      throw new Error('Error while checking credential status of credentialID ' + credentialId);
+    }
+    const claim: Claim = credentialStatus.claim as Claim;
+    const { currentStatus } = claim;
+
+    /// TODO:  probably we should also verify the credential HASH by recalculating the hash of the crdential and
+    // matching with credentialHash property.
+    // const { credentialHash } = credentialStatus;
+    if (currentStatus != VC.CRED_STATUS_TYPES.LIVE) {
+      return { verified: false };
+    }
+
+    return { verified: true };
+  }
+
   // encode a multibase base58-btc multicodec key
   // TEST
   public async getCredential(params: {
@@ -191,7 +206,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     }
 
     // TODO: do proper check for date and time
-    // if(params.expirationDate < new Date()) throw  new Error("Expiration date can not be lesser than current date")
+    //if(params.expirationDate < new Date()) throw  new Error("Expiration date can not be lesser than current date")
 
     const vc: IVerifiableCredential = {} as IVerifiableCredential;
 
@@ -208,8 +223,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     vc.type.push('VerifiableCredential');
     vc.type.push(schemaDoc.name);
 
-    vc.expirationDate = new Date(params.expirationDate).toISOString().slice(0, -5) + 'Z';
-    vc.issuanceDate = new Date().toISOString().slice(0, -5) + 'Z';
+    vc.expirationDate = this.dateNow(params.expirationDate);
+    vc.issuanceDate = this.dateNow('12/11/2021'); // TODO: need to remove this.
 
     vc.issuer = issuerDid;
     vc.credentialSubject = {};
@@ -225,15 +240,15 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     // TODO: confusion here is, what would be the status of this credential at the time of its creation?
     // If this properpty is present , then checkStatus() must be passed at the time of verification of the credential
     // Ref: https://github.com/digitalbazaar/vc-js/blob/7e14ef27bc688194635077d243d9025c0020448b/test/10-verify.spec.js#L188
-    // vc.credentialStatus = {
-    //     id: "asasdasds", // TODO: need to implement credential status in the RPC,
-    //     type: this.credentialStatus.type
-    // }
+    vc.credentialStatus = {
+      id: this.credStatusRPC.credentialRestEP + '/' + vc.id, // TODO: Will add credentialStatus path when issueing this crdential
+      type: this.credentialStatus.type,
+    } as ICredentialStatus;
 
     return vc;
   }
 
-  public async signCredential(params: {
+  public async issueCredential(params: {
     credential: IVerifiableCredential;
     issuerDid: string;
     privateKey: string;
@@ -261,6 +276,51 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       verificationMethod: publicKeyId,
       key: keyPair,
     });
+
+    /// Before we issue the credential the credential status has to be added
+    /// for that we will call RegisterCredentialStatus RPC
+    //  Let us generate credentialHash first
+    const credentialHash = this.sha256Hash(JSON.stringify(params.credential));
+
+    const credentialStatus: CredentialStatus = {
+      claim: {
+        id: params.credential.id,
+        currentStatus: VC.CRED_STATUS_TYPES.LIVE,
+        statusReason: 'Credential is active',
+      },
+      issuer: params.credential.issuer,
+      issuanceDate: params.credential.issuanceDate,
+      expirationDate: params.credential.expirationDate,
+      credentialHash,
+    };
+
+    const proofValue = await this.sign({
+      message: JSON.stringify(credentialStatus),
+      privateKeyMultibase: params.privateKey,
+    });
+
+    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credential.issuer });
+    const issuerDidDoc: Did = issuerDID as Did;
+    const issuerPublicKeyId = issuerDidDoc.authentication[0];
+    const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+      (x) => x.id == issuerPublicKeyId
+    ) as VerificationMethod;
+
+    const proof: CredentialProof = {
+      type: VC.VERIFICATION_METHOD_TYPE,
+      created: this.dateNow(),
+      updated: this.dateNow(),
+      verificationMethod: issuerPublicKeyVerMethod.id,
+      proofValue,
+      proofPurpose: VC.PROOF_PURPOSE,
+    };
+
+    /// RegisterCRedeRPC
+    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
+
+    if (!resp || resp.code != 0) {
+      throw new Error('Error while issuing the credential error = ' + resp.rawLog);
+    }
 
     const signedVC = await vc.issue({
       credential: params.credential,
@@ -304,11 +364,17 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       key: keyPair,
     });
 
+    /* eslint-disable */
+    const that = this;
+    /* eslint-enable */
     const result = await vc.verifyCredential({
       credential: params.credential,
       controller: assertionController,
       suite,
       documentLoader,
+      checkStatus: async function (options) {
+        return await that.checkCredentialStatus(options.credential.id);
+      },
     });
 
     return result;

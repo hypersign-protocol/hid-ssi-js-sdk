@@ -11,6 +11,7 @@ export const HYPERSIGN_MAINNET_REST="http://localhost:1317"
 export const HID_COSMOS_MODULE='/hypersignprotocol.hidnode.ssi'
 export const HYPERSIGN_NETWORK_DID_PATH="hypersign-protocol/hidnode/ssi/did"
 export const HYPERSIGN_NETWORK_SCHEMA_PATH="hypersign-protocol/hidnode/ssi/schema"
+export const HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH="hypersign-protocol/hidnode/ssi/credential"
 export const HYPERSIGN_NETWORK_BANK_BALANCE_PATH="/bank/balances/"
 
 export enum HIDRpcEnums {
@@ -18,15 +19,23 @@ export enum HIDRpcEnums {
     MsgUpdateDID = "MsgUpdateDID",
     MsgDeactivateDID = "MsgDeactivateDID",
     MsgCreateSchema = "MsgCreateSchema",
+    MsgRegisterCredentialStatus= "MsgRegisterCredentialStatus"
 }
 Object.freeze(HIDRpcEnums)
+
+export enum CredentialStatusEnums {
+    LIVE = "Live"
+}
 
 export const VC = {
     PREFIX: "vc_",
     CREDENTAIL_SCHEMA_VALIDATOR_TYPE: "JsonSchemaValidator2018",
     CREDENTAIL_STATUS_TYPE: "CredentialStatusList2017",
     CREDENTAIL_BASE_CONTEXT: "https://www.w3.org/2018/credentials/v1",
-    CREDENTAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1"
+    CREDENTAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1",
+    PROOF_PURPOSE: "assertion",
+    VERIFICATION_METHOD_TYPE: "Ed25519VerificationKey2020",
+    CRED_STATUS_TYPES: CredentialStatusEnums 
 }
 Object.freeze(VC)
 

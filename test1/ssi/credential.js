@@ -26,7 +26,7 @@ createWallet(mnemonic)
             name: "Vishwas Anand Bhushan",
             modelname: "abcd"
         };
-        const expirationDate = new Date();
+        const expirationDate = new Date('12/11/2027');
         console.log('================Genenrate Verifiable Credential================')
         return hsSdk.vc.getCredential({
             schemaId,
@@ -40,7 +40,7 @@ createWallet(mnemonic)
         console.log(JSON.stringify(vc, null, 2))
         unsignedVc = vc;
         console.log('================Sign Verifiable Credential================')
-        return hsSdk.vc.signCredential({
+        return hsSdk.vc.issueCredential({
             credential: vc,
             issuerDid,
             privateKey
@@ -56,7 +56,9 @@ createWallet(mnemonic)
     .then((result) => {
         console.log(result)
     })
-    .then(() => {
+
+
+.then(() => {
         console.log('================Generate Verifiable Presenatation================')
         return hsSdk.vp.getPresentation({
             verifiableCredential: unsignedVc,

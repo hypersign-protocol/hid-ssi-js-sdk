@@ -58,6 +58,7 @@ var did_1 = __importDefault(require("../did/did"));
 var ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
 var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
 var utils_1 = __importDefault(require("../utils"));
+var vc_1 = __importDefault(require("./vc"));
 var _a = jsonld_signatures_1.default.purposes, AuthenticationProofPurpose = _a.AuthenticationProofPurpose, AssertionProofPurpose = _a.AssertionProofPurpose;
 var constants_1 = require("../constants");
 var HypersignVerifiablePresentation = /** @class */ (function () {
@@ -66,6 +67,7 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
             return constants_1.VP.PREFIX + (0, uuid_1.v4)();
         };
         this.hsDid = new did_1.default();
+        this.vc = new vc_1.default();
         this.id = '';
         this.type = [];
         this.verifiableCredential = [];
@@ -136,7 +138,7 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
     // https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L392
     HypersignVerifiablePresentation.prototype.verifyPresentation = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var holderDID, holderDidDoc, holderPublicKeyId, holderPublicKeyVerMethod, holderPublicKeyMultibase, holderController, presentationPurpose, keyPair, vpSuite_holder, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, issuerPublicKeyMultibase, issuerController, purpose, issuerKeyPair, vcSuite_issuer, result;
+            var holderDID, holderDidDoc, holderPublicKeyId, holderPublicKeyVerMethod, holderPublicKeyMultibase, holderController, presentationPurpose, keyPair, vpSuite_holder, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, issuerPublicKeyMultibase, issuerController, purpose, issuerKeyPair, vcSuite_issuer, that, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -203,12 +205,25 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                             verificationMethod: issuerPublicKeyId,
                             key: issuerKeyPair,
                         });
+                        that = this;
                         return [4 /*yield*/, vc_js_1.default.verify({
                                 presentation: params.signedPresentation,
                                 presentationPurpose: presentationPurpose,
                                 purpose: purpose,
                                 suite: [vpSuite_holder, vcSuite_issuer],
                                 documentLoader: jsonld_1.documentLoader,
+                                checkStatus: function (options) {
+                                    return __awaiter(this, void 0, void 0, function () {
+                                        return __generator(this, function (_a) {
+                                            switch (_a.label) {
+                                                case 0:
+                                                    console.log('Iside checkStatus()');
+                                                    return [4 /*yield*/, that.vc.checkCredentialStatus(options.credential.id)];
+                                                case 1: return [2 /*return*/, _a.sent()];
+                                            }
+                                        });
+                                    });
+                                },
                             })];
                     case 5:
                         result = _a.sent();

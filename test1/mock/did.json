@@ -1,1 +1,22 @@
-{"context":["https://www.w3.org/ns/did/v1"],"id":"did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1","controller":["did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1"],"alsoKnownAs":["did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1"],"verificationMethod":[{"id":"did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1#key-1","type":"Ed25519VerificationKey2020","controller":"did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1","publicKeyMultibase":"zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1"}],"authentication":["did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1#key-1"],"assertionMethod":["did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1#key-1"],"keyAgreement":["did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1#key-1"],"capabilityInvocation":["did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1#key-1"],"capabilityDelegation":[],"service":[{"id":"did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1#vcs","type":"LinkedDomains","serviceEndpoint":"https://example.com/vc"}]}
+{
+    "context": ["https://www.w3.org/ns/did/v1"],
+    "id": "did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1",
+    "controller": ["did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1"],
+    "alsoKnownAs": ["did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1"],
+    "verificationMethod": [{
+        "id": "did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1#key-1",
+        "type": "Ed25519VerificationKey2020",
+        "controller": "did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1",
+        "publicKeyMultibase": "zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1"
+    }],
+    "authentication": ["did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1#key-1"],
+    "assertionMethod": ["did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1#key-1"],
+    "keyAgreement": ["did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1#key-1"],
+    "capabilityInvocation": ["did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1#key-1"],
+    "capabilityDelegation": [],
+    "service": [{
+        "id": "did:hs:zFJ4GigEBXMKedwUMMkCmd14qvg8ddifZyiQKJhabexs1#vcs",
+        "type": "LinkedDomains",
+        "serviceEndpoint": "https://example.com/vc"
+    }]
+}

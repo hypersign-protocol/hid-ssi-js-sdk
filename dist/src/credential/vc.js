@@ -58,7 +58,12 @@ var schema_1 = __importDefault(require("../schema/schema"));
 var did_1 = __importDefault(require("../did/did"));
 var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
 var ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
+var ed25519 = require('@stablelib/ed25519');
+var credRPC_1 = require("./credRPC");
 var constants_1 = require("../constants");
+var credential_1 = require("../generated/ssi/credential");
+var crypto_1 = __importDefault(require("crypto"));
+var sha256 = crypto_1.default.createHash('sha256');
 var HypersignVerifiableCredential = /** @class */ (function () {
     function HypersignVerifiableCredential() {
         var _this = this;
@@ -76,10 +81,6 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             }
             var SchemaProps = Object.keys(schemaProperty['propertiesParsed']);
             var props = [];
-            console.log({
-                sentPropes: sentPropes,
-                SchemaProps: SchemaProps,
-            });
             // Check for "additionalProperties" in schemaProperty
             if (!schemaProperty.additionalProperties) {
                 if (sentPropes.length > SchemaProps.length || !_this.checkIfAllRequiredPropsAreSent(SchemaProps, sentPropes))
@@ -120,6 +121,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
         };
         this.hsSchema = new schema_1.default();
         this.hsDid = new did_1.default();
+        this.credStatusRPC = new credRPC_1.CredentialRPC();
         this.context = [];
         this.id = '';
         this.type = [];
@@ -137,6 +139,64 @@ var HypersignVerifiableCredential = /** @class */ (function () {
         };
         this.proof = {};
     }
+    HypersignVerifiableCredential.prototype.sign = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var privateKeyMultibaseConverted, credentialStatus, credentialBytes, signed;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        privateKeyMultibaseConverted = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
+                            privKey: params.privateKeyMultibase,
+                        }).privateKeyMultibase;
+                        credentialStatus = JSON.parse(params.message);
+                        return [4 /*yield*/, credential_1.CredentialStatus.encode(credentialStatus)];
+                    case 1:
+                        credentialBytes = (_a.sent()).finish();
+                        signed = ed25519.sign(privateKeyMultibaseConverted, credentialBytes);
+                        return [2 /*return*/, Buffer.from(signed).toString('base64')];
+                }
+            });
+        });
+    };
+    HypersignVerifiableCredential.prototype.dateNow = function (date) {
+        if (date) {
+            return new Date(date).toISOString().slice(0, -5) + 'Z';
+        }
+        else {
+            return new Date().toISOString().slice(0, -5) + 'Z';
+        }
+    };
+    HypersignVerifiableCredential.prototype.sha256Hash = function (message) {
+        return sha256.update(message).digest('hex');
+    };
+    HypersignVerifiableCredential.prototype.checkCredentialStatus = function (credentialId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var credentialStatus, claim, currentStatus;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!credentialId) {
+                            throw new Error('CredentialId must be passed to check its status');
+                        }
+                        return [4 /*yield*/, this.credStatusRPC.resolveCredentialStatus(credentialId)];
+                    case 1:
+                        credentialStatus = _a.sent();
+                        if (!credentialStatus) {
+                            throw new Error('Error while checking credential status of credentialID ' + credentialId);
+                        }
+                        claim = credentialStatus.claim;
+                        currentStatus = claim.currentStatus;
+                        /// TODO:  probably we should also verify the credential HASH by recalculating the hash of the crdential and
+                        // matching with credentialHash property.
+                        // const { credentialHash } = credentialStatus;
+                        if (currentStatus != constants_1.VC.CRED_STATUS_TYPES.LIVE) {
+                            return [2 /*return*/, { verified: false }];
+                        }
+                        return [2 /*return*/, { verified: true }];
+                }
+            });
+        });
+    };
     // encode a multibase base58-btc multicodec key
     // TEST
     HypersignVerifiableCredential.prototype.getCredential = function (params) {
@@ -182,8 +242,8 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         vc.type = [];
                         vc.type.push('VerifiableCredential');
                         vc.type.push(schemaDoc.name);
-                        vc.expirationDate = new Date(params.expirationDate).toISOString().slice(0, -5) + 'Z';
-                        vc.issuanceDate = new Date().toISOString().slice(0, -5) + 'Z';
+                        vc.expirationDate = this.dateNow(params.expirationDate);
+                        vc.issuanceDate = this.dateNow('12/11/2021'); // TODO: need to remove this.
                         vc.issuer = issuerDid;
                         vc.credentialSubject = {};
                         vc.credentialSubject = __assign({}, this.getCredentialSubject(schemaDoc.schema, params.fields));
@@ -195,18 +255,18 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         // TODO: confusion here is, what would be the status of this credential at the time of its creation?
                         // If this properpty is present , then checkStatus() must be passed at the time of verification of the credential
                         // Ref: https://github.com/digitalbazaar/vc-js/blob/7e14ef27bc688194635077d243d9025c0020448b/test/10-verify.spec.js#L188
-                        // vc.credentialStatus = {
-                        //     id: "asasdasds", // TODO: need to implement credential status in the RPC,
-                        //     type: this.credentialStatus.type
-                        // }
+                        vc.credentialStatus = {
+                            id: this.credStatusRPC.credentialRestEP + '/' + vc.id,
+                            type: this.credentialStatus.type,
+                        };
                         return [2 /*return*/, vc];
                 }
             });
         });
     };
-    HypersignVerifiableCredential.prototype.signCredential = function (params) {
+    HypersignVerifiableCredential.prototype.issueCredential = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, signedVC;
+            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, resp, signedVC;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.hsDid.resolve({ did: params.issuerDid })];
@@ -227,12 +287,50 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                             verificationMethod: publicKeyId,
                             key: keyPair,
                         });
+                        credentialHash = this.sha256Hash(JSON.stringify(params.credential));
+                        credentialStatus = {
+                            claim: {
+                                id: params.credential.id,
+                                currentStatus: constants_1.VC.CRED_STATUS_TYPES.LIVE,
+                                statusReason: 'Credential is active',
+                            },
+                            issuer: params.credential.issuer,
+                            issuanceDate: params.credential.issuanceDate,
+                            expirationDate: params.credential.expirationDate,
+                            credentialHash: credentialHash,
+                        };
+                        return [4 /*yield*/, this.sign({
+                                message: JSON.stringify(credentialStatus),
+                                privateKeyMultibase: params.privateKey,
+                            })];
+                    case 3:
+                        proofValue = _a.sent();
+                        return [4 /*yield*/, this.hsDid.resolve({ did: params.credential.issuer })];
+                    case 4:
+                        issuerDID = (_a.sent()).didDocument;
+                        issuerDidDoc = issuerDID;
+                        issuerPublicKeyId = issuerDidDoc.authentication[0];
+                        issuerPublicKeyVerMethod = issuerDidDoc.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
+                        proof = {
+                            type: constants_1.VC.VERIFICATION_METHOD_TYPE,
+                            created: this.dateNow(),
+                            updated: this.dateNow(),
+                            verificationMethod: issuerPublicKeyVerMethod.id,
+                            proofValue: proofValue,
+                            proofPurpose: constants_1.VC.PROOF_PURPOSE,
+                        };
+                        return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, proof)];
+                    case 5:
+                        resp = _a.sent();
+                        if (!resp || resp.code != 0) {
+                            throw new Error('Error while issuing the credential error = ' + resp.rawLog);
+                        }
                         return [4 /*yield*/, vc_js_1.default.issue({
                                 credential: params.credential,
                                 suite: suite,
                                 documentLoader: jsonld_1.documentLoader,
                             })];
-                    case 3:
+                    case 6:
                         signedVC = _a.sent();
                         return [2 /*return*/, signedVC];
                 }
@@ -242,7 +340,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
     //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
     HypersignVerifiableCredential.prototype.verifyCredential = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var issuerDID, issuerDidDoc, publicKeyId, publicKeyVerMethod, publicKeyMultibase, assertionController, keyPair, suite, result;
+            var issuerDID, issuerDidDoc, publicKeyId, publicKeyVerMethod, publicKeyMultibase, assertionController, keyPair, suite, that, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -270,11 +368,22 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                             verificationMethod: publicKeyId,
                             key: keyPair,
                         });
+                        that = this;
                         return [4 /*yield*/, vc_js_1.default.verifyCredential({
                                 credential: params.credential,
                                 controller: assertionController,
                                 suite: suite,
                                 documentLoader: jsonld_1.documentLoader,
+                                checkStatus: function (options) {
+                                    return __awaiter(this, void 0, void 0, function () {
+                                        return __generator(this, function (_a) {
+                                            switch (_a.label) {
+                                                case 0: return [4 /*yield*/, that.checkCredentialStatus(options.credential.id)];
+                                                case 1: return [2 /*return*/, _a.sent()];
+                                            }
+                                        });
+                                    });
+                                },
                             })];
                     case 3:
                         result = _a.sent();

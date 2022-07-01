@@ -7,6 +7,8 @@ import { Did, VerificationMethod } from '../generated/ssi/did';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import Utils from '../utils';
+import HypersignVerifiableCredential from './vc';
+import { ICredentialMethods } from './ICredential';
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 import { VP, DID } from '../constants';
 
@@ -58,12 +60,14 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
   private hsDid: HypersignDID;
 
   id: string;
+  vc: ICredentialMethods;
   type: Array<string>;
   verifiableCredential: Array<IVerifiableCredential>;
   holder: string;
   proof: object;
   constructor() {
     this.hsDid = new HypersignDID();
+    this.vc = new HypersignVerifiableCredential();
 
     this.id = '';
     this.type = [];
@@ -245,12 +249,18 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       key: issuerKeyPair,
     });
 
+    /* eslint-disable */
+    const that = this;
+    /* eslint-enable */
     const result = await vc.verify({
       presentation: params.signedPresentation,
       presentationPurpose,
       purpose,
       suite: [vpSuite_holder, vcSuite_issuer],
       documentLoader,
+      checkStatus: async function (options) {
+        return await that.vc.checkCredentialStatus(options.credential.id);
+      },
     });
 
     return result;
