@@ -227,7 +227,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     vc.type.push(schemaDoc.name);
 
     vc.expirationDate = this.dateNow(params.expirationDate);
-    vc.issuanceDate = this.dateNow('12/11/2021'); // TODO: need to remove this.
+    vc.issuanceDate = this.dateNow(); // TODO: need to remove this.
 
     vc.issuer = issuerDid;
     vc.credentialSubject = {};
