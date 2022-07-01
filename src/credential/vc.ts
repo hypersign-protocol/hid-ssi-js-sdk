@@ -167,8 +167,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     // matching with credentialHash property.
     // const { credentialHash } = credentialStatus;
     if (currentStatus != VC.CRED_STATUS_TYPES.LIVE) {
-      console.log('WARN: Credential status is  not LIVE, currentStatus ' + currentStatus)
-      console.log('WARN: Status reason is ' + statusReason)
+      console.log('WARN: Credential status is  not LIVE, currentStatus ' + currentStatus);
+      console.log('WARN: Status reason is ' + statusReason);
       return { verified: false };
     }
 
@@ -332,7 +332,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     });
     return signedVC;
   }
-
 
   // TODO:  Implement a method to update credential status of a doc.
 

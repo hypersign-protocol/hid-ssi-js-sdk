@@ -171,7 +171,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
     };
     HypersignVerifiableCredential.prototype.checkCredentialStatus = function (credentialId) {
         return __awaiter(this, void 0, void 0, function () {
-            var credentialStatus, claim, currentStatus;
+            var credentialStatus, claim, currentStatus, statusReason;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -185,11 +185,13 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                             throw new Error('Error while checking credential status of credentialID ' + credentialId);
                         }
                         claim = credentialStatus.claim;
-                        currentStatus = claim.currentStatus;
+                        currentStatus = claim.currentStatus, statusReason = claim.statusReason;
                         /// TODO:  probably we should also verify the credential HASH by recalculating the hash of the crdential and
                         // matching with credentialHash property.
                         // const { credentialHash } = credentialStatus;
                         if (currentStatus != constants_1.VC.CRED_STATUS_TYPES.LIVE) {
+                            console.log('WARN: Credential status is  not LIVE, currentStatus ' + currentStatus);
+                            console.log('WARN: Status reason is ' + statusReason);
                             return [2 /*return*/, { verified: false }];
                         }
                         return [2 /*return*/, { verified: true }];
@@ -337,6 +339,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             });
         });
     };
+    // TODO:  Implement a method to update credential status of a doc.
     //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
     HypersignVerifiableCredential.prototype.verifyCredential = function (params) {
         return __awaiter(this, void 0, void 0, function () {
