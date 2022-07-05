@@ -18,9 +18,11 @@ class DID implements Did {
   keyAgreement: string[];
   capabilityInvocation: string[];
   capabilityDelegation: string[];
+  namespace: string;
   service: Service[];
-  constructor(publicKey: string) {
+  constructor(publicKey: string, namespace?: string) {
     this.context = [constant.DID.DID_BASE_CONTEXT];
+    this.namespace = namespace && namespace != '' ? namespace : '';
     this.id = this.getId(publicKey);
     this.controller = [this.id];
     this.alsoKnownAs = [this.id];
@@ -47,8 +49,8 @@ class DID implements Did {
   private getId = (publicKey) => {
     let did = '';
     did =
-      constant.DID.NAMESPACE && constant.DID.NAMESPACE != ''
-        ? `${constant.DID.SCHEME}:${constant.DID.NAMESPACE}:${publicKey}`
+      this.namespace && this.namespace != ''
+        ? `${constant.DID.SCHEME}:${this.namespace}:${publicKey}`
         : `${constant.DID.SCHEME}:${publicKey}`;
     return did;
   };
@@ -62,8 +64,10 @@ class DID implements Did {
 
 export default class HypersignDID implements IDID {
   private didrpc: IDIDRpc;
-  constructor() {
+  public namespace: string;
+  constructor(namespace?: string) {
     this.didrpc = new DIDRpc();
+    this.namespace = namespace ? namespace : '';
   }
 
   // Sign the doc
@@ -107,7 +111,7 @@ export default class HypersignDID implements IDID {
     const { publicKeyMultibase: publicKeyMultibase1 } = Utils.convertEd25519verificationkey2020toStableLibKeysInto({
       publicKey: params.publicKeyMultibase,
     });
-    const newDid = new DID(publicKeyMultibase1);
+    const newDid = new DID(publicKeyMultibase1, this.namespace);
     return newDid.getDidString();
   }
 

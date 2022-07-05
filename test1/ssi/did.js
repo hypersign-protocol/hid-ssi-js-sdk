@@ -11,7 +11,7 @@ createWallet(mnemonic)
     .then(async(offlineSigner) => {
         const accounts = await offlineSigner.getAccounts();
         console.log(accounts)
-        hsSdk = new HypersignSsiSDK(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest);
+        hsSdk = new HypersignSsiSDK(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest, hidNodeEp.namespace);
         return hsSdk.init();
     })
     .then(async() => {
@@ -63,7 +63,7 @@ createWallet(mnemonic)
         didDocString = JSON.stringify(didDocument)
         writeDataInFile('../mock/did.json', didDocString)
         versionId = didDocumentMetadata.versionId;
-        return "" //hsSdk.did.deactivate({ didDocString, privateKeyMultibase, verificationMethodId, versionId })
+        return ""; //hsSdk.did.deactivate({ didDocString, privateKeyMultibase, verificationMethodId, versionId })
     })
     .then((resTx) => {
         console.log(resTx)

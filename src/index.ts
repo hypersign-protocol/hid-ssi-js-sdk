@@ -11,11 +11,12 @@ export = class HypersignSSISdk{
     vc: any;
     vp: any;
     schema: any;
+    namespace: string;
     
     private signer: OfflineSigner;
     private nodeEndpoint: string; // http://localhost:26657 | 'TEST' | 'MAIN'
     private nodeRestEndpoint: string; // "" | http://localhost:1317
-    constructor(offlineSigner: OfflineSigner, nodeEndpoint: string, nodeRestEndpoint?: string){
+    constructor(offlineSigner: OfflineSigner, nodeEndpoint: string, nodeRestEndpoint?: string, namespace?: string){
         
         // TODO validate if offlinesigner is of type OfflineSiner
         this.signer = offlineSigner; 
@@ -26,6 +27,7 @@ export = class HypersignSSISdk{
 
         this.nodeEndpoint = nodeEndpoint; 
         this.nodeRestEndpoint = nodeRestEndpoint ? nodeRestEndpoint : "";
+        this.namespace = namespace? namespace: "";
 
         // this.did = {} as Did;
         // this.vc = {} as VC;
@@ -40,10 +42,7 @@ export = class HypersignSSISdk{
         const hidClient = new HIDClient(this.signer, this.nodeEndpoint, this.nodeRestEndpoint);
         await hidClient.init();
 
-        console.log('hID wallet address in init()' + HIDClient.getHidWalletAddress())
-
-
-        this.did = new Did();
+        this.did = new Did(this.namespace);
         this.schema = new Schema();
         this.vc = new VC();
         this.vp = new VP();

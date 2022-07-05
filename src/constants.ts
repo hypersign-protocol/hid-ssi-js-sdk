@@ -47,7 +47,7 @@ Object.freeze(VP)
 export const DID = {
     CONTROLLER_CONTEXT: "https://w3id.org/security/v2",
     SCHEME: "did:hs",
-    NAMESPACE:"devnet", 
+    NAMESPACE:"devnet", // this is not used 
     DID_BASE_CONTEXT: "https://www.w3.org/ns/did/v1",
     VERIFICATION_METHOD_TYPE: "Ed25519VerificationKey2020"
 }

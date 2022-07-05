@@ -48,7 +48,8 @@ const props = {
 
 const hidNodeEp = {
     rpc: "https://devnet.hypersign.id/node1/rpc",
-    rest: "https://devnet.hypersign.id/node1/rest"
+    rest: "https://devnet.hypersign.id/node1/rest",
+    namespace: 'devnet'
 }
 
 module.exports = {
