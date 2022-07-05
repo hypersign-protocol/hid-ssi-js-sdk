@@ -28,7 +28,7 @@ export enum CredentialStatusEnums {
 }
 
 export const VC = {
-    PREFIX: "vc_",
+    PREFIX: "vc:",
     CREDENTAIL_SCHEMA_VALIDATOR_TYPE: "JsonSchemaValidator2018",
     CREDENTAIL_STATUS_TYPE: "CredentialStatusList2017",
     CREDENTAIL_BASE_CONTEXT: "https://www.w3.org/2018/credentials/v1",
@@ -40,13 +40,14 @@ export const VC = {
 Object.freeze(VC)
 
 export const VP = {
-    PREFIX: "vp_"
+    PREFIX: "vp:"
 }
 Object.freeze(VP)
 
 export const DID = {
     CONTROLLER_CONTEXT: "https://w3id.org/security/v2",
     SCHEME: "did:hs",
+    NAMESPACE:"devnet", 
     DID_BASE_CONTEXT: "https://www.w3.org/ns/did/v1",
     VERIFICATION_METHOD_TYPE: "Ed25519VerificationKey2020"
 }
