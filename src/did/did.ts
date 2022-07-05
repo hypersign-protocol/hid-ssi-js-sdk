@@ -44,7 +44,14 @@ class DID implements Did {
     return JSON.stringify(this);
   }
 
-  private getId = (publicKey) => `${constant.DID.SCHEME}:${publicKey}`;
+  private getId = (publicKey) => {
+    let did = '';
+    did =
+      constant.DID.NAMESPACE && constant.DID.NAMESPACE != ''
+        ? `${constant.DID.SCHEME}:${constant.DID.NAMESPACE}:${publicKey}`
+        : `${constant.DID.SCHEME}:${publicKey}`;
+    return did;
+  };
 
   // {
   //   const edKeyPair = await Ed25519VerificationKey2020.generate();
