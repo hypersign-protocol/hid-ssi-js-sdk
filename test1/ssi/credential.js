@@ -1,4 +1,4 @@
-const HypersignSsiSDK = require('../../dist/src')
+const HypersignSsiSDK = require('../../build/src')
 const { createWallet, mnemonic, hidNodeEp, writeDataInFile } = require('../config')
 const { id } = require('../mock/did.json')
 const { id: schemaId } = require('../mock/schema.json')

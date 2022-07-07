@@ -1,5 +1,5 @@
 const { props, writeDataInFile, createWallet, mnemonic, hidNodeEp } = require('../config')
-const HypersignSsiSDK = require('../../dist/src')
+const HypersignSsiSDK = require('../../build/src')
 const { privateKeyMultibase } = require('../mock/keys.json')
 const { verificationMethod, id } = require('../mock/did.json')
 
