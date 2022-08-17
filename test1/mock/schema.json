@@ -1,1 +1,26 @@
-{"type":"https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json","modelVersion":"1.0","id":"did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w;id=4714b66e-7904-40f9-91fb-3b476848a3d0;version=1.0","name":"Email Schema","author":"did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w","authored":"2022-08-17T08:52:02Z","schema":{"schema":"http://json-schema.org/draft-07/schema","description":"This is email credential","type":"object","properties":"{\"email\":{\"type\":\"string\",\"format\":\"email\"},\"name\":{\"type\":\"string\"},\"modelname\":{\"type\":\"string\"}}","required":["email","name"],"additionalProperties":false},"proof":{"type":"Ed25519VerificationKey2020","created":"2022-08-17T08:52:02Z","verificationMethod":"did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#key-1","proofPurpose":"assertion","proofValue":"I9VKKKAxy1u2h7s6uKvhFcdn+UNikqnBez/vxmN2+Rz94jQtRErJT+IsKvO87Aup3GKE7jxZMivw+XfIGaMYAg=="}}
+{
+    "type": "https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json",
+    "modelVersion": "1.0",
+    "id": "did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w;id=161eb31f-084c-4185-9acf-b65280472e4b;version=1.0",
+    "name": "Email Schema",
+    "author": "did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w",
+    "authored": "2022-08-17T11:19:54Z",
+    "schema": {
+        "schema": "http://json-schema.org/draft-07/schema",
+        "description": "This is email credential",
+        "type": "object",
+        "properties": "{\"email\":{\"type\":\"string\",\"format\":\"email\"},\"name\":{\"type\":\"string\"},\"modelname\":{\"type\":\"string\"}}",
+        "required": [
+            "email",
+            "name"
+        ],
+        "additionalProperties": false
+    },
+    "proof": {
+        "type": "Ed25519VerificationKey2020",
+        "created": "2022-08-17T11:19:54Z",
+        "verificationMethod": "did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#key-1",
+        "proofPurpose": "assertion",
+        "proofValue": "g0WjCbEbxl55JkTNUipGvF5KC7HaxW4NvgIZxpMsp0bJ4xJOFxY25WGAsUmpX5VcH8NouNt+pjmBWFRX3oNeAQ=="
+    }
+}

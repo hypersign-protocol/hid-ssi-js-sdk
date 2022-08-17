@@ -1,1 +1,40 @@
-{"context":["https://www.w3.org/ns/did/v1"],"id":"did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w","controller":["did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w"],"alsoKnownAs":["did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w"],"verificationMethod":[{"id":"did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#key-1","type":"Ed25519VerificationKey2020","controller":"did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w","publicKeyMultibase":"z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w"}],"authentication":["did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#key-1"],"assertionMethod":["did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#key-1"],"keyAgreement":["did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#key-1"],"capabilityInvocation":["did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#key-1"],"capabilityDelegation":[],"service":[{"id":"did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#vcs","type":"LinkedDomains","serviceEndpoint":"https://example.com/vc"}]}
+{
+    "context": [
+        "https://www.w3.org/ns/did/v1"
+    ],
+    "id": "did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w",
+    "controller": [
+        "did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w"
+    ],
+    "alsoKnownAs": [
+        "did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w"
+    ],
+    "verificationMethod": [
+        {
+            "id": "did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#key-1",
+            "type": "Ed25519VerificationKey2020",
+            "controller": "did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w",
+            "publicKeyMultibase": "z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w"
+        }
+    ],
+    "authentication": [
+        "did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#key-1"
+    ],
+    "assertionMethod": [
+        "did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#key-1"
+    ],
+    "keyAgreement": [
+        "did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#key-1"
+    ],
+    "capabilityInvocation": [
+        "did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#key-1"
+    ],
+    "capabilityDelegation": [],
+    "service": [
+        {
+            "id": "did:hs:z7RRHSFGaSYYQQkoCd9CAm5ezYd2tJBuEVPex4Zftba1w#vcs",
+            "type": "LinkedDomains",
+            "serviceEndpoint": "https://example.com/vc"
+        }
+    ]
+}
