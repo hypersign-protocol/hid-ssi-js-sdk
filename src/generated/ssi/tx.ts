@@ -2,7 +2,7 @@
 import { Reader, util, configure, Writer } from "protobufjs/minimal";
 import * as Long from "long";
 import { Did, SignInfo } from "./did";
-import { Schema } from "./schema";
+import { SchemaDocument, SchemaProof } from "./schema";
 import { CredentialStatus, CredentialProof } from "./credential";
 
 export const protobufPackage = "hypersignprotocol.hidnode.ssi";
@@ -30,8 +30,8 @@ export interface MsgUpdateDIDResponse {
 
 export interface MsgCreateSchema {
   creator: string;
-  schema: Schema | undefined;
-  signatures: SignInfo[];
+  schemaDoc: SchemaDocument | undefined;
+  schemaProof: SchemaProof | undefined;
 }
 
 export interface MsgCreateSchemaResponse {
@@ -401,11 +401,17 @@ export const MsgCreateSchema = {
     if (message.creator !== "") {
       writer.uint32(10).string(message.creator);
     }
-    if (message.schema !== undefined) {
-      Schema.encode(message.schema, writer.uint32(18).fork()).ldelim();
+    if (message.schemaDoc !== undefined) {
+      SchemaDocument.encode(
+        message.schemaDoc,
+        writer.uint32(18).fork()
+      ).ldelim();
     }
-    for (const v of message.signatures) {
-      SignInfo.encode(v!, writer.uint32(26).fork()).ldelim();
+    if (message.schemaProof !== undefined) {
+      SchemaProof.encode(
+        message.schemaProof,
+        writer.uint32(26).fork()
+      ).ldelim();
     }
     return writer;
   },
@@ -414,7 +420,6 @@ export const MsgCreateSchema = {
     const reader = input instanceof Uint8Array ? new Reader(input) : input;
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = { ...baseMsgCreateSchema } as MsgCreateSchema;
-    message.signatures = [];
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -422,10 +427,10 @@ export const MsgCreateSchema = {
           message.creator = reader.string();
           break;
         case 2:
-          message.schema = Schema.decode(reader, reader.uint32());
+          message.schemaDoc = SchemaDocument.decode(reader, reader.uint32());
           break;
         case 3:
-          message.signatures.push(SignInfo.decode(reader, reader.uint32()));
+          message.schemaProof = SchemaProof.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -437,21 +442,20 @@ export const MsgCreateSchema = {
 
   fromJSON(object: any): MsgCreateSchema {
     const message = { ...baseMsgCreateSchema } as MsgCreateSchema;
-    message.signatures = [];
     if (object.creator !== undefined && object.creator !== null) {
       message.creator = String(object.creator);
     } else {
       message.creator = "";
     }
-    if (object.schema !== undefined && object.schema !== null) {
-      message.schema = Schema.fromJSON(object.schema);
+    if (object.schemaDoc !== undefined && object.schemaDoc !== null) {
+      message.schemaDoc = SchemaDocument.fromJSON(object.schemaDoc);
     } else {
-      message.schema = undefined;
+      message.schemaDoc = undefined;
     }
-    if (object.signatures !== undefined && object.signatures !== null) {
-      for (const e of object.signatures) {
-        message.signatures.push(SignInfo.fromJSON(e));
-      }
+    if (object.schemaProof !== undefined && object.schemaProof !== null) {
+      message.schemaProof = SchemaProof.fromJSON(object.schemaProof);
+    } else {
+      message.schemaProof = undefined;
     }
     return message;
   },
@@ -459,35 +463,33 @@ export const MsgCreateSchema = {
   toJSON(message: MsgCreateSchema): unknown {
     const obj: any = {};
     message.creator !== undefined && (obj.creator = message.creator);
-    message.schema !== undefined &&
-      (obj.schema = message.schema ? Schema.toJSON(message.schema) : undefined);
-    if (message.signatures) {
-      obj.signatures = message.signatures.map((e) =>
-        e ? SignInfo.toJSON(e) : undefined
-      );
-    } else {
-      obj.signatures = [];
-    }
+    message.schemaDoc !== undefined &&
+      (obj.schemaDoc = message.schemaDoc
+        ? SchemaDocument.toJSON(message.schemaDoc)
+        : undefined);
+    message.schemaProof !== undefined &&
+      (obj.schemaProof = message.schemaProof
+        ? SchemaProof.toJSON(message.schemaProof)
+        : undefined);
     return obj;
   },
 
   fromPartial(object: DeepPartial<MsgCreateSchema>): MsgCreateSchema {
     const message = { ...baseMsgCreateSchema } as MsgCreateSchema;
-    message.signatures = [];
     if (object.creator !== undefined && object.creator !== null) {
       message.creator = object.creator;
     } else {
       message.creator = "";
     }
-    if (object.schema !== undefined && object.schema !== null) {
-      message.schema = Schema.fromPartial(object.schema);
+    if (object.schemaDoc !== undefined && object.schemaDoc !== null) {
+      message.schemaDoc = SchemaDocument.fromPartial(object.schemaDoc);
     } else {
-      message.schema = undefined;
+      message.schemaDoc = undefined;
     }
-    if (object.signatures !== undefined && object.signatures !== null) {
-      for (const e of object.signatures) {
-        message.signatures.push(SignInfo.fromPartial(e));
-      }
+    if (object.schemaProof !== undefined && object.schemaProof !== null) {
+      message.schemaProof = SchemaProof.fromPartial(object.schemaProof);
+    } else {
+      message.schemaProof = undefined;
     }
     return message;
   },

@@ -1,7 +1,8 @@
 const { props, writeDataInFile, createWallet, mnemonic, hidNodeEp } = require('../config')
 const HypersignSsiSDK = require('../../build/src')
 const { privateKeyMultibase } = require('../mock/keys.json')
-const { verificationMethod, id } = require('../mock/did.json')
+const { verificationMethod, id ,assertionMethod} = require('../mock/did.json')
+
 
 console.log({
     verificationMethod,
@@ -15,6 +16,13 @@ if (!privateKeyMultibase || !verificationMethod || !id) {
 const author = id;
 let hsSdk;
 let schema;
+let proof={
+    "type": "Ed25519VerificationKey2020",
+    "created": "",
+    "verificationMethod": assertionMethod[0],
+    "proofValue": "",
+    "proofPurpose": "assertion"
+    }
 createWallet(mnemonic)
     .then((offlineSigner) => {
         hsSdk = new HypersignSsiSDK(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest);
@@ -43,14 +51,17 @@ createWallet(mnemonic)
                         isRequired: false
                     }
                 ],
-            }
+            },
+           
+           
         }
         schema = hsSdk.schema.getSchema({
             name: schemaOptions.name,
             description: "This is email credential",
             author: schemaOptions.author,
             additionalProperties: false,
-            fields: schemaOptions.schemaProperty.properties
+            fields: schemaOptions.schemaProperty.properties,
+            
         })
     })
     .then(() => {
@@ -63,11 +74,16 @@ createWallet(mnemonic)
         console.log("Signature: ", signature)
         console.log("=========Register Schema========")
         const verificationMethodId = verificationMethod[0].id
-        console.log(verificationMethodId)
-        return hsSdk.schema.registerSchema({ schema, signature, verificationMethodId })
+        console.log(verificationMethodId,signature)
+        
+        proof.proofValue=signature
+        proof.created=schema.authored
+        console.log(proof);
+        return hsSdk.schema.registerSchema({ schema, proof })
     }).then(res => {
-        console.log(res)
+        
         console.log("=========Resolve Schema========")
+        console.log(res)
         return hsSdk.schema.resolve({ schemaId: schema.id })
     }).then(res => {
         writeDataInFile('../mock/schema.json', JSON.stringify(res))
