@@ -3,7 +3,7 @@ const { DirectSecp256k1HdWallet } = require("@cosmjs/proto-signing");
 const fs = require('fs')
 
 // const mnemonic = "retreat seek south invite fall eager engage endorse inquiry sample salad evidence express actor hidden fence anchor crowd two now convince convince park bag"
-const mnemonic = "paddle bullet admit science marble strong inmate rely grass must vicious view"
+const mnemonic = "napkin delay purchase easily camp mimic share wait stereo reflect allow soccer believe exhibit laptop upset tired talent transfer talk surface solution omit crack"
 const createWallet = async(mnemonic) => {
     if (!mnemonic) {
         return await DirectSecp256k1HdWallet.generate(24, options = {
@@ -47,9 +47,9 @@ const props = {
 }
 
 const hidNodeEp = {
-    rpc: "https://devnet.hypersign.id/node1/rpc",
-    rest: "https://devnet.hypersign.id/node1/rest",
-    namespace: 'devnet'
+    rpc: "https://jagrat.hypersign.id/node1/rpc",
+    rest: "https://jagrat.hypersign.id/node1/rest",
+    namespace: ''
 }
 
 module.exports = {
