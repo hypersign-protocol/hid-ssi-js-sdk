@@ -1,6 +1,6 @@
 {
     "name": "hs-ssi-sdk",
-    "version": "6.0.0",
+    "version": "6.1.0",
     "description": "sdk is an implementation of proposed DID by W3C",
     "main": "build/src/index.js",
     "scripts": {
