@@ -1,7 +1,17 @@
 import * as constants from "./constants";
 const { encode, decode } = require("base58-universal");
+import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 
 export default class Utils {
+
+  public static async getUUID(): Promise<string> {
+    const edKeyPair = await Ed25519VerificationKey2020.generate();
+    const exportedKp = await edKeyPair.export({ publicKey: true });
+    const { publicKeyMultibase: publicKeyMultibase1 } = this.convertEd25519verificationkey2020toStableLibKeysInto({
+      publicKey: exportedKp.publicKeyMultibase,
+    });
+    return publicKeyMultibase1;
+  }
   
   public static checkUrl(url: string) {
     // TODO: check if the url is a valid url

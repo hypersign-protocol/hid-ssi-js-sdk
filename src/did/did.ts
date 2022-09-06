@@ -50,8 +50,8 @@ class DID implements Did {
     let did = '';
     did =
       this.namespace && this.namespace != ''
-        ? `${constant.DID.SCHEME}:${this.namespace}:${publicKey}`
-        : `${constant.DID.SCHEME}:${publicKey}`;
+        ? `${constant.DID.SCHEME}:${constant.DID.METHOD}:${this.namespace}:${publicKey}`
+        : `${constant.DID.SCHEME}:${constant.DID.METHOD}:${publicKey}`;
     return did;
   };
 

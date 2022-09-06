@@ -25,7 +25,7 @@ let proof = {
 }
 createWallet(mnemonic)
     .then((offlineSigner) => {
-        hsSdk = new HypersignSsiSDK(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest);
+        hsSdk = new HypersignSsiSDK(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest, hidNodeEp.namespace);
         return hsSdk.init();
     })
     .then(() => {
@@ -54,7 +54,7 @@ createWallet(mnemonic)
             },
 
         }
-        schema = hsSdk.schema.getSchema({
+        return hsSdk.schema.getSchema({
             name: schemaOptions.name,
             description: "This is email credential",
             author: schemaOptions.author,
@@ -62,7 +62,8 @@ createWallet(mnemonic)
             fields: schemaOptions.schemaProperty.properties,
         })
     })
-    .then(() => {
+    .then((schemaLocal) => {
+        schema = schemaLocal
         console.log(schema)
         console.log("========Sign Schema=======")
         const privKey = privateKeyMultibase

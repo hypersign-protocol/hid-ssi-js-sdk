@@ -17,7 +17,7 @@ const privateKey = privateKeyMultibase;
 
 createWallet(mnemonic)
     .then((offlineSigner) => {
-        hsSdk = new HypersignSsiSDK(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest);
+        hsSdk = new HypersignSsiSDK(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest,  hidNodeEp.namespace);
         return hsSdk.init();
     })
     .then(() => {

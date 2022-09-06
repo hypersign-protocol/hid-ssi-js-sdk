@@ -49,7 +49,7 @@ const props = {
 const hidNodeEp = {
     rpc: "https://jagrat.hypersign.id/node1/rpc",
     rest: "https://jagrat.hypersign.id/node1/rest",
-    namespace: ''
+    namespace: 'devnet'
 }
 
 module.exports = {

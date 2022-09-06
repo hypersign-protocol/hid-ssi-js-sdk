@@ -65,9 +65,11 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
   verifiableCredential: Array<IVerifiableCredential>;
   holder: string;
   proof: object;
-  constructor() {
+  namespace: string;
+  constructor(namespace?: string) {
     this.hsDid = new HypersignDID();
     this.vc = new HypersignVerifiableCredential();
+    this.namespace = namespace && namespace != '' ? namespace : '';
 
     this.id = '';
     this.type = [];
@@ -76,12 +78,19 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     this.proof = {};
   }
 
-  private getId = () => {
-    return VP.PREFIX + uuidv4();
-  };
+  private async getId(): Promise<string> {
+    const uuid = await Utils.getUUID();
+    let id;
+    if (this.namespace && this.namespace != '') {
+      id = `${VP.SCHEME}:${VP.METHOD}:${this.namespace}:${uuid}`;
+    } else {
+      id = `${VP.SCHEME}:${VP.METHOD}:${uuid}`;
+    }
+    return id;
+  }
 
   async getPresentation(params: { verifiableCredential: IVerifiableCredential; holderDid: string }): Promise<object> {
-    const id = this.getId();
+    const id = await this.getId();
     const presentation = vc.createPresentation({
       verifiableCredential: params.verifiableCredential,
       id: id,

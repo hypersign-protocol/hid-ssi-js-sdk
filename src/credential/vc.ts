@@ -16,7 +16,6 @@ import { CredentialStatus, CredentialProof, Credential, Claim } from '../generat
 import { DeliverTxResponse } from '@cosmjs/stargate';
 
 import crypto from 'crypto';
-import { constants } from 'buffer';
 
 const sha256 = crypto.createHash('sha256');
 
@@ -32,13 +31,15 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public proof: object;
   public credentialStatus: ICredentialStatus;
   private credStatusRPC: ICredentialRPC;
+  private namespace: string;
 
   private hsSchema: HypersignSchema;
   private hsDid: HypersignDID;
-  constructor() {
+  constructor(namespace?: string) {
     this.hsSchema = new HypersignSchema();
     this.hsDid = new HypersignDID();
     this.credStatusRPC = new CredentialRPC();
+    this.namespace = namespace && namespace != '' ? namespace : '';
 
     this.context = [];
     this.id = '';
@@ -84,9 +85,16 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return sha256.update(message).digest('hex');
   }
 
-  private getId = () => {
-    return VC.PREFIX + uuidv4();
-  };
+  private async getId(): Promise<string> {
+    const uuid = await Utils.getUUID();
+    let id;
+    if (this.namespace && this.namespace != '') {
+      id = `${VC.SCHEME}:${VC.METHOD}:${this.namespace}:${uuid}`;
+    } else {
+      id = `${VC.SCHEME}:${VC.METHOD}:${uuid}`;
+    }
+    return id;
+  }
 
   private checkIfAllRequiredPropsAreSent = (sentAttributes: Array<string>, requiredProps: Array<string>) => {
     return !requiredProps.some((x) => sentAttributes.indexOf(x) === -1);
@@ -219,7 +227,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     vc['@context'] = this.getCredentialContext(params.schemaId, schemaProperties);
 
     /// TODO:  need to implement this properly
-    vc.id = this.getId();
+    vc.id = await this.getId();
 
     // Type
     vc.type = [];

@@ -27,8 +27,21 @@ export enum CredentialStatusEnums {
     LIVE = "Live"
 }
 
+export const DID = {
+    CONTROLLER_CONTEXT: "https://w3id.org/security/v2",
+    SCHEME: "did",
+    METHOD: "hid",
+    NAMESPACE:"devnet", // this is not used 
+    DID_BASE_CONTEXT: "https://www.w3.org/ns/did/v1",
+    VERIFICATION_METHOD_TYPE: "Ed25519VerificationKey2020"
+}
+Object.freeze(DID)
+
 export const VC = {
-    PREFIX: "vc:",
+    SCHEME: "vc",
+    METHOD: "hid",
+    NAMESPACE:"devnet", 
+    PREFIX: "vc:" + DID.METHOD + ":" + DID.NAMESPACE + ":",
     CREDENTAIL_SCHEMA_VALIDATOR_TYPE: "JsonSchemaValidator2018",
     CREDENTAIL_STATUS_TYPE: "CredentialStatusList2017",
     CREDENTAIL_BASE_CONTEXT: "https://www.w3.org/2018/credentials/v1",
@@ -40,20 +53,17 @@ export const VC = {
 Object.freeze(VC)
 
 export const VP = {
-    PREFIX: "vp:"
+    PREFIX: "vp:",
+    SCHEME: "vp",
+    METHOD: "hid",
+    NAMESPACE:"devnet",
 }
 Object.freeze(VP)
 
-export const DID = {
-    CONTROLLER_CONTEXT: "https://w3id.org/security/v2",
-    SCHEME: "did:hs",
-    NAMESPACE:"devnet", // this is not used 
-    DID_BASE_CONTEXT: "https://www.w3.org/ns/did/v1",
-    VERIFICATION_METHOD_TYPE: "Ed25519VerificationKey2020"
-}
-Object.freeze(DID)
-
 export const SCHEMA = {
+    SCHEME: "sch",
+    METHOD: "hid",
+    NAMESPACE:"devnet", 
     SCHEMA_JSON: 'http://json-schema.org/draft-07/schema',
     SCHEMA_TYPE: 'https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json'
 }
@@ -65,8 +75,8 @@ export const KEY_HEADERS = {
 }
 Object.freeze(KEY_HEADERS)
 
-export const GAS_PRICE='0.0001';
-export const HID_DECIMAL = 18;
+export const GAS_PRICE='0.1';
+export const HID_DECIMAL = 6;
 export const HID_DNOMINATION = 'uhid';
 export const HID_MIN_GAS='200000'
 export const HID_MIN_FEE='5000'

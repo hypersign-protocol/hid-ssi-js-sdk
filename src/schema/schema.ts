@@ -15,9 +15,12 @@ export default class HyperSignSchema implements SchemaDocument {
   authored: string;
   schema: SchemaProperty;
   schemaRpc: SchemaRpc;
+  namespace: string;
 
-  constructor() {
+  constructor(namespace?: string) {
     this.schemaRpc = new SchemaRpc();
+    console.log('Inside schema constructor namespace =' + namespace);
+    this.namespace = namespace && namespace != '' ? namespace : '';
     (this.type = constants.SCHEMA.SCHEMA_TYPE),
       (this.modelVersion = '1.0'),
       (this.id = ''),
@@ -35,23 +38,28 @@ export default class HyperSignSchema implements SchemaDocument {
   }
 
   // Ref:
-  private getSchemaId(author: string): string {
-    const a = author;
-    const b = uuidv4();
-    const id = `${a};id=${b};version=${this.modelVersion}`; // ID Structure ->  did:hs:<a>;id=<b>;version=1.0
+  private async getSchemaId(): Promise<string> {
+    const b = await Utils.getUUID();
+    // ID Structure ->  sch:<method>:<namespace>:<method-specific-id>:<version>
+    let id;
+    if (this.namespace && this.namespace != '') {
+      id = `${constants.SCHEMA.SCHEME}:${constants.SCHEMA.METHOD}:${this.namespace}:${b}:${this.modelVersion}`;
+    } else {
+      id = `${constants.SCHEMA.SCHEME}:${constants.SCHEMA.METHOD}:${b}:${this.modelVersion}`;
+    }
     return id;
   }
 
-  public getSchema(params: {
+  public async getSchema(params: {
     name: string;
     description?: string;
     author: string;
     fields?: Array<ISchemaFields>;
     additionalProperties: boolean;
-  }): SchemaDocument {
+  }): Promise<SchemaDocument> {
     if (!params.author) throw new Error('HID-SSI-SDK:: Error: Author must be passed');
 
-    this.id = this.getSchemaId(params.author);
+    this.id = await this.getSchemaId();
     this.name = params.name;
     this.author = params.author;
     this.authored = new Date(new Date().getTime() - 10000).toISOString().slice(0, -5) + 'Z';

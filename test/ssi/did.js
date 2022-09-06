@@ -63,7 +63,7 @@ createWallet(mnemonic)
         didDocString = JSON.stringify(didDocument)
         writeDataInFile('../mock/did.json', didDocString)
         versionId = didDocumentMetadata.versionId;
-        return // hsSdk.did.deactivate({ didDocString, privateKeyMultibase, verificationMethodId, versionId })
+        return "";//hsSdk.did.deactivate({ didDocString, privateKeyMultibase, verificationMethodId, versionId })
     })
     .then((resTx) => {
         console.log(resTx)

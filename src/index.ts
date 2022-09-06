@@ -43,9 +43,9 @@ export = class HypersignSSISdk{
         await hidClient.init();
 
         this.did = new Did(this.namespace);
-        this.schema = new Schema();
-        this.vc = new VC();
-        this.vp = new VP();
+        this.schema = new Schema(this.namespace);
+        this.vc = new VC(this.namespace);
+        this.vp = new VP(this.namespace);
     }
 
 }
