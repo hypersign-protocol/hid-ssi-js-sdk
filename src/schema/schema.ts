@@ -19,7 +19,6 @@ export default class HyperSignSchema implements SchemaDocument {
 
   constructor(namespace?: string) {
     this.schemaRpc = new SchemaRpc();
-    console.log('Inside schema constructor namespace =' + namespace);
     this.namespace = namespace && namespace != '' ? namespace : '';
     (this.type = constants.SCHEMA.SCHEMA_TYPE),
       (this.modelVersion = '1.0'),
