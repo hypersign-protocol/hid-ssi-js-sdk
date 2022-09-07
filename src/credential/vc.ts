@@ -17,7 +17,7 @@ import { DeliverTxResponse } from '@cosmjs/stargate';
 
 import crypto from 'crypto';
 
-const sha256 = crypto.createHash('sha256');
+
 
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
   public context: Array<string>;
@@ -82,6 +82,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   }
 
   private sha256Hash(message: string): string {
+    const sha256 = crypto.createHash('sha256');
     return sha256.update(message).digest('hex');
   }
 
