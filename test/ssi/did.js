@@ -1,14 +1,17 @@
 const { createWallet, writeDataInFile, mnemonic, hidNodeEp } = require('../config')
 const HypersignSsiSDK = require('../../build/src')
-
+const {Bip39}=require('@cosmjs/crypto')
 let hsSdk = null;
 let didDocString;
 let versionId;
 let verificationMethodId;
 let didDoc;
 let privateKeyMultibase;
+let offlineSigner
 createWallet(mnemonic)
-    .then(async(offlineSigner) => {
+    .then(async(offlineSigner11) => {
+       offlineSigner=offlineSigner11
+        console.log("offlineSigner", offlineSigner);
         const accounts = await offlineSigner.getAccounts();
         console.log(accounts)
         hsSdk = new HypersignSsiSDK(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest, hidNodeEp.namespace);
@@ -17,13 +20,15 @@ createWallet(mnemonic)
     .then(async() => {
         console.log("===============GENERATE DID-KEYS=======================")
             // const param = "blade sting surge cube valid scr"; // 32 bytes
-        const kp = await hsSdk.did.generateKeys();
+        const seed=Bip39.decode(mnemonic)
+        const kp = await hsSdk.did.generateKeys({seed});
+        console.log("kp", kp);
         writeDataInFile('../mock/keys.json', JSON.stringify(kp))
         privateKeyMultibase = kp.privateKeyMultibase
         const publicKeyMultibase = kp.publicKeyMultibase
         console.log(kp)
         console.log("===============GENERATE DID&DIDDoc=======================")
-        didDocString = hsSdk.did.generate({ publicKeyMultibase });
+        didDocString = await hsSdk.did.generate({ publicKeyMultibase });
         console.log(didDocString)
         writeDataInFile('../mock/did.json', didDocString)
         didDoc = JSON.parse(didDocString);

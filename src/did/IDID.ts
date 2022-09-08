@@ -25,7 +25,7 @@ export interface IParams {
 
 export interface IDID {
   generateKeys(params: { seed: string }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }>;
-  generate(params: { publicKeyMultibase: string }): string;
+  generate(params: { publicKeyMultibase: string }): Promise<string>;
   register(params: {
     didDocString: string;
     privateKeyMultibase: string;

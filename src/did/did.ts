@@ -20,10 +20,10 @@ class DID implements Did {
   capabilityDelegation: string[];
   namespace: string;
   service: Service[];
-  constructor(publicKey: string, namespace?: string) {
+  constructor(publicKey: string, methodSpecificId: string, namespace?: string) {
     this.context = [constant.DID.DID_BASE_CONTEXT];
     this.namespace = namespace && namespace != '' ? namespace : '';
-    this.id = this.getId(publicKey);
+    this.id = this.getId(methodSpecificId);
     this.controller = [this.id];
     this.alsoKnownAs = [this.id];
     const verificationMethod: VerificationMethod = {
@@ -46,12 +46,12 @@ class DID implements Did {
     return JSON.stringify(this);
   }
 
-  private getId = (publicKey) => {
+  private getId = (methodSpecificId) => {
     let did = '';
     did =
       this.namespace && this.namespace != ''
-        ? `${constant.DID.SCHEME}:${constant.DID.METHOD}:${this.namespace}:${publicKey}`
-        : `${constant.DID.SCHEME}:${constant.DID.METHOD}:${publicKey}`;
+        ? `${constant.DID.SCHEME}:${constant.DID.METHOD}:${this.namespace}:${methodSpecificId}`
+        : `${constant.DID.SCHEME}:${constant.DID.METHOD}:${methodSpecificId}`;
     return did;
   };
 
@@ -104,14 +104,16 @@ export default class HypersignDID implements IDID {
   }
 
   /// Generate Did Document
-  public generate(params: { publicKeyMultibase: string }): string {
+  public async generate(params: { publicKeyMultibase: string }): Promise<string> {
     if (!params.publicKeyMultibase) {
       throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
     }
     const { publicKeyMultibase: publicKeyMultibase1 } = Utils.convertEd25519verificationkey2020toStableLibKeysInto({
       publicKey: params.publicKeyMultibase,
     });
-    const newDid = new DID(publicKeyMultibase1, this.namespace);
+
+    const methodSpecificId = await Utils.getUUID();
+    const newDid = new DID(publicKeyMultibase1, methodSpecificId, this.namespace);
     return newDid.getDidString();
   }
 
