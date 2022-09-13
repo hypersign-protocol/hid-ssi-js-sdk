@@ -65,7 +65,7 @@ export const SCHEMA = {
     METHOD: "hid",
     NAMESPACE:"devnet", 
     SCHEMA_JSON: 'http://json-schema.org/draft-07/schema',
-    SCHEMA_TYPE: 'https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json'
+    SCHEMA_TYPE: 'https://w3c-ccg.github.io/vc-json-schemas/v1/schema/1.0/schema.json'
 }
 Object.freeze(SCHEMA)
 

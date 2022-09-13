@@ -17,8 +17,6 @@ import { DeliverTxResponse } from '@cosmjs/stargate';
 
 import crypto from 'crypto';
 
-
-
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
   public context: Array<string>;
   public id: string;
@@ -187,7 +185,9 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   // encode a multibase base58-btc multicodec key
   // TEST
   public async getCredential(params: {
-    schemaId: string;
+    schemaId?: string;
+    schemaContext?: Array<string>;
+    type?: Array<string>;
     subjectDid: string;
     issuerDid: string;
     expirationDate: string;
@@ -196,11 +196,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     let schemaDoc: Schema = {} as Schema;
     // let issuerDidDoc:Did = {} as Did
     // let subjectDidDoc:Did = {} as Did
-    try {
-      schemaDoc = await this.hsSchema.resolve({ schemaId: params.schemaId });
-    } catch (e) {
-      throw new Error('HID-SSI-SDK:: Error: Could not resolve the schema from schemaId = ' + params.schemaId);
-    }
 
     const issuerDid = params.issuerDid;
     const subjectDid = params.subjectDid;
@@ -217,6 +212,44 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       throw new Error('HID-SSI-SDK:: Error: Could not fetch subject did doc, subject did = ' + subjectDid);
     }
 
+    if (params && params.schemaContext && params.type) {
+      try {
+        const context = Array<string>();
+        context.push(VC.CREDENTAIL_BASE_CONTEXT);
+        params.schemaContext.forEach((x) => {
+          context.push(x);
+        });
+        const issuerDid = params.issuerDid;
+        const subjectDid = params.subjectDid;
+        const expirationDate = params.expirationDate;
+        const credentialSubject = params.fields;
+
+        const vc: IVerifiableCredential = {} as IVerifiableCredential;
+        vc['@context'] = context;
+        vc.id = await this.getId();
+        vc.type = [];
+        vc.type.push('VerifiableCredential');
+        params.type.forEach((x) => {
+          vc.type.push(x);
+        });
+
+        vc.issuer = issuerDid;
+        vc.issuanceDate = this.dateNow(new Date().toISOString());
+        vc.expirationDate = this.dateNow(expirationDate);
+        vc.credentialSubject = credentialSubject;
+        vc.credentialSubject['id'] = subjectDid;
+        return vc;
+      } catch (error) {
+        throw new Error('HID-SSI-SDK:: Error: Could not create credential, error = ' + error);
+      }
+    } else if (!params.schemaId) {
+      throw new Error('HID-SSI-SDK:: Error: schemaId is required when schemaContext and type not passed');
+    }
+    try {
+      schemaDoc = await this.hsSchema.resolve({ schemaId: params.schemaId });
+    } catch (e) {
+      throw new Error('HID-SSI-SDK:: Error: Could not resolve the schema from schemaId = ' + params.schemaId);
+    }
     // TODO: do proper check for date and time
     //if(params.expirationDate < new Date()) throw  new Error("Expiration date can not be lesser than current date")
 
