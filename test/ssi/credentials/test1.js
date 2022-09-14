@@ -1,8 +1,13 @@
-const HypersignSsiSDK = require('../../build/src')
-const { createWallet, mnemonic, hidNodeEp, writeDataInFile } = require('../config')
-const { id } = require('../mock/did.json')
-const { id: schemaId } = require('../mock/schema.json')
-const { privateKeyMultibase } = require('../mock/keys.json')
+/**
+ * - Testing create, sign, verify VC using custom schema
+ * - Testing create, sign, verify VP
+ */
+
+const HypersignSsiSDK = require('../../../build/src')
+const { createWallet, mnemonic, hidNodeEp, writeDataInFile } = require('../../config')
+const { id } = require('../../mock/did.json')
+const { id: schemaId } = require('../../mock/schema.json')
+const { privateKeyMultibase } = require('../../mock/keys.json')
 
 
 let hsSdk;
@@ -47,7 +52,7 @@ createWallet(mnemonic)
         })
     })
     .then((svc) => {
-        writeDataInFile('../mock/vc.json', JSON.stringify(svc))
+        writeDataInFile('../../mock/vc.json', JSON.stringify(svc))
         console.log(JSON.stringify(svc, null, 2))
         signedVC = svc;
         console.log('================Verify Verifiable Credential================')
@@ -78,7 +83,7 @@ createWallet(mnemonic)
     })
     .then(svp => {
         console.log(JSON.stringify(svp, null, 2))
-        writeDataInFile('../mock/vp.json', JSON.stringify(svp))
+        writeDataInFile('../../mock/vp.json', JSON.stringify(svp))
         signedVP = svp;
         console.log('================Verify Verifiable Presenatation================')
         return hsSdk.vp.verifyPresentation({

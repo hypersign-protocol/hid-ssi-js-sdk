@@ -3,11 +3,11 @@
  * - Supporting Multiple Credentials while creating presentation
  */
 
-const HypersignSsiSDK = require("../../build/src")
-const { createWallet, mnemonic, hidNodeEp, writeDataInFile } = require("../config")
-const { privateKeyMultibase } = require('../mock/keys.json')
-const { id } = require('../mock/did.json');
-const otherVc = require('../mock/vc.json');
+const HypersignSsiSDK = require("../../../build/src")
+const { createWallet, mnemonic, hidNodeEp, writeDataInFile } = require("../../config")
+const { privateKeyMultibase } = require('../../mock/keys.json')
+const { id } = require('../../mock/did.json');
+const otherVc = require('../../mock/vc.json');
 
 
 async function test2() {
@@ -171,6 +171,7 @@ async function test2() {
     issuerDid,
     privateKey: privateKeyMultibase
   })
+  writeDataInFile('../../mock/vc-with-schema.org.json', JSON.stringify(issueCread))
   console.log(JSON.stringify(issueCread, null, 2));
   
   console.log('Verify VC ==========')
@@ -192,8 +193,9 @@ async function test2() {
     challenge: '123',
     domain: 'example.com',
   })
+  
   console.log(JSON.stringify(SignedPresentation, null, 2));
-
+  writeDataInFile('../../mock/vp-with-multi-vc.json', JSON.stringify(SignedPresentation))
   console.log('Verify VP ==========')
   const verify = await hsSdk.vp.verifyPresentation({
     signedPresentation: SignedPresentation,
