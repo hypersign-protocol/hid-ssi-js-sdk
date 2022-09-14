@@ -17,8 +17,6 @@ import { DeliverTxResponse } from '@cosmjs/stargate';
 
 import crypto from 'crypto';
 
-
-
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
   public context: Array<string>;
   public id: string;
