@@ -1,7 +1,6 @@
 import vc from 'vc-js';
 import jsonSigs from 'jsonld-signatures';
 import { documentLoader } from 'jsonld';
-import { v4 as uuidv4 } from 'uuid';
 import HypersignDID from '../did/did';
 import { Did, VerificationMethod } from '../generated/ssi/did';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
@@ -40,7 +39,7 @@ interface IVerifiablePresentation {
 }
 
 export interface IPresentationMethods {
-  getPresentation(params: { verifiableCredential: IVerifiableCredential; holderDid: string }): Promise<object>;
+  getPresentation(params: { verifiableCredentials: Array<IVerifiableCredential>; holderDid: string }): Promise<object>;
   signPresentation(params: {
     presentation: IVerifiablePresentation;
     holderDid: string;
@@ -89,10 +88,13 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     return id;
   }
 
-  async getPresentation(params: { verifiableCredential: IVerifiableCredential; holderDid: string }): Promise<object> {
+  async getPresentation(params: {
+    verifiableCredentials: Array<IVerifiableCredential>;
+    holderDid: string;
+  }): Promise<object> {    
     const id = await this.getId();
     const presentation = vc.createPresentation({
-      verifiableCredential: params.verifiableCredential,
+      verifiableCredential: params.verifiableCredentials,
       id: id,
       holder: params.holderDid,
     });
@@ -267,6 +269,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       purpose,
       suite: [vpSuite_holder, vcSuite_issuer],
       documentLoader,
+      unsignedPresentation: true,
       checkStatus: async function (options) {
         return await that.vc.checkCredentialStatus(options.credential.id);
       },

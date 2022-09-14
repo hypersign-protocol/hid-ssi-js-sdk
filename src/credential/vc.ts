@@ -238,6 +238,15 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         vc.expirationDate = this.dateNow(expirationDate);
         vc.credentialSubject = credentialSubject;
         vc.credentialSubject['id'] = subjectDid;
+
+        // TODO: confusion here is, what would be the status of this credential at the time of its creation?
+        // If this properpty is present , then checkStatus() must be passed at the time of verification of the credential
+        // Ref: https://github.com/digitalbazaar/vc-js/blob/7e14ef27bc688194635077d243d9025c0020448b/test/10-verify.spec.js#L188
+        vc.credentialStatus = {
+          id: this.credStatusRPC.credentialRestEP + '/' + vc.id, // TODO: Will add credentialStatus path when issueing this crdential
+          type: this.credentialStatus.type,
+        } as ICredentialStatus;
+
         return vc;
       } catch (error) {
         throw new Error('HID-SSI-SDK:: Error: Could not create credential, error = ' + error);
@@ -245,6 +254,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     } else if (!params.schemaId) {
       throw new Error('HID-SSI-SDK:: Error: schemaId is required when schemaContext and type not passed');
     }
+
     try {
       schemaDoc = await this.hsSchema.resolve({ schemaId: params.schemaId });
     } catch (e) {

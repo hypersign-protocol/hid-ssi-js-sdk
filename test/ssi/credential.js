@@ -58,10 +58,10 @@ createWallet(mnemonic)
     })
 
 
-.then(() => {
-        console.log('================Generate Verifiable Presenatation================')
+    .then(() => {
+        console.log('================Generate Verifiable Presenatation Unsigned VC: ================')
         return hsSdk.vp.getPresentation({
-            verifiableCredential: unsignedVc,
+            verifiableCredentials: [unsignedVc],
             holderDid: subjectDid
         })
     })
