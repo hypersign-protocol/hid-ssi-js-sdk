@@ -30,13 +30,17 @@ createWallet(mnemonic)
         verificationMethodId = didDoc.verificationMethod[0].id
         await hsSdk.did.register({ didDocString, privateKeyMultibase, verificationMethodId })
 
-        didDoc = JSON.parse(didDocString);
-        console.log(didDoc);
-        const  {signedDidDocument,fingerprint} = await hsSdk.did.signDid({ privateKey: kp.privateKeyMultibase, challenge: "123", domain: 'abc', did: didDoc.id })
-        writeDataInFile("../mock/signedError.json",JSON.stringify(signedDidDocument))
-        console.log("signedDid", signedDidDocument);
-        const verifiedSig = await hsSdk.did.verify({doc:signedDidDocument, challenge: "123", domain: 'abc' , did: fingerprint})
-        console.log("verifiedSig", JSON.stringify(verifiedSig,null,2));
+
+
+        console.log("============Sign==================");
+        const { signedDidDocument } = await hsSdk.did.signDid({ privateKey: kp.privateKeyMultibase, challenge: "123", domain: 'abc', did: didDoc.id })
+        writeDataInFile("../mock/signedError.json", JSON.stringify(signedDidDocument))
+        console.log(signedDidDocument);
+
+        const { VerificationResult } = await hsSdk.did.verify({ doc: signedDidDocument })
+        console.log("============Verify==================");
+        console.log("verifiedSig", JSON.stringify(VerificationResult, null, 2));
+        console.log(VerificationResult);
     })
 
 
