@@ -149,11 +149,39 @@ export default class HypersignDID implements IDID {
     return await this.didrpc.registerDID(didDoc, signature, verificationMethodId);
   }
 
-  public async resolve(params: { did: string }): Promise<IDIDResolve> {
-    if (!params.did) {
-      throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
+  /**
+   * @param params params: { did?: string ,didDoc?: JSON }
+   *
+   *  if did is provided then it will resolve the did doc from the blockchain
+   *  if didDoc is provided then it will verify the did with the proof
+   * @returns  Promise : {context ,didDocument, VerificationResult , didDocumentMetadata}
+   */
+  public async resolve(params: { did?: string; didDoc?: JSON }): Promise<IDIDResolve> {
+    if (params.did) {
+      return await this.didrpc.resolveDID(params.did);
     }
-    return await this.didrpc.resolveDID(params.did);
+    if (params.didDoc) {
+      const signedDidDoc: any = params.didDoc;
+      const doc = { ...signedDidDoc };
+      if (!signedDidDoc.proof) {
+        throw new Error('HID-SSI-SDK:: Error: params.didDoc is not signed');
+      }
+      const { VerificationResult } = await this.verify({ doc } as IParams);
+      if (!VerificationResult.verified) {
+        throw new Error('HID-SSI-SDK:: Error: params.didDoc is not verified , Invalid signature');
+      }
+      delete signedDidDoc.proof;
+      const didDoc = signedDidDoc as Did;
+
+      const results = {
+        context: doc['@context'],
+        didDocument: didDoc,
+        didDocumentMetadata: {},
+      } as IDIDResolve;
+
+      return { ...results };
+    }
+    throw new Error('HID-SSI-SDK:: Error: params.did or params.didDoc is required to resolve a did');
   }
 
   // Update DID Document
@@ -222,8 +250,8 @@ export default class HypersignDID implements IDID {
    */
 
   public async signDid(params: IParams): Promise<object> {
-    const { privateKey, challenge, domain, did } = params;
-    let doc;
+    const { privateKey, challenge, domain, did, doc } = params;
+    let resolveddoc;
     if (!privateKey) {
       throw new Error('HID-SSI-SDK:: Error: params.privateKey is required to sign a did');
     }
@@ -237,14 +265,20 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
     }
     try {
-      doc = await this.didrpc.resolveDID(did);
-      // const publicKeyId=doc
+      // if did is prvovided then resolve the did doc from the blockchain or else use the did doc provided in the params object to sign the did doc with the proof
+      if (did) {
+        resolveddoc = await this.didrpc.resolveDID(did);
+      } else if (doc) {
+        resolveddoc = doc;
+      } else {
+        throw new Error('HID-SSI-SDK:: Error: params.did or params.doc is required to sign a did');
+      }
     } catch (error) {
       throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a public did');
     }
 
-    const publicKeyId = doc.didDocument.authentication[0];
-    const pubkey = doc.didDocument.verificationMethod.find((item) => item.id === publicKeyId);
+    const publicKeyId = resolveddoc.didDocument.authentication[0];
+    const pubkey = resolveddoc.didDocument.verificationMethod.find((item) => item.id === publicKeyId);
     const { publicKeyMultibase: publicKeyMultibase1 } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
       publicKey: pubkey.publicKeyMultibase,
     });
@@ -263,11 +297,11 @@ export default class HypersignDID implements IDID {
 
     // suite.date = new Date().toISOString();
 
-    const context = doc.didDocument.context;
-    delete doc.didDocument.context;
-    doc.didDocument['@context'] = context;
-    doc.didDocument['@context'].push(constant.VC.CREDENTAIL_SECURITY_SUITE);
-    const signedDidDocument = await jsonSigs.sign(doc.didDocument, {
+    const context = resolveddoc.didDocument.context;
+    delete resolveddoc.didDocument.context;
+    resolveddoc.didDocument['@context'] = context;
+    resolveddoc.didDocument['@context'].push(constant.VC.CREDENTAIL_SECURITY_SUITE);
+    const signedDidDocument = await jsonSigs.sign(resolveddoc.didDocument, {
       suite,
       purpose: new AuthenticationProofPurpose({
         challenge,
@@ -289,7 +323,7 @@ export default class HypersignDID implements IDID {
    *
    * @returns VerificationResult {VerificationResult}
    */
-  public async verify(params: IParams): Promise<object> {
+  public async verify(params: IParams): Promise<{ VerificationResult }> {
     const { doc } = params;
     if (!doc) {
       throw new Error('HID-SSI-SDK:: Error: params.doc is required to verify a did');

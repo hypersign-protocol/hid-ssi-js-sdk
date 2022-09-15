@@ -186,14 +186,18 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   // TEST
   public async getCredential(params: {
     schemaId: string;
-    subjectDid: string;
+    subjectDid?: string;
+    subjectDidDocSigned?: JSON;
     issuerDid: string;
     expirationDate: string;
+
     fields: object;
   }): Promise<IVerifiableCredential> {
     let schemaDoc: Schema = {} as Schema;
-    // let issuerDidDoc:Did = {} as Did
-    // let subjectDidDoc:Did = {} as Did
+    if (params.subjectDid && params.subjectDidDocSigned) {
+      throw new Error('HID-SSI-SDK:: Error: Both subjectDid and subjectDidDoc cannot be passed');
+    }
+
     try {
       schemaDoc = await this.hsSchema.resolve({ schemaId: params.schemaId });
     } catch (e) {
@@ -202,11 +206,18 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const issuerDid = params.issuerDid;
     const subjectDid = params.subjectDid;
-
+    let resolvedsubjectDidDoc;
     const { didDocument: issuerDidDoc } = await this.hsDid.resolve({ did: issuerDid });
-
-    const { didDocument: subjectDidDoc } = await this.hsDid.resolve({ did: subjectDid });
-
+    //
+    if (params.subjectDid) {
+      resolvedsubjectDidDoc = await this.hsDid.resolve({ did: subjectDid });
+    } else if (params.subjectDidDocSigned) {
+      const subjectDidDocSigned = params.subjectDidDocSigned as JSON;
+      resolvedsubjectDidDoc = await this.hsDid.resolve({ didDoc: subjectDidDocSigned });
+    } else {
+      throw new Error('HID-SSI-SDK:: Error: Could not resolve the subjectDid or subjectDidDoc');
+    }
+    const { didDocument: subjectDidDoc } = resolvedsubjectDidDoc;
     if (!issuerDidDoc) {
       throw new Error('HID-SSI-SDK:: Error: Could not fetch issuer did doc, issuer did = ' + issuerDid);
     }
