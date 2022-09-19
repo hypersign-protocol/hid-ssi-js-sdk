@@ -23,7 +23,7 @@ const test = async () => {
     console.log(mnemonic);
 
 
-    const slipPathKeys = Slip10.derivePath(Slip10Curve.Ed25519, seed, makeSSIWalletPath(10000000))
+    const slipPathKeys = Slip10.derivePath(Slip10Curve.Ed25519, seed, makeSSIWalletPath(0))
     console.log(slipPathKeys);
     const edKeyPair2 = await Ed25519VerificationKey2020.generate({ seed: slipPathKeys.privkey });
 
