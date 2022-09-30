@@ -31,7 +31,7 @@ export const DID = {
     CONTROLLER_CONTEXT: "https://w3id.org/security/v2",
     SCHEME: "did",
     METHOD: "hid",
-    NAMESPACE:"devnet", // this is not used 
+    NAMESPACE:"testnet", // this is not used 
     DID_BASE_CONTEXT: "https://www.w3.org/ns/did/v1",
     VERIFICATION_METHOD_TYPE: "Ed25519VerificationKey2020"
 }
@@ -40,7 +40,7 @@ Object.freeze(DID)
 export const VC = {
     SCHEME: "vc",
     METHOD: "hid",
-    NAMESPACE:"devnet", 
+    NAMESPACE:"testnet", 
     PREFIX: "vc:" + DID.METHOD + ":" + DID.NAMESPACE + ":",
     CREDENTAIL_SCHEMA_VALIDATOR_TYPE: "JsonSchemaValidator2018",
     CREDENTAIL_STATUS_TYPE: "CredentialStatusList2017",
@@ -56,14 +56,14 @@ export const VP = {
     PREFIX: "vp:",
     SCHEME: "vp",
     METHOD: "hid",
-    NAMESPACE:"devnet",
+    NAMESPACE:"testnet",
 }
 Object.freeze(VP)
 
 export const SCHEMA = {
     SCHEME: "sch",
     METHOD: "hid",
-    NAMESPACE:"devnet", 
+    NAMESPACE:"testnet", 
     SCHEMA_JSON: 'http://json-schema.org/draft-07/schema',
     SCHEMA_TYPE: 'https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json'
 }
