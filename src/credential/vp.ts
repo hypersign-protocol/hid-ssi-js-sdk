@@ -103,14 +103,14 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
 
   async signPresentation(params: {
     presentation: IVerifiablePresentation;
-    holderDid: string;
+    holderDid?: string;
+    holderDidDocSigned?: JSON;
     privateKey: string;
     challenge: string;
   }): Promise<object> {
-    if (!params.holderDid) {
-      throw new Error('params.holderDid is required for signinng a presentation');
+    if (params.holderDid && params.holderDidDocSigned) {
+      throw new Error('Either holderDid or holderDidDocSigned should be provided');
     }
-
     if (!params.privateKey) {
       throw new Error('params.privateKey is required for signinng a presentation');
     }
@@ -122,9 +122,16 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     if (!params.challenge) {
       throw new Error('params.challenge is required for signinng a presentation');
     }
-
-    const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.holderDid });
-
+    let resolvedDidDoc;
+    if (params.holderDid) {
+      resolvedDidDoc = await this.hsDid.resolve({ did: params.holderDid });
+    } else if (params.holderDidDocSigned) {
+      const didDocSigned = params.holderDidDocSigned as JSON;
+      resolvedDidDoc = await this.hsDid.resolve({ didDoc: didDocSigned });
+    } else {
+      throw new Error('params.holderDid or params.holderDidDocSigned is required for signinng a presentation');
+    }
+    const { didDocument: signerDidDoc } = resolvedDidDoc;
     const publicKeyId = signerDidDoc['assertionMethod'][0]; // TODO: bad idea -  should not hardcode it.
     const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
       (x) => x.id == publicKeyId
@@ -162,10 +169,11 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     challenge: string;
     domain?: string;
     issuerDid: string;
-    holderDid: string;
+    holderDid?: string;
+    holderDidDocSigned?: JSON;
   }): Promise<object> {
-    if (!params.holderDid) {
-      throw new Error('params.signedPresentation is required for verifying a presentation');
+    if (params.holderDid && params.holderDidDocSigned) {
+      throw new Error('Either holderDid or holderDidDocSigned should be provided');
     }
 
     if (!params.issuerDid) {
@@ -182,7 +190,16 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
 
     ///---------------------------------------
     /// Holder
-    const { didDocument: holderDID } = await this.hsDid.resolve({ did: params.holderDid });
+    let resolvedDidDoc;
+    if (params.holderDid) {
+      resolvedDidDoc = await this.hsDid.resolve({ did: params.holderDid });
+    } else if (params.holderDidDocSigned) {
+      resolvedDidDoc = await this.hsDid.resolve({ didDoc: params.holderDidDocSigned });
+    } else {
+      throw new Error('Either holderDid or holderDidDocSigned should be provided');
+    }
+
+    const { didDocument: holderDID } = resolvedDidDoc;
 
     const holderDidDoc: Did = holderDID as Did;
     const holderPublicKeyId = holderDidDoc.authentication[0];

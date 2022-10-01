@@ -185,25 +185,41 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   // encode a multibase base58-btc multicodec key
   // TEST
   public async getCredential(params: {
-    schemaId?: string;
+    schemaId: string;
+    subjectDid?: string;
+    subjectDidDocSigned?: JSON;
     schemaContext?: Array<string>;
     type?: Array<string>;
-    subjectDid: string;
     issuerDid: string;
     expirationDate: string;
+
     fields: object;
   }): Promise<IVerifiableCredential> {
     let schemaDoc: Schema = {} as Schema;
-    // let issuerDidDoc:Did = {} as Did
-    // let subjectDidDoc:Did = {} as Did
+    if (params.subjectDid && params.subjectDidDocSigned) {
+      throw new Error('HID-SSI-SDK:: Error: Both subjectDid and subjectDidDoc cannot be passed');
+    }
 
+    try {
+      schemaDoc = await this.hsSchema.resolve({ schemaId: params.schemaId });
+    } catch (e) {
+      throw new Error('HID-SSI-SDK:: Error: Could not resolve the schema from schemaId = ' + params.schemaId);
+    }
+    
     const issuerDid = params.issuerDid;
     const subjectDid = params.subjectDid;
-
+    let resolvedsubjectDidDoc;
     const { didDocument: issuerDidDoc } = await this.hsDid.resolve({ did: issuerDid });
-
-    const { didDocument: subjectDidDoc } = await this.hsDid.resolve({ did: subjectDid });
-
+    //
+    if (params.subjectDid) {
+      resolvedsubjectDidDoc = await this.hsDid.resolve({ did: subjectDid });
+    } else if (params.subjectDidDocSigned) {
+      const subjectDidDocSigned = params.subjectDidDocSigned as JSON;
+      resolvedsubjectDidDoc = await this.hsDid.resolve({ didDoc: subjectDidDocSigned });
+    } else {
+      throw new Error('HID-SSI-SDK:: Error: Could not resolve the subjectDid or subjectDidDoc');
+    }
+    const { didDocument: subjectDidDoc } = resolvedsubjectDidDoc;
     if (!issuerDidDoc) {
       throw new Error('HID-SSI-SDK:: Error: Could not fetch issuer did doc, issuer did = ' + issuerDid);
     }
