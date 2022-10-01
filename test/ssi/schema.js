@@ -31,7 +31,7 @@ createWallet(mnemonic)
     .then(() => {
         console.log("======Generate Schema=====")
         const schemaOptions = {
-            name: "Email Schema",
+            name: "Email Schema Test",
             author,
             schemaProperty: {
                 properties: [{
@@ -56,7 +56,7 @@ createWallet(mnemonic)
         }
         return hsSdk.schema.getSchema({
             name: schemaOptions.name,
-            description: "This is email credential",
+            description: "This is email credential test",
             author: schemaOptions.author,
             additionalProperties: false,
             fields: schemaOptions.schemaProperty.properties,
