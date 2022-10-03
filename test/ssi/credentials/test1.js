@@ -6,7 +6,7 @@
 
 const HypersignSsiSDK = require('../../../build/src')
 const { createWallet, mnemonic, hidNodeEp, writeDataInFile } = require('../../config')
-const { id } = require('../../mock/public/did.json')
+const issuerDidDoc = require('../../mock/public/did.json')
 const { id: schemaId } = require('../../mock/public/schema.json')
 const { privateKeyMultibase } = require('../../mock/public/keys.json')
 
@@ -21,7 +21,7 @@ let signedVP;
 const challenge = "12312301231231jnj12n3123123s"
 const subjectDid = holderSignedDIDDoc.id
 console.log(subjectDid)
-const issuerDid = id;
+const issuerDid = issuerDidDoc.id;
 const privateKey = privateKeyMultibase;
 
 createWallet(mnemonic)
@@ -52,7 +52,8 @@ createWallet(mnemonic)
         return hsSdk.vc.issueCredential({
             credential: vc,
             issuerDid,
-            privateKey
+            privateKey,
+            verificationMethodId:issuerDidDoc.assertionMethod[0]
         })
     })
     .then((svc) => {
@@ -60,7 +61,7 @@ createWallet(mnemonic)
         console.log(JSON.stringify(svc, null, 2))
         signedVC = svc;
         console.log('================Verify Verifiable Credential================')
-        return hsSdk.vc.verifyCredential({ credential: svc, issuerDid })
+        return hsSdk.vc.verifyCredential({ credential: svc, issuerDid ,verificationMethodId:issuerDidDoc.assertionMethod[0]})
     })
     .then((result) => {
         console.log(result)
@@ -82,7 +83,8 @@ createWallet(mnemonic)
             presentation: unsignedVp,
             holderDidDocSigned: holderSignedDIDDoc,
             privateKey,
-            challenge
+            challenge,
+            verificationMethodId:holderSignedDIDDoc.assertionMethod[0]
         })
     })
     .then(svp => {
@@ -96,6 +98,8 @@ createWallet(mnemonic)
             domain: "https://localhos:20202",
             issuerDid,
             holderDidDocSigned: holderSignedDIDDoc,
+            holderVerificationMethodId:holderSignedDIDDoc.authentication[0],
+            issuerVerificationMethodId:issuerDidDoc.assertionMethod[0]
         })
     })
     .then(result => {

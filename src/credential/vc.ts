@@ -317,13 +317,30 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public async issueCredential(params: {
     credential: IVerifiableCredential;
     issuerDid: string;
+    verificationMethodId: string; // vermethod of issuer for assestion
     privateKey: string;
   }): Promise<object> {
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to issue credential');
+    }
+
+    if (!params.credential) {
+      throw new Error('HID-SSI-SDK:: Error: params.credential is required to issue credential');
+    }
+
+    if (!params.privateKey) {
+      throw new Error('HID-SSI-SDK:: Error: params.privateKey is required to issue credential');
+    }
+
+    if (!params.issuerDid) {
+      throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to issue credential');
+    }
+
     const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
     if (!signerDidDoc) throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
 
     // TODO: take verification method from params
-    const publicKeyId = signerDidDoc['assertionMethod'][0]; // TODO: bad idea -  should not hardcode it.
+    const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
     const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
       (x) => x.id == publicKeyId
     ) as VerificationMethod;
@@ -368,7 +385,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credential.issuer });
     const issuerDidDoc: Did = issuerDID as Did;
-    const issuerPublicKeyId = issuerDidDoc.authentication[0];
+    const issuerPublicKeyId = params.verificationMethodId;
     const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
       (x) => x.id == issuerPublicKeyId
     ) as VerificationMethod;
@@ -386,7 +403,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
 
     if (!resp || resp.code != 0) {
-      throw new Error('Error while issuing the credential error = ' + resp.rawLog);
+      throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
     }
 
     // const credentialJson = Utils.ldToJsonConvertor(params.credential);
@@ -402,12 +419,24 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   // TODO:  Implement a method to update credential status of a doc.
 
   //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
-  public async verifyCredential(params: { credential: IVerifiableCredential; issuerDid: string }): Promise<object> {
-    if (!params.credential) throw new Error('Credential can not be undefined');
+  public async verifyCredential(params: {
+    credential: IVerifiableCredential;
+    issuerDid: string;
+    verificationMethodId: string;
+  }): Promise<object> {
+    if (!params.credential) throw new Error('HID-SSI-SDK:: Credential is required to verify credential');
+
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify credential');
+    }
+
+    if (!params.issuerDid) {
+      throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
+    }
 
     const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.issuerDid });
     const issuerDidDoc: Did = issuerDID as Did;
-    const publicKeyId = issuerDidDoc.assertionMethod[0];
+    const publicKeyId = params.verificationMethodId;
     const publicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
       (x) => x.id == publicKeyId
     ) as VerificationMethod;

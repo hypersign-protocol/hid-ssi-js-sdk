@@ -45,6 +45,7 @@ export interface IPresentationMethods {
     holderDid: string;
     privateKey: string;
     challenge: string;
+    verificationMethodId: string;
   }): Promise<object>;
   verifyPresentation(params: {
     signedPresentation: IVerifiablePresentation;
@@ -52,6 +53,8 @@ export interface IPresentationMethods {
     domain?: string;
     issuerDid: string;
     holderDid: string;
+    holderVerificationMethodId: string;
+    issuerVerificationMethodId: string;
   }): Promise<object>;
 }
 
@@ -105,22 +108,27 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     presentation: IVerifiablePresentation;
     holderDid?: string;
     holderDidDocSigned?: JSON;
+    verificationMethodId: string; // verificationMethodId of holder for assertion
     privateKey: string;
     challenge: string;
   }): Promise<object> {
     if (params.holderDid && params.holderDidDocSigned) {
-      throw new Error('Either holderDid or holderDidDocSigned should be provided');
+      throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
     }
     if (!params.privateKey) {
-      throw new Error('params.privateKey is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.privateKey is required for signinng a presentation');
     }
 
     if (!params.presentation) {
-      throw new Error('params.presentation is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
     }
 
     if (!params.challenge) {
-      throw new Error('params.challenge is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+    }
+
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
     }
     let resolvedDidDoc;
     if (params.holderDid) {
@@ -129,12 +137,14 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       resolvedDidDoc = {};
       resolvedDidDoc.didDocument = params.holderDidDocSigned;
     } else {
-      throw new Error('params.holderDid or params.holderDidDocSigned is required for signinng a presentation');
+      throw new Error(
+        'HID-SSI-SDK:: params.holderDid or params.holderDidDocSigned is required for signinng a presentation'
+      );
     }
     const { didDocument: signerDidDoc } = resolvedDidDoc;
 
     // TODO: take verification method from params
-    const publicKeyId = signerDidDoc['assertionMethod'][0]; // TODO: bad idea -  should not hardcode it.
+    const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
     const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
       (x) => x.id == publicKeyId
     ) as VerificationMethod;
@@ -173,17 +183,27 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     issuerDid: string;
     holderDid?: string;
     holderDidDocSigned?: JSON;
+    holderVerificationMethodId: string; // verificationMethodId of holder for authentication
+    issuerVerificationMethodId: string; // verificationMethodId of issuer for assertion
   }): Promise<object> {
     if (params.holderDid && params.holderDidDocSigned) {
-      throw new Error('Either holderDid or holderDidDocSigned should be provided');
+      throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
     }
 
     if (!params.issuerDid) {
-      throw new Error('params.issuerDid is required for verifying a presentation');
+      throw new Error('HID-SSI-SDK:: params.issuerDid is required for verifying a presentation');
     }
 
     if (!params.challenge) {
-      throw new Error('params.challenge is required for verifying a presentation');
+      throw new Error('HID-SSI-SDK:: params.challenge is required for verifying a presentation');
+    }
+
+    if (!params.holderVerificationMethodId) {
+      throw new Error('HID-SSI-SDK:: params.holderVerificationMethodId is required for verifying a presentation');
+    }
+
+    if (!params.issuerVerificationMethodId) {
+      throw new Error('HID-SSI-SDK:: params.issuerVerificationMethodId is required for verifying a presentation');
     }
 
     ///---------------------------------------
@@ -201,7 +221,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     const { didDocument: holderDID } = resolvedDidDoc;
 
     const holderDidDoc: Did = holderDID as Did;
-    const holderPublicKeyId = holderDidDoc.authentication[0];
+    const holderPublicKeyId = params.holderVerificationMethodId;
 
     const holderPublicKeyVerMethod: VerificationMethod = holderDidDoc.verificationMethod.find(
       (x) => x.id == holderPublicKeyId
@@ -242,7 +262,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.issuerDid });
 
     const issuerDidDoc: Did = issuerDID as Did;
-    const issuerPublicKeyId = issuerDidDoc.assertionMethod[0];
+    const issuerPublicKeyId = params.issuerVerificationMethodId;
 
     const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
       (x) => x.id == issuerPublicKeyId

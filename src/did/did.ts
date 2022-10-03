@@ -133,13 +133,13 @@ export default class HypersignDID implements IDID {
   }
 
   /**
-   * @param params params: { did?: string ,didDoc?: JSON }
+   * @param params params: { did?: string  }
    *
    *  if did is provided then it will resolve the did doc from the blockchain
-   *  if didDoc is provided then it will verify the did with the proof
+   *
    * @returns  Promise : {context ,didDocument, VerificationResult , didDocumentMetadata}
    */
-  public async resolve(params: { did?: string; didDoc?: JSON }): Promise<IDIDResolve> {
+  public async resolve(params: { did?: string }): Promise<IDIDResolve> {
     if (params.did) {
       const result = await this.didrpc.resolveDID(params.did);
       return {
@@ -147,27 +147,7 @@ export default class HypersignDID implements IDID {
         didDocumentMetadata: result.didDocumentMetadata,
       } as IDIDResolve;
     }
-    if (params.didDoc) {
-      const signedDidDoc: any = params.didDoc;
-      const doc = { ...signedDidDoc };
-      if (!signedDidDoc.proof) {
-        throw new Error('HID-SSI-SDK:: Error: params.didDoc is not signed');
-      }
-      const { verificationResult } = await this.verify({ doc } as IParams);
-      if (!verificationResult.verified) {
-        throw new Error('HID-SSI-SDK:: Error: params.didDoc is not verified , Invalid signature');
-      }
-      delete signedDidDoc.proof;
-      const didDoc = signedDidDoc as Did;
-
-      const results = {
-        didDocument: didDoc,
-        didDocumentMetadata: {},
-      } as IDIDResolve;
-
-      return { ...results };
-    }
-    throw new Error('HID-SSI-SDK:: Error: params.did or params.didDoc is required to resolve a did');
+    throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
   }
 
   // Update DID Document

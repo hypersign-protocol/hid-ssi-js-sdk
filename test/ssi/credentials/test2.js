@@ -6,14 +6,14 @@
 const HypersignSsiSDK = require("../../../build/src")
 const { createWallet, mnemonic, hidNodeEp, writeDataInFile } = require("../../config")
 const { privateKeyMultibase } = require('../../mock/public/keys.json')
-const { id } = require('../../mock/public/did.json');
+const issuerDidDoc = require('../../mock/public/did.json')
 const otherVc = require('../../mock/vc.json');
 const path =  require('path');
 
 
 async function test2() {
-  const issuerDid = id;
-  const subjectDid = id;
+  const issuerDid = issuerDidDoc.id;
+  const subjectDid = issuerDidDoc.id;;
 
   const offlineSigner = await createWallet(mnemonic);
   const hsSdk = new HypersignSsiSDK(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest, hidNodeEp.namespace);
@@ -170,6 +170,7 @@ async function test2() {
   const issueCread=await hsSdk.vc.issueCredential({
     credential: creadential,
     issuerDid,
+    verificationMethodId:issuerDidDoc.assertionMethod[0] ,
     privateKey: privateKeyMultibase
   })
   const filePath = path.join(__dirname, '../../mock/vc-with-schema-org.json')
@@ -178,13 +179,13 @@ async function test2() {
   console.log(JSON.stringify(issueCread, null, 2));
   
   console.log('Verify VC ==========')
-  const verifiableCreadStatus = await hsSdk.vc.verifyCredential({ credential: issueCread, issuerDid })
+  const verifiableCreadStatus = await hsSdk.vc.verifyCredential({ credential: issueCread, issuerDid ,verificationMethodId:issuerDidDoc.assertionMethod[0] })
   console.log(verifiableCreadStatus);
 
   console.log('Generate VP ==========')
   const unsignedVp = await hsSdk.vp.getPresentation({
     verifiableCredentials: [ issueCread, otherVc ], // adding two credentials to check if both credentials can be verified
-    holderDid: subjectDid
+    holderDid: subjectDid,
   })
   console.log(unsignedVp);
 
@@ -195,6 +196,7 @@ async function test2() {
     privateKey: privateKeyMultibase,
     challenge: '123',
     domain: 'example.com',
+    verificationMethodId: issuerDidDoc.assertionMethod[0]
   })
   
   console.log(JSON.stringify(SignedPresentation, null, 2));
@@ -206,7 +208,9 @@ async function test2() {
     challenge: '123',
     domain: 'example.com',
     issuerDid,
-    holderDid: subjectDid
+    holderDid: subjectDid,
+    holderVerificationMethodId: issuerDidDoc.authentication[0],
+    issuerVerificationMethodId: issuerDidDoc.assertionMethod[0]
   })
   console.log(verify);
 }
