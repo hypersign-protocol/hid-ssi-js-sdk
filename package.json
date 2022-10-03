@@ -4,7 +4,7 @@
     "description": "sdk is an implementation of proposed DID by W3C",
     "main": "build/src/index.js",
     "scripts": {
-        "test": "jest",
+        "test": "cd test/ssi && node did.js && node private-did.js && node schema.js && cd credentials && node test1.js && node test2.js", 
         "start": "node build/index.js",
         "build": "npm run lint:fix && npm run prettier && rimraf build && tsc -p .",
         "prettier": "prettier --config .prettierrc.json --write src/**/*.ts",
@@ -12,6 +12,7 @@
         "lint": "eslint . --ext .ts",
         "lint:fix": "npm run lint -- --fix",
         "prepare": "husky install"
+        
     },
     "author": "Hypersign Team",
     "license": "ISC",
