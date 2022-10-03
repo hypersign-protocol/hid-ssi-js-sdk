@@ -1,7 +1,7 @@
 const { props, writeDataInFile, createWallet, mnemonic, hidNodeEp } = require('../config')
 const HypersignSsiSDK = require('../../build/src')
-const { privateKeyMultibase } = require('../mock/keys.json')
-const { verificationMethod, id, assertionMethod } = require('../mock/did.json')
+const { privateKeyMultibase } = require('../mock/public/keys.json')
+const { verificationMethod, id, assertionMethod } = require('../mock/public/did.json')
 
 
 console.log({
@@ -81,6 +81,6 @@ createWallet(mnemonic)
         console.log(res)
         return hsSdk.schema.resolve({ schemaId: schema.id })
     }).then(res => {
-        writeDataInFile('../mock/schema.json', JSON.stringify(res))
+        writeDataInFile('../mock/public/schema.json', JSON.stringify(res))
         console.log(JSON.stringify(res, null, 2))
     })
