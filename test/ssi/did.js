@@ -7,7 +7,9 @@ let versionId;
 let verificationMethodId;
 let didDoc;
 let privateKeyMultibase;
-let offlineSigner
+let offlineSigner;
+const challenge = "1231231231";
+const domain = "www.adbv.com";
 createWallet(mnemonic)
     .then(async(offlineSigner11) => {
        offlineSigner=offlineSigner11
@@ -28,13 +30,31 @@ createWallet(mnemonic)
         const publicKeyMultibase = kp.publicKeyMultibase
         console.log(kp)
         console.log("===============GENERATE DID&DIDDoc=======================")
-        didDocString = await hsSdk.did.generate({ publicKeyMultibase });
-        console.log(didDocString)
-        writeDataInFile('../mock/did.json', didDocString)
-        didDoc = JSON.parse(didDocString);
+        return hsSdk.did.generate({ publicKeyMultibase });
+        
+    })
+    .then((res) => {
+        console.log(res)
+        didDocString =  JSON.stringify(res);
+        writeDataInFile('../mock/did.json',didDocString)
+        didDoc = res;
+        verificationMethodId = didDoc['verificationMethod'][0].id
+        console.log("===============SIGN DID=======================")
+        return hsSdk.did.signDid({ privateKey: privateKeyMultibase, challenge, domain, doc: didDoc,  verificationMethodId });
+    })    
+    .then((signedDidDoc) => {
+        const { signedDidDocument } =  signedDidDoc;
+        console.log(signedDidDocument)
+        console.log("===============VERIFY DID=======================")
+        return hsSdk.did.verify({ doc : signedDidDocument, verificationMethodId, challenge,  domain })
+    })
+    .then((result) => {
+        console.log(result.verificationResult)
+    })
+    .then(() => {
         verificationMethodId = didDoc['verificationMethod'][0].id
         console.log("===============REGISTER DID=======================")
-        return hsSdk.did.register({ didDocString, privateKeyMultibase, verificationMethodId })
+        return hsSdk.did.register({ didDocument: didDoc , privateKeyMultibase, verificationMethodId })
     })
     .then((resTx) => {
         console.log(resTx)
@@ -52,9 +72,9 @@ createWallet(mnemonic)
             "type": "LinkedDomains",
             "serviceEndpoint": "https://example.com/vc"
         })
-        const didDocString = JSON.stringify(didDoc);
+        
         console.log("===============DID Update=======================")
-        return hsSdk.did.update({ didDocString, privateKeyMultibase, verificationMethodId, versionId })
+        return hsSdk.did.update({  didDocument: didDoc, privateKeyMultibase, verificationMethodId, versionId })
     })
     .then((resTx) => {
         console.log(resTx)
@@ -68,7 +88,7 @@ createWallet(mnemonic)
         didDocString = JSON.stringify(didDocument)
         writeDataInFile('../mock/did.json', didDocString)
         versionId = didDocumentMetadata.versionId;
-        return ""//hsSdk.did.deactivate({ didDocString, privateKeyMultibase, verificationMethodId, versionId })
+        return hsSdk.did.deactivate({  didDocument: didDoc, privateKeyMultibase, verificationMethodId, versionId })
     })
     .then((resTx) => {
         console.log(resTx)

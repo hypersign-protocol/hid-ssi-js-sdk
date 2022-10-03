@@ -97,6 +97,31 @@ export default class Utils {
   }
 
 
+  public static jsonToLdConvertor(json: any) {
+    const ld = {};
+    for (const key in json) {
+      if (key === "context") {
+        ld['@'+key] = json[key];
+      } else {
+        ld[key] = json[key]
+      }
+    }
+    return ld;
+  }
+
+  public static ldToJsonConvertor(ld: any) {
+    const json = {};
+    for (const key in ld) {
+      if (key === "@context") {
+        json['context'] = ld[key];
+      } else {
+        json[key] = ld[key]
+      }
+    }
+    return json;
+  }
+  
+
   // TODO: need to find a way to make it dynamic
   public static getFee(){
     return "auto";

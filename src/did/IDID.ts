@@ -9,7 +9,6 @@ export interface IPublicKey {
 export interface IController {
   '@context': string;
   id: string;
-  publicKey: Array<IPublicKey>;
   authentication: Array<string>;
 }
 
@@ -21,25 +20,26 @@ export interface IParams {
   domain: string;
   controller: IController;
   did: string;
+  verificationMethodId: string;
+}
+
+export interface IDid extends IDidProto {
+  '@context': Array<any>;
 }
 
 export interface IDID {
   generateKeys(params: { seed: string }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }>;
-  generate(params: { publicKeyMultibase: string }): Promise<string>;
-  register(params: {
-    didDocString: string;
-    privateKeyMultibase: string;
-    verificationMethodId: string;
-  }): Promise<object>;
+  generate(params: { publicKeyMultibase: string }): Promise<object>;
+  register(params: { didDocument: object; privateKeyMultibase: string; verificationMethodId: string }): Promise<object>;
   resolve(params: { did: string }): Promise<object>;
   update(params: {
-    didDocString: string;
+    didDocument: object;
     privateKeyMultibase: string;
     verificationMethodId: string;
     versionId: string;
   }): Promise<object>;
   deactivate(params: {
-    didDocString: string;
+    didDocument: object;
     privateKeyMultibase: string;
     verificationMethodId: string;
     versionId: string;
@@ -51,8 +51,7 @@ export interface IDID {
 }
 
 export interface IDIDResolve {
-  context: string;
-  didDocument: IDidProto;
+  didDocument: object;
   didDocumentMetadata: Metadata;
 }
 
