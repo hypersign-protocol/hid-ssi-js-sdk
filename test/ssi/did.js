@@ -25,7 +25,7 @@ createWallet(mnemonic)
         const seed=Bip39.decode(mnemonic)
         const kp = await hsSdk.did.generateKeys({seed});
         console.log("kp", kp);
-        writeDataInFile('../mock/keys.json', JSON.stringify(kp))
+        writeDataInFile('../mock/public/keys.json', JSON.stringify(kp))
         privateKeyMultibase = kp.privateKeyMultibase
         const publicKeyMultibase = kp.publicKeyMultibase
         console.log(kp)
@@ -36,7 +36,7 @@ createWallet(mnemonic)
     .then((res) => {
         console.log(res)
         didDocString =  JSON.stringify(res);
-        writeDataInFile('../mock/did.json',didDocString)
+        writeDataInFile('../mock/public/did.json',didDocString)
         didDoc = res;
         verificationMethodId = didDoc['verificationMethod'][0].id
         console.log("===============SIGN DID=======================")
@@ -45,6 +45,7 @@ createWallet(mnemonic)
     .then((signedDidDoc) => {
         const { signedDidDocument } =  signedDidDoc;
         console.log(signedDidDocument)
+        writeDataInFile('../mock/public/signed-did.json',JSON.stringify(signedDidDocument))
         console.log("===============VERIFY DID=======================")
         return hsSdk.did.verify({ doc : signedDidDocument, verificationMethodId, challenge,  domain })
     })
@@ -72,7 +73,7 @@ createWallet(mnemonic)
             "type": "LinkedDomains",
             "serviceEndpoint": "https://example.com/vc"
         })
-        
+
         console.log("===============DID Update=======================")
         return hsSdk.did.update({  didDocument: didDoc, privateKeyMultibase, verificationMethodId, versionId })
     })
@@ -86,9 +87,9 @@ createWallet(mnemonic)
         console.log("===============DID Deactivate=======================")
         const { didDocumentMetadata, didDocument } = res;
         didDocString = JSON.stringify(didDocument)
-        writeDataInFile('../mock/did.json', didDocString)
+        writeDataInFile('../mock/public/did.json', didDocString)
         versionId = didDocumentMetadata.versionId;
-        return hsSdk.did.deactivate({  didDocument: didDoc, privateKeyMultibase, verificationMethodId, versionId })
+        return ""// hsSdk.did.deactivate({  didDocument: didDoc, privateKeyMultibase, verificationMethodId, versionId })
     })
     .then((resTx) => {
         console.log(resTx)
