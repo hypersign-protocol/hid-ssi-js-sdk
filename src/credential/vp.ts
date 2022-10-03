@@ -126,12 +126,14 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     if (params.holderDid) {
       resolvedDidDoc = await this.hsDid.resolve({ did: params.holderDid });
     } else if (params.holderDidDocSigned) {
-      const didDocSigned = params.holderDidDocSigned as JSON;
-      resolvedDidDoc = await this.hsDid.resolve({ didDoc: didDocSigned });
+      resolvedDidDoc = {};
+      resolvedDidDoc.didDocument = params.holderDidDocSigned;
     } else {
       throw new Error('params.holderDid or params.holderDidDocSigned is required for signinng a presentation');
     }
     const { didDocument: signerDidDoc } = resolvedDidDoc;
+
+    // TODO: take verification method from params
     const publicKeyId = signerDidDoc['assertionMethod'][0]; // TODO: bad idea -  should not hardcode it.
     const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
       (x) => x.id == publicKeyId
@@ -180,10 +182,6 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       throw new Error('params.issuerDid is required for verifying a presentation');
     }
 
-    if (!params.holderDid) {
-      throw new Error('params.holderDid is required for verifying a presentation');
-    }
-
     if (!params.challenge) {
       throw new Error('params.challenge is required for verifying a presentation');
     }
@@ -194,7 +192,8 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     if (params.holderDid) {
       resolvedDidDoc = await this.hsDid.resolve({ did: params.holderDid });
     } else if (params.holderDidDocSigned) {
-      resolvedDidDoc = await this.hsDid.resolve({ didDoc: params.holderDidDocSigned });
+      resolvedDidDoc = {};
+      resolvedDidDoc.didDocument = params.holderDidDocSigned;
     } else {
       throw new Error('Either holderDid or holderDidDocSigned should be provided');
     }

@@ -5,8 +5,8 @@
 
 const HypersignSsiSDK = require("../../../build/src")
 const { createWallet, mnemonic, hidNodeEp, writeDataInFile } = require("../../config")
-const { privateKeyMultibase } = require('../../mock/keys.json')
-const { id } = require('../../mock/did.json');
+const { privateKeyMultibase } = require('../../mock/public/keys.json')
+const { id } = require('../../mock/public/did.json');
 const otherVc = require('../../mock/vc.json');
 const path =  require('path');
 

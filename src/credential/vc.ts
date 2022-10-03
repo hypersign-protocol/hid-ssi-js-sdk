@@ -200,22 +200,16 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       throw new Error('HID-SSI-SDK:: Error: Both subjectDid and subjectDidDoc cannot be passed');
     }
 
-    try {
-      schemaDoc = await this.hsSchema.resolve({ schemaId: params.schemaId });
-    } catch (e) {
-      throw new Error('HID-SSI-SDK:: Error: Could not resolve the schema from schemaId = ' + params.schemaId);
-    }
-    
     const issuerDid = params.issuerDid;
     const subjectDid = params.subjectDid;
     let resolvedsubjectDidDoc;
     const { didDocument: issuerDidDoc } = await this.hsDid.resolve({ did: issuerDid });
     //
     if (params.subjectDid) {
-      resolvedsubjectDidDoc = await this.hsDid.resolve({ did: subjectDid });
+      resolvedsubjectDidDoc = await this.hsDid.resolve({ did: params.subjectDid });
     } else if (params.subjectDidDocSigned) {
-      const subjectDidDocSigned = params.subjectDidDocSigned as JSON;
-      resolvedsubjectDidDoc = await this.hsDid.resolve({ didDoc: subjectDidDocSigned });
+      resolvedsubjectDidDoc = {};
+      resolvedsubjectDidDoc.didDocument = params.subjectDidDocSigned;
     } else {
       throw new Error('HID-SSI-SDK:: Error: Could not resolve the subjectDid or subjectDidDoc');
     }
@@ -235,6 +229,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         params.schemaContext.forEach((x) => {
           context.push(x);
         });
+
         const issuerDid = params.issuerDid;
         const subjectDid = params.subjectDid;
         const expirationDate = params.expirationDate;
@@ -253,7 +248,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         vc.issuanceDate = this.dateNow(new Date().toISOString());
         vc.expirationDate = this.dateNow(expirationDate);
         vc.credentialSubject = credentialSubject;
-        vc.credentialSubject['id'] = subjectDid;
+        vc.credentialSubject['id'] = subjectDid && subjectDid != undefined ? subjectDid : subjectDidDoc.id;
 
         // TODO: confusion here is, what would be the status of this credential at the time of its creation?
         // If this properpty is present , then checkStatus() must be passed at the time of verification of the credential
@@ -302,7 +297,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     vc.credentialSubject = {
       ...this.getCredentialSubject(schemaDoc.schema as SchemaProperty, params.fields),
     };
-    vc.credentialSubject['id'] = subjectDid;
+    vc.credentialSubject['id'] = subjectDid && subjectDid != undefined ? subjectDid : subjectDidDoc.id;
     vc.credentialSchema = {
       id: schemaDoc.id,
       type: this.credentialSchema.type,
@@ -327,6 +322,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
     if (!signerDidDoc) throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
 
+    // TODO: take verification method from params
     const publicKeyId = signerDidDoc['assertionMethod'][0]; // TODO: bad idea -  should not hardcode it.
     const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
       (x) => x.id == publicKeyId
@@ -393,6 +389,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       throw new Error('Error while issuing the credential error = ' + resp.rawLog);
     }
 
+    // const credentialJson = Utils.ldToJsonConvertor(params.credential);
+    //console.log(credentialJson);
     const signedVC = await vc.issue({
       credential: params.credential,
       suite,

@@ -1,13 +1,16 @@
 /**
  * - Testing create, sign, verify VC using custom schema
  * - Testing create, sign, verify VP
+ * - Testing of private and public did 
  */
 
 const HypersignSsiSDK = require('../../../build/src')
 const { createWallet, mnemonic, hidNodeEp, writeDataInFile } = require('../../config')
-const { id } = require('../../mock/did.json')
-const { id: schemaId } = require('../../mock/schema.json')
-const { privateKeyMultibase } = require('../../mock/keys.json')
+const { id } = require('../../mock/public/did.json')
+const { id: schemaId } = require('../../mock/public/schema.json')
+const { privateKeyMultibase } = require('../../mock/public/keys.json')
+
+const holderSignedDIDDoc = require('../../mock/private/signed-did.json')
 
 
 let hsSdk;
@@ -16,7 +19,8 @@ let signedVC;
 let unsignedVp;
 let signedVP;
 const challenge = "12312301231231jnj12n3123123s"
-const subjectDid = id
+const subjectDid = holderSignedDIDDoc.id
+console.log(subjectDid)
 const issuerDid = id;
 const privateKey = privateKeyMultibase;
 
@@ -35,7 +39,7 @@ createWallet(mnemonic)
         console.log('================Genenrate Verifiable Credential================')
         return hsSdk.vc.getCredential({
             schemaId,
-            subjectDid,
+            subjectDidDocSigned: holderSignedDIDDoc,
             issuerDid,
             expirationDate,
             fields
@@ -44,7 +48,7 @@ createWallet(mnemonic)
     .then((vc) => {
         console.log(JSON.stringify(vc, null, 2))
         unsignedVc = vc;
-        console.log('================Sign Verifiable Credential================')
+        console.log('================Issue Verifiable Credential================')
         return hsSdk.vc.issueCredential({
             credential: vc,
             issuerDid,
@@ -76,7 +80,7 @@ createWallet(mnemonic)
         console.log('================Sign Verifiable Presenatation================')
         return hsSdk.vp.signPresentation({
             presentation: unsignedVp,
-            holderDid: subjectDid,
+            holderDidDocSigned: holderSignedDIDDoc,
             privateKey,
             challenge
         })
@@ -91,7 +95,7 @@ createWallet(mnemonic)
             challenge,
             domain: "https://localhos:20202",
             issuerDid,
-            holderDid: subjectDid,
+            holderDidDocSigned: holderSignedDIDDoc,
         })
     })
     .then(result => {
