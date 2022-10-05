@@ -102,7 +102,7 @@ export default class HypersignDID implements IDID {
       publicKey: params.publicKeyMultibase,
     });
 
-    const methodSpecificId = await Utils.getUUID();
+    const methodSpecificId = publicKeyMultibase1;
     const did = this.getId(methodSpecificId);
     const newDid = new DIDDocument(publicKeyMultibase1, did) as IDid;
     return Utils.jsonToLdConvertor({ ...newDid });
