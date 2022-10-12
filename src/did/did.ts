@@ -325,7 +325,7 @@ export default class HypersignDID implements IDID {
       const suite = new Ed25519Signature2020({
         key: keyPair,
       });
-      suite.date = new Date().toISOString();
+      suite.date = new Date(new Date().getTime() - 100000).toISOString();
 
       const controller: IController = {
         '@context': constant.DID.CONTROLLER_CONTEXT,
