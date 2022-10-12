@@ -425,7 +425,7 @@ var HypersignDID = /** @class */ (function () {
                         suite = new ed25519_signature_2020_1.Ed25519Signature2020({
                             key: keyPair,
                         });
-                        suite.date = new Date().toISOString();
+                        suite.date = new Date(new Date().getTime() - 100000).toISOString();
                         controller = {
                             '@context': constant.DID.CONTROLLER_CONTEXT,
                             id: publicKeyId,

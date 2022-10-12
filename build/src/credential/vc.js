@@ -279,7 +279,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                             vc_1.type.push(x);
                         });
                         vc_1.issuer = issuerDid_1;
-                        vc_1.issuanceDate = this.dateNow(new Date().toISOString());
+                        vc_1.issuanceDate = this.dateNow(new Date(new Date().getTime() - 100000).toISOString());
                         vc_1.expirationDate = this.dateNow(expirationDate);
                         vc_1.credentialSubject = credentialSubject;
                         vc_1.credentialSubject['id'] = subjectDid_1 && subjectDid_1 != undefined ? subjectDid_1 : subjectDidDoc.id;

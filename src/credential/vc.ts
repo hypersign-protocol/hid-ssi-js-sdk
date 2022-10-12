@@ -245,7 +245,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         });
 
         vc.issuer = issuerDid;
-        vc.issuanceDate = this.dateNow(new Date().toISOString());
+        vc.issuanceDate = this.dateNow(new Date(new Date().getTime() - 100000).toISOString());
         vc.expirationDate = this.dateNow(expirationDate);
         vc.credentialSubject = credentialSubject;
         vc.credentialSubject['id'] = subjectDid && subjectDid != undefined ? subjectDid : subjectDidDoc.id;

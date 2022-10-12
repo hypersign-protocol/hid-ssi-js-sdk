@@ -61,7 +61,7 @@ export default class HyperSignSchema implements SchemaDocument {
     this.id = await this.getSchemaId();
     this.name = params.name;
     this.author = params.author;
-    this.authored = new Date(new Date().getTime() - 10000).toISOString().slice(0, -5) + 'Z';
+    this.authored = new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z';
     this.schema = {
       schema: constants.SCHEMA.SCHEMA_JSON,
       description: params.description ? params.description : '',
