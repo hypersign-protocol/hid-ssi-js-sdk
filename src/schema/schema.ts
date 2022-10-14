@@ -1,126 +1,143 @@
-import { ISchema, ISchemaTemplateSchema, ISchemaTemplate } from "./ISchema";
-import { v4 as uuidv4 } from "uuid";
-import * as constant from "../constants";
-import Utils from "../utils";
-import axios from "axios";
-import IOptions from "../IOptions";
+import { Schema, SchemaDocument, SchemaProof, SchemaProperty } from '../generated/ssi/schema';
+import { v4 as uuidv4 } from 'uuid';
+import { SchemaRpc } from './schemaRPC';
+import * as constants from '../constants';
+import { ISchemaFields, ISchemaMethods } from './ISchema';
+import Utils from '../utils';
+const ed25519 = require('@stablelib/ed25519');
 
-const SC_PREFIX = "sch_";
-const SCHEMA_URL = "https://json-schema.org/draft-07/schema#";
-const W3_SCHEMA_JSON_URL =
-  "https://w3c-ccg.github.io/vc-json-schemas/schema/1.0/schema.json";
-
-class SchemaTemplateSchema implements ISchemaTemplateSchema {
-  $schema: string;
-  description: string;
+export default class HyperSignSchema implements SchemaDocument {
   type: string;
-  properties: any;
-  required: Array<string>;
-  additionalProperties: boolean;
-  constructor({
-    properties,
-    additionalProperties,
-    description,
-  }: ISchemaTemplateSchema) {
-    this.$schema = SCHEMA_URL;
-    this.description = description;
-    this.type = "object";
-    this.properties = {};
-    this.required = Object.keys(properties); // TODO: right now all requried... later we can change this.
-    this.additionalProperties = additionalProperties as boolean;
-    this.required.forEach((key) => {
-      this.properties[`${key}`] = {
-        type: typeof properties[key] ? typeof properties[key] : "string",
-      };
-    });
-  }
+  modelVersion: string;
+  id: string;
+  name: string;
+  author: string;
+  authored: string;
+  schema: SchemaProperty;
+  schemaRpc: SchemaRpc;
+  namespace: string;
 
-  get(): ISchemaTemplateSchema {
-    return this;
-  }
-}
-
-export interface IScheme {
-  schemaUrl: string;
-  generateSchema({
-    name,
-    author,
-    description,
-    properties,
-  }: ISchema): Promise<ISchemaTemplate>;
-  registerSchema(schema: ISchemaTemplate): Promise<any>;
-  getSchema(options: {schemaId?: string, author?: string}): Promise<any>;
-}
-
-export default class Schema implements IScheme {
-  private utils: Utils;
-  schemaUrl: string;
-  constructor(options: IOptions) {
-    this.utils = new Utils({ nodeUrl: options.nodeUrl });
-    this.schemaUrl = this.utils.nodeurl + constant.HYPERSIGN_NETWORK_SCHEMA_EP;
-  }
-
-  public async generateSchema({
-    name,
-    author,
-    description,
-    properties,
-  }: ISchema): Promise<ISchemaTemplate> {
-    let newSchema: ISchemaTemplate = {} as ISchemaTemplate;
-
-    const didDoc = await this.utils.resolve(author);
-    if (!didDoc) throw new Error("Could not resolve author did");
-
-    newSchema.type = W3_SCHEMA_JSON_URL;
-    newSchema.modelVersion = "v1.0";
-    newSchema.id = SC_PREFIX + uuidv4();
-    newSchema.name = name;
-    newSchema.author = author;
-    newSchema.authored = new Date().toString();
-    newSchema.schema = new SchemaTemplateSchema({
-      properties,
+  constructor(namespace?: string) {
+    this.schemaRpc = new SchemaRpc();
+    this.namespace = namespace && namespace != '' ? namespace : '';
+    (this.type = constants.SCHEMA.SCHEMA_TYPE),
+      (this.modelVersion = '1.0'),
+      (this.id = ''),
+      (this.name = ''),
+      (this.author = ''),
+      (this.authored = '');
+    this.schema = {
+      schema: '',
+      description: '',
+      type: '',
+      properties: '',
+      required: [],
       additionalProperties: false,
-      description,
-    }).get();
-    return newSchema;
+    };
   }
 
-  public async registerSchema(schema: ISchemaTemplate): Promise<any> {
-    try {
-      const response = await axios.post(this.schemaUrl, schema);
-      return response.data;
-    } catch (e) {
-      const { response } = e;
-      return response.data;
+  // Ref:
+  private async getSchemaId(): Promise<string> {
+    const b = await Utils.getUUID();
+    // ID Structure ->  sch:<method>:<namespace>:<method-specific-id>:<version>
+    let id;
+    if (this.namespace && this.namespace != '') {
+      id = `${constants.SCHEMA.SCHEME}:${constants.SCHEMA.METHOD}:${this.namespace}:${b}:${this.modelVersion}`;
+    } else {
+      id = `${constants.SCHEMA.SCHEME}:${constants.SCHEMA.METHOD}:${b}:${this.modelVersion}`;
     }
+    return id;
   }
 
-  public async getSchema(options: {schemaId?: string, author?: string}): Promise<any> {
-    try {
-      let get_didUrl = "";
-      const { author, schemaId } = options;
+  public async getSchema(params: {
+    name: string;
+    description?: string;
+    author: string;
+    fields?: Array<ISchemaFields>;
+    additionalProperties: boolean;
+  }): Promise<SchemaDocument> {
+    if (!params.author) throw new Error('HID-SSI-SDK:: Error: Author must be passed');
 
-      if(author != undefined && schemaId != undefined){ // 1,1
-        get_didUrl = this.schemaUrl + schemaId + "?author=" + author;
-      }
+    this.id = await this.getSchemaId();
+    this.name = params.name;
+    this.author = params.author;
+    this.authored = new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z';
+    this.schema = {
+      schema: constants.SCHEMA.SCHEMA_JSON,
+      description: params.description ? params.description : '',
+      type: 'object',
+      properties: '',
+      required: [],
+      additionalProperties: params.additionalProperties,
+    };
 
-      else if(author == undefined && schemaId != undefined){ // 1,0
-        get_didUrl = this.schemaUrl + schemaId;
-      }
+    const t = {};
+    if (params.fields && params.fields.length > 0) {
+      params.fields.forEach((prop) => {
+        const schemaPropsObj: {
+          propName: string;
+          val: { type: string; format?: string };
+        } = {} as { propName: string; val: { type: string; format?: string } };
+        schemaPropsObj.propName = prop.name;
+        schemaPropsObj.val = {} as { type: string; format?: string };
+        schemaPropsObj.val.type = prop.type;
 
-      else if(author != undefined && schemaId == undefined){ // 0,1
-        get_didUrl = this.schemaUrl + "?author=" + author;
-      }
+        if (prop.format) schemaPropsObj.val.format = prop.format;
 
-      else if(author == undefined && schemaId == undefined){ // 0,0
-        get_didUrl = this.schemaUrl;
-      }
-      
-      const response = await axios.get(get_didUrl);
-      return response.data;
-    } catch (e) {
-      const { response } = e;
-      return response.data;
+        t[schemaPropsObj.propName] = schemaPropsObj.val;
+
+        if (prop.isRequired) {
+          this.schema.required.push(prop.name);
+        }
+      });
+
+      this.schema.properties = JSON.stringify(t);
     }
+
+    return {
+      type: this.type,
+      modelVersion: this.modelVersion,
+      id: this.id,
+      name: this.name,
+      author: this.author,
+      authored: this.authored,
+      schema: this.schema,
+    };
+  }
+
+  public async signSchema(params: { privateKey: string; schema: Schema }): Promise<string> {
+    if (!params.privateKey) throw new Error('HID-SSI-SDK:: Error: PrivateKey must be passed');
+    if (!params.schema) throw new Error('HID-SSI-SDK:: Error: Schema must be passed');
+
+    const { privateKeyMultibase: privateKeyMultibaseConverted } =
+      Utils.convertEd25519verificationkey2020toStableLibKeysInto({
+        privKey: params.privateKey,
+      });
+
+    const dataBytes = (await Schema.encode(params.schema)).finish();
+    const signed = ed25519.sign(privateKeyMultibaseConverted, dataBytes);
+    return Buffer.from(signed).toString('base64');
+  }
+
+  public async registerSchema(params: { schema: Schema; proof: SchemaProof }): Promise<object> {
+    if (!params.schema) throw new Error('HID-SSI-SDK:: Error: Schema must be passed');
+    if (!params.proof) throw new Error('HID-SSI-SDK:: Error: Proof must be passed');
+    if (!params.proof.created) throw new Error('HID-SSI-SDK:: Error: Proof must Contain created');
+    if (!params.proof.proofPurpose) throw new Error('HID-SSI-SDK:: Error: Proof must Contain proofPurpose');
+    if (!params.proof.proofValue) throw new Error('HID-SSI-SDK:: Error: Proof must Contain proofValue');
+    if (!params.proof.type) throw new Error('HID-SSI-SDK:: Error: Proof must Contain type');
+    if (!params.proof.verificationMethod) throw new Error('HID-SSI-SDK:: Error: Proof must Contain verificationMethod');
+
+    return this.schemaRpc.createSchema(params.schema, params.proof);
+  }
+
+  public async resolve(params: { schemaId: string }): Promise<Schema> {
+    if (!params.schemaId) throw new Error('HID-SSI-SDK:: Error: SchemaId must be passed');
+    const schemaArr: Array<object> = await this.schemaRpc.resolveSchema(params.schemaId);
+    if (!schemaArr || schemaArr.length < 0) {
+      throw new Error('HID-SSI-SDK:: Error: No schema found, id = ' + params.schemaId);
+    }
+    const schema = schemaArr[0] as Schema;
+    return schema;
   }
 }
