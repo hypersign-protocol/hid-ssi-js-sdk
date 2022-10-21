@@ -23,6 +23,8 @@ Object.freeze(HIDRpcEnums);
 var CredentialStatusEnums;
 (function (CredentialStatusEnums) {
     CredentialStatusEnums["LIVE"] = "Live";
+    CredentialStatusEnums["REVOKED"] = "Revoked";
+    CredentialStatusEnums["SUSPENDED"] = "Suspended";
 })(CredentialStatusEnums = exports.CredentialStatusEnums || (exports.CredentialStatusEnums = {}));
 exports.DID = {
     CONTROLLER_CONTEXT: "https://w3id.org/security/v2",

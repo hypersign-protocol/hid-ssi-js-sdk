@@ -75,7 +75,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     if (date) {
       return new Date(date).toISOString().slice(0, -5) + 'Z';
     } else {
-      return new Date().toISOString().slice(0, -5) + 'Z';
+      return new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z';
     }
   }
 
@@ -404,6 +404,111 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     if (!resp || resp.code != 0) {
       throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+    }
+
+    // const credentialJson = Utils.ldToJsonConvertor(params.credential);
+    //console.log(credentialJson);
+    const signedVC = await vc.issue({
+      credential: params.credential,
+      suite,
+      documentLoader,
+    });
+    return signedVC;
+  }
+  public async revokeCredential(params: {
+    credential: IVerifiableCredential;
+    issuerDid: string;
+    verificationMethodId: string; // vermethod of issuer for assestion
+    privateKey: string;
+    status: string;
+  }): Promise<object> {
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required revoke credential');
+    }
+
+    if (!params.credential) {
+      throw new Error('HID-SSI-SDK:: Error: params.credential is required to revoke credential');
+    }
+
+    if (!params.privateKey) {
+      throw new Error('HID-SSI-SDK:: Error: params.privateKey is required to revoke credential');
+    }
+
+    if (!params.issuerDid) {
+      throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to revoke credential');
+    }
+    if (!params.status) {
+      throw new Error('HID-SSI-SDK:: Error: params.status is required to revoke credential');
+    }
+
+    const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
+    if (!signerDidDoc) throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
+
+    // TODO: take verification method from params
+    const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
+    const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
+      (x) => x.id == publicKeyId
+    ) as VerificationMethod;
+
+    const convertedKeyPair = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
+      publicKey: publicKeyVerMethod.publicKeyMultibase,
+    });
+
+    publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
+
+    const keyPair = await Ed25519VerificationKey2020.from({
+      privateKeyMultibase: params.privateKey,
+      ...publicKeyVerMethod,
+    });
+
+    const suite = new Ed25519Signature2020({
+      verificationMethod: publicKeyId,
+      key: keyPair,
+    });
+
+    /// Before we issue the credential the credential status has to be added
+    /// for that we will call RegisterCredentialStatus RPC
+    //  Let us generate credentialHash first
+    const credentialHash = this.sha256Hash(JSON.stringify(params.credential));
+    params.status = params.status.toUpperCase();
+    const credentialStatus: CredentialStatus = {
+      claim: {
+        id: params.credential.id,
+        currentStatus: VC.CRED_STATUS_TYPES[params.status],
+        statusReason: 'Credential is inactive',
+      },
+      issuer: params.credential.issuer,
+      issuanceDate: params.credential.issuanceDate,
+      expirationDate: params.credential.expirationDate,
+      credentialHash,
+    };
+
+    const proofValue = await this.sign({
+      message: JSON.stringify(credentialStatus),
+      privateKeyMultibase: params.privateKey,
+    });
+
+    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credential.issuer });
+    const issuerDidDoc: Did = issuerDID as Did;
+    const issuerPublicKeyId = params.verificationMethodId;
+    const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+      (x) => x.id == issuerPublicKeyId
+    ) as VerificationMethod;
+
+    const proof: CredentialProof = {
+      type: VC.VERIFICATION_METHOD_TYPE,
+      created: params.credential.issuanceDate,
+      updated: this.dateNow(),
+      verificationMethod: issuerPublicKeyVerMethod.id,
+      proofValue,
+      proofPurpose: VC.PROOF_PURPOSE,
+    };
+
+    /// RegisterCRedeRPC
+    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
+
+    if (!resp || resp.code != 0) {
+      throw new Error('HID-SSI-SDK:: Error while revoking the credential error = ' + resp.rawLog);
     }
 
     // const credentialJson = Utils.ldToJsonConvertor(params.credential);

@@ -24,7 +24,9 @@ export enum HIDRpcEnums {
 Object.freeze(HIDRpcEnums)
 
 export enum CredentialStatusEnums {
-    LIVE = "Live"
+    LIVE = "Live",
+    REVOKED="Revoked",
+    SUSPENDED="Suspended"
 }
 
 export const DID = {

@@ -159,7 +159,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             return new Date(date).toISOString().slice(0, -5) + 'Z';
         }
         else {
-            return new Date().toISOString().slice(0, -5) + 'Z';
+            return new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z';
         }
     };
     HypersignVerifiableCredential.prototype.sha256Hash = function (message) {
@@ -420,6 +420,96 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         resp = _a.sent();
                         if (!resp || resp.code != 0) {
                             throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+                        }
+                        return [4 /*yield*/, vc_js_1.default.issue({
+                                credential: params.credential,
+                                suite: suite,
+                                documentLoader: jsonld_1.documentLoader,
+                            })];
+                    case 6:
+                        signedVC = _a.sent();
+                        return [2 /*return*/, signedVC];
+                }
+            });
+        });
+    };
+    HypersignVerifiableCredential.prototype.revokeCredential = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, resp, signedVC;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!params.verificationMethodId) {
+                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required revoke credential');
+                        }
+                        if (!params.credential) {
+                            throw new Error('HID-SSI-SDK:: Error: params.credential is required to revoke credential');
+                        }
+                        if (!params.privateKey) {
+                            throw new Error('HID-SSI-SDK:: Error: params.privateKey is required to revoke credential');
+                        }
+                        if (!params.issuerDid) {
+                            throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to revoke credential');
+                        }
+                        if (!params.status) {
+                            throw new Error('HID-SSI-SDK:: Error: params.status is required to revoke credential');
+                        }
+                        return [4 /*yield*/, this.hsDid.resolve({ did: params.issuerDid })];
+                    case 1:
+                        signerDidDoc = (_a.sent()).didDocument;
+                        if (!signerDidDoc)
+                            throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
+                        publicKeyId = params.verificationMethodId;
+                        publicKeyVerMethod = signerDidDoc['verificationMethod'].find(function (x) { return x.id == publicKeyId; });
+                        convertedKeyPair = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
+                            publicKey: publicKeyVerMethod.publicKeyMultibase,
+                        });
+                        publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
+                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: params.privateKey }, publicKeyVerMethod))];
+                    case 2:
+                        keyPair = _a.sent();
+                        suite = new ed25519_signature_2020_1.Ed25519Signature2020({
+                            verificationMethod: publicKeyId,
+                            key: keyPair,
+                        });
+                        credentialHash = this.sha256Hash(JSON.stringify(params.credential));
+                        params.status = params.status.toUpperCase();
+                        credentialStatus = {
+                            claim: {
+                                id: params.credential.id,
+                                currentStatus: constants_1.VC.CRED_STATUS_TYPES[params.status],
+                                statusReason: 'Credential is inactive',
+                            },
+                            issuer: params.credential.issuer,
+                            issuanceDate: params.credential.issuanceDate,
+                            expirationDate: params.credential.expirationDate,
+                            credentialHash: credentialHash,
+                        };
+                        return [4 /*yield*/, this.sign({
+                                message: JSON.stringify(credentialStatus),
+                                privateKeyMultibase: params.privateKey,
+                            })];
+                    case 3:
+                        proofValue = _a.sent();
+                        return [4 /*yield*/, this.hsDid.resolve({ did: params.credential.issuer })];
+                    case 4:
+                        issuerDID = (_a.sent()).didDocument;
+                        issuerDidDoc = issuerDID;
+                        issuerPublicKeyId = params.verificationMethodId;
+                        issuerPublicKeyVerMethod = issuerDidDoc.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
+                        proof = {
+                            type: constants_1.VC.VERIFICATION_METHOD_TYPE,
+                            created: params.credential.issuanceDate,
+                            updated: this.dateNow(),
+                            verificationMethod: issuerPublicKeyVerMethod.id,
+                            proofValue: proofValue,
+                            proofPurpose: constants_1.VC.PROOF_PURPOSE,
+                        };
+                        return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, proof)];
+                    case 5:
+                        resp = _a.sent();
+                        if (!resp || resp.code != 0) {
+                            throw new Error('HID-SSI-SDK:: Error while revoking the credential error = ' + resp.rawLog);
                         }
                         return [4 /*yield*/, vc_js_1.default.issue({
                                 credential: params.credential,
