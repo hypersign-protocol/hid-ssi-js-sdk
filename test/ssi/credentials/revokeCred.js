@@ -79,7 +79,7 @@ createWallet(mnemonic)
         })
     })
     .then((result) => {
-        console.log(JSON.stringify(result), null, 2)
+        console.log(JSON.stringify(result, null, 2))
         writeDataInFile('../../mock/After-revoke-vc.json', JSON.stringify(result))
         signedVC = result;
         console.log('================Verify Verifiable Credential================')
