@@ -433,7 +433,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             });
         });
     };
-    HypersignVerifiableCredential.prototype.revokeCredential = function (params) {
+    HypersignVerifiableCredential.prototype.updateCredentialStatus = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, resp, signedVC;
             return __generator(this, function (_a) {

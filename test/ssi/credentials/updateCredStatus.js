@@ -70,7 +70,7 @@ createWallet(mnemonic)
     .then(() => {
         console.log('================Revoke Verifiable Presentation================')
 
-        return hsSdk.vc.revokeCredential({
+        return hsSdk.vc.updateCredentialStatus({
             credential: signedVC,
             issuerDid,
             privateKey,
