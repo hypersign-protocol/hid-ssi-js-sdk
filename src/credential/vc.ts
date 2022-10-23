@@ -415,7 +415,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     });
     return signedVC;
   }
-  public async revokeCredential(params: {
+  public async updateCredentialStatus(params: {
     credential: IVerifiableCredential;
     issuerDid: string;
     verificationMethodId: string; // vermethod of issuer for assestion
