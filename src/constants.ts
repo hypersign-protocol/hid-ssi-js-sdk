@@ -28,6 +28,14 @@ export enum CredentialStatusEnums {
     REVOKED="Revoked",
     SUSPENDED="Suspended"
 }
+export enum CredentialStatusReasonEnums {
+    LIVE = "Credential is live",
+    REVOKED="Credential is revoked",
+    SUSPENDED="Credential is suspended"
+}
+
+
+
 
 export const DID = {
     CONTROLLER_CONTEXT: "https://w3id.org/security/v2",
@@ -51,7 +59,8 @@ export const VC = {
     CREDENTAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1",
     PROOF_PURPOSE: "assertion",
     VERIFICATION_METHOD_TYPE: "Ed25519VerificationKey2020",
-    CRED_STATUS_TYPES: CredentialStatusEnums 
+    CRED_STATUS_TYPES: CredentialStatusEnums ,
+    CRED_STATUS_REASON_TYPES: CredentialStatusReasonEnums
 }
 Object.freeze(VC)
 

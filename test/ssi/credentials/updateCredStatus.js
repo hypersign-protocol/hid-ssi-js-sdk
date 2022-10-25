@@ -11,6 +11,7 @@ const { id: schemaId } = require('../../mock/public/schema.json')
 const { privateKeyMultibase } = require('../../mock/public/keys.json')
 
 const holderSignedDIDDoc = require('../../mock/private/signed-did.json')
+const { default: Axios } = require('axios')
 
 
 let hsSdk;
@@ -67,11 +68,12 @@ createWallet(mnemonic)
         console.log(result)
     })
 
-    .then(() => {
+    .then(async () => {
         console.log('================Revoke Verifiable Presentation================')
-
+        const credentialStatus  = await Axios.get(signedVC.credentialStatus.id) 
+        const {credStatus}= credentialStatus.data
         return hsSdk.vc.updateCredentialStatus({
-            credential: signedVC,
+            credStatus,
             issuerDid,
             privateKey,
             verificationMethodId: issuerDidDoc.assertionMethod[0],
@@ -81,7 +83,7 @@ createWallet(mnemonic)
     .then((result) => {
         console.log(JSON.stringify(result, null, 2))
         writeDataInFile('../../mock/After-revoke-vc.json', JSON.stringify(result))
-        signedVC = result;
+        
         console.log('================Verify Verifiable Credential================')
         return hsSdk.vc.verifyCredential({ credential: signedVC, issuerDid, verificationMethodId: issuerDidDoc.assertionMethod[0] })
 

@@ -435,14 +435,14 @@ var HypersignVerifiableCredential = /** @class */ (function () {
     };
     HypersignVerifiableCredential.prototype.updateCredentialStatus = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, resp, signedVC;
+            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, claim, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, resp;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (!params.verificationMethodId) {
                             throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required revoke credential');
                         }
-                        if (!params.credential) {
+                        if (!params.credStatus) {
                             throw new Error('HID-SSI-SDK:: Error: params.credential is required to revoke credential');
                         }
                         if (!params.privateKey) {
@@ -472,18 +472,21 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                             verificationMethod: publicKeyId,
                             key: keyPair,
                         });
-                        credentialHash = this.sha256Hash(JSON.stringify(params.credential));
+                        /// Before we issue the credential the credential status has to be added
+                        /// for that we will call RegisterCredentialStatus RPC
+                        //  Let us generate credentialHash first
                         params.status = params.status.toUpperCase();
+                        claim = params.credStatus.claim;
                         credentialStatus = {
                             claim: {
-                                id: params.credential.id,
+                                id: claim.id,
                                 currentStatus: constants_1.VC.CRED_STATUS_TYPES[params.status],
-                                statusReason: 'Credential is inactive',
+                                statusReason: constants_1.VC.CRED_STATUS_REASON_TYPES[params.status],
                             },
-                            issuer: params.credential.issuer,
-                            issuanceDate: params.credential.issuanceDate,
-                            expirationDate: params.credential.expirationDate,
-                            credentialHash: credentialHash,
+                            issuer: params.credStatus.issuer,
+                            issuanceDate: params.credStatus.issuanceDate,
+                            expirationDate: params.credStatus.expirationDate,
+                            credentialHash: params.credStatus.credentialHash,
                         };
                         return [4 /*yield*/, this.sign({
                                 message: JSON.stringify(credentialStatus),
@@ -491,7 +494,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                             })];
                     case 3:
                         proofValue = _a.sent();
-                        return [4 /*yield*/, this.hsDid.resolve({ did: params.credential.issuer })];
+                        return [4 /*yield*/, this.hsDid.resolve({ did: params.credStatus.issuer })];
                     case 4:
                         issuerDID = (_a.sent()).didDocument;
                         issuerDidDoc = issuerDID;
@@ -499,7 +502,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         issuerPublicKeyVerMethod = issuerDidDoc.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
                         proof = {
                             type: constants_1.VC.VERIFICATION_METHOD_TYPE,
-                            created: params.credential.issuanceDate,
+                            created: params.credStatus.issuanceDate,
                             updated: this.dateNow(),
                             verificationMethod: issuerPublicKeyVerMethod.id,
                             proofValue: proofValue,
@@ -511,14 +514,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         if (!resp || resp.code != 0) {
                             throw new Error('HID-SSI-SDK:: Error while revoking the credential error = ' + resp.rawLog);
                         }
-                        return [4 /*yield*/, vc_js_1.default.issue({
-                                credential: params.credential,
-                                suite: suite,
-                                documentLoader: jsonld_1.documentLoader,
-                            })];
-                    case 6:
-                        signedVC = _a.sent();
-                        return [2 /*return*/, signedVC];
+                        return [2 /*return*/, resp];
                 }
             });
         });
