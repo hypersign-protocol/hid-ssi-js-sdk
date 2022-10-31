@@ -69,7 +69,7 @@ createWallet(mnemonic)
     })
 
     .then(async () => {
-        console.log('================Revoke Verifiable Presentation================')
+        console.log('================Revoke Verifiable Credential================')
         const credentialStatus  = await Axios.get(signedVC.credentialStatus.id) 
         const {credStatus}= credentialStatus.data
         return hsSdk.vc.updateCredentialStatus({
@@ -77,7 +77,8 @@ createWallet(mnemonic)
             issuerDid,
             privateKey,
             verificationMethodId: issuerDidDoc.assertionMethod[0],
-            status: 'SUSPENDED'
+            status: 'SUSPENDED',
+            statusReason: 'I am the issuer i can do whatever'
         })
     })
     .then((result) => {

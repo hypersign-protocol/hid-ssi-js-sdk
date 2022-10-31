@@ -481,7 +481,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                             claim: {
                                 id: claim.id,
                                 currentStatus: constants_1.VC.CRED_STATUS_TYPES[params.status],
-                                statusReason: constants_1.VC.CRED_STATUS_REASON_TYPES[params.status],
+                                statusReason: params.statusReason ? params.statusReason : constants_1.VC.CRED_STATUS_REASON_TYPES[params.status],
                             },
                             issuer: params.credStatus.issuer,
                             issuanceDate: params.credStatus.issuanceDate,

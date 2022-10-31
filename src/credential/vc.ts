@@ -421,6 +421,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     verificationMethodId: string; // vermethod of issuer for assestion
     privateKey: string;
     status: string;
+    statusReason?: string;
   }): Promise<object> {
     if (!params.verificationMethodId) {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required revoke credential');
@@ -475,7 +476,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       claim: {
         id: claim.id,
         currentStatus: VC.CRED_STATUS_TYPES[params.status],
-        statusReason: VC.CRED_STATUS_REASON_TYPES[params.status],
+        statusReason: params.statusReason ? params.statusReason : VC.CRED_STATUS_REASON_TYPES[params.status],
       },
       issuer: params.credStatus.issuer,
       issuanceDate: params.credStatus.issuanceDate,
