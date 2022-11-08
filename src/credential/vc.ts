@@ -425,6 +425,15 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     // const credentialJson = Utils.ldToJsonConvertor(params.credential);
     //console.log(credentialJson);
   }
+  public async registerCredentialStatus(credentialStatus: CredentialStatus, proof: CredentialProof) {
+    if (!credentialStatus || !proof)
+      throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
+    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
+    if (!resp || resp.code != 0) {
+      throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+    }
+    return resp;
+  }
 
   // TODO:  Implement a method to update credential status of a doc.
 
