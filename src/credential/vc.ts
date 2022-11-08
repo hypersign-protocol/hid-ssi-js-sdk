@@ -319,6 +319,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     issuerDid: string;
     verificationMethodId: string; // vermethod of issuer for assestion
     privateKey: string;
+    registerCredential?: boolean;
   }): Promise<object> {
     if (!params.verificationMethodId) {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to issue credential');
@@ -334,6 +335,10 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     if (!params.issuerDid) {
       throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to issue credential');
+    }
+
+    if (params.registerCredential == undefined) {
+      params.registerCredential = true;
     }
 
     const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
@@ -400,20 +405,25 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     };
 
     /// RegisterCRedeRPC
-    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
-
-    if (!resp || resp.code != 0) {
-      throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
-    }
-
-    // const credentialJson = Utils.ldToJsonConvertor(params.credential);
-    //console.log(credentialJson);
     const signedVC = await vc.issue({
       credential: params.credential,
       suite,
       documentLoader,
     });
-    return signedVC;
+    if (params.registerCredential) {
+      const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
+
+      if (!resp || resp.code != 0) {
+        throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+      }
+
+      return signedVC;
+    }
+
+    return { signedVC, credentialStatus, proof };
+
+    // const credentialJson = Utils.ldToJsonConvertor(params.credential);
+    //console.log(credentialJson);
   }
 
   // TODO:  Implement a method to update credential status of a doc.
