@@ -57,4 +57,6 @@ export interface ICredentialRPC {
   credentialRestEP: string;
   registerCredentialStatus(credentialStatus: CredentialStatus, proof: CredentialProof): Promise<DeliverTxResponse>;
   resolveCredentialStatus(credentialId: string): Promise<Credential>;
+  generateCredentialStatusTxnMessage(credentialStatus: CredentialStatus, proof: CredentialProof): Promise<object>;
+  registerCredentialStatusBulk(txMessages: Array<any>[]): Promise<DeliverTxResponse>;
 }

@@ -457,6 +457,41 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             });
         });
     };
+    HypersignVerifiableCredential.prototype.generateRegisterCredentialStatusTxnMessage = function (credentialStatus, proof) {
+        return __awaiter(this, void 0, void 0, function () {
+            var txnMessage;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!credentialStatus || !proof)
+                            throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
+                        return [4 /*yield*/, this.credStatusRPC.generateCredentialStatusTxnMessage(credentialStatus, proof)];
+                    case 1:
+                        txnMessage = _a.sent();
+                        return [2 /*return*/, txnMessage];
+                }
+            });
+        });
+    };
+    HypersignVerifiableCredential.prototype.registerCredentialStatusTxnBulk = function (txnMessage) {
+        return __awaiter(this, void 0, void 0, function () {
+            var resp;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!txnMessage)
+                            throw new Error('HID-SSI-SDK:: Error: txnMessage is required to register credential status');
+                        return [4 /*yield*/, this.credStatusRPC.registerCredentialStatusBulk(txnMessage)];
+                    case 1:
+                        resp = _a.sent();
+                        if (!resp || resp.code != 0) {
+                            throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+                        }
+                        return [2 /*return*/, resp];
+                }
+            });
+        });
+    };
     // TODO:  Implement a method to update credential status of a doc.
     //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
     HypersignVerifiableCredential.prototype.verifyCredential = function (params) {

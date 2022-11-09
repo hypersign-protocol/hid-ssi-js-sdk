@@ -45,6 +45,40 @@ export class CredentialRPC implements ICredentialRPC {
     return txResult;
   }
 
+  async generateCredentialStatusTxnMessage(credentialStatus: CredentialStatus, proof: CredentialProof) {
+    if (!credentialStatus) {
+      throw new Error('CredentialStatus must be passed as a param while registerting credential status');
+    }
+
+    if (!proof) {
+      throw new Error('Proof must be passed as a param while registering crdential status');
+    }
+
+    const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgRegisterCredentialStatus}`;
+
+    const txMessage = {
+      typeUrl, // Same as above
+      value: generatedProto[HIDRpcEnums.MsgRegisterCredentialStatus].fromPartial({
+        credentialStatus,
+        proof,
+        creator: HIDClient.getHidWalletAddress(),
+      }),
+    };
+
+    return txMessage;
+  }
+
+  async registerCredentialStatusBulk(txMessages: []) {
+    const fee = 'auto';
+    const hidClient: SigningStargateClient = HIDClient.getHidClient();
+    const txResult: DeliverTxResponse = await hidClient.signAndBroadcast(
+      HIDClient.getHidWalletAddress(),
+      txMessages,
+      fee
+    );
+    return txResult;
+  }
+
   async resolveCredentialStatus(credentialId: string): Promise<Credential> {
     credentialId = credentialId + ':'; // TODO:  we need to sort this out ... need to remove later
     const get_didUrl = `${this.credentialRestEP}/${credentialId}`;

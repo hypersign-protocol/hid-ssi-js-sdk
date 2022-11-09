@@ -435,6 +435,22 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return resp;
   }
 
+  public async generateRegisterCredentialStatusTxnMessage(credentialStatus: CredentialStatus, proof: CredentialProof) {
+    if (!credentialStatus || !proof)
+      throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
+    const txnMessage = await this.credStatusRPC.generateCredentialStatusTxnMessage(credentialStatus, proof);
+
+    return txnMessage;
+  }
+
+  public async registerCredentialStatusTxnBulk(txnMessage: []) {
+    if (!txnMessage) throw new Error('HID-SSI-SDK:: Error: txnMessage is required to register credential status');
+    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatusBulk(txnMessage);
+    if (!resp || resp.code != 0) {
+      throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+    }
+    return resp;
+  }
   // TODO:  Implement a method to update credential status of a doc.
 
   //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
