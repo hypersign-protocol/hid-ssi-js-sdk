@@ -55,7 +55,7 @@ createWallet(mnemonic)
     .then(() => {
         verificationMethodId = didDoc['verificationMethod'][0].id
         console.log("===============REGISTER DID=======================")
-        // return hsSdk.did.register({ didDocument: didDoc , privateKeyMultibase, verificationMethodId })
+        return hsSdk.did.register({ didDocument: didDoc , privateKeyMultibase, verificationMethodId })
     })
     .then((resTx) => {
         console.log(resTx)
