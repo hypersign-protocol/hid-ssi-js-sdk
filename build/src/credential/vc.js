@@ -349,7 +349,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
     };
     HypersignVerifiableCredential.prototype.issueCredential = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, resp, signedVC;
+            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, signedVC, resp;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -364,6 +364,9 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         }
                         if (!params.issuerDid) {
                             throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to issue credential');
+                        }
+                        if (params.registerCredential == undefined) {
+                            params.registerCredential = true;
                         }
                         return [4 /*yield*/, this.hsDid.resolve({ did: params.issuerDid })];
                     case 1:
@@ -415,20 +418,76 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                             proofValue: proofValue,
                             proofPurpose: constants_1.VC.PROOF_PURPOSE,
                         };
-                        return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, proof)];
-                    case 5:
-                        resp = _a.sent();
-                        if (!resp || resp.code != 0) {
-                            throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
-                        }
                         return [4 /*yield*/, vc_js_1.default.issue({
                                 credential: params.credential,
                                 suite: suite,
                                 documentLoader: jsonld_1.documentLoader,
                             })];
-                    case 6:
+                    case 5:
                         signedVC = _a.sent();
+                        if (!params.registerCredential) return [3 /*break*/, 7];
+                        return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, proof)];
+                    case 6:
+                        resp = _a.sent();
+                        if (!resp || resp.code != 0) {
+                            throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+                        }
                         return [2 /*return*/, signedVC];
+                    case 7: return [2 /*return*/, { signedVC: signedVC, credentialStatus: credentialStatus, proof: proof }];
+                }
+            });
+        });
+    };
+    HypersignVerifiableCredential.prototype.registerCredentialStatus = function (credentialStatus, proof) {
+        return __awaiter(this, void 0, void 0, function () {
+            var resp;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!credentialStatus || !proof)
+                            throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
+                        return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, proof)];
+                    case 1:
+                        resp = _a.sent();
+                        if (!resp || resp.code != 0) {
+                            throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+                        }
+                        return [2 /*return*/, resp];
+                }
+            });
+        });
+    };
+    HypersignVerifiableCredential.prototype.generateRegisterCredentialStatusTxnMessage = function (credentialStatus, proof) {
+        return __awaiter(this, void 0, void 0, function () {
+            var txnMessage;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!credentialStatus || !proof)
+                            throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
+                        return [4 /*yield*/, this.credStatusRPC.generateCredentialStatusTxnMessage(credentialStatus, proof)];
+                    case 1:
+                        txnMessage = _a.sent();
+                        return [2 /*return*/, txnMessage];
+                }
+            });
+        });
+    };
+    HypersignVerifiableCredential.prototype.registerCredentialStatusTxnBulk = function (txnMessage) {
+        return __awaiter(this, void 0, void 0, function () {
+            var resp;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!txnMessage)
+                            throw new Error('HID-SSI-SDK:: Error: txnMessage is required to register credential status');
+                        return [4 /*yield*/, this.credStatusRPC.registerCredentialStatusBulk(txnMessage)];
+                    case 1:
+                        resp = _a.sent();
+                        if (!resp || resp.code != 0) {
+                            throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+                        }
+                        return [2 /*return*/, resp];
                 }
             });
         });
