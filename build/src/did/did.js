@@ -211,16 +211,9 @@ var HypersignDID = /** @class */ (function () {
             });
         });
     };
-    /**
-     * @param params params: { did?: string  }
-     *
-     *  if did is provided then it will resolve the did doc from the blockchain
-     *
-     * @returns  Promise : {context ,didDocument, VerificationResult , didDocumentMetadata}
-     */
     HypersignDID.prototype.resolve = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var result;
+            var result, didDoc, stableLibPublicKey, publicKeyMultibaseConverted;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -228,6 +221,14 @@ var HypersignDID = /** @class */ (function () {
                         return [4 /*yield*/, this.didrpc.resolveDID(params.did)];
                     case 1:
                         result = _a.sent();
+                        if (params.ed25519verificationkey2020) {
+                            didDoc = result.didDocument;
+                            stableLibPublicKey = didDoc.verificationMethod[0].publicKeyMultibase;
+                            publicKeyMultibaseConverted = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
+                                publicKey: stableLibPublicKey,
+                            }).publicKeyMultibase;
+                            didDoc.verificationMethod[0].publicKeyMultibase = publicKeyMultibaseConverted;
+                        }
                         return [2 /*return*/, {
                                 didDocument: utils_1.default.jsonToLdConvertor(result.didDocument),
                                 didDocumentMetadata: result.didDocumentMetadata,
