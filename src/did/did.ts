@@ -160,12 +160,16 @@ export default class HypersignDID implements IDID {
       const result = await this.didrpc.resolveDID(params.did);
       if (params.ed25519verificationkey2020) {
         const didDoc: IDidDocument = result.didDocument as IDidDocument;
-        const stableLibPublicKey = didDoc.verificationMethod[0].publicKeyMultibase;
-        const { publicKeyMultibase: publicKeyMultibaseConverted } =
-          Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
-            publicKey: stableLibPublicKey,
-          });
-        didDoc.verificationMethod[0].publicKeyMultibase = publicKeyMultibaseConverted;
+        const verificationMethods = didDoc.verificationMethod;
+        verificationMethods.forEach((verificationMethod) => {
+          if (verificationMethod.type === 'Ed25519VerificationKey2020') {
+            const ed25519PublicKey = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
+              publicKey: verificationMethod.publicKeyMultibase,
+            });
+            verificationMethod.publicKeyMultibase = ed25519PublicKey.publicKeyMultibase;
+          }
+        });
+        didDoc.verificationMethod = verificationMethods;
       }
       return {
         didDocument: Utils.jsonToLdConvertor(result.didDocument),
