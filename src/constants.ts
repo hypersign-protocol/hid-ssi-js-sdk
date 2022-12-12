@@ -59,7 +59,7 @@ export const VC = {
     CREDENTAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1",
     PROOF_PURPOSE: "assertion",
     VERIFICATION_METHOD_TYPE: "Ed25519Signature2020",
-    CRED_STATUS_TYPES: CredentialStatusEnums 
+    CRED_STATUS_TYPES: CredentialStatusEnums ,
 
     CRED_STATUS_REASON_TYPES: CredentialStatusReasonEnums
 }
