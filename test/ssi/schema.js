@@ -17,7 +17,7 @@ const author = id;
 let hsSdk;
 let schema;
 let proof = {
-    "type": "Ed25519VerificationKey2020",
+    "type": "Ed25519Signature2020",
     "created": "",
     "verificationMethod": assertionMethod[0],
     "proofValue": "",
