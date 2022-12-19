@@ -2,7 +2,7 @@ const { DirectSecp256k1HdWallet } = require('@cosmjs/proto-signing');
 const { HdPath, Slip10RawIndex } = require('@cosmjs/crypto');
 
 export const mnemonic =
-  'zero require alcohol swamp hover punch celery common merge embrace flock dumb unit capital problem future canal improve auto home apple avoid tragic mechanic'; //"judge harvest lion steak possible ship dog outside local hunt portion fix blast answer walnut injury food clever hen wrist casual humble script alter"//"napkin delay purchase easily camp mimic share wait stereo reflect allow soccer believe exhibit laptop upset tired talent transfer talk surface solution omit crack"
+  'zero require alcohol swamp hover punch celery common merge embrace flock dumb unit capital problem future canal improve auto home apple avoid tragic mechanic';
 
 export const hidNodeEp = {
   rpc: 'https://jagrat.hypersign.id/rpc',
