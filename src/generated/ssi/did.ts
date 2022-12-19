@@ -43,9 +43,9 @@ export interface SignInfo {
   signature: string;
 }
 
-export interface DidDocument {
-  did: Did | undefined;
-  metadata: Metadata | undefined;
+export interface DidDocumentState {
+  didDocument: Did | undefined;
+  didDocumentMetadata: Metadata | undefined;
 }
 
 const baseDid: object = {
@@ -791,31 +791,37 @@ export const SignInfo = {
   },
 };
 
-const baseDidDocument: object = {};
+const baseDidDocumentState: object = {};
 
-export const DidDocument = {
-  encode(message: DidDocument, writer: Writer = Writer.create()): Writer {
-    if (message.did !== undefined) {
-      Did.encode(message.did, writer.uint32(10).fork()).ldelim();
+export const DidDocumentState = {
+  encode(message: DidDocumentState, writer: Writer = Writer.create()): Writer {
+    if (message.didDocument !== undefined) {
+      Did.encode(message.didDocument, writer.uint32(10).fork()).ldelim();
     }
-    if (message.metadata !== undefined) {
-      Metadata.encode(message.metadata, writer.uint32(18).fork()).ldelim();
+    if (message.didDocumentMetadata !== undefined) {
+      Metadata.encode(
+        message.didDocumentMetadata,
+        writer.uint32(18).fork()
+      ).ldelim();
     }
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): DidDocument {
+  decode(input: Reader | Uint8Array, length?: number): DidDocumentState {
     const reader = input instanceof Uint8Array ? new Reader(input) : input;
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseDidDocument } as DidDocument;
+    const message = { ...baseDidDocumentState } as DidDocumentState;
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.did = Did.decode(reader, reader.uint32());
+          message.didDocument = Did.decode(reader, reader.uint32());
           break;
         case 2:
-          message.metadata = Metadata.decode(reader, reader.uint32());
+          message.didDocumentMetadata = Metadata.decode(
+            reader,
+            reader.uint32()
+          );
           break;
         default:
           reader.skipType(tag & 7);
@@ -825,43 +831,55 @@ export const DidDocument = {
     return message;
   },
 
-  fromJSON(object: any): DidDocument {
-    const message = { ...baseDidDocument } as DidDocument;
-    if (object.did !== undefined && object.did !== null) {
-      message.did = Did.fromJSON(object.did);
+  fromJSON(object: any): DidDocumentState {
+    const message = { ...baseDidDocumentState } as DidDocumentState;
+    if (object.didDocument !== undefined && object.didDocument !== null) {
+      message.didDocument = Did.fromJSON(object.didDocument);
     } else {
-      message.did = undefined;
+      message.didDocument = undefined;
     }
-    if (object.metadata !== undefined && object.metadata !== null) {
-      message.metadata = Metadata.fromJSON(object.metadata);
+    if (
+      object.didDocumentMetadata !== undefined &&
+      object.didDocumentMetadata !== null
+    ) {
+      message.didDocumentMetadata = Metadata.fromJSON(
+        object.didDocumentMetadata
+      );
     } else {
-      message.metadata = undefined;
+      message.didDocumentMetadata = undefined;
     }
     return message;
   },
 
-  toJSON(message: DidDocument): unknown {
+  toJSON(message: DidDocumentState): unknown {
     const obj: any = {};
-    message.did !== undefined &&
-      (obj.did = message.did ? Did.toJSON(message.did) : undefined);
-    message.metadata !== undefined &&
-      (obj.metadata = message.metadata
-        ? Metadata.toJSON(message.metadata)
+    message.didDocument !== undefined &&
+      (obj.didDocument = message.didDocument
+        ? Did.toJSON(message.didDocument)
+        : undefined);
+    message.didDocumentMetadata !== undefined &&
+      (obj.didDocumentMetadata = message.didDocumentMetadata
+        ? Metadata.toJSON(message.didDocumentMetadata)
         : undefined);
     return obj;
   },
 
-  fromPartial(object: DeepPartial<DidDocument>): DidDocument {
-    const message = { ...baseDidDocument } as DidDocument;
-    if (object.did !== undefined && object.did !== null) {
-      message.did = Did.fromPartial(object.did);
+  fromPartial(object: DeepPartial<DidDocumentState>): DidDocumentState {
+    const message = { ...baseDidDocumentState } as DidDocumentState;
+    if (object.didDocument !== undefined && object.didDocument !== null) {
+      message.didDocument = Did.fromPartial(object.didDocument);
     } else {
-      message.did = undefined;
+      message.didDocument = undefined;
     }
-    if (object.metadata !== undefined && object.metadata !== null) {
-      message.metadata = Metadata.fromPartial(object.metadata);
+    if (
+      object.didDocumentMetadata !== undefined &&
+      object.didDocumentMetadata !== null
+    ) {
+      message.didDocumentMetadata = Metadata.fromPartial(
+        object.didDocumentMetadata
+      );
     } else {
-      message.metadata = undefined;
+      message.didDocumentMetadata = undefined;
     }
     return message;
   },
