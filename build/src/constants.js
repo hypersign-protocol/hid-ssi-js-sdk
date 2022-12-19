@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HID_MIN_FEE = exports.HID_MIN_GAS = exports.HID_DNOMINATION = exports.HID_DECIMAL = exports.GAS_PRICE = exports.KEY_HEADERS = exports.SCHEMA = exports.VP = exports.VC = exports.DID = exports.CredentialStatusEnums = exports.HIDRpcEnums = exports.HYPERSIGN_NETWORK_BANK_BALANCE_PATH = exports.HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH = exports.HYPERSIGN_NETWORK_SCHEMA_PATH = exports.HYPERSIGN_NETWORK_DID_PATH = exports.HID_COSMOS_MODULE = exports.HYPERSIGN_MAINNET_REST = exports.HYPERSIGN_MAINNET_RPC = exports.HYPERSIGN_TESTNET_REST = exports.HYPERSIGN_TESTNET_RPC = exports.compactProof = void 0;
+exports.HID_MIN_FEE = exports.HID_MIN_GAS = exports.HID_DNOMINATION = exports.HID_DECIMAL = exports.GAS_PRICE = exports.KEY_HEADERS = exports.SCHEMA = exports.VP = exports.VC = exports.DID = exports.CredentialStatusReasonEnums = exports.CredentialStatusEnums = exports.HIDRpcEnums = exports.HYPERSIGN_NETWORK_BANK_BALANCE_PATH = exports.HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH = exports.HYPERSIGN_NETWORK_SCHEMA_PATH = exports.HYPERSIGN_NETWORK_DID_PATH = exports.HID_COSMOS_MODULE = exports.HYPERSIGN_MAINNET_REST = exports.HYPERSIGN_MAINNET_RPC = exports.HYPERSIGN_TESTNET_REST = exports.HYPERSIGN_TESTNET_RPC = exports.compactProof = void 0;
 exports.compactProof = false;
 exports.HYPERSIGN_TESTNET_RPC = "http://localhost:26657";
 exports.HYPERSIGN_TESTNET_REST = "http://localhost:1317";
@@ -23,7 +23,15 @@ Object.freeze(HIDRpcEnums);
 var CredentialStatusEnums;
 (function (CredentialStatusEnums) {
     CredentialStatusEnums["LIVE"] = "Live";
+    CredentialStatusEnums["REVOKED"] = "Revoked";
+    CredentialStatusEnums["SUSPENDED"] = "Suspended";
 })(CredentialStatusEnums = exports.CredentialStatusEnums || (exports.CredentialStatusEnums = {}));
+var CredentialStatusReasonEnums;
+(function (CredentialStatusReasonEnums) {
+    CredentialStatusReasonEnums["LIVE"] = "Credential is live";
+    CredentialStatusReasonEnums["REVOKED"] = "Credential is revoked";
+    CredentialStatusReasonEnums["SUSPENDED"] = "Credential is suspended";
+})(CredentialStatusReasonEnums = exports.CredentialStatusReasonEnums || (exports.CredentialStatusReasonEnums = {}));
 exports.DID = {
     CONTROLLER_CONTEXT: "https://w3id.org/security/v2",
     SCHEME: "did",
@@ -44,8 +52,9 @@ exports.VC = {
     CREDENTAIL_SECURITY_CONTEXT_V2: "https://w3id.org/security/v2",
     CREDENTAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1",
     PROOF_PURPOSE: "assertion",
-    VERIFICATION_METHOD_TYPE: "Ed25519VerificationKey2020",
-    CRED_STATUS_TYPES: CredentialStatusEnums
+    VERIFICATION_METHOD_TYPE: "Ed25519Signature2020",
+    CRED_STATUS_TYPES: CredentialStatusEnums,
+    CRED_STATUS_REASON_TYPES: CredentialStatusReasonEnums
 };
 Object.freeze(exports.VC);
 exports.VP = {

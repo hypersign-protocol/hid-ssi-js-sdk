@@ -98,6 +98,45 @@ var CredentialRPC = /** @class */ (function () {
             });
         });
     };
+    CredentialRPC.prototype.generateCredentialStatusTxnMessage = function (credentialStatus, proof) {
+        return __awaiter(this, void 0, void 0, function () {
+            var typeUrl, txMessage;
+            return __generator(this, function (_a) {
+                if (!credentialStatus) {
+                    throw new Error('CredentialStatus must be passed as a param while registerting credential status');
+                }
+                if (!proof) {
+                    throw new Error('Proof must be passed as a param while registering crdential status');
+                }
+                typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgRegisterCredentialStatus);
+                txMessage = {
+                    typeUrl: typeUrl,
+                    value: generatedProto[constants_1.HIDRpcEnums.MsgRegisterCredentialStatus].fromPartial({
+                        credentialStatus: credentialStatus,
+                        proof: proof,
+                        creator: client_1.HIDClient.getHidWalletAddress(),
+                    }),
+                };
+                return [2 /*return*/, txMessage];
+            });
+        });
+    };
+    CredentialRPC.prototype.registerCredentialStatusBulk = function (txMessages) {
+        return __awaiter(this, void 0, void 0, function () {
+            var fee, hidClient, txResult;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        fee = 'auto';
+                        hidClient = client_1.HIDClient.getHidClient();
+                        return [4 /*yield*/, hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), txMessages, fee)];
+                    case 1:
+                        txResult = _a.sent();
+                        return [2 /*return*/, txResult];
+                }
+            });
+        });
+    };
     CredentialRPC.prototype.resolveCredentialStatus = function (credentialId) {
         return __awaiter(this, void 0, void 0, function () {
             var get_didUrl, response, credStatus;
