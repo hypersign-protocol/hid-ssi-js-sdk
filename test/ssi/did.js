@@ -30,7 +30,7 @@ createWallet(mnemonic)
         const publicKeyMultibase = kp.publicKeyMultibase
         console.log(kp)
         console.log("===============GENERATE DID&DIDDoc=======================")
-        return hsSdk.did.generate({ publicKeyMultibase });
+        return hsSdk.did.generate({ publicKeyMultibase});
         
     })
     .then((res) => {
@@ -60,10 +60,10 @@ createWallet(mnemonic)
     .then((resTx) => {
         console.log(resTx)
         console.log("===============RESOLVE DID=======================")
-        return hsSdk.did.resolve({ did: didDoc["id"] })
+        return hsSdk.did.resolve({ did: didDoc["id"],ed25519verificationkey2020:true })
     })
     .then(res => {
-        console.log(res)
+        console.log(JSON.stringify(res, null, 2))
         const { didDocumentMetadata } = res;
         versionId = didDocumentMetadata.versionId;
 
