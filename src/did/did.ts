@@ -135,7 +135,7 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to register a did');
     }
 
-    if (!params.privateKeyMultibase) {
+    if (!params.verificationMethodId) {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
     }
 
@@ -193,7 +193,7 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to update a did');
     }
 
-    if (!params.privateKeyMultibase) {
+    if (!params.verificationMethodId) {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update a did');
     }
     if (!params.versionId) {
@@ -220,7 +220,7 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to deactivate a did');
     }
 
-    if (!params.privateKeyMultibase) {
+    if (!params.verificationMethodId) {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to deactivate a did');
     }
     if (!params.versionId) {
