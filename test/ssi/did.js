@@ -23,7 +23,7 @@ createWallet(mnemonic)
         console.log("===============GENERATE DID-KEYS=======================")
             // const param = "blade sting surge cube valid scr"; // 32 bytes
         const seed=Bip39.decode(mnemonic)
-        const kp = await hsSdk.did.generateKeys({seed});
+        const kp = await hsSdk.did.generateKeys();
         console.log("kp", kp);
         writeDataInFile('../mock/public/keys.json', JSON.stringify(kp))
         privateKeyMultibase = kp.privateKeyMultibase

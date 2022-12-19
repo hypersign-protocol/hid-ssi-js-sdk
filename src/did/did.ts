@@ -147,7 +147,7 @@ export default class HypersignDID implements IDID {
   }
 
   /**
-   * @param params params: { did?: string ,convertToEd25519VerificationKey2020?:boolean }
+   * @param params params: { did?: string ,ed25519verificationkey2020?:boolean }
    *
    *  if did is provided then it will resolve the did doc from the blockchain
    *
