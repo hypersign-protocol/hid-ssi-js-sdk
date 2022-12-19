@@ -196,7 +196,7 @@ var HypersignDID = /** @class */ (function () {
                         if (!params.privateKeyMultibase) {
                             throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to register a did');
                         }
-                        if (!params.privateKeyMultibase) {
+                        if (!params.verificationMethodId) {
                             throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
                         }
                         didDocument = params.didDocument, privateKeyMultibase = params.privateKeyMultibase, verificationMethodId = params.verificationMethodId;
@@ -256,7 +256,7 @@ var HypersignDID = /** @class */ (function () {
                         if (!params.privateKeyMultibase) {
                             throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to update a did');
                         }
-                        if (!params.privateKeyMultibase) {
+                        if (!params.verificationMethodId) {
                             throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update a did');
                         }
                         if (!params.versionId) {
@@ -286,7 +286,7 @@ var HypersignDID = /** @class */ (function () {
                         if (!params.privateKeyMultibase) {
                             throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to deactivate a did');
                         }
-                        if (!params.privateKeyMultibase) {
+                        if (!params.verificationMethodId) {
                             throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to deactivate a did');
                         }
                         if (!params.versionId) {
@@ -401,7 +401,7 @@ var HypersignDID = /** @class */ (function () {
      */
     HypersignDID.prototype.verify = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var doc, verificationMethodId, challenge, domain, didDoc, publicKeyId, pubkey, result, publicKeyMultibase1, keyPair, suite, controller, purpose;
+            var doc, verificationMethodId, challenge, domain, didDoc, publicKeyId, pubkey, result, publicKeyMultibase1, keyPair, suite_1, controller, purpose;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -428,10 +428,10 @@ var HypersignDID = /** @class */ (function () {
                             })];
                     case 1:
                         keyPair = _a.sent();
-                        suite = new ed25519_signature_2020_1.Ed25519Signature2020({
+                        suite_1 = new ed25519_signature_2020_1.Ed25519Signature2020({
                             key: keyPair,
                         });
-                        suite.date = new Date(new Date().getTime() - 100000).toISOString();
+                        suite_1.date = new Date(new Date().getTime() - 100000).toISOString();
                         controller = {
                             '@context': constant.DID.CONTROLLER_CONTEXT,
                             id: publicKeyId,
@@ -443,7 +443,7 @@ var HypersignDID = /** @class */ (function () {
                             domain: domain,
                         });
                         return [4 /*yield*/, jsonld_signatures_1.default.verify(didDoc, {
-                                suite: suite,
+                                suite: suite_1,
                                 purpose: purpose,
                                 documentLoader: jsonld_1.documentLoader,
                                 compactProof: constant.compactProof,
