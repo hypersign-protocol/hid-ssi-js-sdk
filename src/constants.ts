@@ -23,8 +23,20 @@ export enum HIDRpcEnums {
 Object.freeze(HIDRpcEnums);
 
 export enum CredentialStatusEnums {
-  LIVE = 'Live',
+
+    LIVE = "Live",
+    REVOKED="Revoked",
+    SUSPENDED="Suspended"
 }
+export enum CredentialStatusReasonEnums {
+    LIVE = "Credential is live",
+    REVOKED="Credential is revoked",
+    SUSPENDED="Credential is suspended"
+}
+
+
+
+
 export const DID = {
   CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
   SCHEME: 'did',
@@ -36,20 +48,23 @@ export const DID = {
 Object.freeze(DID);
 
 export const VC = {
-  SCHEME: 'vc',
-  METHOD: 'hid',
-  NAMESPACE: 'devnet',
-  PREFIX: 'vc:' + DID.METHOD + ':' + DID.NAMESPACE + ':',
-  CREDENTAIL_SCHEMA_VALIDATOR_TYPE: 'JsonSchemaValidator2018',
-  CREDENTAIL_STATUS_TYPE: 'CredentialStatusList2017',
-  CREDENTAIL_BASE_CONTEXT: 'https://www.w3.org/2018/credentials/v1',
-  CREDENTAIL_SECURITY_CONTEXT_V2: 'https://w3id.org/security/v2',
-  CREDENTAIL_SECURITY_SUITE: 'https://w3id.org/security/suites/ed25519-2020/v1',
-  PROOF_PURPOSE: 'assertion',
-  VERIFICATION_METHOD_TYPE: 'Ed25519Signature2020',
-  CRED_STATUS_TYPES: CredentialStatusEnums,
-};
-Object.freeze(VC);
+
+    SCHEME: "vc",
+    METHOD: "hid",
+    NAMESPACE:"devnet", 
+    PREFIX: "vc:" + DID.METHOD + ":" + DID.NAMESPACE + ":",
+    CREDENTAIL_SCHEMA_VALIDATOR_TYPE: "JsonSchemaValidator2018",
+    CREDENTAIL_STATUS_TYPE: "CredentialStatusList2017",
+    CREDENTAIL_BASE_CONTEXT: "https://www.w3.org/2018/credentials/v1",
+    CREDENTAIL_SECURITY_CONTEXT_V2: "https://w3id.org/security/v2",
+    CREDENTAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1",
+    PROOF_PURPOSE: "assertion",
+    VERIFICATION_METHOD_TYPE: "Ed25519Signature2020",
+    CRED_STATUS_TYPES: CredentialStatusEnums ,
+
+    CRED_STATUS_REASON_TYPES: CredentialStatusReasonEnums
+}
+Object.freeze(VC)
 
 export const VP = {
   PREFIX: 'vp:',

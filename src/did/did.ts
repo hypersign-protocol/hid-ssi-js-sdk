@@ -9,6 +9,19 @@ import { Did, VerificationMethod, Service } from '../generated/ssi/did';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import { IParams, IDID, IDid, IDIDResolve, IDIDRpc, IController } from './IDID';
+export interface IDidDocument {
+  context: string[];
+  id: string;
+  controller: string[];
+  alsoKnownAs: string[];
+  verificationMethod: Array<VerificationMethod>;
+  authentication: string[];
+  assertionMethod: string[];
+  keyAgreement: string[];
+  capabilityInvocation: string[];
+  capabilityDelegation: string[];
+  service: Service[];
+}
 class DIDDocument implements Did {
   context: string[];
   id: string;
@@ -46,6 +59,7 @@ class DIDDocument implements Did {
 export default class HypersignDID implements IDID {
   private didrpc: IDIDRpc;
   public namespace: string;
+
   constructor(namespace?: string) {
     this.didrpc = new DIDRpc();
     this.namespace = namespace ? namespace : '';
@@ -133,15 +147,30 @@ export default class HypersignDID implements IDID {
   }
 
   /**
-   * @param params params: { did?: string  }
+   * @param params params: { did?: string ,ed25519verificationkey2020?:boolean }
    *
    *  if did is provided then it will resolve the did doc from the blockchain
    *
    * @returns  Promise : {context ,didDocument, VerificationResult , didDocumentMetadata}
    */
-  public async resolve(params: { did?: string }): Promise<IDIDResolve> {
+
+  public async resolve(params: { did: string }): Promise<IDIDResolve>;
+  public async resolve(params: { did: string; ed25519verificationkey2020?: boolean }): Promise<IDIDResolve> {
     if (params.did) {
       const result = await this.didrpc.resolveDID(params.did);
+      if (params.ed25519verificationkey2020) {
+        const didDoc: IDidDocument = result.didDocument as IDidDocument;
+        const verificationMethods = didDoc.verificationMethod;
+        verificationMethods.forEach((verificationMethod) => {
+          if (verificationMethod.type === 'Ed25519VerificationKey2020') {
+            const ed25519PublicKey = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
+              publicKey: verificationMethod.publicKeyMultibase,
+            });
+            verificationMethod.publicKeyMultibase = ed25519PublicKey.publicKeyMultibase;
+          }
+        });
+        didDoc.verificationMethod = verificationMethods;
+      }
       return {
         didDocument: Utils.jsonToLdConvertor(result.didDocument),
         didDocumentMetadata: result.didDocumentMetadata,

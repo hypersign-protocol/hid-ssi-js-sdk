@@ -18,7 +18,7 @@ var did_1 = require("./did");
 var schema_1 = require("./schema");
 var credential_1 = require("./credential");
 exports.protobufPackage = "hypersignprotocol.hidnode.ssi";
-var baseMsgCreateDID = { creator: "" };
+var baseMsgCreateDID = { creator: "", clientSpec: "" };
 exports.MsgCreateDID = {
     encode: function (message, writer) {
         if (writer === void 0) { writer = minimal_1.Writer.create(); }
@@ -31,6 +31,9 @@ exports.MsgCreateDID = {
         }
         if (message.creator !== "") {
             writer.uint32(26).string(message.creator);
+        }
+        if (message.clientSpec !== "") {
+            writer.uint32(34).string(message.clientSpec);
         }
         return writer;
     },
@@ -50,6 +53,9 @@ exports.MsgCreateDID = {
                     break;
                 case 3:
                     message.creator = reader.string();
+                    break;
+                case 4:
+                    message.clientSpec = reader.string();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -79,6 +85,12 @@ exports.MsgCreateDID = {
         else {
             message.creator = "";
         }
+        if (object.clientSpec !== undefined && object.clientSpec !== null) {
+            message.clientSpec = String(object.clientSpec);
+        }
+        else {
+            message.clientSpec = "";
+        }
         return message;
     },
     toJSON: function (message) {
@@ -96,6 +108,7 @@ exports.MsgCreateDID = {
             obj.signatures = [];
         }
         message.creator !== undefined && (obj.creator = message.creator);
+        message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
         return obj;
     },
     fromPartial: function (object) {
@@ -118,6 +131,12 @@ exports.MsgCreateDID = {
         }
         else {
             message.creator = "";
+        }
+        if (object.clientSpec !== undefined && object.clientSpec !== null) {
+            message.clientSpec = object.clientSpec;
+        }
+        else {
+            message.clientSpec = "";
         }
         return message;
     },
@@ -174,7 +193,11 @@ exports.MsgCreateDIDResponse = {
         return message;
     },
 };
-var baseMsgUpdateDID = { version_id: "", creator: "" };
+var baseMsgUpdateDID = {
+    version_id: "",
+    creator: "",
+    clientSpec: "",
+};
 exports.MsgUpdateDID = {
     encode: function (message, writer) {
         if (writer === void 0) { writer = minimal_1.Writer.create(); }
@@ -190,6 +213,9 @@ exports.MsgUpdateDID = {
         }
         if (message.creator !== "") {
             writer.uint32(34).string(message.creator);
+        }
+        if (message.clientSpec !== "") {
+            writer.uint32(42).string(message.clientSpec);
         }
         return writer;
     },
@@ -212,6 +238,9 @@ exports.MsgUpdateDID = {
                     break;
                 case 4:
                     message.creator = reader.string();
+                    break;
+                case 5:
+                    message.clientSpec = reader.string();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -247,6 +276,12 @@ exports.MsgUpdateDID = {
         else {
             message.creator = "";
         }
+        if (object.clientSpec !== undefined && object.clientSpec !== null) {
+            message.clientSpec = String(object.clientSpec);
+        }
+        else {
+            message.clientSpec = "";
+        }
         return message;
     },
     toJSON: function (message) {
@@ -265,6 +300,7 @@ exports.MsgUpdateDID = {
             obj.signatures = [];
         }
         message.creator !== undefined && (obj.creator = message.creator);
+        message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
         return obj;
     },
     fromPartial: function (object) {
@@ -293,6 +329,12 @@ exports.MsgUpdateDID = {
         }
         else {
             message.creator = "";
+        }
+        if (object.clientSpec !== undefined && object.clientSpec !== null) {
+            message.clientSpec = object.clientSpec;
+        }
+        else {
+            message.clientSpec = "";
         }
         return message;
     },
@@ -349,7 +391,7 @@ exports.MsgUpdateDIDResponse = {
         return message;
     },
 };
-var baseMsgCreateSchema = { creator: "" };
+var baseMsgCreateSchema = { creator: "", clientSpec: "" };
 exports.MsgCreateSchema = {
     encode: function (message, writer) {
         if (writer === void 0) { writer = minimal_1.Writer.create(); }
@@ -361,6 +403,9 @@ exports.MsgCreateSchema = {
         }
         if (message.schemaProof !== undefined) {
             schema_1.SchemaProof.encode(message.schemaProof, writer.uint32(26).fork()).ldelim();
+        }
+        if (message.clientSpec !== "") {
+            writer.uint32(34).string(message.clientSpec);
         }
         return writer;
     },
@@ -379,6 +424,9 @@ exports.MsgCreateSchema = {
                     break;
                 case 3:
                     message.schemaProof = schema_1.SchemaProof.decode(reader, reader.uint32());
+                    break;
+                case 4:
+                    message.clientSpec = reader.string();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -407,6 +455,12 @@ exports.MsgCreateSchema = {
         else {
             message.schemaProof = undefined;
         }
+        if (object.clientSpec !== undefined && object.clientSpec !== null) {
+            message.clientSpec = String(object.clientSpec);
+        }
+        else {
+            message.clientSpec = "";
+        }
         return message;
     },
     toJSON: function (message) {
@@ -420,6 +474,7 @@ exports.MsgCreateSchema = {
             (obj.schemaProof = message.schemaProof
                 ? schema_1.SchemaProof.toJSON(message.schemaProof)
                 : undefined);
+        message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
         return obj;
     },
     fromPartial: function (object) {
@@ -441,6 +496,12 @@ exports.MsgCreateSchema = {
         }
         else {
             message.schemaProof = undefined;
+        }
+        if (object.clientSpec !== undefined && object.clientSpec !== null) {
+            message.clientSpec = object.clientSpec;
+        }
+        else {
+            message.clientSpec = "";
         }
         return message;
     },
@@ -497,7 +558,12 @@ exports.MsgCreateSchemaResponse = {
         return message;
     },
 };
-var baseMsgDeactivateDID = { creator: "", didId: "", version_id: "" };
+var baseMsgDeactivateDID = {
+    creator: "",
+    didId: "",
+    version_id: "",
+    clientSpec: "",
+};
 exports.MsgDeactivateDID = {
     encode: function (message, writer) {
         if (writer === void 0) { writer = minimal_1.Writer.create(); }
@@ -513,6 +579,9 @@ exports.MsgDeactivateDID = {
         for (var _i = 0, _a = message.signatures; _i < _a.length; _i++) {
             var v = _a[_i];
             did_1.SignInfo.encode(v, writer.uint32(34).fork()).ldelim();
+        }
+        if (message.clientSpec !== "") {
+            writer.uint32(42).string(message.clientSpec);
         }
         return writer;
     },
@@ -535,6 +604,9 @@ exports.MsgDeactivateDID = {
                     break;
                 case 4:
                     message.signatures.push(did_1.SignInfo.decode(reader, reader.uint32()));
+                    break;
+                case 5:
+                    message.clientSpec = reader.string();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -570,6 +642,12 @@ exports.MsgDeactivateDID = {
                 message.signatures.push(did_1.SignInfo.fromJSON(e));
             }
         }
+        if (object.clientSpec !== undefined && object.clientSpec !== null) {
+            message.clientSpec = String(object.clientSpec);
+        }
+        else {
+            message.clientSpec = "";
+        }
         return message;
     },
     toJSON: function (message) {
@@ -585,6 +663,7 @@ exports.MsgDeactivateDID = {
         else {
             obj.signatures = [];
         }
+        message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
         return obj;
     },
     fromPartial: function (object) {
@@ -613,6 +692,12 @@ exports.MsgDeactivateDID = {
                 var e = _a[_i];
                 message.signatures.push(did_1.SignInfo.fromPartial(e));
             }
+        }
+        if (object.clientSpec !== undefined && object.clientSpec !== null) {
+            message.clientSpec = object.clientSpec;
+        }
+        else {
+            message.clientSpec = "";
         }
         return message;
     },
@@ -669,7 +754,7 @@ exports.MsgDeactivateDIDResponse = {
         return message;
     },
 };
-var baseMsgRegisterCredentialStatus = { creator: "" };
+var baseMsgRegisterCredentialStatus = { creator: "", clientSpec: "" };
 exports.MsgRegisterCredentialStatus = {
     encode: function (message, writer) {
         if (writer === void 0) { writer = minimal_1.Writer.create(); }
@@ -681,6 +766,9 @@ exports.MsgRegisterCredentialStatus = {
         }
         if (message.proof !== undefined) {
             credential_1.CredentialProof.encode(message.proof, writer.uint32(26).fork()).ldelim();
+        }
+        if (message.clientSpec !== "") {
+            writer.uint32(34).string(message.clientSpec);
         }
         return writer;
     },
@@ -699,6 +787,9 @@ exports.MsgRegisterCredentialStatus = {
                     break;
                 case 3:
                     message.proof = credential_1.CredentialProof.decode(reader, reader.uint32());
+                    break;
+                case 4:
+                    message.clientSpec = reader.string();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -728,6 +819,12 @@ exports.MsgRegisterCredentialStatus = {
         else {
             message.proof = undefined;
         }
+        if (object.clientSpec !== undefined && object.clientSpec !== null) {
+            message.clientSpec = String(object.clientSpec);
+        }
+        else {
+            message.clientSpec = "";
+        }
         return message;
     },
     toJSON: function (message) {
@@ -741,6 +838,7 @@ exports.MsgRegisterCredentialStatus = {
             (obj.proof = message.proof
                 ? credential_1.CredentialProof.toJSON(message.proof)
                 : undefined);
+        message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
         return obj;
     },
     fromPartial: function (object) {
@@ -763,6 +861,12 @@ exports.MsgRegisterCredentialStatus = {
         }
         else {
             message.proof = undefined;
+        }
+        if (object.clientSpec !== undefined && object.clientSpec !== null) {
+            message.clientSpec = object.clientSpec;
+        }
+        else {
+            message.clientSpec = "";
         }
         return message;
     },

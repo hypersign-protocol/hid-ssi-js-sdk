@@ -11,6 +11,7 @@ export interface MsgCreateDID {
   didDocString: Did | undefined;
   signatures: SignInfo[];
   creator: string;
+  clientSpec: string;
 }
 
 export interface MsgCreateDIDResponse {
@@ -22,6 +23,7 @@ export interface MsgUpdateDID {
   version_id: string;
   signatures: SignInfo[];
   creator: string;
+  clientSpec: string;
 }
 
 export interface MsgUpdateDIDResponse {
@@ -32,6 +34,7 @@ export interface MsgCreateSchema {
   creator: string;
   schemaDoc: SchemaDocument | undefined;
   schemaProof: SchemaProof | undefined;
+  clientSpec: string;
 }
 
 export interface MsgCreateSchemaResponse {
@@ -43,6 +46,7 @@ export interface MsgDeactivateDID {
   didId: string;
   version_id: string;
   signatures: SignInfo[];
+  clientSpec: string;
 }
 
 export interface MsgDeactivateDIDResponse {
@@ -53,13 +57,14 @@ export interface MsgRegisterCredentialStatus {
   creator: string;
   credentialStatus: CredentialStatus | undefined;
   proof: CredentialProof | undefined;
+  clientSpec: string;
 }
 
 export interface MsgRegisterCredentialStatusResponse {
   id: number;
 }
 
-const baseMsgCreateDID: object = { creator: "" };
+const baseMsgCreateDID: object = { creator: "", clientSpec: "" };
 
 export const MsgCreateDID = {
   encode(message: MsgCreateDID, writer: Writer = Writer.create()): Writer {
@@ -71,6 +76,9 @@ export const MsgCreateDID = {
     }
     if (message.creator !== "") {
       writer.uint32(26).string(message.creator);
+    }
+    if (message.clientSpec !== "") {
+      writer.uint32(34).string(message.clientSpec);
     }
     return writer;
   },
@@ -91,6 +99,9 @@ export const MsgCreateDID = {
           break;
         case 3:
           message.creator = reader.string();
+          break;
+        case 4:
+          message.clientSpec = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -118,6 +129,11 @@ export const MsgCreateDID = {
     } else {
       message.creator = "";
     }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = String(object.clientSpec);
+    } else {
+      message.clientSpec = "";
+    }
     return message;
   },
 
@@ -135,6 +151,7 @@ export const MsgCreateDID = {
       obj.signatures = [];
     }
     message.creator !== undefined && (obj.creator = message.creator);
+    message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
     return obj;
   },
 
@@ -155,6 +172,11 @@ export const MsgCreateDID = {
       message.creator = object.creator;
     } else {
       message.creator = "";
+    }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = object.clientSpec;
+    } else {
+      message.clientSpec = "";
     }
     return message;
   },
@@ -218,7 +240,11 @@ export const MsgCreateDIDResponse = {
   },
 };
 
-const baseMsgUpdateDID: object = { version_id: "", creator: "" };
+const baseMsgUpdateDID: object = {
+  version_id: "",
+  creator: "",
+  clientSpec: "",
+};
 
 export const MsgUpdateDID = {
   encode(message: MsgUpdateDID, writer: Writer = Writer.create()): Writer {
@@ -233,6 +259,9 @@ export const MsgUpdateDID = {
     }
     if (message.creator !== "") {
       writer.uint32(34).string(message.creator);
+    }
+    if (message.clientSpec !== "") {
+      writer.uint32(42).string(message.clientSpec);
     }
     return writer;
   },
@@ -256,6 +285,9 @@ export const MsgUpdateDID = {
           break;
         case 4:
           message.creator = reader.string();
+          break;
+        case 5:
+          message.clientSpec = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -288,6 +320,11 @@ export const MsgUpdateDID = {
     } else {
       message.creator = "";
     }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = String(object.clientSpec);
+    } else {
+      message.clientSpec = "";
+    }
     return message;
   },
 
@@ -306,6 +343,7 @@ export const MsgUpdateDID = {
       obj.signatures = [];
     }
     message.creator !== undefined && (obj.creator = message.creator);
+    message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
     return obj;
   },
 
@@ -331,6 +369,11 @@ export const MsgUpdateDID = {
       message.creator = object.creator;
     } else {
       message.creator = "";
+    }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = object.clientSpec;
+    } else {
+      message.clientSpec = "";
     }
     return message;
   },
@@ -394,7 +437,7 @@ export const MsgUpdateDIDResponse = {
   },
 };
 
-const baseMsgCreateSchema: object = { creator: "" };
+const baseMsgCreateSchema: object = { creator: "", clientSpec: "" };
 
 export const MsgCreateSchema = {
   encode(message: MsgCreateSchema, writer: Writer = Writer.create()): Writer {
@@ -412,6 +455,9 @@ export const MsgCreateSchema = {
         message.schemaProof,
         writer.uint32(26).fork()
       ).ldelim();
+    }
+    if (message.clientSpec !== "") {
+      writer.uint32(34).string(message.clientSpec);
     }
     return writer;
   },
@@ -431,6 +477,9 @@ export const MsgCreateSchema = {
           break;
         case 3:
           message.schemaProof = SchemaProof.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.clientSpec = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -457,6 +506,11 @@ export const MsgCreateSchema = {
     } else {
       message.schemaProof = undefined;
     }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = String(object.clientSpec);
+    } else {
+      message.clientSpec = "";
+    }
     return message;
   },
 
@@ -471,6 +525,7 @@ export const MsgCreateSchema = {
       (obj.schemaProof = message.schemaProof
         ? SchemaProof.toJSON(message.schemaProof)
         : undefined);
+    message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
     return obj;
   },
 
@@ -490,6 +545,11 @@ export const MsgCreateSchema = {
       message.schemaProof = SchemaProof.fromPartial(object.schemaProof);
     } else {
       message.schemaProof = undefined;
+    }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = object.clientSpec;
+    } else {
+      message.clientSpec = "";
     }
     return message;
   },
@@ -561,7 +621,12 @@ export const MsgCreateSchemaResponse = {
   },
 };
 
-const baseMsgDeactivateDID: object = { creator: "", didId: "", version_id: "" };
+const baseMsgDeactivateDID: object = {
+  creator: "",
+  didId: "",
+  version_id: "",
+  clientSpec: "",
+};
 
 export const MsgDeactivateDID = {
   encode(message: MsgDeactivateDID, writer: Writer = Writer.create()): Writer {
@@ -576,6 +641,9 @@ export const MsgDeactivateDID = {
     }
     for (const v of message.signatures) {
       SignInfo.encode(v!, writer.uint32(34).fork()).ldelim();
+    }
+    if (message.clientSpec !== "") {
+      writer.uint32(42).string(message.clientSpec);
     }
     return writer;
   },
@@ -599,6 +667,9 @@ export const MsgDeactivateDID = {
           break;
         case 4:
           message.signatures.push(SignInfo.decode(reader, reader.uint32()));
+          break;
+        case 5:
+          message.clientSpec = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -631,6 +702,11 @@ export const MsgDeactivateDID = {
         message.signatures.push(SignInfo.fromJSON(e));
       }
     }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = String(object.clientSpec);
+    } else {
+      message.clientSpec = "";
+    }
     return message;
   },
 
@@ -646,6 +722,7 @@ export const MsgDeactivateDID = {
     } else {
       obj.signatures = [];
     }
+    message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
     return obj;
   },
 
@@ -671,6 +748,11 @@ export const MsgDeactivateDID = {
       for (const e of object.signatures) {
         message.signatures.push(SignInfo.fromPartial(e));
       }
+    }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = object.clientSpec;
+    } else {
+      message.clientSpec = "";
     }
     return message;
   },
@@ -745,7 +827,7 @@ export const MsgDeactivateDIDResponse = {
   },
 };
 
-const baseMsgRegisterCredentialStatus: object = { creator: "" };
+const baseMsgRegisterCredentialStatus: object = { creator: "", clientSpec: "" };
 
 export const MsgRegisterCredentialStatus = {
   encode(
@@ -763,6 +845,9 @@ export const MsgRegisterCredentialStatus = {
     }
     if (message.proof !== undefined) {
       CredentialProof.encode(message.proof, writer.uint32(26).fork()).ldelim();
+    }
+    if (message.clientSpec !== "") {
+      writer.uint32(34).string(message.clientSpec);
     }
     return writer;
   },
@@ -790,6 +875,9 @@ export const MsgRegisterCredentialStatus = {
           break;
         case 3:
           message.proof = CredentialProof.decode(reader, reader.uint32());
+          break;
+        case 4:
+          message.clientSpec = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -823,6 +911,11 @@ export const MsgRegisterCredentialStatus = {
     } else {
       message.proof = undefined;
     }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = String(object.clientSpec);
+    } else {
+      message.clientSpec = "";
+    }
     return message;
   },
 
@@ -837,6 +930,7 @@ export const MsgRegisterCredentialStatus = {
       (obj.proof = message.proof
         ? CredentialProof.toJSON(message.proof)
         : undefined);
+    message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
     return obj;
   },
 
@@ -865,6 +959,11 @@ export const MsgRegisterCredentialStatus = {
       message.proof = CredentialProof.fromPartial(object.proof);
     } else {
       message.proof = undefined;
+    }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = object.clientSpec;
+    } else {
+      message.clientSpec = "";
     }
     return message;
   },

@@ -11,7 +11,7 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DidDocument = exports.SignInfo = exports.Service = exports.VerificationMethod = exports.Metadata = exports.Did = exports.protobufPackage = void 0;
+exports.DidDocumentState = exports.SignInfo = exports.Service = exports.VerificationMethod = exports.Metadata = exports.Did = exports.protobufPackage = void 0;
 /* eslint-disable */
 var minimal_1 = require("protobufjs/minimal");
 exports.protobufPackage = "hypersignprotocol.hidnode.ssi";
@@ -768,30 +768,30 @@ exports.SignInfo = {
         return message;
     },
 };
-var baseDidDocument = {};
-exports.DidDocument = {
+var baseDidDocumentState = {};
+exports.DidDocumentState = {
     encode: function (message, writer) {
         if (writer === void 0) { writer = minimal_1.Writer.create(); }
-        if (message.did !== undefined) {
-            exports.Did.encode(message.did, writer.uint32(10).fork()).ldelim();
+        if (message.didDocument !== undefined) {
+            exports.Did.encode(message.didDocument, writer.uint32(10).fork()).ldelim();
         }
-        if (message.metadata !== undefined) {
-            exports.Metadata.encode(message.metadata, writer.uint32(18).fork()).ldelim();
+        if (message.didDocumentMetadata !== undefined) {
+            exports.Metadata.encode(message.didDocumentMetadata, writer.uint32(18).fork()).ldelim();
         }
         return writer;
     },
     decode: function (input, length) {
         var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
         var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseDidDocument);
+        var message = __assign({}, baseDidDocumentState);
         while (reader.pos < end) {
             var tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
-                    message.did = exports.Did.decode(reader, reader.uint32());
+                    message.didDocument = exports.Did.decode(reader, reader.uint32());
                     break;
                 case 2:
-                    message.metadata = exports.Metadata.decode(reader, reader.uint32());
+                    message.didDocumentMetadata = exports.Metadata.decode(reader, reader.uint32());
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -801,44 +801,48 @@ exports.DidDocument = {
         return message;
     },
     fromJSON: function (object) {
-        var message = __assign({}, baseDidDocument);
-        if (object.did !== undefined && object.did !== null) {
-            message.did = exports.Did.fromJSON(object.did);
+        var message = __assign({}, baseDidDocumentState);
+        if (object.didDocument !== undefined && object.didDocument !== null) {
+            message.didDocument = exports.Did.fromJSON(object.didDocument);
         }
         else {
-            message.did = undefined;
+            message.didDocument = undefined;
         }
-        if (object.metadata !== undefined && object.metadata !== null) {
-            message.metadata = exports.Metadata.fromJSON(object.metadata);
+        if (object.didDocumentMetadata !== undefined &&
+            object.didDocumentMetadata !== null) {
+            message.didDocumentMetadata = exports.Metadata.fromJSON(object.didDocumentMetadata);
         }
         else {
-            message.metadata = undefined;
+            message.didDocumentMetadata = undefined;
         }
         return message;
     },
     toJSON: function (message) {
         var obj = {};
-        message.did !== undefined &&
-            (obj.did = message.did ? exports.Did.toJSON(message.did) : undefined);
-        message.metadata !== undefined &&
-            (obj.metadata = message.metadata
-                ? exports.Metadata.toJSON(message.metadata)
+        message.didDocument !== undefined &&
+            (obj.didDocument = message.didDocument
+                ? exports.Did.toJSON(message.didDocument)
+                : undefined);
+        message.didDocumentMetadata !== undefined &&
+            (obj.didDocumentMetadata = message.didDocumentMetadata
+                ? exports.Metadata.toJSON(message.didDocumentMetadata)
                 : undefined);
         return obj;
     },
     fromPartial: function (object) {
-        var message = __assign({}, baseDidDocument);
-        if (object.did !== undefined && object.did !== null) {
-            message.did = exports.Did.fromPartial(object.did);
+        var message = __assign({}, baseDidDocumentState);
+        if (object.didDocument !== undefined && object.didDocument !== null) {
+            message.didDocument = exports.Did.fromPartial(object.didDocument);
         }
         else {
-            message.did = undefined;
+            message.didDocument = undefined;
         }
-        if (object.metadata !== undefined && object.metadata !== null) {
-            message.metadata = exports.Metadata.fromPartial(object.metadata);
+        if (object.didDocumentMetadata !== undefined &&
+            object.didDocumentMetadata !== null) {
+            message.didDocumentMetadata = exports.Metadata.fromPartial(object.didDocumentMetadata);
         }
         else {
-            message.metadata = undefined;
+            message.didDocumentMetadata = undefined;
         }
         return message;
     },

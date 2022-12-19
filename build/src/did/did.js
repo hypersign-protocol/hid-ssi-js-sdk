@@ -211,16 +211,9 @@ var HypersignDID = /** @class */ (function () {
             });
         });
     };
-    /**
-     * @param params params: { did?: string  }
-     *
-     *  if did is provided then it will resolve the did doc from the blockchain
-     *
-     * @returns  Promise : {context ,didDocument, VerificationResult , didDocumentMetadata}
-     */
     HypersignDID.prototype.resolve = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var result;
+            var result, didDoc, verificationMethods;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -228,6 +221,19 @@ var HypersignDID = /** @class */ (function () {
                         return [4 /*yield*/, this.didrpc.resolveDID(params.did)];
                     case 1:
                         result = _a.sent();
+                        if (params.ed25519verificationkey2020) {
+                            didDoc = result.didDocument;
+                            verificationMethods = didDoc.verificationMethod;
+                            verificationMethods.forEach(function (verificationMethod) {
+                                if (verificationMethod.type === 'Ed25519VerificationKey2020') {
+                                    var ed25519PublicKey = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
+                                        publicKey: verificationMethod.publicKeyMultibase,
+                                    });
+                                    verificationMethod.publicKeyMultibase = ed25519PublicKey.publicKeyMultibase;
+                                }
+                            });
+                            didDoc.verificationMethod = verificationMethods;
+                        }
                         return [2 /*return*/, {
                                 didDocument: utils_1.default.jsonToLdConvertor(result.didDocument),
                                 didDocumentMetadata: result.didDocumentMetadata,

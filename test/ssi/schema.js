@@ -84,3 +84,33 @@ createWallet(mnemonic)
         writeDataInFile('../mock/public/schema.json', JSON.stringify(res))
         console.log(JSON.stringify(res, null, 2))
     })
+
+    .then(() => {
+        console.log("=========Edit Schema========")
+        
+        const properties=JSON.parse(schema.schema.properties)
+        properties.rollno={type:"string"}
+        schema.schema.properties=JSON.stringify(properties)
+        let schemaId=schema.id
+        schemaId=schemaId.replace("1.0","1.1")
+        schema.id=schemaId               
+
+        console.log("========Sign Schema=======")
+        const privKey = privateKeyMultibase
+        return hsSdk.schema.signSchema({ privateKey: privKey, schema })
+    })
+    .then(signature => {
+        console.log("Signature: ", signature)
+        console.log("=========Register Schema========")
+        proof.proofValue = signature
+        proof.created = schema.authored
+        console.log(schema, proof);
+        return hsSdk.schema.registerSchema({ schema, proof })
+    }).then(res => {
+        console.log("=========Resolve Schema========")
+        console.log(res)
+        return hsSdk.schema.resolve({ schemaId: schema.id })
+    }).then(res => {
+        writeDataInFile('../mock/public/schema.json', JSON.stringify(res))
+        console.log(JSON.stringify(res, null, 2))
+    })
