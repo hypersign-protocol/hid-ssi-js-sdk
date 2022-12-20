@@ -349,7 +349,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
     };
     HypersignVerifiableCredential.prototype.issueCredential = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var signerDidDoc, signerDidDocAsIDidDocument, didControllers, idFromVerificationMethodId, signerDidDocFinal, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, signedVC, resp;
+            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerDidtemp, didDocumentController, idFromPublicKey, issuerDidFinal, issuerDidDocFinal, issuerPublicKeyVerMethod, proof, signedVC, resp;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -373,28 +373,14 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         signerDidDoc = (_a.sent()).didDocument;
                         if (!signerDidDoc)
                             throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
-                        signerDidDocAsIDidDocument = signerDidDoc;
-                        didControllers = signerDidDocAsIDidDocument.controller;
-                        idFromVerificationMethodId = params.verificationMethodId.split('#')[0];
-                        if (!didControllers.includes(idFromVerificationMethodId)) {
-                            throw new Error('IssuerDid = ' +
-                                params.issuerDid +
-                                ' is not a controller of verificationMethodId = ' +
-                                params.verificationMethodId);
-                        }
-                        return [4 /*yield*/, this.hsDid.resolve({ did: idFromVerificationMethodId })];
-                    case 2:
-                        signerDidDocFinal = (_a.sent()).didDocument;
-                        if (!signerDidDocFinal)
-                            throw new Error('Could not resolve issuerDid = ' + idFromVerificationMethodId);
                         publicKeyId = params.verificationMethodId;
-                        publicKeyVerMethod = signerDidDocFinal['verificationMethod'].find(function (x) { return x.id == publicKeyId; });
+                        publicKeyVerMethod = signerDidDoc['verificationMethod'].find(function (x) { return x.id == publicKeyId; });
                         convertedKeyPair = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
                             publicKey: publicKeyVerMethod.publicKeyMultibase,
                         });
                         publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
                         return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: params.privateKey }, publicKeyVerMethod))];
-                    case 3:
+                    case 2:
                         keyPair = _a.sent();
                         suite = new ed25519_signature_2020_1.Ed25519Signature2020({
                             verificationMethod: publicKeyId,
@@ -416,14 +402,24 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                                 message: JSON.stringify(credentialStatus),
                                 privateKeyMultibase: params.privateKey,
                             })];
-                    case 4:
+                    case 3:
                         proofValue = _a.sent();
                         return [4 /*yield*/, this.hsDid.resolve({ did: params.credential.issuer })];
-                    case 5:
+                    case 4:
                         issuerDID = (_a.sent()).didDocument;
                         issuerDidDoc = issuerDID;
                         issuerPublicKeyId = params.verificationMethodId;
-                        issuerPublicKeyVerMethod = issuerDidDoc.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
+                        issuerDidtemp = issuerDID;
+                        didDocumentController = issuerDidtemp.controller;
+                        idFromPublicKey = issuerPublicKeyId.split('#')[0];
+                        if (!didDocumentController.includes(idFromPublicKey)) {
+                            throw new Error('HID-SSI-SDK:: Error:' + idFromPublicKey + ' is not a controller of ' + issuerDidDoc.id);
+                        }
+                        return [4 /*yield*/, this.hsDid.resolve({ did: idFromPublicKey })];
+                    case 5:
+                        issuerDidFinal = (_a.sent()).didDocument;
+                        issuerDidDocFinal = issuerDidFinal;
+                        issuerPublicKeyVerMethod = issuerDidDocFinal.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
                         proof = {
                             type: constants_1.VC.VERIFICATION_METHOD_TYPE,
                             created: this.dateNow(),

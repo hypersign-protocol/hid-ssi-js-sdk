@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import HypersignSchema from '../schema/schema';
 import { Schema, SchemaProperty } from '../generated/ssi/schema';
 import HypersignDID, { IDidDocument } from '../did/did';
-import { Did, DidDocumentState, VerificationMethod } from '../generated/ssi/did';
+import { Did, VerificationMethod } from '../generated/ssi/did';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 const ed25519 = require('@stablelib/ed25519');
@@ -343,24 +343,10 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
     if (!signerDidDoc) throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
-    const signerDidDocAsIDidDocument = signerDidDoc as IDidDocument;
-    const didControllers = signerDidDocAsIDidDocument.controller;
-    const idFromVerificationMethodId = params.verificationMethodId.split('#')[0];
-    if (!didControllers.includes(idFromVerificationMethodId)) {
-      throw new Error(
-        'IssuerDid = ' +
-          params.issuerDid +
-          ' is not a controller of verificationMethodId = ' +
-          params.verificationMethodId
-      );
-    }
-
-    const { didDocument: signerDidDocFinal } = await this.hsDid.resolve({ did: idFromVerificationMethodId });
-    if (!signerDidDocFinal) throw new Error('Could not resolve issuerDid = ' + idFromVerificationMethodId);
 
     // TODO: take verification method from params
     const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
-    const publicKeyVerMethod: VerificationMethod = signerDidDocFinal['verificationMethod'].find(
+    const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
       (x) => x.id == publicKeyId
     ) as VerificationMethod;
 
@@ -405,7 +391,16 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credential.issuer });
     const issuerDidDoc: Did = issuerDID as Did;
     const issuerPublicKeyId = params.verificationMethodId;
-    const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+    const issuerDidtemp = issuerDID as IDidDocument;
+    const didDocumentController = issuerDidtemp.controller;
+    const idFromPublicKey = issuerPublicKeyId.split('#')[0];
+    if (!didDocumentController.includes(idFromPublicKey)) {
+      throw new Error('HID-SSI-SDK:: Error:' + idFromPublicKey + ' is not a controller of ' + issuerDidDoc.id);
+    }
+
+    const { didDocument: issuerDidFinal } = await this.hsDid.resolve({ did: idFromPublicKey });
+    const issuerDidDocFinal: IDidDocument = issuerDidFinal as IDidDocument;
+    const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDocFinal.verificationMethod.find(
       (x) => x.id == issuerPublicKeyId
     ) as VerificationMethod;
 
