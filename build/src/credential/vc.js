@@ -349,7 +349,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
     };
     HypersignVerifiableCredential.prototype.issueCredential = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, signedVC, resp;
+            var signerDidDoc, signerDidDocAsIDidDocument, didControllers, idFromVerificationMethodId, signerDidDocFinal, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, signedVC, resp;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -373,14 +373,26 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         signerDidDoc = (_a.sent()).didDocument;
                         if (!signerDidDoc)
                             throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
+                        signerDidDocAsIDidDocument = signerDidDoc;
+                        didControllers = signerDidDocAsIDidDocument.controller;
+                        idFromVerificationMethodId = params.verificationMethodId.split('#')[0];
+                        if (!didControllers.includes(idFromVerificationMethodId)) {
+                            throw new Error('IssuerDid = ' +
+                                params.issuerDid +
+                                ' is not a controller of verificationMethodId = ' +
+                                params.verificationMethodId);
+                        }
+                        return [4 /*yield*/, this.hsDid.resolve({ did: idFromVerificationMethodId })];
+                    case 2:
+                        signerDidDocFinal = (_a.sent()).didDocument;
                         publicKeyId = params.verificationMethodId;
-                        publicKeyVerMethod = signerDidDoc['verificationMethod'].find(function (x) { return x.id == publicKeyId; });
+                        publicKeyVerMethod = signerDidDocFinal['verificationMethod'].find(function (x) { return x.id == publicKeyId; });
                         convertedKeyPair = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
                             publicKey: publicKeyVerMethod.publicKeyMultibase,
                         });
                         publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
                         return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: params.privateKey }, publicKeyVerMethod))];
-                    case 2:
+                    case 3:
                         keyPair = _a.sent();
                         suite = new ed25519_signature_2020_1.Ed25519Signature2020({
                             verificationMethod: publicKeyId,
@@ -402,10 +414,10 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                                 message: JSON.stringify(credentialStatus),
                                 privateKeyMultibase: params.privateKey,
                             })];
-                    case 3:
+                    case 4:
                         proofValue = _a.sent();
                         return [4 /*yield*/, this.hsDid.resolve({ did: params.credential.issuer })];
-                    case 4:
+                    case 5:
                         issuerDID = (_a.sent()).didDocument;
                         issuerDidDoc = issuerDID;
                         issuerPublicKeyId = params.verificationMethodId;
@@ -423,17 +435,17 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                                 suite: suite,
                                 documentLoader: jsonld_1.documentLoader,
                             })];
-                    case 5:
-                        signedVC = _a.sent();
-                        if (!params.registerCredential) return [3 /*break*/, 7];
-                        return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, proof)];
                     case 6:
+                        signedVC = _a.sent();
+                        if (!params.registerCredential) return [3 /*break*/, 8];
+                        return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, proof)];
+                    case 7:
                         resp = _a.sent();
                         if (!resp || resp.code != 0) {
                             throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
                         }
                         return [2 /*return*/, signedVC];
-                    case 7: return [2 /*return*/, { signedVC: signedVC, credentialStatus: credentialStatus, proof: proof }];
+                    case 8: return [2 /*return*/, { signedVC: signedVC, credentialStatus: credentialStatus, proof: proof }];
                 }
             });
         });

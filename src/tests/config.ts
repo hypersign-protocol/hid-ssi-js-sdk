@@ -1,5 +1,5 @@
-const { DirectSecp256k1HdWallet } = require('@cosmjs/proto-signing');
-const { HdPath, Slip10RawIndex } = require('@cosmjs/crypto');
+import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
+import { HdPath, Slip10RawIndex } from '@cosmjs/crypto';
 
 export const mnemonic =
   'zero require alcohol swamp hover punch celery common merge embrace flock dumb unit capital problem future canal improve auto home apple avoid tragic mechanic';

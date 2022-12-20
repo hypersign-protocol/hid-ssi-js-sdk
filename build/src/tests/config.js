@@ -37,8 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createWallet = exports.makeCosmoshubPath = exports.hidNodeEp = exports.mnemonic = void 0;
-var DirectSecp256k1HdWallet = require('@cosmjs/proto-signing').DirectSecp256k1HdWallet;
-var _a = require('@cosmjs/crypto'), HdPath = _a.HdPath, Slip10RawIndex = _a.Slip10RawIndex;
+var proto_signing_1 = require("@cosmjs/proto-signing");
+var crypto_1 = require("@cosmjs/crypto");
 exports.mnemonic = 'zero require alcohol swamp hover punch celery common merge embrace flock dumb unit capital problem future canal improve auto home apple avoid tragic mechanic';
 exports.hidNodeEp = {
     rpc: 'https://jagrat.hypersign.id/rpc',
@@ -47,11 +47,11 @@ exports.hidNodeEp = {
 };
 function makeCosmoshubPath(a) {
     return [
-        Slip10RawIndex.hardened(44),
-        Slip10RawIndex.hardened(118),
-        Slip10RawIndex.hardened(0),
-        Slip10RawIndex.normal(0),
-        Slip10RawIndex.normal(a),
+        crypto_1.Slip10RawIndex.hardened(44),
+        crypto_1.Slip10RawIndex.hardened(118),
+        crypto_1.Slip10RawIndex.hardened(0),
+        crypto_1.Slip10RawIndex.normal(0),
+        crypto_1.Slip10RawIndex.normal(a),
     ];
 }
 exports.makeCosmoshubPath = makeCosmoshubPath;
@@ -61,12 +61,12 @@ var createWallet = function (mnemonic) { return __awaiter(void 0, void 0, void 0
         switch (_a.label) {
             case 0:
                 if (!!mnemonic) return [3 /*break*/, 2];
-                return [4 /*yield*/, DirectSecp256k1HdWallet.generate(24, (options = {
+                return [4 /*yield*/, proto_signing_1.DirectSecp256k1HdWallet.generate(24, (options = {
                         prefix: 'hid',
                         hdPaths: [makeCosmoshubPath(0)],
                     }))];
             case 1: return [2 /*return*/, _a.sent()];
-            case 2: return [4 /*yield*/, DirectSecp256k1HdWallet.fromMnemonic(mnemonic, (options = {
+            case 2: return [4 /*yield*/, proto_signing_1.DirectSecp256k1HdWallet.fromMnemonic(mnemonic, (options = {
                     prefix: 'hid',
                     hdPaths: [makeCosmoshubPath(0)],
                 }))];
