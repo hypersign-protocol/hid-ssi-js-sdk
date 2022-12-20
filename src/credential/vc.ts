@@ -356,6 +356,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     }
 
     const { didDocument: signerDidDocFinal } = await this.hsDid.resolve({ did: idFromVerificationMethodId });
+    if (!signerDidDocFinal) throw new Error('Could not resolve issuerDid = ' + idFromVerificationMethodId);
 
     // TODO: take verification method from params
     const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
