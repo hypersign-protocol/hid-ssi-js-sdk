@@ -385,6 +385,8 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         return [4 /*yield*/, this.hsDid.resolve({ did: idFromVerificationMethodId })];
                     case 2:
                         signerDidDocFinal = (_a.sent()).didDocument;
+                        if (!signerDidDocFinal)
+                            throw new Error('Could not resolve issuerDid = ' + idFromVerificationMethodId);
                         publicKeyId = params.verificationMethodId;
                         publicKeyVerMethod = signerDidDocFinal['verificationMethod'].find(function (x) { return x.id == publicKeyId; });
                         convertedKeyPair = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
