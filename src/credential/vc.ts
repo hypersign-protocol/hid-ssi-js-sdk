@@ -4,7 +4,7 @@ import { documentLoader } from 'jsonld';
 import { v4 as uuidv4 } from 'uuid';
 import HypersignSchema from '../schema/schema';
 import { Schema, SchemaProperty } from '../generated/ssi/schema';
-import HypersignDID, { IDidDocument } from '../did/did';
+import HypersignDID from '../did/did';
 import { Did, VerificationMethod } from '../generated/ssi/did';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
@@ -387,28 +387,19 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       message: JSON.stringify(credentialStatus),
       privateKeyMultibase: params.privateKey,
     });
-
-    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credential.issuer });
-    const issuerDidDoc: Did = issuerDID as Did;
-    const issuerPublicKeyId = params.verificationMethodId;
-    const issuerDidtemp = issuerDID as IDidDocument;
-    const didDocumentController = issuerDidtemp.controller;
-    const idFromPublicKey = issuerPublicKeyId.split('#')[0];
-    if (!didDocumentController.includes(idFromPublicKey)) {
-      throw new Error('HID-SSI-SDK:: Error:' + idFromPublicKey + ' is not a controller of ' + issuerDidDoc.id);
-    }
-
-    const { didDocument: issuerDidFinal } = await this.hsDid.resolve({ did: idFromPublicKey });
-    const issuerDidDocFinal: IDidDocument = issuerDidFinal as IDidDocument;
-    const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDocFinal.verificationMethod.find(
-      (x) => x.id == issuerPublicKeyId
-    ) as VerificationMethod;
+    // LOOKS LIKE REDUNDANT CODE
+    // const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credential.issuer });
+    // const issuerDidDoc: Did = issuerDID as Did;
+    // const issuerPublicKeyId = params.verificationMethodId;
+    // const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+    //   (x) => x.id == issuerPublicKeyId
+    // ) as VerificationMethod;
 
     const proof: CredentialProof = {
       type: VC.VERIFICATION_METHOD_TYPE,
       created: this.dateNow(),
       updated: this.dateNow(),
-      verificationMethod: issuerPublicKeyVerMethod.id,
+      verificationMethod: publicKeyVerMethod.id,
       proofValue,
       proofPurpose: VC.PROOF_PURPOSE,
     };
