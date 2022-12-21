@@ -246,7 +246,6 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                         }
                         issuerPublicKeyId = params.issuerVerificationMethodId;
                         issuerPublicKeyVerMethod = issuerDidDoc.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
-                        console.log('issuerPublicKeyVerMethod', issuerPublicKeyVerMethod);
                         if (!(issuerPublicKeyVerMethod === null || issuerPublicKeyVerMethod === undefined)) return [3 /*break*/, 7];
                         return [4 /*yield*/, this.hsDid.resolve({
                                 did: issuerDidDocControllerVerificationMethod,
@@ -255,7 +254,6 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                         controllerDidDocT = (_a.sent()).didDocument;
                         controllerDidDoc = controllerDidDocT;
                         issuerPublicKeyVerMethod = controllerDidDoc.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
-                        console.log('issuerPublicKeyVerMethod', issuerPublicKeyVerMethod);
                         _a.label = 7;
                     case 7:
                         issuerPublicKeyMultibase = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
