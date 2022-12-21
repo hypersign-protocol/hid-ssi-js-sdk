@@ -277,6 +277,9 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     let issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
       (x) => x.id == issuerPublicKeyId
     ) as VerificationMethod;
+
+    console.log('issuerPublicKeyVerMethod', issuerPublicKeyVerMethod);
+
     if (issuerPublicKeyVerMethod === null || issuerPublicKeyVerMethod === undefined) {
       const { didDocument: controllerDidDocT } = await this.hsDid.resolve({
         did: issuerDidDocControllerVerificationMethod,
@@ -285,6 +288,8 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       issuerPublicKeyVerMethod = controllerDidDoc.verificationMethod.find(
         (x) => x.id == issuerPublicKeyId
       ) as VerificationMethod;
+
+      console.log('issuerPublicKeyVerMethod', issuerPublicKeyVerMethod);
     }
     // Connvert the 45 byte pub key of issuer into 48 byte
     const { publicKeyMultibase: issuerPublicKeyMultibase } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020(
