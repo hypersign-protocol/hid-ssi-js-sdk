@@ -260,14 +260,32 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     ///---------------------------------------
     /// Issuer
     const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.issuerDid });
+    if (issuerDID === null || issuerDID === undefined) {
+      throw new Error('Issuer DID is not registered');
+    }
 
     const issuerDidDoc: Did = issuerDID as Did;
+    const issuerDidDocController = issuerDidDoc.controller;
+    const issuerDidDocControllerVerificationMethod = params.issuerVerificationMethodId.split('#')[0];
+
+    if (!issuerDidDocController.includes(issuerDidDocControllerVerificationMethod)) {
+      throw new Error(issuerDidDocControllerVerificationMethod + ' is not a controller of ' + params.issuerDid);
+    }
+
     const issuerPublicKeyId = params.issuerVerificationMethodId;
 
-    const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+    let issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
       (x) => x.id == issuerPublicKeyId
     ) as VerificationMethod;
-
+    if (issuerPublicKeyVerMethod === null || issuerPublicKeyVerMethod === undefined) {
+      const { didDocument: controllerDidDocT } = await this.hsDid.resolve({
+        did: issuerDidDocControllerVerificationMethod,
+      });
+      const controllerDidDoc: Did = controllerDidDocT as Did;
+      issuerPublicKeyVerMethod = controllerDidDoc.verificationMethod.find(
+        (x) => x.id == issuerPublicKeyId
+      ) as VerificationMethod;
+    }
     // Connvert the 45 byte pub key of issuer into 48 byte
     const { publicKeyMultibase: issuerPublicKeyMultibase } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020(
       {

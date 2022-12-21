@@ -349,7 +349,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
     };
     HypersignVerifiableCredential.prototype.issueCredential = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, proof, signedVC, resp;
+            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, credIssuerDidDoc, credIssuerController, issuerPublicKeyVerMethod, proof, signedVC, resp;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -371,7 +371,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         return [4 /*yield*/, this.hsDid.resolve({ did: params.issuerDid })];
                     case 1:
                         signerDidDoc = (_a.sent()).didDocument;
-                        if (!signerDidDoc)
+                        if (signerDidDoc === null || signerDidDoc === undefined)
                             throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
                         publicKeyId = params.verificationMethodId;
                         publicKeyVerMethod = signerDidDoc['verificationMethod'].find(function (x) { return x.id == publicKeyId; });
@@ -404,11 +404,22 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                             })];
                     case 3:
                         proofValue = _a.sent();
+                        return [4 /*yield*/, this.hsDid.resolve({ did: params.credential.issuer })];
+                    case 4:
+                        issuerDID = (_a.sent()).didDocument;
+                        if (issuerDID === null || issuerDID === undefined)
+                            throw new Error('Could not resolve issuerDid = ' + params.credential.issuer);
+                        credIssuerDidDoc = issuerDID;
+                        credIssuerController = credIssuerDidDoc.controller;
+                        if (!credIssuerController.includes(params.issuerDid)) {
+                            throw new Error(params.issuerDid + ' is not a controller of ' + params.credential.issuer);
+                        }
+                        issuerPublicKeyVerMethod = publicKeyVerMethod;
                         proof = {
                             type: constants_1.VC.VERIFICATION_METHOD_TYPE,
                             created: this.dateNow(),
                             updated: this.dateNow(),
-                            verificationMethod: publicKeyVerMethod.id,
+                            verificationMethod: issuerPublicKeyVerMethod.id,
                             proofValue: proofValue,
                             proofPurpose: constants_1.VC.PROOF_PURPOSE,
                         };
@@ -417,17 +428,17 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                                 suite: suite,
                                 documentLoader: jsonld_1.documentLoader,
                             })];
-                    case 4:
-                        signedVC = _a.sent();
-                        if (!params.registerCredential) return [3 /*break*/, 6];
-                        return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, proof)];
                     case 5:
+                        signedVC = _a.sent();
+                        if (!params.registerCredential) return [3 /*break*/, 7];
+                        return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, proof)];
+                    case 6:
                         resp = _a.sent();
                         if (!resp || resp.code != 0) {
                             throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
                         }
                         return [2 /*return*/, signedVC];
-                    case 6: return [2 /*return*/, { signedVC: signedVC, credentialStatus: credentialStatus, proof: proof }];
+                    case 7: return [2 /*return*/, { signedVC: signedVC, credentialStatus: credentialStatus, proof: proof }];
                 }
             });
         });

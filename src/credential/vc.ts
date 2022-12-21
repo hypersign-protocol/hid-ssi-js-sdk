@@ -342,7 +342,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     }
 
     const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
-    if (!signerDidDoc) throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
+    if (signerDidDoc === null || signerDidDoc === undefined)
+      throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
 
     // TODO: take verification method from params
     const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
@@ -387,19 +388,31 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       message: JSON.stringify(credentialStatus),
       privateKeyMultibase: params.privateKey,
     });
-    // LOOKS LIKE REDUNDANT CODE
-    // const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credential.issuer });
+
+    // check params.issuer is a controller of params.credential.issuer
+
+    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credential.issuer });
+    if (issuerDID === null || issuerDID === undefined)
+      throw new Error('Could not resolve issuerDid = ' + params.credential.issuer);
+    const credIssuerDidDoc: Did = issuerDID as Did;
+    const credIssuerController = credIssuerDidDoc.controller;
+    if (!credIssuerController.includes(params.issuerDid)) {
+      throw new Error(params.issuerDid + ' is not a controller of ' + params.credential.issuer);
+    }
+
     // const issuerDidDoc: Did = issuerDID as Did;
     // const issuerPublicKeyId = params.verificationMethodId;
     // const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
     //   (x) => x.id == issuerPublicKeyId
     // ) as VerificationMethod;
 
+    const issuerPublicKeyVerMethod: VerificationMethod = publicKeyVerMethod;
+
     const proof: CredentialProof = {
       type: VC.VERIFICATION_METHOD_TYPE,
       created: this.dateNow(),
       updated: this.dateNow(),
-      verificationMethod: publicKeyVerMethod.id,
+      verificationMethod: issuerPublicKeyVerMethod.id,
       proofValue,
       proofPurpose: VC.PROOF_PURPOSE,
     };
