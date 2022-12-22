@@ -523,8 +523,20 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credStatus.issuer });
     const issuerDidDoc: Did = issuerDID as Did;
+    const issuerDidDocController = issuerDidDoc.controller;
+    const verificationMethodController = params.verificationMethodId.split('#')[0];
+
+    if (!issuerDidDocController.includes(verificationMethodController)) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
+    }
+
+    const { didDocument: controllerDidDoc } = await this.hsDid.resolve({ did: verificationMethodController });
+    if (!controllerDidDoc)
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
+    const didDocofController = controllerDidDoc as Did;
+
     const issuerPublicKeyId = params.verificationMethodId;
-    const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+    const issuerPublicKeyVerMethod: VerificationMethod = didDocofController.verificationMethod.find(
       (x) => x.id == issuerPublicKeyId
     ) as VerificationMethod;
 

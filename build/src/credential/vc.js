@@ -464,7 +464,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
     };
     HypersignVerifiableCredential.prototype.updateCredentialStatus = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, claim, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, resp;
+            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, claim, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerDidDocController, verificationMethodController, controllerDidDoc, didDocofController, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, resp;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -527,8 +527,19 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                     case 4:
                         issuerDID = (_a.sent()).didDocument;
                         issuerDidDoc = issuerDID;
+                        issuerDidDocController = issuerDidDoc.controller;
+                        verificationMethodController = params.verificationMethodId.split('#')[0];
+                        if (!issuerDidDocController.includes(verificationMethodController)) {
+                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
+                        }
+                        return [4 /*yield*/, this.hsDid.resolve({ did: verificationMethodController })];
+                    case 5:
+                        controllerDidDoc = (_a.sent()).didDocument;
+                        if (!controllerDidDoc)
+                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
+                        didDocofController = controllerDidDoc;
                         issuerPublicKeyId = params.verificationMethodId;
-                        issuerPublicKeyVerMethod = issuerDidDoc.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
+                        issuerPublicKeyVerMethod = didDocofController.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
                         proof = {
                             type: constants_1.VC.VERIFICATION_METHOD_TYPE,
                             created: params.credStatus.issuanceDate,
@@ -538,7 +549,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                             proofPurpose: constants_1.VC.PROOF_PURPOSE,
                         };
                         return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, proof)];
-                    case 5:
+                    case 6:
                         resp = _a.sent();
                         if (!resp || resp.code != 0) {
                             throw new Error('HID-SSI-SDK:: Error while revoking the credential error = ' + resp.rawLog);
