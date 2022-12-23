@@ -392,7 +392,7 @@ describe('#issueCredential() method for issuing credential', function () {
     tempIssueCredentialBody.issuerDid = didDocId;
     tempIssueCredentialBody.verificationMethodId = verificationMethodId;
     tempIssueCredentialBody.privateKey = privateKeyMultibase;
-    const issuedCredResult = await hsSdk.vc.issueCredential(tempIssueCredentialBody);
+    const { signedVC: issuedCredResult } = await hsSdk.vc.issueCredential(tempIssueCredentialBody);
 
     credentialStatusId = issuedCredResult['credentialStatus'].id;
     expect(issuedCredResult).to.be.a('object');
@@ -406,7 +406,7 @@ describe('#issueCredential() method for issuing credential', function () {
     should().exist(issuedCredResult['credentialSchema']);
     should().exist(issuedCredResult['credentialStatus']);
     should().exist(issuedCredResult['proof']);
-    expect(issuedCredResult['id']).to.be.equal(credentialId);
+    expect(issuedCredResult['id']).to.be.equal(newCredDetails.id);
   });
 });
 

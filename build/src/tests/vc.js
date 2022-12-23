@@ -595,7 +595,7 @@ describe('#issueCredential() method for issuing credential', function () {
                     tempIssueCredentialBody.privateKey = privateKeyMultibase;
                     return [4 /*yield*/, hsSdk.vc.issueCredential(tempIssueCredentialBody)];
                 case 2:
-                    issuedCredResult = _a.sent();
+                    issuedCredResult = (_a.sent()).signedVC;
                     credentialStatusId = issuedCredResult['credentialStatus'].id;
                     (0, chai_1.expect)(issuedCredResult).to.be.a('object');
                     (0, chai_1.should)().exist(issuedCredResult['@context']);
@@ -608,7 +608,7 @@ describe('#issueCredential() method for issuing credential', function () {
                     (0, chai_1.should)().exist(issuedCredResult['credentialSchema']);
                     (0, chai_1.should)().exist(issuedCredResult['credentialStatus']);
                     (0, chai_1.should)().exist(issuedCredResult['proof']);
-                    (0, chai_1.expect)(issuedCredResult['id']).to.be.equal(credentialId);
+                    (0, chai_1.expect)(issuedCredResult['id']).to.be.equal(newCredDetails.id);
                     return [2 /*return*/];
             }
         });
