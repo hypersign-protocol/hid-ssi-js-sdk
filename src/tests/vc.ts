@@ -15,11 +15,15 @@ const domain = 'www.adbv.com';
 let offlineSigner;
 let hsSdk;
 let credentialId;
+let credentialId2;
 let credentialDetail;
 let verifiablePresentation;
 let signedPresentation;
 let verifiableCredentialPresentationId;
 let credentialStatusId;
+const credentialStatusProof = {};
+const credentialStatus2 = {};
+let credentialStatus;
 const credentialBody = {
   schemaId: '',
   subjectDid: '',
@@ -384,17 +388,19 @@ describe('#issueCredential() method for issuing credential', function () {
     tempCredentialBody.issuerDid = didDocId;
     tempCredentialBody.fields = { name: 'varshaxyz' };
     const newCredDetails = await hsSdk.vc.getCredential(tempCredentialBody);
-
     const tempIssueCredentialBody = { ...issueCredentialBody };
-
     tempIssueCredentialBody['registerCredential'] = false;
     tempIssueCredentialBody.credential = newCredDetails;
     tempIssueCredentialBody.issuerDid = didDocId;
     tempIssueCredentialBody.verificationMethodId = verificationMethodId;
     tempIssueCredentialBody.privateKey = privateKeyMultibase;
-    const { signedVC: issuedCredResult } = await hsSdk.vc.issueCredential(tempIssueCredentialBody);
-
-    credentialStatusId = issuedCredResult['credentialStatus'].id;
+    const {
+      signedVC: issuedCredResult,
+      credentialStatus,
+      proof,
+    } = await hsSdk.vc.issueCredential(tempIssueCredentialBody);
+    Object.assign(credentialStatus2, credentialStatus);
+    Object.assign(credentialStatusProof, proof);
     expect(issuedCredResult).to.be.a('object');
     should().exist(issuedCredResult['@context']);
     should().exist(issuedCredResult['id']);
@@ -489,7 +495,89 @@ describe('#checkCredentialStatus() method to check status of the credential', fu
     expect(credentialStatus.verified).to.be.equal(true);
   });
 });
+describe('#resolveCredentialStatus this is to resolve credential status', function () {
+  it('should not be able to resolve credential as credentialId is not passed', async function () {
+    return hsSdk.vc.resolveCredentialStatus({ credentialId: '' }).catch(function (err) {
+      expect(function () {
+        throw err;
+      }).to.throw(Error, 'HID-SSI-SDK:: Error: credentialId is required to resolve credential status');
+    });
+  });
+  it('should be able to resolve credential', async function () {
+    credentialStatus = await hsSdk.vc.resolveCredentialStatus({ credentialId });
+    expect(credentialStatus).to.be.a('object');
+    should().exist(credentialStatus.issuer);
+    should().exist(credentialStatus.issuanceDate);
+    should().exist(credentialStatus.expirationDate);
+    should().exist(credentialStatus.credentialHash);
+    should().exist(credentialStatus.proof);
+  });
+});
 describe('#updateCredentialStatus this method is to change credential status to revoked or suspended', function () {
+  const params = {
+    credStatus: credentialStatus,
+    issuerDid: didDocId,
+    verificationMethodId,
+    privateKey: privateKeyMultibase,
+    status: 'SUSPENDED',
+    statusReason: 'Suspending this credential for some time',
+  };
+  it('should not be able to update credential as verificationMethodId is not passed', async function () {
+    const tempParams = { ...params };
+    tempParams.verificationMethodId = '';
+    return hsSdk.vc.updateCredentialStatus(tempParams).catch(function (err) {
+      expect(function () {
+        throw err;
+      }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required revoke credential');
+    });
+  });
+  it('should not be able to update credential as credStatus is not passed', async function () {
+    const tempParams = { ...params };
+    tempParams.verificationMethodId = verificationMethodId;
+    tempParams.credStatus = '';
+    return hsSdk.vc.updateCredentialStatus(tempParams).catch(function (err) {
+      expect(function () {
+        throw err;
+      }).to.throw(Error, 'HID-SSI-SDK:: Error: params.credential is required to revoke credential');
+    });
+  });
+  it('should not be able to update credential as privateKey is not passed', async function () {
+    const tempParams = { ...params };
+    tempParams.verificationMethodId = verificationMethodId;
+    tempParams.credStatus = credentialStatus;
+    tempParams.privateKey = '';
+
+    return hsSdk.vc.updateCredentialStatus(tempParams).catch(function (err) {
+      expect(function () {
+        throw err;
+      }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKey is required to revoke credential');
+    });
+  });
+  it('should not be able to update credential as issuerDid is not passed', async function () {
+    const tempParams = { ...params };
+    tempParams.verificationMethodId = verificationMethodId;
+    tempParams.credStatus = credentialStatus;
+    tempParams.privateKey = privateKeyMultibase;
+    tempParams.issuerDid = '';
+    return hsSdk.vc.updateCredentialStatus(tempParams).catch(function (err) {
+      expect(function () {
+        throw err;
+      }).to.throw(Error, 'HID-SSI-SDK:: Error: params.issuerDid is required to revoke credential');
+    });
+  });
+  it('should not be able to update credential as issuerDid is not passed', async function () {
+    const tempParams = { ...params };
+    tempParams.verificationMethodId = verificationMethodId;
+    tempParams.credStatus = credentialStatus;
+    tempParams.privateKey = privateKeyMultibase;
+    tempParams.issuerDid = didDocId;
+    tempParams.status = '';
+    return hsSdk.vc.updateCredentialStatus(tempParams).catch(function (err) {
+      expect(function () {
+        throw err;
+      }).to.throw(Error, 'HID-SSI-SDK:: Error: params.status is required to revoke credential');
+    });
+  });
   it('should be able to change credential status to suspended', async function () {
     const credentialStatus = await hsSdk.vc.resolveCredentialStatus({ credentialId });
     const params = {
@@ -518,6 +606,24 @@ describe('#updateCredentialStatus this method is to change credential status to 
     const updatedCredResult = await hsSdk.vc.updateCredentialStatus(params);
     expect(updatedCredResult).to.be.a('object');
     expect(updatedCredResult.code).to.be.equal(0);
+  });
+});
+
+describe('#registerCredentialStatus() method to register credential on blockchain', function () {
+  it('should not be able to register credential as credentialStatus is not passed', async function () {
+    return hsSdk.vc.registerCredentialStatus(credentialStatus).catch(function (err) {
+      expect(function () {
+        throw err;
+      }).to.throw(Error, 'HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
+    });
+  });
+  it('should be able to register credential on blockchain', async function () {
+    const credentialStatus = credentialStatus2;
+    const proof = credentialStatusProof;
+    const registerCredDetail = await hsSdk.vc.registerCredentialStatus(credentialStatus, proof);
+    expect(registerCredDetail).to.be.a('object');
+    should().exist(registerCredDetail.code);
+    should().exist(registerCredDetail.transactionHash);
   });
 });
 
