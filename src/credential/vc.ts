@@ -577,6 +577,25 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   }
   // TODO:  Implement a method to update credential status of a doc.
 
+  /**
+   *
+   * This method is used to resolve credential status from the Hypersign Identity Network
+   * @params {credentialId}
+   *
+   * @example
+   * const credentialStatus = await sdk.vc.resolveCredentialStatus({credentialId: 'vc:hid:testnet:Zlakfjkjs....'})
+   * console.log(credentialStatus)
+   *
+   * @returns CredentialStatus
+   */
+
+  public async resolveCredentialStatus(params: { credentialId }): Promise<CredentialStatus> {
+    if (!params.credentialId)
+      throw new Error('HID-SSI-SDK:: Error: credentialId is required to resolve credential status');
+    const credentialStatus: CredentialStatus = await this.credStatusRPC.resolveCredentialStatus(params.credentialId);
+    return credentialStatus;
+  }
+
   //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
   public async verifyCredential(params: {
     credential: IVerifiableCredential;

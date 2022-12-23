@@ -372,8 +372,47 @@ describe('#issueCredential() method for issuing credential', function () {
     should().exist(issuedCredResult['credentialSchema']);
     should().exist(issuedCredResult['credentialStatus']);
     should().exist(issuedCredResult['proof']);
-    expect(issuedCredResult['id']).to.be.equal(credentialId);
+    expect(issuedCredResult['id']).to.be.equal(credentialId);    
   });
+
+  it('should be able to issue credential but will not register on chain',async ()=>{
+
+    const expirationDate = new Date('12/11/2027');
+    const tempCredentialBody = { ...credentialBody };
+    tempCredentialBody.schemaId = schemaId;
+    tempCredentialBody['subjectDidDocSigned'] = signedDocument;
+    tempCredentialBody['expirationDate'] = expirationDate;
+    tempCredentialBody.issuerDid = didDocId;
+    tempCredentialBody.fields = { name: 'varshaxyz' };
+    const newCredDetails=await hsSdk.vc.getCredential(tempCredentialBody)
+
+    const tempIssueCredentialBody = { ...issueCredentialBody }; 
+
+    
+    tempIssueCredentialBody['registerCredential']=false
+    tempIssueCredentialBody.credential = newCredDetails;
+    tempIssueCredentialBody.issuerDid = didDocId;
+    tempIssueCredentialBody.verificationMethodId = verificationMethodId;
+    tempIssueCredentialBody.privateKey = privateKeyMultibase;
+    const issuedCredResult = await hsSdk.vc.issueCredential(tempIssueCredentialBody);
+
+    credentialStatusId = issuedCredResult['credentialStatus'].id;
+    expect(issuedCredResult).to.be.a('object');
+    should().exist(issuedCredResult['@context']);
+    should().exist(issuedCredResult['id']);
+    should().exist(issuedCredResult['type']);
+    should().exist(issuedCredResult['expirationDate']);
+    should().exist(issuedCredResult['issuanceDate']);
+    should().exist(issuedCredResult['issuer']);
+    should().exist(issuedCredResult['credentialSubject']);
+    should().exist(issuedCredResult['credentialSchema']);
+    should().exist(issuedCredResult['credentialStatus']);
+    should().exist(issuedCredResult['proof']);
+    expect(issuedCredResult['id']).to.be.equal(credentialId);    
+
+  })
+
+
 });
 
 describe('#verifyCredential() method to verify a credential', function () {
@@ -457,8 +496,9 @@ describe('#checkCredentialStatus() method to check status of the credential', fu
 });
 describe('#updateCredentialStatus this method is to change credential status to revoked or suspended', function () {
   it('should be able to change credential status to suspended', async function () {
+    const credentialStatus = await hsSdk.vc.resolveCredentialStatus({ credentialId });
     const params = {
-      credStatus: credentialStatusId,
+      credStatus: credentialStatus,
       issuerDid: didDocId,
       verificationMethodId,
       privateKey: privateKeyMultibase,
@@ -466,8 +506,26 @@ describe('#updateCredentialStatus this method is to change credential status to 
       statusReason: 'Suspending this credential for some time',
     };
     const updatedCredResult = await hsSdk.vc.updateCredentialStatus(params);
+    expect(updatedCredResult).to.be.a('object');
+    expect(updatedCredResult.code).to.be.equal(0);
+  });
+
+  it('should be able to change credential status to Live', async function () {
+    const credentialStatus = await hsSdk.vc.resolveCredentialStatus({ credentialId });
+    const params = {
+      credStatus: credentialStatus,
+      issuerDid: didDocId,
+      verificationMethodId,
+      privateKey: privateKeyMultibase,
+      status: 'LIVE',
+      statusReason: 'Setting the status to LIVE',
+    };
+    const updatedCredResult = await hsSdk.vc.updateCredentialStatus(params);
+    expect(updatedCredResult).to.be.a('object');
+    expect(updatedCredResult.code).to.be.equal(0);
   });
 });
+
 //Test case for verifying presentation
 
 describe('#getPresentation() method to generate presentation', function () {
