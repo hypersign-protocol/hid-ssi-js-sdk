@@ -71,6 +71,7 @@ var credentialDetail;
 var verifiablePresentation;
 var signedPresentation;
 var verifiableCredentialPresentationId;
+var credentialStatusId;
 var credentialBody = {
     schemaId: '',
     subjectDid: '',
@@ -470,6 +471,7 @@ describe('#getCredential() method to generate a credential', function () {
     });
 });
 describe('#issueCredential() method for issuing credential', function () {
+    var _this = this;
     it('should not be able to issueCredential as verificationMethodId is null or empty', function () {
         return __awaiter(this, void 0, void 0, function () {
             var tempIssueCredentialBody;
@@ -552,6 +554,7 @@ describe('#issueCredential() method for issuing credential', function () {
                         return [4 /*yield*/, hsSdk.vc.issueCredential(tempIssueCredentialBody)];
                     case 1:
                         issuedCredResult = _a.sent();
+                        credentialStatusId = issuedCredResult['credentialStatus'].id;
                         (0, chai_1.expect)(issuedCredResult).to.be.a('object');
                         (0, chai_1.should)().exist(issuedCredResult['@context']);
                         (0, chai_1.should)().exist(issuedCredResult['id']);
@@ -569,6 +572,47 @@ describe('#issueCredential() method for issuing credential', function () {
             });
         });
     });
+    it('should be able to issue credential but will not register on chain', function () { return __awaiter(_this, void 0, void 0, function () {
+        var expirationDate, tempCredentialBody, newCredDetails, tempIssueCredentialBody, issuedCredResult;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    expirationDate = new Date('12/11/2027');
+                    tempCredentialBody = __assign({}, credentialBody);
+                    tempCredentialBody.schemaId = schemaId;
+                    tempCredentialBody['subjectDidDocSigned'] = signedDocument;
+                    tempCredentialBody['expirationDate'] = expirationDate;
+                    tempCredentialBody.issuerDid = didDocId;
+                    tempCredentialBody.fields = { name: 'varshaxyz' };
+                    return [4 /*yield*/, hsSdk.vc.getCredential(tempCredentialBody)];
+                case 1:
+                    newCredDetails = _a.sent();
+                    tempIssueCredentialBody = __assign({}, issueCredentialBody);
+                    tempIssueCredentialBody['registerCredential'] = false;
+                    tempIssueCredentialBody.credential = newCredDetails;
+                    tempIssueCredentialBody.issuerDid = didDocId;
+                    tempIssueCredentialBody.verificationMethodId = verificationMethodId;
+                    tempIssueCredentialBody.privateKey = privateKeyMultibase;
+                    return [4 /*yield*/, hsSdk.vc.issueCredential(tempIssueCredentialBody)];
+                case 2:
+                    issuedCredResult = (_a.sent()).signedVC;
+                    credentialStatusId = issuedCredResult['credentialStatus'].id;
+                    (0, chai_1.expect)(issuedCredResult).to.be.a('object');
+                    (0, chai_1.should)().exist(issuedCredResult['@context']);
+                    (0, chai_1.should)().exist(issuedCredResult['id']);
+                    (0, chai_1.should)().exist(issuedCredResult['type']);
+                    (0, chai_1.should)().exist(issuedCredResult['expirationDate']);
+                    (0, chai_1.should)().exist(issuedCredResult['issuanceDate']);
+                    (0, chai_1.should)().exist(issuedCredResult['issuer']);
+                    (0, chai_1.should)().exist(issuedCredResult['credentialSubject']);
+                    (0, chai_1.should)().exist(issuedCredResult['credentialSchema']);
+                    (0, chai_1.should)().exist(issuedCredResult['credentialStatus']);
+                    (0, chai_1.should)().exist(issuedCredResult['proof']);
+                    (0, chai_1.expect)(issuedCredResult['id']).to.be.equal(newCredDetails.id);
+                    return [2 /*return*/];
+            }
+        });
+    }); });
 });
 describe('#verifyCredential() method to verify a credential', function () {
     it('should not be able to verify credential as verificationMethodId is null or empty', function () {
@@ -653,7 +697,7 @@ describe('#verifyCredential() method to verify a credential', function () {
     });
 });
 describe('#checkCredentialStatus() method to check status of the credential', function () {
-    it('should not be able to verify credential as credentialId is null or empty', function () {
+    it('should not be able to check credential as credentialId is null or empty', function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 return [2 /*return*/, hsSdk.vc.checkCredentialStatus().catch(function (err) {
@@ -664,7 +708,7 @@ describe('#checkCredentialStatus() method to check status of the credential', fu
             });
         });
     });
-    it('should not be able to verify credential as credentialId is invalid', function () {
+    it('should not be able to check credential as credentialId is invalid', function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 return [2 /*return*/, hsSdk.vc.checkCredentialStatus({ credentialId: credentialId + 'x' }).catch(function (err) {
@@ -686,6 +730,60 @@ describe('#checkCredentialStatus() method to check status of the credential', fu
                         (0, chai_1.expect)(credentialStatus).to.be.a('object');
                         (0, chai_1.should)().exist(credentialStatus.verified);
                         (0, chai_1.expect)(credentialStatus.verified).to.be.equal(true);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+});
+describe('#updateCredentialStatus this method is to change credential status to revoked or suspended', function () {
+    it('should be able to change credential status to suspended', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var credentialStatus, params, updatedCredResult;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, hsSdk.vc.resolveCredentialStatus({ credentialId: credentialId })];
+                    case 1:
+                        credentialStatus = _a.sent();
+                        params = {
+                            credStatus: credentialStatus,
+                            issuerDid: didDocId,
+                            verificationMethodId: verificationMethodId,
+                            privateKey: privateKeyMultibase,
+                            status: 'SUSPENDED',
+                            statusReason: 'Suspending this credential for some time',
+                        };
+                        return [4 /*yield*/, hsSdk.vc.updateCredentialStatus(params)];
+                    case 2:
+                        updatedCredResult = _a.sent();
+                        (0, chai_1.expect)(updatedCredResult).to.be.a('object');
+                        (0, chai_1.expect)(updatedCredResult.code).to.be.equal(0);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+    it('should be able to change credential status to Live', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var credentialStatus, params, updatedCredResult;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, hsSdk.vc.resolveCredentialStatus({ credentialId: credentialId })];
+                    case 1:
+                        credentialStatus = _a.sent();
+                        params = {
+                            credStatus: credentialStatus,
+                            issuerDid: didDocId,
+                            verificationMethodId: verificationMethodId,
+                            privateKey: privateKeyMultibase,
+                            status: 'LIVE',
+                            statusReason: 'Setting the status to LIVE',
+                        };
+                        return [4 /*yield*/, hsSdk.vc.updateCredentialStatus(params)];
+                    case 2:
+                        updatedCredResult = _a.sent();
+                        (0, chai_1.expect)(updatedCredResult).to.be.a('object');
+                        (0, chai_1.expect)(updatedCredResult.code).to.be.equal(0);
                         return [2 /*return*/];
                 }
             });

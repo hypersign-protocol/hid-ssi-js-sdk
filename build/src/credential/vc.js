@@ -595,6 +595,33 @@ var HypersignVerifiableCredential = /** @class */ (function () {
         });
     };
     // TODO:  Implement a method to update credential status of a doc.
+    /**
+     *
+     * This method is used to resolve credential status from the Hypersign Identity Network
+     * @params {credentialId}
+     *
+     * @example
+     * const credentialStatus = await sdk.vc.resolveCredentialStatus({credentialId: 'vc:hid:testnet:Zlakfjkjs....'})
+     * console.log(credentialStatus)
+     *
+     * @returns CredentialStatus
+     */
+    HypersignVerifiableCredential.prototype.resolveCredentialStatus = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var credentialStatus;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!params.credentialId)
+                            throw new Error('HID-SSI-SDK:: Error: credentialId is required to resolve credential status');
+                        return [4 /*yield*/, this.credStatusRPC.resolveCredentialStatus(params.credentialId)];
+                    case 1:
+                        credentialStatus = _a.sent();
+                        return [2 /*return*/, credentialStatus];
+                }
+            });
+        });
+    };
     //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
     HypersignVerifiableCredential.prototype.verifyCredential = function (params) {
         return __awaiter(this, void 0, void 0, function () {
