@@ -342,7 +342,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     }
 
     const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
-    if (!signerDidDoc) throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
+    if (signerDidDoc === null || signerDidDoc === undefined)
+      throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
 
     // TODO: take verification method from params
     const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
@@ -388,12 +389,24 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       privateKeyMultibase: params.privateKey,
     });
 
+    // check params.issuer is a controller of params.credential.issuer
+
     const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credential.issuer });
-    const issuerDidDoc: Did = issuerDID as Did;
-    const issuerPublicKeyId = params.verificationMethodId;
-    const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
-      (x) => x.id == issuerPublicKeyId
-    ) as VerificationMethod;
+    if (issuerDID === null || issuerDID === undefined)
+      throw new Error('Could not resolve issuerDid = ' + params.credential.issuer);
+    const credIssuerDidDoc: Did = issuerDID as Did;
+    const credIssuerController = credIssuerDidDoc.controller;
+    if (!credIssuerController.includes(params.issuerDid)) {
+      throw new Error(params.issuerDid + ' is not a controller of ' + params.credential.issuer);
+    }
+
+    // const issuerDidDoc: Did = issuerDID as Did;
+    // const issuerPublicKeyId = params.verificationMethodId;
+    // const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+    //   (x) => x.id == issuerPublicKeyId
+    // ) as VerificationMethod;
+
+    const issuerPublicKeyVerMethod: VerificationMethod = publicKeyVerMethod;
 
     const proof: CredentialProof = {
       type: VC.VERIFICATION_METHOD_TYPE,
@@ -510,8 +523,20 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credStatus.issuer });
     const issuerDidDoc: Did = issuerDID as Did;
+    const issuerDidDocController = issuerDidDoc.controller;
+    const verificationMethodController = params.verificationMethodId.split('#')[0];
+
+    if (!issuerDidDocController.includes(verificationMethodController)) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
+    }
+
+    const { didDocument: controllerDidDoc } = await this.hsDid.resolve({ did: verificationMethodController });
+    if (!controllerDidDoc)
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
+    const didDocofController = controllerDidDoc as Did;
+
     const issuerPublicKeyId = params.verificationMethodId;
-    const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+    const issuerPublicKeyVerMethod: VerificationMethod = didDocofController.verificationMethod.find(
       (x) => x.id == issuerPublicKeyId
     ) as VerificationMethod;
 
@@ -551,6 +576,25 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return resp;
   }
   // TODO:  Implement a method to update credential status of a doc.
+
+  /**
+   *
+   * This method is used to resolve credential status from the Hypersign Identity Network
+   * @params {credentialId}
+   *
+   * @example
+   * const credentialStatus = await sdk.vc.resolveCredentialStatus({credentialId: 'vc:hid:testnet:Zlakfjkjs....'})
+   * console.log(credentialStatus)
+   *
+   * @returns CredentialStatus
+   */
+
+  public async resolveCredentialStatus(params: { credentialId }): Promise<CredentialStatus> {
+    if (!params.credentialId)
+      throw new Error('HID-SSI-SDK:: Error: credentialId is required to resolve credential status');
+    const credentialStatus: CredentialStatus = await this.credStatusRPC.resolveCredentialStatus(params.credentialId);
+    return credentialStatus;
+  }
 
   //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
   public async verifyCredential(params: {

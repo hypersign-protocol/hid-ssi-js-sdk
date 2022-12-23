@@ -25,7 +25,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -174,7 +174,7 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
     // https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L392
     HypersignVerifiablePresentation.prototype.verifyPresentation = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var resolvedDidDoc, holderDID, holderDidDoc, holderPublicKeyId, holderPublicKeyVerMethod, holderPublicKeyMultibase, holderController, presentationPurpose, keyPair, vpSuite_holder, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, issuerPublicKeyMultibase, issuerController, purpose, issuerKeyPair, vcSuite_issuer, that, result;
+            var resolvedDidDoc, holderDID, holderDidDoc, holderPublicKeyId, holderPublicKeyVerMethod, holderPublicKeyMultibase, holderController, presentationPurpose, keyPair, vpSuite_holder, issuerDID, issuerDidDoc, issuerDidDocController, issuerDidDocControllerVerificationMethod, issuerPublicKeyId, issuerPublicKeyVerMethod, controllerDidDocT, controllerDidDoc, issuerPublicKeyMultibase, issuerController, purpose, issuerKeyPair, vcSuite_issuer, that, result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -235,9 +235,27 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                         return [4 /*yield*/, this.hsDid.resolve({ did: params.issuerDid })];
                     case 5:
                         issuerDID = (_a.sent()).didDocument;
+                        if (issuerDID === null || issuerDID === undefined) {
+                            throw new Error('Issuer DID is not registered');
+                        }
                         issuerDidDoc = issuerDID;
+                        issuerDidDocController = issuerDidDoc.controller;
+                        issuerDidDocControllerVerificationMethod = params.issuerVerificationMethodId.split('#')[0];
+                        if (!issuerDidDocController.includes(issuerDidDocControllerVerificationMethod)) {
+                            throw new Error(issuerDidDocControllerVerificationMethod + ' is not a controller of ' + params.issuerDid);
+                        }
                         issuerPublicKeyId = params.issuerVerificationMethodId;
                         issuerPublicKeyVerMethod = issuerDidDoc.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
+                        if (!(issuerPublicKeyVerMethod === null || issuerPublicKeyVerMethod === undefined)) return [3 /*break*/, 7];
+                        return [4 /*yield*/, this.hsDid.resolve({
+                                did: issuerDidDocControllerVerificationMethod,
+                            })];
+                    case 6:
+                        controllerDidDocT = (_a.sent()).didDocument;
+                        controllerDidDoc = controllerDidDocT;
+                        issuerPublicKeyVerMethod = controllerDidDoc.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
+                        _a.label = 7;
+                    case 7:
                         issuerPublicKeyMultibase = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
                             publicKey: issuerPublicKeyVerMethod.publicKeyMultibase,
                         }).publicKeyMultibase;
@@ -251,7 +269,7 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                             controller: issuerController,
                         });
                         return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: '' }, issuerPublicKeyVerMethod))];
-                    case 6:
+                    case 8:
                         issuerKeyPair = _a.sent();
                         vcSuite_issuer = new ed25519_signature_2020_1.Ed25519Signature2020({
                             verificationMethod: issuerPublicKeyId,
@@ -276,7 +294,7 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                                     });
                                 },
                             })];
-                    case 7:
+                    case 9:
                         result = _a.sent();
                         return [2 /*return*/, result];
                 }

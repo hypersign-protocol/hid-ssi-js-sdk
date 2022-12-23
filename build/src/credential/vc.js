@@ -25,7 +25,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -349,7 +349,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
     };
     HypersignVerifiableCredential.prototype.issueCredential = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, signedVC, resp;
+            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, credIssuerDidDoc, credIssuerController, issuerPublicKeyVerMethod, proof, signedVC, resp;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -371,7 +371,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         return [4 /*yield*/, this.hsDid.resolve({ did: params.issuerDid })];
                     case 1:
                         signerDidDoc = (_a.sent()).didDocument;
-                        if (!signerDidDoc)
+                        if (signerDidDoc === null || signerDidDoc === undefined)
                             throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
                         publicKeyId = params.verificationMethodId;
                         publicKeyVerMethod = signerDidDoc['verificationMethod'].find(function (x) { return x.id == publicKeyId; });
@@ -407,9 +407,14 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         return [4 /*yield*/, this.hsDid.resolve({ did: params.credential.issuer })];
                     case 4:
                         issuerDID = (_a.sent()).didDocument;
-                        issuerDidDoc = issuerDID;
-                        issuerPublicKeyId = params.verificationMethodId;
-                        issuerPublicKeyVerMethod = issuerDidDoc.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
+                        if (issuerDID === null || issuerDID === undefined)
+                            throw new Error('Could not resolve issuerDid = ' + params.credential.issuer);
+                        credIssuerDidDoc = issuerDID;
+                        credIssuerController = credIssuerDidDoc.controller;
+                        if (!credIssuerController.includes(params.issuerDid)) {
+                            throw new Error(params.issuerDid + ' is not a controller of ' + params.credential.issuer);
+                        }
+                        issuerPublicKeyVerMethod = publicKeyVerMethod;
                         proof = {
                             type: constants_1.VC.VERIFICATION_METHOD_TYPE,
                             created: this.dateNow(),
@@ -459,7 +464,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
     };
     HypersignVerifiableCredential.prototype.updateCredentialStatus = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, claim, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, resp;
+            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, claim, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerDidDocController, verificationMethodController, controllerDidDoc, didDocofController, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, resp;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -522,8 +527,19 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                     case 4:
                         issuerDID = (_a.sent()).didDocument;
                         issuerDidDoc = issuerDID;
+                        issuerDidDocController = issuerDidDoc.controller;
+                        verificationMethodController = params.verificationMethodId.split('#')[0];
+                        if (!issuerDidDocController.includes(verificationMethodController)) {
+                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
+                        }
+                        return [4 /*yield*/, this.hsDid.resolve({ did: verificationMethodController })];
+                    case 5:
+                        controllerDidDoc = (_a.sent()).didDocument;
+                        if (!controllerDidDoc)
+                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
+                        didDocofController = controllerDidDoc;
                         issuerPublicKeyId = params.verificationMethodId;
-                        issuerPublicKeyVerMethod = issuerDidDoc.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
+                        issuerPublicKeyVerMethod = didDocofController.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
                         proof = {
                             type: constants_1.VC.VERIFICATION_METHOD_TYPE,
                             created: params.credStatus.issuanceDate,
@@ -533,7 +549,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                             proofPurpose: constants_1.VC.PROOF_PURPOSE,
                         };
                         return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, proof)];
-                    case 5:
+                    case 6:
                         resp = _a.sent();
                         if (!resp || resp.code != 0) {
                             throw new Error('HID-SSI-SDK:: Error while revoking the credential error = ' + resp.rawLog);
@@ -579,6 +595,33 @@ var HypersignVerifiableCredential = /** @class */ (function () {
         });
     };
     // TODO:  Implement a method to update credential status of a doc.
+    /**
+     *
+     * This method is used to resolve credential status from the Hypersign Identity Network
+     * @params {credentialId}
+     *
+     * @example
+     * const credentialStatus = await sdk.vc.resolveCredentialStatus({credentialId: 'vc:hid:testnet:Zlakfjkjs....'})
+     * console.log(credentialStatus)
+     *
+     * @returns CredentialStatus
+     */
+    HypersignVerifiableCredential.prototype.resolveCredentialStatus = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var credentialStatus;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!params.credentialId)
+                            throw new Error('HID-SSI-SDK:: Error: credentialId is required to resolve credential status');
+                        return [4 /*yield*/, this.credStatusRPC.resolveCredentialStatus(params.credentialId)];
+                    case 1:
+                        credentialStatus = _a.sent();
+                        return [2 /*return*/, credentialStatus];
+                }
+            });
+        });
+    };
     //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
     HypersignVerifiableCredential.prototype.verifyCredential = function (params) {
         return __awaiter(this, void 0, void 0, function () {

@@ -185,6 +185,20 @@ describe('#resolve() did after updating did document', function () {
     expect(result).to.be.a('object');
     expect(result.didDocument.id).to.be.equal(didDocId);
     expect(result.didDocumentMetadata).to.be.a('object');
+    expect(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.not.equal(publicKeyMultibase);
+    versionId = result.didDocumentMetadata.versionId;
+  });
+  // should we able to get same publicKeyMultibase as generated in the begining in didDoc
+  it('should be able to resolve did if params.ed25519verificationkey2020 is passed', async function () {
+    const params = {
+      did: didDocId,
+      ed25519verificationkey2020: true,
+    };
+    const result = await hsSdk.did.resolve(params);
+    expect(result).to.be.a('object');
+    expect(result.didDocument.id).to.be.equal(didDocId);
+    expect(result.didDocumentMetadata).to.be.a('object');
+    expect(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.equal(publicKeyMultibase);
     versionId = result.didDocumentMetadata.versionId;
   });
 });

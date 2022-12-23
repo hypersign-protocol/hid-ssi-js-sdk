@@ -14,7 +14,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -282,6 +282,31 @@ describe('#resolve() did after updating did document', function () {
                         (0, chai_1.expect)(result).to.be.a('object');
                         (0, chai_1.expect)(result.didDocument.id).to.be.equal(didDocId);
                         (0, chai_1.expect)(result.didDocumentMetadata).to.be.a('object');
+                        (0, chai_1.expect)(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.not.equal(publicKeyMultibase);
+                        versionId = result.didDocumentMetadata.versionId;
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+    // should we able to get same publicKeyMultibase as generated in the begining in didDoc
+    it('should be able to resolve did if params.ed25519verificationkey2020 is passed', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var params, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        params = {
+                            did: didDocId,
+                            ed25519verificationkey2020: true,
+                        };
+                        return [4 /*yield*/, hsSdk.did.resolve(params)];
+                    case 1:
+                        result = _a.sent();
+                        (0, chai_1.expect)(result).to.be.a('object');
+                        (0, chai_1.expect)(result.didDocument.id).to.be.equal(didDocId);
+                        (0, chai_1.expect)(result.didDocumentMetadata).to.be.a('object');
+                        (0, chai_1.expect)(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.equal(publicKeyMultibase);
                         versionId = result.didDocumentMetadata.versionId;
                         return [2 /*return*/];
                 }
