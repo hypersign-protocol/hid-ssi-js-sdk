@@ -372,11 +372,10 @@ describe('#issueCredential() method for issuing credential', function () {
     should().exist(issuedCredResult['credentialSchema']);
     should().exist(issuedCredResult['credentialStatus']);
     should().exist(issuedCredResult['proof']);
-    expect(issuedCredResult['id']).to.be.equal(credentialId);    
+    expect(issuedCredResult['id']).to.be.equal(credentialId);
   });
 
-  it('should be able to issue credential but will not register on chain',async ()=>{
-
+  it('should be able to issue credential but will not register on chain', async () => {
     const expirationDate = new Date('12/11/2027');
     const tempCredentialBody = { ...credentialBody };
     tempCredentialBody.schemaId = schemaId;
@@ -384,12 +383,11 @@ describe('#issueCredential() method for issuing credential', function () {
     tempCredentialBody['expirationDate'] = expirationDate;
     tempCredentialBody.issuerDid = didDocId;
     tempCredentialBody.fields = { name: 'varshaxyz' };
-    const newCredDetails=await hsSdk.vc.getCredential(tempCredentialBody)
+    const newCredDetails = await hsSdk.vc.getCredential(tempCredentialBody);
 
-    const tempIssueCredentialBody = { ...issueCredentialBody }; 
+    const tempIssueCredentialBody = { ...issueCredentialBody };
 
-    
-    tempIssueCredentialBody['registerCredential']=false
+    tempIssueCredentialBody['registerCredential'] = false;
     tempIssueCredentialBody.credential = newCredDetails;
     tempIssueCredentialBody.issuerDid = didDocId;
     tempIssueCredentialBody.verificationMethodId = verificationMethodId;
@@ -408,11 +406,8 @@ describe('#issueCredential() method for issuing credential', function () {
     should().exist(issuedCredResult['credentialSchema']);
     should().exist(issuedCredResult['credentialStatus']);
     should().exist(issuedCredResult['proof']);
-    expect(issuedCredResult['id']).to.be.equal(credentialId);    
-
-  })
-
-
+    expect(issuedCredResult['id']).to.be.equal(credentialId);
+  });
 });
 
 describe('#verifyCredential() method to verify a credential', function () {

@@ -471,6 +471,7 @@ describe('#getCredential() method to generate a credential', function () {
     });
 });
 describe('#issueCredential() method for issuing credential', function () {
+    var _this = this;
     it('should not be able to issueCredential as verificationMethodId is null or empty', function () {
         return __awaiter(this, void 0, void 0, function () {
             var tempIssueCredentialBody;
@@ -571,6 +572,47 @@ describe('#issueCredential() method for issuing credential', function () {
             });
         });
     });
+    it('should be able to issue credential but will not register on chain', function () { return __awaiter(_this, void 0, void 0, function () {
+        var expirationDate, tempCredentialBody, newCredDetails, tempIssueCredentialBody, issuedCredResult;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    expirationDate = new Date('12/11/2027');
+                    tempCredentialBody = __assign({}, credentialBody);
+                    tempCredentialBody.schemaId = schemaId;
+                    tempCredentialBody['subjectDidDocSigned'] = signedDocument;
+                    tempCredentialBody['expirationDate'] = expirationDate;
+                    tempCredentialBody.issuerDid = didDocId;
+                    tempCredentialBody.fields = { name: 'varshaxyz' };
+                    return [4 /*yield*/, hsSdk.vc.getCredential(tempCredentialBody)];
+                case 1:
+                    newCredDetails = _a.sent();
+                    tempIssueCredentialBody = __assign({}, issueCredentialBody);
+                    tempIssueCredentialBody['registerCredential'] = false;
+                    tempIssueCredentialBody.credential = newCredDetails;
+                    tempIssueCredentialBody.issuerDid = didDocId;
+                    tempIssueCredentialBody.verificationMethodId = verificationMethodId;
+                    tempIssueCredentialBody.privateKey = privateKeyMultibase;
+                    return [4 /*yield*/, hsSdk.vc.issueCredential(tempIssueCredentialBody)];
+                case 2:
+                    issuedCredResult = _a.sent();
+                    credentialStatusId = issuedCredResult['credentialStatus'].id;
+                    (0, chai_1.expect)(issuedCredResult).to.be.a('object');
+                    (0, chai_1.should)().exist(issuedCredResult['@context']);
+                    (0, chai_1.should)().exist(issuedCredResult['id']);
+                    (0, chai_1.should)().exist(issuedCredResult['type']);
+                    (0, chai_1.should)().exist(issuedCredResult['expirationDate']);
+                    (0, chai_1.should)().exist(issuedCredResult['issuanceDate']);
+                    (0, chai_1.should)().exist(issuedCredResult['issuer']);
+                    (0, chai_1.should)().exist(issuedCredResult['credentialSubject']);
+                    (0, chai_1.should)().exist(issuedCredResult['credentialSchema']);
+                    (0, chai_1.should)().exist(issuedCredResult['credentialStatus']);
+                    (0, chai_1.should)().exist(issuedCredResult['proof']);
+                    (0, chai_1.expect)(issuedCredResult['id']).to.be.equal(credentialId);
+                    return [2 /*return*/];
+            }
+        });
+    }); });
 });
 describe('#verifyCredential() method to verify a credential', function () {
     it('should not be able to verify credential as verificationMethodId is null or empty', function () {
