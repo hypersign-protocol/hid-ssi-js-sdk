@@ -19,6 +19,7 @@ let credentialDetail;
 let verifiablePresentation;
 let signedPresentation;
 let verifiableCredentialPresentationId;
+let credentialStatusId;
 const credentialBody = {
   schemaId: '',
   subjectDid: '',
@@ -359,6 +360,7 @@ describe('#issueCredential() method for issuing credential', function () {
     tempIssueCredentialBody.verificationMethodId = verificationMethodId;
     tempIssueCredentialBody.privateKey = privateKeyMultibase;
     const issuedCredResult = await hsSdk.vc.issueCredential(tempIssueCredentialBody);
+    credentialStatusId = issuedCredResult['credentialStatus'].id;
     expect(issuedCredResult).to.be.a('object');
     should().exist(issuedCredResult['@context']);
     should().exist(issuedCredResult['id']);
@@ -432,14 +434,14 @@ describe('#verifyCredential() method to verify a credential', function () {
 });
 
 describe('#checkCredentialStatus() method to check status of the credential', function () {
-  it('should not be able to verify credential as credentialId is null or empty', async function () {
+  it('should not be able to check credential as credentialId is null or empty', async function () {
     return hsSdk.vc.checkCredentialStatus().catch(function (err) {
       expect(function () {
         throw err;
       }).to.throw(Error, 'CredentialId must be passed to check its status');
     });
   });
-  it('should not be able to verify credential as credentialId is invalid', async function () {
+  it('should not be able to check credential as credentialId is invalid', async function () {
     return hsSdk.vc.checkCredentialStatus({ credentialId: credentialId + 'x' }).catch(function (err) {
       expect(function () {
         throw err;
@@ -453,7 +455,19 @@ describe('#checkCredentialStatus() method to check status of the credential', fu
     expect(credentialStatus.verified).to.be.equal(true);
   });
 });
-
+describe('#updateCredentialStatus this method is to change credential status to revoked or suspended', function () {
+  it('should be able to change credential status to suspended', async function () {
+    const params = {
+      credStatus: credentialStatusId,
+      issuerDid: didDocId,
+      verificationMethodId,
+      privateKey: privateKeyMultibase,
+      status: 'SUSPENDED',
+      statusReason: 'Suspending this credential for some time',
+    };
+    const updatedCredResult = await hsSdk.vc.updateCredentialStatus(params);
+  });
+});
 //Test case for verifying presentation
 
 describe('#getPresentation() method to generate presentation', function () {
