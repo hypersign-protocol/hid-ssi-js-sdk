@@ -270,7 +270,7 @@ export default class HypersignDID implements IDID {
         throw new Error('HID-SSI-SDK:: Error: params.did or params.doc is required to sign a did');
       }
     } catch (error) {
-      throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a public did');
+      throw new Error(`HID-SSI-SDK:: Error: could not resolve did ${did}`);
     }
 
     const publicKeyId = verificationMethodId;
