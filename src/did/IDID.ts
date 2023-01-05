@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+
 import { Did as IDidProto, Metadata, VerificationMethod, Service } from '../generated/ssi/did';
 export interface IPublicKey {
   '@context': string;

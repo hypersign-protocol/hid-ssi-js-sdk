@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+
 import * as constant from '../constants';
 import jsonSigs from 'jsonld-signatures';
 import { documentLoader } from 'jsonld';

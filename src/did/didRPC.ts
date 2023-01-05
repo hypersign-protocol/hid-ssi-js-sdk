@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+
 import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_DID_PATH } from '../constants';
 import * as generatedProto from '../generated/ssi/tx';
 import { Did as IDidProto, SignInfo } from '../generated/ssi/did';
