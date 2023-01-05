@@ -21,7 +21,7 @@ beforeEach(async function () {
   await hsSdk.init();
 });
 
-//remove seed while creating did so that wallet can generate different
+//remove seed while creating did so that wallet can generate different did every time
 describe('#generateKeys() method to generate publicKyeMultibase and privateKeyMultiBase', function () {
   it('should return publickeyMultibase and privateKeyMultibase', async function () {
     const kp = await hsSdk.did.generateKeys();

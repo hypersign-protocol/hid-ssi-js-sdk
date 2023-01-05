@@ -1,7 +1,9 @@
 import HypersignDID from '../did/did';
 import { expect, should } from 'chai';
 import { IPublicKey, IController } from '../did/IDID';
+const nameSpace = 'Fyre';
 const hypersignDid = new HypersignDID();
+const hypersignDidWithNameSpace = new HypersignDID(nameSpace);
 const seed = '';
 let privateKeyMultibase;
 let publicKeyMultibase;
@@ -11,6 +13,8 @@ let didDocId;
 let signedDocument;
 const challenge = '1231231231';
 const domain = 'www.adbv.com';
+let didDocumentWithNameSpace;
+let didDocIdWithNameSpace;
 
 describe('#generateKeys() method to generate publicKyeMultibase and privateKeyMultiBase', function () {
   it('should return publickeyMultibase and privateKeyMultibase', async function () {
@@ -22,6 +26,7 @@ describe('#generateKeys() method to generate publicKyeMultibase and privateKeyMu
     should().exist(result.publicKeyMultibase);
   });
 });
+
 describe('#generate() method to generate did document', function () {
   it('should not able to generate did document and throw error as publickKeyMultibase is not passed or it is empty', function () {
     return hypersignDid.generate({ publicKeyMultibase: '' }).catch(function (err) {
@@ -139,9 +144,31 @@ describe('#sign() this is to sign didDoc', function () {
     return hypersignDid.signDid(params).catch(function (err) {
       expect(function () {
         throw err;
-      }).to.throw(Error, 'HID-SSI-SDK:: Error: params.did is required to resolve a public did');
+      }).to.throw(Error, `HID-SSI-SDK:: Error: could not resolve did ${params.did}`);
     });
   });
+  it('should not able to sign did document and throw error as verificationMethodId is invalid or wrong', function () {
+    const params = {
+      privateKey: privateKeyMultibase as string,
+      challenge: challenge as string,
+      domain: domain as string,
+      did: '',
+      doc: didDocument as object,
+      verificationMethodId: verificationMethodId as string,
+      publicKey,
+      controller,
+    };
+    params.verificationMethodId = '';
+    return hypersignDid.signDid(params).catch(function (err) {
+      expect(function () {
+        throw err;
+      }).to.throw(Error, 'HID-SSI-SDK:: Incorrect verification method id');
+    });
+  });
+  /**
+   * Commented for time being
+   * Add a check in code that didDoc should be non empty object and also that follow some type with particular properties
+   */
   // it('should not able to sign did document and throw error as neither did nor doc is passed', function () {
   //   const params = {
   //     privateKey: privateKeyMultibase as string,
@@ -154,6 +181,7 @@ describe('#sign() this is to sign didDoc', function () {
   //     controller,
   //   };
   //   params.did = '';
+  //   params.doc= {}
   //   return hypersignDid.signDid(params).catch(function (err) {
   //     expect(function () {
   //       throw err;
@@ -165,7 +193,7 @@ describe('#sign() this is to sign didDoc', function () {
       privateKey: privateKeyMultibase as string,
       challenge: challenge as string,
       domain: domain as string,
-      did: '',
+      did: '', // This is taken as empty as didDoc is yet not register on blockchain and won't able to resolve based on did
       doc: didDocument as object,
       verificationMethodId: verificationMethodId as string,
       publicKey,
@@ -376,5 +404,95 @@ describe('#deactivate() this is to deactivate didDoc', function () {
           throw err;
         }).to.throw(Error, "Cannot read property 'signAndBroadcast' of undefined");
       });
+  });
+});
+
+// Test case for generating did with particular nameSpace
+
+describe('#generate() method to generate did document with nameSpace', function () {
+  it('should return didDocument that has nameSpcae', async function () {
+    didDocumentWithNameSpace = await hypersignDidWithNameSpace.generate({ publicKeyMultibase });
+    didDocIdWithNameSpace = didDocumentWithNameSpace['id'];
+    verificationMethodId = didDocumentWithNameSpace['verificationMethod'][0].id;
+    expect(didDocumentWithNameSpace).to.be.a('object');
+    should().exist(didDocumentWithNameSpace['@context']);
+    should().exist(didDocumentWithNameSpace['id']);
+    expect(didDocumentWithNameSpace['id']).to.contain.oneOf([`${nameSpace}`]);
+    should().exist(didDocumentWithNameSpace['controller']);
+    should().exist(didDocumentWithNameSpace['alsoKnownAs']);
+    should().exist(didDocumentWithNameSpace['verificationMethod']);
+    expect(
+      didDocumentWithNameSpace['verificationMethod'] &&
+        didDocumentWithNameSpace['authentication'] &&
+        didDocumentWithNameSpace['assertionMethod'] &&
+        didDocumentWithNameSpace['keyAgreement'] &&
+        didDocumentWithNameSpace['capabilityInvocation'] &&
+        didDocumentWithNameSpace['capabilityDelegation'] &&
+        didDocumentWithNameSpace['service']
+    ).to.be.a('array');
+    should().exist(didDocumentWithNameSpace['authentication']);
+    should().exist(didDocumentWithNameSpace['assertionMethod']);
+    should().exist(didDocumentWithNameSpace['keyAgreement']);
+    should().exist(didDocumentWithNameSpace['capabilityInvocation']);
+    should().exist(didDocumentWithNameSpace['capabilityDelegation']);
+    should().exist(didDocumentWithNameSpace['service']);
+  });
+});
+
+describe('#sign() this is to sign didDoc that has didDocId with some nameSpace', function () {
+  const publicKey: IPublicKey = {
+    '@context': '',
+    id: '',
+    type: '',
+    publicKeyBase58: '',
+  };
+  const controller: IController = {
+    '@context': '',
+    id: '',
+    authentication: [],
+  };
+  it('should able to sign did document that has nameSpace', async function () {
+    const params = {
+      privateKey: privateKeyMultibase as string,
+      challenge: challenge as string,
+      domain: domain as string,
+      did: '',
+      doc: didDocumentWithNameSpace as object,
+      verificationMethodId: verificationMethodId as string,
+      publicKey,
+      controller,
+    };
+    signedDocument = await hypersignDidWithNameSpace.signDid(params);
+    expect(signedDocument).to.be.a('object');
+    signedDocument = signedDocument.signedDidDocument;
+    should().exist(signedDocument['@context']);
+    should().exist(signedDocument['id']);
+    expect(didDocIdWithNameSpace).to.be.equal(signedDocument['id']);
+    should().exist(signedDocument['controller']);
+    should().exist(signedDocument['alsoKnownAs']);
+    should().exist(signedDocument['verificationMethod']);
+    should().exist(signedDocument['authentication']);
+    should().exist(signedDocument['assertionMethod']);
+    should().exist(signedDocument['keyAgreement']);
+    should().exist(signedDocument['capabilityInvocation']);
+    should().exist(signedDocument['capabilityDelegation']);
+    should().exist(signedDocument['service']);
+    should().exist(signedDocument['proof']);
+  });
+});
+describe('#verify() method to verify did document that has nameSpace', function () {
+  it('should return verification result of diDocument with nameSpace', async function () {
+    const result = await hypersignDidWithNameSpace.verify({
+      doc: signedDocument,
+      verificationMethodId,
+      challenge,
+      domain,
+    });
+    expect(result).to.be.a('object');
+    should().exist(result.verificationResult);
+    should().exist(result.verificationResult.verified);
+    should().exist(result.verificationResult.results);
+    expect(result.verificationResult.results).to.be.a('array');
+    expect(result.verificationResult.verified).to.equal(true);
   });
 });
