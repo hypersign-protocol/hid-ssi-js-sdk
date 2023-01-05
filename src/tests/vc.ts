@@ -1,5 +1,5 @@
 import { expect, should } from 'chai';
-import HypersignSSISdk from '../index';
+import { HypersignSSISdk } from '../index';
 import { createWallet, mnemonic, hidNodeEp } from './config';
 let privateKeyMultibase;
 let publicKeyMultibase;

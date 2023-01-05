@@ -9,6 +9,7 @@ import { Did, VerificationMethod, Service } from '../generated/ssi/did';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import { IParams, IDID, IDid, IDIDResolve, IDIDRpc, IController, IDidDocument, IPublicKey } from './IDID';
+import { OfflineSigner } from '@cosmjs/proto-signing';
 
 class DIDDocument implements Did {
   context: string[];
@@ -46,16 +47,45 @@ class DIDDocument implements Did {
 
 /** Class representing HypersignDID */
 export default class HypersignDID implements IDID {
-  private didrpc: IDIDRpc;
+  private didrpc: IDIDRpc | null;
   public namespace: string;
 
   /**
    * Creates instance of HypersignDID class
-   * @param {string} namespace - DID namespace
+   * @constructor
+   * @params
+   *  - params.namespace        : namespace of did id, Default 'did:hid'
+   *  - params.offlineSigner    : signer of type OfflineSigner
+   *  - params.nodeRpcEndpoint  : RPC endpoint of the Hypersign blockchain, Default 'TEST'
+   *  - params.nodeRestEndpoint : REST endpoint of the Hypersign blockchain
    */
-  constructor(namespace?: string) {
-    this.didrpc = new DIDRpc();
+  constructor(
+    params: {
+      namespace?: string;
+      offlineSigner?: OfflineSigner;
+      nodeRpcEndpoint?: string;
+      nodeRestEndpoint?: string;
+    } = {}
+  ) {
+    const { offlineSigner, namespace, nodeRpcEndpoint, nodeRestEndpoint } = params;
+    if (offlineSigner) {
+      const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
+      const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
+      this.didrpc = new DIDRpc({ offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
+    } else {
+      this.didrpc = null;
+    }
+
     this.namespace = namespace ? namespace : '';
+  }
+
+  public async init() {
+    if (!this.didrpc) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+    await this.didrpc.init();
   }
 
   private async _sign(params: { didDocString: string; privateKeyMultibase: string }): Promise<string> {
@@ -147,6 +177,12 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
     }
 
+    if (!this.didrpc) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+
     const { didDocument, privateKeyMultibase, verificationMethodId } = params;
     const didDocStringJson = Utils.ldToJsonConvertor(didDocument);
     const signature: string = await this._sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase });
@@ -162,27 +198,34 @@ export default class HypersignDID implements IDID {
    * @returns  {Promise<IDIDResolve>} didDocument and didDocumentMetadata
    */
   public async resolve(params: { did: string; ed25519verificationkey2020?: boolean }): Promise<IDIDResolve> {
-    if (params.did) {
-      const result = await this.didrpc.resolveDID(params.did);
-      if (params.ed25519verificationkey2020) {
-        const didDoc: IDidDocument = result.didDocument as IDidDocument;
-        const verificationMethods = didDoc.verificationMethod;
-        verificationMethods.forEach((verificationMethod) => {
-          if (verificationMethod.type === 'Ed25519VerificationKey2020') {
-            const ed25519PublicKey = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
-              publicKey: verificationMethod.publicKeyMultibase,
-            });
-            verificationMethod.publicKeyMultibase = ed25519PublicKey.publicKeyMultibase;
-          }
-        });
-        didDoc.verificationMethod = verificationMethods;
-      }
-      return {
-        didDocument: Utils.jsonToLdConvertor(result.didDocument),
-        didDocumentMetadata: result.didDocumentMetadata,
-      } as IDIDResolve;
+    if (!params.did) {
+      throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
     }
-    throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
+
+    if (!this.didrpc) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+
+    const result = await this.didrpc.resolveDID(params.did);
+    if (params.ed25519verificationkey2020) {
+      const didDoc: IDidDocument = result.didDocument as IDidDocument;
+      const verificationMethods = didDoc.verificationMethod;
+      verificationMethods.forEach((verificationMethod) => {
+        if (verificationMethod.type === 'Ed25519VerificationKey2020') {
+          const ed25519PublicKey = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
+            publicKey: verificationMethod.publicKeyMultibase,
+          });
+          verificationMethod.publicKeyMultibase = ed25519PublicKey.publicKeyMultibase;
+        }
+      });
+      didDoc.verificationMethod = verificationMethods;
+    }
+    return {
+      didDocument: Utils.jsonToLdConvertor(result.didDocument),
+      didDocumentMetadata: result.didDocumentMetadata,
+    } as IDIDResolve;
   }
 
   /**
@@ -212,6 +255,12 @@ export default class HypersignDID implements IDID {
     }
     if (!params.versionId) {
       throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
+    }
+
+    if (!this.didrpc) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+      );
     }
 
     const { didDocument, privateKeyMultibase, verificationMethodId, versionId } = params;
@@ -248,6 +297,12 @@ export default class HypersignDID implements IDID {
     }
     if (!params.versionId) {
       throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
+    }
+
+    if (!this.didrpc) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+      );
     }
 
     const { didDocument, privateKeyMultibase, verificationMethodId, versionId } = params;
@@ -290,7 +345,7 @@ export default class HypersignDID implements IDID {
 
     try {
       // if did is prvovided then resolve the did doc from the blockchain or else use the did doc provided in the params object to sign the did doc with the proof
-      if (did) {
+      if (did && this.didrpc) {
         resolveddoc = await this.didrpc.resolveDID(did);
       } else if (doc) {
         resolveddoc = {};
@@ -305,7 +360,7 @@ export default class HypersignDID implements IDID {
     const publicKeyId = verificationMethodId;
     const pubkey = resolveddoc.didDocument.verificationMethod.find((item) => item.id === publicKeyId);
     if (!pubkey) {
-      throw new Error('HID-SSI-SDK:: Incorrect verification method id');
+      throw new Error('HID-SSI-SDK:: Error: Incorrect verification method id');
     }
     const { publicKeyMultibase: publicKeyMultibase1 } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
       publicKey: pubkey.publicKeyMultibase,

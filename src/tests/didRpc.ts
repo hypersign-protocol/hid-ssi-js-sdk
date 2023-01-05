@@ -1,30 +1,34 @@
 import { expect, should } from 'chai';
-import HypersignSSISdk from '../index';
+import HypersignDID from '../did/did';
 
 import { createWallet, mnemonic, hidNodeEp } from './config';
-let hsSdk;
-const seed = '';
 let privateKeyMultibase;
 let publicKeyMultibase;
 let verificationMethodId;
 let didDocument;
 let didDocId;
 let offlineSigner;
-let transactionHash;
 let versionId;
+let hypersignDID;
+let transactionHash;
 
 //add mnemonic of wallet that have balance
 
 beforeEach(async function () {
   offlineSigner = await createWallet(mnemonic);
-  hsSdk = new HypersignSSISdk(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest, hidNodeEp.namespace);
-  await hsSdk.init();
+  hypersignDID = new HypersignDID({
+    offlineSigner,
+    nodeRestEndpoint: hidNodeEp.rest,
+    nodeRpcEndpoint: hidNodeEp.rpc,
+    namespace: hidNodeEp.namespace,
+  });
+  await hypersignDID.init();
 });
 
 //remove seed while creating did so that wallet can generate different did every time
 describe('#generateKeys() method to generate publicKyeMultibase and privateKeyMultiBase', function () {
   it('should return publickeyMultibase and privateKeyMultibase', async function () {
-    const kp = await hsSdk.did.generateKeys();
+    const kp = await hypersignDID.generateKeys();
     privateKeyMultibase = kp.privateKeyMultibase;
     publicKeyMultibase = kp.publicKeyMultibase;
     expect(kp).to.be.a('object');
@@ -34,14 +38,14 @@ describe('#generateKeys() method to generate publicKyeMultibase and privateKeyMu
 });
 describe('#generate() to generate did', function () {
   it('should not be able to generate did document and throw error as publicKeyMultibase passed is null or empty', function () {
-    return hsSdk.did.generate({ publicKeyMultibase: '' }).catch(function (err) {
+    return hypersignDID.generate({ publicKeyMultibase: '' }).catch(function (err) {
       expect(function () {
         throw err;
       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
     });
   });
   it('should be able to generate didDocument', async function () {
-    didDocument = await hsSdk.did.generate({ publicKeyMultibase });
+    didDocument = await hypersignDID.generate({ publicKeyMultibase });
     didDocId = didDocument['id'];
     verificationMethodId = didDocument['verificationMethod'][0].id;
     expect(didDocument).to.be.a('object');
@@ -70,28 +74,28 @@ describe('#generate() to generate did', function () {
 });
 describe('#register() this is to register did on the blockchain', function () {
   it('should not able to register did document and throw error as didDocument is not passed or it is empty', function () {
-    return hsSdk.did.register({ didDocument: {}, privateKeyMultibase, verificationMethodId }).catch(function (err) {
+    return hypersignDID.register({ didDocument: {}, privateKeyMultibase, verificationMethodId }).catch(function (err) {
       expect(function () {
         throw err;
       }).to.throw(Error, "Cannot read property 'length' of undefined");
     });
   });
   it('should not be able to register did document as privateKeyMultibase is null or empty', function () {
-    return hsSdk.did.register({ didDocument, privateKeyMultibase: '', verificationMethodId }).catch(function (err) {
+    return hypersignDID.register({ didDocument, privateKeyMultibase: '', verificationMethodId }).catch(function (err) {
       expect(function () {
         throw err;
       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKeyMultibase is required to register a did');
     });
   });
   it('should not be able to register did document as verificationMethodId is null or empty', function () {
-    return hsSdk.did.register({ didDocument, privateKeyMultibase, verificationMethodId: '' }).catch(function (err) {
+    return hypersignDID.register({ didDocument, privateKeyMultibase, verificationMethodId: '' }).catch(function (err) {
       expect(function () {
         throw err;
       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
     });
   });
   it('should be able to register didDocument in the blockchain', async function () {
-    const result = await hsSdk.did.register({ didDocument, privateKeyMultibase, verificationMethodId });
+    const result = await hypersignDID.register({ didDocument, privateKeyMultibase, verificationMethodId });
     transactionHash = result.transactionHash;
     should().exist(result.code);
     should().exist(result.height);
@@ -104,7 +108,7 @@ describe('#register() this is to register did on the blockchain', function () {
 
 describe('#resolve() this is to resolve didDocument based on didDocId', function () {
   it('should not able to resolve did document and throw error didDocId is not passed', function () {
-    return hsSdk.did.resolve({ params: { did: '' } }).catch(function (err) {
+    return hypersignDID.resolve({ params: { did: '' } }).catch(function (err) {
       expect(function () {
         throw err;
       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.did is required to resolve a did');
@@ -114,7 +118,7 @@ describe('#resolve() this is to resolve didDocument based on didDocId', function
     const params = {
       did: didDocId,
     };
-    const result = await hsSdk.did.resolve(params);
+    const result = await hypersignDID.resolve(params);
     expect(result).to.be.a('object');
     expect(result.didDocument.id).to.be.equal(didDocId);
     expect(result.didDocumentMetadata).to.be.a('object');
@@ -124,7 +128,7 @@ describe('#resolve() this is to resolve didDocument based on didDocId', function
 
 describe('#update() this is to update didDocument based on didDocId', function () {
   it('should not be able to update did document as privateKeyMultibase is null or empty', function () {
-    return hsSdk.did
+    return hypersignDID
       .update({ didDocument, privateKeyMultibase: '', verificationMethodId, versionId: '1.0' })
       .catch(function (err) {
         expect(function () {
@@ -133,7 +137,7 @@ describe('#update() this is to update didDocument based on didDocId', function (
       });
   });
   it('should not be able to update did document as verificationMethodId is null or empty', function () {
-    return hsSdk.did
+    return hypersignDID
       .update({ didDocument, privateKeyMultibase, verificationMethodId: '', versionId: '1.0' })
       .catch(function (err) {
         expect(function () {
@@ -142,7 +146,7 @@ describe('#update() this is to update didDocument based on didDocId', function (
       });
   });
   it('should not be able to update did document as versionId is null or empty', function () {
-    return hsSdk.did
+    return hypersignDID
       .update({ didDocument, privateKeyMultibase, verificationMethodId, versionId: '' })
       .catch(function (err) {
         expect(function () {
@@ -152,7 +156,7 @@ describe('#update() this is to update didDocument based on didDocId', function (
   });
   it('should not be able to update did document as versionId pased is incorrect', function () {
     const updateBody = { didDocument, privateKeyMultibase, verificationMethodId, versionId: '1.0.1' };
-    return hsSdk.did.update(updateBody).catch(function (err) {
+    return hypersignDID.update(updateBody).catch(function (err) {
       expect(function () {
         throw err;
       }).to.throw(
@@ -162,7 +166,7 @@ describe('#update() this is to update didDocument based on didDocId', function (
     });
   });
   it('should be able to update did document', async function () {
-    const result = await hsSdk.did.update({
+    const result = await hypersignDID.update({
       didDocument,
       privateKeyMultibase,
       verificationMethodId,
@@ -181,7 +185,7 @@ describe('#resolve() did after updating did document', function () {
     const params = {
       did: didDocId,
     };
-    const result = await hsSdk.did.resolve(params);
+    const result = await hypersignDID.resolve(params);
     expect(result).to.be.a('object');
     expect(result.didDocument.id).to.be.equal(didDocId);
     expect(result.didDocumentMetadata).to.be.a('object');
@@ -194,7 +198,7 @@ describe('#resolve() did after updating did document', function () {
       did: didDocId,
       ed25519verificationkey2020: true,
     };
-    const result = await hsSdk.did.resolve(params);
+    const result = await hypersignDID.resolve(params);
     expect(result).to.be.a('object');
     expect(result.didDocument.id).to.be.equal(didDocId);
     expect(result.didDocumentMetadata).to.be.a('object');
@@ -204,7 +208,7 @@ describe('#resolve() did after updating did document', function () {
 });
 describe('#deactivate() this is to deactivate didDocument based on didDocId', function () {
   it('should not be able to deactivate did document as privateKeyMultibase is null or empty', function () {
-    return hsSdk.did
+    return hypersignDID
       .deactivate({ didDocument, privateKeyMultibase: '', verificationMethodId, versionId: '1.0' })
       .catch(function (err) {
         expect(function () {
@@ -213,7 +217,7 @@ describe('#deactivate() this is to deactivate didDocument based on didDocId', fu
       });
   });
   it('should not be able to deactivate did document as verificationMethodId is null or empty', function () {
-    return hsSdk.did
+    return hypersignDID
       .deactivate({ didDocument, privateKeyMultibase, verificationMethodId: '', versionId: '1.0' })
       .catch(function (err) {
         expect(function () {
@@ -222,7 +226,7 @@ describe('#deactivate() this is to deactivate didDocument based on didDocId', fu
       });
   });
   it('should not be able to deactivate did document as versionId is null or empty', function () {
-    return hsSdk.did
+    return hypersignDID
       .deactivate({ didDocument, privateKeyMultibase, verificationMethodId, versionId: '' })
       .catch(function (err) {
         expect(function () {
@@ -232,7 +236,7 @@ describe('#deactivate() this is to deactivate didDocument based on didDocId', fu
   });
   it('should not be able to deactivate did document as versionId pased is incorrect', function () {
     const deactivateBody = { didDocument, privateKeyMultibase, verificationMethodId, versionId: '1.0.1' };
-    return hsSdk.did.deactivate(deactivateBody).catch(function (err) {
+    return hypersignDID.deactivate(deactivateBody).catch(function (err) {
       expect(function () {
         throw err;
       }).to.throw(
@@ -242,7 +246,7 @@ describe('#deactivate() this is to deactivate didDocument based on didDocId', fu
     });
   });
   it('should be able to deactivate did document', async function () {
-    const result = await hsSdk.did.deactivate({
+    const result = await hypersignDID.deactivate({
       didDocument,
       privateKeyMultibase,
       verificationMethodId,

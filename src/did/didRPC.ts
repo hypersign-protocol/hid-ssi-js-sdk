@@ -6,11 +6,26 @@ import { SigningStargateClient } from '@cosmjs/stargate';
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
 import { IDIDResolve, IDIDRpc } from './IDID';
+import { OfflineSigner } from '@cosmjs/proto-signing';
 
 export class DIDRpc implements IDIDRpc {
   private didRestEp: string;
-  constructor() {
+  private hidClient: any;
+  constructor({
+    offlineSigner,
+    nodeRpcEndpoint,
+    nodeRestEndpoint,
+  }: {
+    offlineSigner: OfflineSigner;
+    nodeRpcEndpoint: string;
+    nodeRestEndpoint: string;
+  }) {
     this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_PATH;
+    this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+  }
+
+  async init() {
+    await this.hidClient.init();
   }
 
   async registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string): Promise<object> {

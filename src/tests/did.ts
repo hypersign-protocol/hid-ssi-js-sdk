@@ -1,9 +1,9 @@
 import HypersignDID from '../did/did';
 import { expect, should } from 'chai';
-import { IPublicKey, IController } from '../did/IDID';
+import { IPublicKey, IController, IDID } from '../did/IDID';
 const nameSpace = 'Fyre';
 const hypersignDid = new HypersignDID();
-const hypersignDidWithNameSpace = new HypersignDID(nameSpace);
+const hypersignDidWithNameSpace = new HypersignDID({ namespace: nameSpace });
 const seed = '';
 let privateKeyMultibase;
 let publicKeyMultibase;
@@ -162,7 +162,7 @@ describe('#sign() this is to sign didDoc', function () {
     return hypersignDid.sign(params).catch(function (err) {
       expect(function () {
         throw err;
-      }).to.throw(Error, 'HID-SSI-SDK:: Incorrect verification method id');
+      }).to.throw(Error, 'HID-SSI-SDK:: Error: Incorrect verification method id');
     });
   });
   /**
@@ -279,13 +279,16 @@ describe('#register() this is to register didDoc on blockchain', function () {
         }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
       });
   });
-  it("should not be able to register did document on blockchain as  wallet has no balance and  hidClient can't be initialized", function () {
+  it('should not be able to register did document on blockchain as HypersignDID instance is not initialised with offlinesigner', function () {
     return hypersignDid
       .register({ didDocument: signedDocument, privateKeyMultibase, verificationMethodId })
       .catch(function (err) {
         expect(function () {
           throw err;
-        }).to.throw(Error, "Cannot read property 'signAndBroadcast' of undefined");
+        }).to.throw(
+          Error,
+          'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+        );
       });
   });
 });
@@ -301,12 +304,15 @@ describe('#resolve() this is to resolve didDoc', function () {
       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.did is required to resolve a did');
     });
   });
-  it("should not be able to resolve did document on blockchain as hidClient can't be initialized", function () {
+  it('should not be able to resolve did document on blockchain as HypersignDID instance is not initialised with offlinesigner', function () {
     const params = { did: didDocId };
     return hypersignDid.resolve(params).catch(function (err) {
       expect(function () {
         throw err;
-      }).to.throw(Error, 'connect ECONNREFUSED 127.0.0.1:80');
+      }).to.throw(
+        Error,
+        'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+      );
     });
   });
 });
@@ -348,13 +354,16 @@ describe('#update() this is to update didDoc', function () {
         }).to.throw(Error, 'HID-SSI-SDK:: Error: params.versionId is required to update a did');
       });
   });
-  it("should not be able to update did document on hidClient can't be initialized", function () {
+  it('should not be able to update did document on blockchain as HypersignDID instance is not initialised with offlinesigner', function () {
     return hypersignDid
       .update({ didDocument: didDocument, privateKeyMultibase, verificationMethodId, versionId: '1.0' })
       .catch(function (err) {
         expect(function () {
           throw err;
-        }).to.throw(Error, "Cannot read property 'signAndBroadcast' of undefined");
+        }).to.throw(
+          Error,
+          'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+        );
       });
   });
 });
@@ -396,13 +405,16 @@ describe('#deactivate() this is to deactivate didDoc', function () {
         }).to.throw(Error, 'HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
       });
   });
-  it("should not be able to deactivate did document on hidClient can't be initialized", function () {
+  it('should not be able to deactivate did document on blockchain as HypersignDID instance is not initialised with offlinesigner', function () {
     return hypersignDid
       .deactivate({ didDocument: didDocument, privateKeyMultibase, verificationMethodId, versionId: '1.0' })
       .catch(function (err) {
         expect(function () {
           throw err;
-        }).to.throw(Error, "Cannot read property 'signAndBroadcast' of undefined");
+        }).to.throw(
+          Error,
+          'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+        );
       });
   });
 });

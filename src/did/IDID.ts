@@ -73,6 +73,7 @@ export interface IDIDRpc {
   updateDID(didDoc: IDidProto, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
   deactivateDID(did: string, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
   resolveDID(did: string): Promise<IDIDResolve>;
+  init(): Promise<void>;
 }
 
 export interface IDidDocument {
