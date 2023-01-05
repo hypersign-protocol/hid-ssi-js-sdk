@@ -5,8 +5,8 @@ export const mnemonic =
   'zero require alcohol swamp hover punch celery common merge embrace flock dumb unit capital problem future canal improve auto home apple avoid tragic mechanic';
 
 export const hidNodeEp = {
-  rpc: 'https://jagrat.hypersign.id/rpc',
-  rest: 'https://jagrat.hypersign.id/rest',
+  rpc: 'https://rpc.jagrat.hypersign.id',
+  rest: 'https://api.jagrat.hypersign.id',
   namespace: 'testnet',
 };
 export function makeCosmoshubPath(a) {
