@@ -1,4 +1,4 @@
-import { Did as IDidProto, Metadata } from '../generated/ssi/did';
+import { Did as IDidProto, Metadata, VerificationMethod, Service } from '../generated/ssi/did';
 export interface IPublicKey {
   '@context': string;
   id: string;
@@ -29,15 +29,20 @@ export interface IDid extends IDidProto {
 
 export interface IDID {
   generateKeys(params: { seed: string }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }>;
+
   generate(params: { publicKeyMultibase: string }): Promise<object>;
+
   register(params: { didDocument: object; privateKeyMultibase: string; verificationMethodId: string }): Promise<object>;
-  resolve(params: { did: string }): Promise<object>;
+
+  resolve(params: { did: string; ed25519verificationkey2020?: boolean }): Promise<object>;
+
   update(params: {
     didDocument: object;
     privateKeyMultibase: string;
     verificationMethodId: string;
     versionId: string;
   }): Promise<object>;
+
   deactivate(params: {
     didDocument: object;
     privateKeyMultibase: string;
@@ -46,8 +51,16 @@ export interface IDID {
   }): Promise<object>;
 
   // didAuth
-  signDid(params: IParams): Promise<object>;
-  verify(params: IParams): Promise<object>;
+  sign(params: {
+    doc: object;
+    privateKey?: string;
+    challenge: string;
+    domain: string;
+    did: string;
+    verificationMethodId: string;
+  }): Promise<object>;
+
+  verify(params: { doc: object; verificationMethodId: string; challenge: string; domain?: string }): Promise<object>;
 }
 
 export interface IDIDResolve {
@@ -60,4 +73,18 @@ export interface IDIDRpc {
   updateDID(didDoc: IDidProto, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
   deactivateDID(did: string, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
   resolveDID(did: string): Promise<IDIDResolve>;
+}
+
+export interface IDidDocument {
+  context: string[];
+  id: string;
+  controller: string[];
+  alsoKnownAs: string[];
+  verificationMethod: Array<VerificationMethod>;
+  authentication: string[];
+  assertionMethod: string[];
+  keyAgreement: string[];
+  capabilityInvocation: string[];
+  capabilityDelegation: string[];
+  service: Service[];
 }

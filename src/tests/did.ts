@@ -88,7 +88,7 @@ describe('#sign() this is to sign didDoc', function () {
       controller,
     };
     params.privateKey = '';
-    return hypersignDid.signDid(params).catch(function (err) {
+    return hypersignDid.sign(params).catch(function (err) {
       expect(function () {
         throw err;
       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKey is required to sign a did');
@@ -106,7 +106,7 @@ describe('#sign() this is to sign didDoc', function () {
       controller,
     };
     params.challenge = '';
-    return hypersignDid.signDid(params).catch(function (err) {
+    return hypersignDid.sign(params).catch(function (err) {
       expect(function () {
         throw err;
       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.challenge is required to sign a did');
@@ -124,7 +124,7 @@ describe('#sign() this is to sign didDoc', function () {
       controller,
     };
     params.domain = '';
-    return hypersignDid.signDid(params).catch(function (err) {
+    return hypersignDid.sign(params).catch(function (err) {
       expect(function () {
         throw err;
       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.domain is required to sign a did');
@@ -141,7 +141,7 @@ describe('#sign() this is to sign didDoc', function () {
       publicKey,
       controller,
     };
-    return hypersignDid.signDid(params).catch(function (err) {
+    return hypersignDid.sign(params).catch(function (err) {
       expect(function () {
         throw err;
       }).to.throw(Error, `HID-SSI-SDK:: Error: could not resolve did ${params.did}`);
@@ -159,7 +159,7 @@ describe('#sign() this is to sign didDoc', function () {
       controller,
     };
     params.verificationMethodId = '';
-    return hypersignDid.signDid(params).catch(function (err) {
+    return hypersignDid.sign(params).catch(function (err) {
       expect(function () {
         throw err;
       }).to.throw(Error, 'HID-SSI-SDK:: Incorrect verification method id');
@@ -199,7 +199,7 @@ describe('#sign() this is to sign didDoc', function () {
       publicKey,
       controller,
     };
-    signedDocument = await hypersignDid.signDid(params);
+    signedDocument = await hypersignDid.sign(params);
     expect(signedDocument).to.be.a('object');
     signedDocument = signedDocument.signedDidDocument;
     should().exist(signedDocument['@context']);
@@ -462,7 +462,7 @@ describe('#sign() this is to sign didDoc that has didDocId with some nameSpace',
       publicKey,
       controller,
     };
-    signedDocument = await hypersignDidWithNameSpace.signDid(params);
+    signedDocument = await hypersignDidWithNameSpace.sign(params);
     expect(signedDocument).to.be.a('object');
     signedDocument = signedDocument.signedDidDocument;
     should().exist(signedDocument['@context']);

@@ -44,6 +44,7 @@ var chai_1 = require("chai");
 var nameSpace = 'Fyre';
 var hypersignDid = new did_1.default();
 var hypersignDidWithNameSpace = new did_1.default(nameSpace);
+hypersignDidWithNameSpace;
 var seed = '';
 var privateKeyMultibase;
 var publicKeyMultibase;
@@ -141,7 +142,7 @@ describe('#sign() this is to sign didDoc', function () {
             controller: controller,
         };
         params.privateKey = '';
-        return hypersignDid.signDid(params).catch(function (err) {
+        return hypersignDid.sign(params).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKey is required to sign a did');
@@ -159,7 +160,7 @@ describe('#sign() this is to sign didDoc', function () {
             controller: controller,
         };
         params.challenge = '';
-        return hypersignDid.signDid(params).catch(function (err) {
+        return hypersignDid.sign(params).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, 'HID-SSI-SDK:: Error: params.challenge is required to sign a did');
@@ -177,7 +178,7 @@ describe('#sign() this is to sign didDoc', function () {
             controller: controller,
         };
         params.domain = '';
-        return hypersignDid.signDid(params).catch(function (err) {
+        return hypersignDid.sign(params).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, 'HID-SSI-SDK:: Error: params.domain is required to sign a did');
@@ -194,7 +195,7 @@ describe('#sign() this is to sign didDoc', function () {
             publicKey: publicKey,
             controller: controller,
         };
-        return hypersignDid.signDid(params).catch(function (err) {
+        return hypersignDid.sign(params).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, "HID-SSI-SDK:: Error: could not resolve did ".concat(params.did));
@@ -212,7 +213,7 @@ describe('#sign() this is to sign didDoc', function () {
             controller: controller,
         };
         params.verificationMethodId = '';
-        return hypersignDid.signDid(params).catch(function (err) {
+        return hypersignDid.sign(params).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, 'HID-SSI-SDK:: Incorrect verification method id');
@@ -257,7 +258,7 @@ describe('#sign() this is to sign didDoc', function () {
                             publicKey: publicKey,
                             controller: controller,
                         };
-                        return [4 /*yield*/, hypersignDid.signDid(params)];
+                        return [4 /*yield*/, hypersignDid.sign(params)];
                     case 1:
                         signedDocument = _a.sent();
                         (0, chai_1.expect)(signedDocument).to.be.a('object');
@@ -540,7 +541,7 @@ describe('#sign() this is to sign didDoc that has didDocId with some nameSpace',
                             publicKey: publicKey,
                             controller: controller,
                         };
-                        return [4 /*yield*/, hypersignDidWithNameSpace.signDid(params)];
+                        return [4 /*yield*/, hypersignDidWithNameSpace.sign(params)];
                     case 1:
                         signedDocument = _a.sent();
                         (0, chai_1.expect)(signedDocument).to.be.a('object');

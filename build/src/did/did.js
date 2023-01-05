@@ -102,10 +102,15 @@ var DIDDocument = /** @class */ (function () {
     }
     return DIDDocument;
 }());
+/** Class representing HypersignDID */
 var HypersignDID = /** @class */ (function () {
+    /**
+     * Creates instance of HypersignDID class
+     * @param {string} namespace - DID namespace
+     */
     function HypersignDID(namespace) {
         var _this = this;
-        this.getId = function (methodSpecificId) {
+        this._getId = function (methodSpecificId) {
             var did = '';
             did =
                 _this.namespace && _this.namespace != ''
@@ -116,8 +121,7 @@ var HypersignDID = /** @class */ (function () {
         this.didrpc = new didRPC_1.DIDRpc();
         this.namespace = namespace ? namespace : '';
     }
-    // Sign the doc
-    HypersignDID.prototype.sign = function (params) {
+    HypersignDID.prototype._sign = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var privateKeyMultibaseConverted, didDocString, did, didBytes, signed;
             return __generator(this, function (_a) {
@@ -137,7 +141,11 @@ var HypersignDID = /** @class */ (function () {
             });
         });
     };
-    // Generate a new key pair of type Ed25519VerificationKey2020
+    /**
+     * Generate a new key pair of type Ed25519VerificationKey2020
+     * @params params.seed - Seed to generate the key pair
+     * @returns {Promise<object>} The key pair of type Ed25519
+     */
     HypersignDID.prototype.generateKeys = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var edKeyPair, seedBytes, exportedKp;
@@ -165,7 +173,11 @@ var HypersignDID = /** @class */ (function () {
             });
         });
     };
-    /// Generate Did Document
+    /**
+     * Generates a new DID Document
+     * @params params.publicKeyMultibase - public key
+     * @returns {Promise<object>} DidDocument object
+     */
     HypersignDID.prototype.generate = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var publicKeyMultibase1, methodSpecificId, did, newDid;
@@ -177,19 +189,27 @@ var HypersignDID = /** @class */ (function () {
                     publicKey: params.publicKeyMultibase,
                 }).publicKeyMultibase;
                 methodSpecificId = publicKeyMultibase1;
-                did = this.getId(methodSpecificId);
+                did = this._getId(methodSpecificId);
                 newDid = new DIDDocument(publicKeyMultibase1, did);
                 return [2 /*return*/, utils_1.default.jsonToLdConvertor(__assign({}, newDid))];
             });
         });
     };
-    // TODO:  this method MUST also accept signature/proof
+    /**
+     * Register a new DID and Document in Hypersign blockchain - an onchain activity
+     * @params
+     *  - params.didDocument          : LD did document
+     *  - params.privateKeyMultibase  : Private Key to sign the doc
+     *  - params.verificationMethodId : VerificationMethodId of the document
+     * @returns {Promise<object>} Result of the registration
+     */
     HypersignDID.prototype.register = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var didDocument, privateKeyMultibase, verificationMethodId, didDocStringJson, signature, didDoc;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        // TODO:  this method MUST also accept signature/proof
                         if (!params.didDocument) {
                             throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
                         }
@@ -201,7 +221,7 @@ var HypersignDID = /** @class */ (function () {
                         }
                         didDocument = params.didDocument, privateKeyMultibase = params.privateKeyMultibase, verificationMethodId = params.verificationMethodId;
                         didDocStringJson = utils_1.default.ldToJsonConvertor(didDocument);
-                        return [4 /*yield*/, this.sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase: privateKeyMultibase })];
+                        return [4 /*yield*/, this._sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase: privateKeyMultibase })];
                     case 1:
                         signature = _a.sent();
                         didDoc = didDocStringJson;
@@ -211,6 +231,13 @@ var HypersignDID = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Resolves a DID into DIDDocument from Hypersign blockchain - an onchain activity
+     * @params
+     *  - params.did                        : DID
+     *  - params.ed25519verificationkey2020 : *Optional* True/False
+     * @returns  {Promise<IDIDResolve>} didDocument and didDocumentMetadata
+     */
     HypersignDID.prototype.resolve = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var result, didDoc, verificationMethods;
@@ -243,7 +270,15 @@ var HypersignDID = /** @class */ (function () {
             });
         });
     };
-    // Update DID Document
+    /**
+     * Update a DIDDocument in Hypersign blockchain - an onchain activity
+     * @params
+     *  - params.didDocument          : LD did document
+     *  - params.privateKeyMultibase  : Private Key to sign the doc
+     *  - params.verificationMethodId : VerificationMethodId of the document
+     *  - params.versionId            : Version of the document
+     * @returns {Promise<object>} Result of the update operation
+     */
     HypersignDID.prototype.update = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var didDocument, privateKeyMultibase, verificationMethodId, versionId, didDocStringJson, signature, didDoc;
@@ -264,7 +299,7 @@ var HypersignDID = /** @class */ (function () {
                         }
                         didDocument = params.didDocument, privateKeyMultibase = params.privateKeyMultibase, verificationMethodId = params.verificationMethodId, versionId = params.versionId;
                         didDocStringJson = utils_1.default.ldToJsonConvertor(didDocument);
-                        return [4 /*yield*/, this.sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase: privateKeyMultibase })];
+                        return [4 /*yield*/, this._sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase: privateKeyMultibase })];
                     case 1:
                         signature = _a.sent();
                         didDoc = didDocStringJson;
@@ -274,6 +309,15 @@ var HypersignDID = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Deactivate a DIDDocument in Hypersign blockchain - an onchain activity
+     * @params
+     *  - params.didDocument          : LD did document
+     *  - params.privateKeyMultibase  : Private Key to sign the doc
+     *  - params.verificationMethodId : VerificationMethodId of the document
+     *  - params.versionId            : Version of the document
+     * @returns {Promise<object>} Result of the deactivatee operation
+     */
     HypersignDID.prototype.deactivate = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var didDocument, privateKeyMultibase, verificationMethodId, versionId, didDocStringJson, signature, didDoc;
@@ -294,7 +338,7 @@ var HypersignDID = /** @class */ (function () {
                         }
                         didDocument = params.didDocument, privateKeyMultibase = params.privateKeyMultibase, verificationMethodId = params.verificationMethodId, versionId = params.versionId;
                         didDocStringJson = utils_1.default.ldToJsonConvertor(didDocument);
-                        return [4 /*yield*/, this.sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase: privateKeyMultibase })];
+                        return [4 /*yield*/, this._sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase: privateKeyMultibase })];
                     case 1:
                         signature = _a.sent();
                         didDoc = didDocStringJson;
@@ -304,18 +348,18 @@ var HypersignDID = /** @class */ (function () {
             });
         });
     };
-    /// Did Auth
     /**
-     *
-     * @param params
-     * -    params { privateKey, challenge, domain, did}
-     * -    privateKey  :   private key in multibase format (base58 digitalbazar format)
-     * -    challenge   :   challenge is a random string generated by the client
-     * -    did         :   did of the user
-     * -    domain      :   domain is the domain of the DID Document that is being authenticated
-     * @returns signed {signedDidDocument}
+     * Signs a DIDDocument
+     * @params
+     *  - params.doc                       :
+     *  - params.privateKey                :   private key in multibase format (base58 digitalbazar format)
+     *  - params.challenge                 :   challenge is a random string generated by the client
+     *  - params.did                       :   did of the user
+     *  - params.domain                    :   domain is the domain of the DID Document that is being authenticated
+     *  - params.verificationMethodId      :   verificationMethodId of the DID
+     * @returns {Promise<object>} Signed DID Document
      */
-    HypersignDID.prototype.signDid = function (params) {
+    HypersignDID.prototype.sign = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var privateKey, challenge, domain, did, doc, verificationMethodId, resolveddoc, error_1, publicKeyId, pubkey, publicKeyMultibase1, keyPair, suite, didDocumentLd, signedDidDocument;
             return __generator(this, function (_a) {
@@ -390,14 +434,14 @@ var HypersignDID = /** @class */ (function () {
             });
         });
     };
-    // verify the signature
     /**
-     *
-     * @param params IParams
-     * -    params { doc: signedDidDocument}
-     * -    doc  :   signed did document
-     *
-     * @returns VerificationResult {VerificationResult}
+     * Verifies a signed DIDDocument
+     * @params
+     *  - params.privateKey  :   private key in multibase format (base58 digitalbazar format)
+     *  - params.challenge   :   challenge is a random string generated by the client
+     *  - params.did         :   did of the user
+     *  - params.domain      :   domain is the domain of the DID Document that is being authenticated
+     * @returns Promise<{ verificationResult }> Verification Result
      */
     HypersignDID.prototype.verify = function (params) {
         return __awaiter(this, void 0, void 0, function () {
