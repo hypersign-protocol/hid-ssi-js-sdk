@@ -402,7 +402,7 @@ describe('#sign() this is to sign didDoc', function () {
     };
     it('should not able to sign did document and throw error as privateKey is not passed or it is empty', function () {
         var params = {
-            privateKey: privateKeyMultibase,
+            privateKeyMultibase: privateKeyMultibase,
             challenge: challenge,
             domain: domain,
             did: didDocId,
@@ -411,7 +411,7 @@ describe('#sign() this is to sign didDoc', function () {
             publicKey: publicKey,
             controller: controller,
         };
-        params.privateKey = '';
+        params.privateKeyMultibase = '';
         return hypersignDID.sign(params).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
@@ -420,7 +420,7 @@ describe('#sign() this is to sign didDoc', function () {
     });
     it('should not able to sign did document and throw error as challenge is not passed or it is empty', function () {
         var params = {
-            privateKey: privateKeyMultibase,
+            privateKeyMultibase: privateKeyMultibase,
             challenge: challenge,
             domain: domain,
             did: didDocId,
@@ -438,7 +438,7 @@ describe('#sign() this is to sign didDoc', function () {
     });
     it('should not able to sign did document and throw error as domain is not passed or it is empty', function () {
         var params = {
-            privateKey: privateKeyMultibase,
+            privateKeyMultibase: privateKeyMultibase,
             challenge: challenge,
             domain: domain,
             did: didDocId,
@@ -456,7 +456,7 @@ describe('#sign() this is to sign didDoc', function () {
     });
     it('should not able to sign did document and throw error as did is not resolved', function () {
         var params = {
-            privateKey: privateKeyMultibase,
+            privateKeyMultibase: privateKeyMultibase,
             challenge: challenge,
             domain: domain,
             did: didDocId,
@@ -473,7 +473,7 @@ describe('#sign() this is to sign didDoc', function () {
     });
     it('should not able to sign did document and throw error as verificationMethodId is invalid or wrong', function () {
         var params = {
-            privateKey: privateKeyMultibase,
+            privateKeyMultibase: privateKeyMultibase,
             challenge: challenge,
             domain: domain,
             did: '',
@@ -496,7 +496,7 @@ describe('#sign() this is to sign didDoc', function () {
                 switch (_a.label) {
                     case 0:
                         params = {
-                            privateKey: privateKeyMultibase,
+                            privateKeyMultibase: privateKeyMultibase,
                             challenge: challenge,
                             domain: domain,
                             did: '',
