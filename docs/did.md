@@ -32,8 +32,6 @@ import { HypersignDID } from 'hid-ssi-sdk';
 
 ## Initialize Instance of HypersignDID
 
-
-
 ```js
 const hypersignDID = new HypersignDID();
 
@@ -75,15 +73,24 @@ const kp = await hypersignDID.generateKeys({seed});
   publicKeyMultibase: 'z6MkhHLrnL288X2dXRBVQ9KUDRi8LLUb6sb7zo1oUUjEqTVN'
 }
 ```
+// TODO: It should also outputs algorithm
 
 ### `generate()` 
 
 Generates a new DID Document
 
+**API Definition**
+
 ```js
 generate(params: { publicKeyMultibase: string }): Promise<object>;
 ```
+**Usage**
+
+```js
+const didDocument = await hypersignDID.generate({ publicKeyMultibase });
+```
 **Outputs**
+
 ```js
 {
   '@context': [ 'https://www.w3.org/ns/did/v1' ],
@@ -118,6 +125,9 @@ generate(params: { publicKeyMultibase: string }): Promise<object>;
 ```
 
 ### `sign()`
+Sing a DID Document and generated proof 
+
+**API Definition**
 
 ```js
 sign(params: {
@@ -129,6 +139,22 @@ sign(params: {
     verificationMethodId: string;
   }): Promise<object>;
 ```
+
+**Usage**
+
+```js
+const params = {
+      privateKey: privateKeyMultibase, // private key of type ED25519
+      challenge: '1231231231', // Random challenge
+      domain: 'www.hypersign.id', // Domain name
+      did: '', // If passed, then DID will be resolved and `doc` parameter will not be used
+      doc: didDocument, // A DID Document to signed
+      verificationMethodId: verificationMethodId, // Verification method identifier
+    };
+
+const signedDocument = await hypersignDID.sign(params);
+```
+
 **Outputs**
 ```json
 {
@@ -174,7 +200,7 @@ sign(params: {
       "verificationMethod": "did:hid:testnet:z2rkgwQaXwDAXtKFkbNE74fanZGVsDTCcNzWFjwPidB55#key-1",
       "proofPurpose": "authentication",
       "challenge": "1231231231",
-      "domain": "www.adbv.com",
+      "domain": "www.hypersign.id",
       "proofValue": "z5aX3uHmzhX2kvx5kiSgs8d2RHfEh7akMUvU35wVKqpm9vqsbptSCL7Ak6rLE9DX3DC98buzruvQ6RJgmeC73gHxP"
     }
   }
@@ -183,10 +209,26 @@ sign(params: {
 
 ### `verify()`
 
+Verifies a signed DID Document.
+
+**API Definition**
+
 ```js
 verify(params: { doc: object; verificationMethodId: string; challenge: string; domain?: string }): Promise<object>;
 ```
+**Usage**
+
+```js
+const result = await hypersignDID.verify({
+      doc: signedDocument, // Signed did document
+      verificationMethodId, // The verification method
+      challenge: '1231231231', // Random challenge
+      domain: 'www.hypersign.id',   // The domain name
+});
+```
+
 **Outputs**
+
 ```json
 {
   "verificationResult": {
@@ -227,6 +269,7 @@ verify(params: { doc: object; verificationMethodId: string; challenge: string; d
   }
 }
 ```
+
 ## Onchain APIs
 
 ### Initialize with offlineSigner 
@@ -252,13 +295,25 @@ const hypersignDid = new HypersignDID({
 await hypersignDid.init();
 ```
 
-
 ### `register()`
+
+Registers a DID and DIDDocument on blockchain
+
+**API Definition**
 
 ```js
 register(params: { didDocument: object; privateKeyMultibase: string; verificationMethodId: string }): Promise<object>;
-
 ```
+**Usage**
+
+```js
+const result = await hypersignDID.register({ 
+  didDocument, 
+  privateKeyMultibase, 
+  verificationMethodId
+});
+```
+
 **Outputs**
 ```js
 {
@@ -273,11 +328,23 @@ register(params: { didDocument: object; privateKeyMultibase: string; verificatio
 
 ### `resolve()`
 
+Resolves a DID document from blockchain provided the DID.
+
+**API Definition**
+
 ```js
 resolve(params: { did: string; ed25519verificationkey2020?: boolean }): Promise<object>;
-
 ```
+**Usage**
+
+```js
+const result = await hypersignDID.resolve({
+      did,
+});
+```
+
 **Outputs**
+
 ```js
 {
   didDocument: {
@@ -319,6 +386,10 @@ resolve(params: { did: string; ed25519verificationkey2020?: boolean }): Promise<
 
 ### `update()`
 
+Updates the DID document on blockchain
+
+**API Definition**
+
 ```js
 update(params: {
     didDocument: object;
@@ -328,7 +399,19 @@ update(params: {
   }): Promise<object>;
 ```
 
+**Usage**
+
+```js
+const result = await hypersignDID.update({
+  didDocument,
+  privateKeyMultibase,
+  verificationMethodId,
+  versionId, // VersionId when DID is registered on chain. See the didDocumentMetadata when DID resolves
+});
+```
+
 **Outputs**
+
 ```js
 {
   code: 0,
@@ -339,7 +422,12 @@ update(params: {
   gasWanted: 120751
 }
 ```
+
 ### `deactivate()`
+
+Updates the DID document on blockchain
+
+**API Definition**
 
 ```js
 deactivate(params: {
@@ -349,6 +437,17 @@ deactivate(params: {
     versionId: string;
   }): Promise<object>;
 ```
+**Usage**
+
+```js
+const result = await hypersignDID.deactivate({
+      didDocument,
+      privateKeyMultibase,
+      verificationMethodId,
+      versionId,  // VersionId when DID is registered on chain. See the didDocumentMetadata when DID resolves
+});
+```
+
 **Outputs**
 ```js
 {
