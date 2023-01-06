@@ -34,7 +34,7 @@ export interface IDid extends IDidProto {
 }
 
 export interface IDID {
-  generateKeys(params: { seed: string }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }>;
+  generateKeys(params: { seed?: string }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }>;
 
   generate(params: { publicKeyMultibase: string }): Promise<object>;
 

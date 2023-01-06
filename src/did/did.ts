@@ -123,7 +123,7 @@ export default class HypersignDID implements IDID {
    * @returns {Promise<object>} The key pair of type Ed25519
    */
   public async generateKeys(params: {
-    seed: string;
+    seed?: string;
   }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }> {
     let edKeyPair;
     if (params && params.seed) {

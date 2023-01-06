@@ -5,7 +5,7 @@
   "main": "build/src/index.js",
   "scripts": {
     "test": "cd test/ssi && node did.js && node private-did.js && node schema.js && cd credentials && node test1.js && node test2.js",
-    "test-did": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/did.ts' --exit --timeout 400000 && env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/didRpc.ts' --exit --timeout 40000",
+    "test-did": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/did.ts' --exit --timeout 40000",
     "test-schema": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/schema.ts' --exit --timeout 400000",
     "test-credential": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/did.ts' --exit --timeout 400000 &&   env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/schema.ts' --exit --timeout 400000 && env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/schemaRpc.ts' --exit --timeout 400000 && env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/vc.ts' --exit --timeout 400000 &&  env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/didRpc.ts' --exit --timeout 40000 ",
     "start": "node build/index.js",
