@@ -447,13 +447,18 @@ describe('#verify() method to verify did document', function () {
       .catch(function (err) {
         expect(function () {
           throw err;
-        }).to.throw(Error, 'HID-SSI-SDK:: Error: could not find verification method for verificationMethodId: ' + verMethIdMod + ' in did document');
+        }).to.throw(
+          Error,
+          'HID-SSI-SDK:: Error: could not find verification method for verificationMethodId: ' +
+            verMethIdMod +
+            ' in did document'
+        );
       });
   });
 
   it('should not able to verify did document and throw error as proof is not present in the signedDID doc', function () {
     const signedDIDDoc = signedDocument;
-    delete signedDIDDoc['proof']
+    delete signedDIDDoc['proof'];
     return hypersignDID
       .verify({ didDocument: signedDIDDoc, verificationMethodId, challenge, domain })
       .catch(function (err) {

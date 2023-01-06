@@ -33,18 +33,18 @@ export interface IDid extends IDidProto {
   '@context': Array<any>;
 }
 
-interface IProof{
+interface IProof {
   type: string;
   created: string;
   verificationMethod: string;
   proofPurpose: string;
   challenge: string;
   domain: string;
-  proofValue: string
+  proofValue: string;
 }
 
 export interface ISignedDIDDocument extends IDidProto {
-  proof: IProof
+  proof: IProof;
 }
 
 export interface IDID {
@@ -80,7 +80,12 @@ export interface IDID {
     verificationMethodId: string;
   }): Promise<object>;
 
-  verify(params: { didDocument: object; verificationMethodId: string; challenge: string; domain?: string }): Promise<object>;
+  verify(params: {
+    didDocument: object;
+    verificationMethodId: string;
+    challenge: string;
+    domain?: string;
+  }): Promise<object>;
 }
 
 export interface IDIDResolve {

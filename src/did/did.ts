@@ -51,8 +51,6 @@ class DIDDocument implements Did {
   }
 }
 
-
-
 /** Class representing HypersignDID */
 export default class HypersignDID implements IDID {
   private didrpc: IDIDRpc | null;
@@ -387,7 +385,7 @@ export default class HypersignDID implements IDID {
     });
     const didDocumentLd = Utils.jsonToLdConvertor(resolveddoc.didDocument);
     didDocumentLd['@context'].push(constant.VC.CREDENTAIL_SECURITY_SUITE);
-    const signedDidDocument = await jsonSigs.sign(didDocumentLd, {
+    const signedDidDocument = (await jsonSigs.sign(didDocumentLd, {
       suite,
       purpose: new AuthenticationProofPurpose({
         challenge,
@@ -395,7 +393,7 @@ export default class HypersignDID implements IDID {
       }),
       documentLoader,
       compactProof: constant.compactProof,
-    }) as ISignedDIDDocument;
+    })) as ISignedDIDDocument;
 
     return signedDidDocument;
   }
@@ -421,7 +419,7 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to verify a did');
     }
 
-    if(!didDocument['proof']){
+    if (!didDocument['proof']) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocument.proof is not present in the signed did document');
     }
 
@@ -437,10 +435,14 @@ export default class HypersignDID implements IDID {
     const publicKeyId = verificationMethodId;
     const pubkey = didDoc.verificationMethod.find((item) => item.id === publicKeyId);
 
-    if(!pubkey){
-      throw new Error('HID-SSI-SDK:: Error: could not find verification method for verificationMethodId: ' + verificationMethodId + ' in did document');
+    if (!pubkey) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: could not find verification method for verificationMethodId: ' +
+          verificationMethodId +
+          ' in did document'
+      );
     }
-    
+
     const { publicKeyMultibase: publicKeyMultibase1 } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
       publicKey: pubkey.publicKeyMultibase,
     });
