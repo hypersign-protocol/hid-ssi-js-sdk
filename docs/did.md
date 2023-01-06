@@ -138,7 +138,8 @@ const didDocument = await hypersignDID.generate({ publicKeyMultibase });
 ```
 
 ### `sign()`
-Sing a DID Document and generated proof 
+
+Sign a DID Document and generated proof 
 
 **API Definition**
 
