@@ -1,16 +1,32 @@
 # Introduction 
 
+Hypersign Decentralized Identifiers (Hypersign DID) comply [W3C DID specification](https://www.w3.org/TR/did-core/) and is built on top of [Hypersign Identity Blockchain Network](https://explorer.hypersign.id/hypersign-testnet). It implements [Hypersign DID scheme (`did:hid`)](https://docs.hypersign.id/self-sovereign-identity-ssi/decentralized-identifier-did).
+
+Note: `did:hid` DID scheme is yet to be offcially registered on [W3C DID registry](https://www.w3.org/TR/did-spec-registries/).
+
+## What is a DID?
+
+As per [W3C DID v1.0 specification document](https://www.w3.org/TR/did-core/): 
+
+> Decentralized identifiers (DIDs) are a new type of identifier that enables verifiable, decentralized digital identity. A DID refers to any subject (e.g., a person, organization, thing, data model, abstract entity, etc.) as determined by the controller of the DID.
+
+In simple words, decentralised identifiers are cryptographically-verifiable identifiers which are stored on a decentralised ledger, which enables users to own and manage their digital identity.
+
+## Hypersign DID SDK
+
+Is a javascript library to interact with Hypersign DID and to perform onchain and offchain operations.
+
 ## Table of Contents
 - [Install The Package](#install-the-package)
 - [Import The Package](#import-the-package)
-- [Initialize Instance of HypersignDID](#initialize-instance-of-hypersigndid)
 - [OffChain APIs](#offchain-apis)
+    - [Initialize Instance of HypersignDID](#initialize-instance-of-hypersigndid)
     - [generateKeys()](#generatekeys)
     - [generate()](#generate)
     - [sign()](#sign)
     - [verify()](#verify)
 - [OnChain APIs](#onchain-apis)
-    - [Initialize with offlineSigner](#initialize-with-offlinesigner)
+    - [Initialize Instance of HypersignDID with offlineSigner](#initialize-with-offlinesigner)
     - [register()](#register)
     - [resolve()](#resolve)
     - [update()](#update)
@@ -30,20 +46,18 @@ npm i hid-ssi-sdk --save
 import { HypersignDID } from 'hid-ssi-sdk';
 ```
 
-## Initialize Instance of HypersignDID
+## Offchain APIs
+
+### Initialize Instance of HypersignDID
 
 ```js
 const hypersignDID = new HypersignDID();
 
 // OR initialize by passing a namepace. Default 'did:hid'
 // More complex way to initialize this class can be found in this documentation later
-
 const namespace = 'did:hid';
 const hypersignDID = new HypersignDID({ namespace });
 ```
-
-
-## Offchain APIs
 
 ### `generateKeys()`
 
@@ -62,7 +76,6 @@ const kp = await hypersignDID.generateKeys();
 
 // OR pass a seed / mnemonic to generated deterministic key pair
 const seed = Bip39.decode("three image merge verb tenant tree modify million hotel decade hurt alien loop illegal day judge beyond anxiety term there improve mad gossip car")
-
 const kp = await hypersignDID.generateKeys({seed});
 ```
 **Outputs**
@@ -285,9 +298,8 @@ const hypersignDid = new HypersignDID({
   });
 
 // OR Just initalize with offlineSigner
-
 const hypersignDid = new HypersignDID({
-    offlineSiner
+    offlineSigner
 })
 ```
 **Call `init()` to initalize the offlineSigner**
@@ -433,7 +445,7 @@ const result = await hypersignDID.update({
 
 ### `deactivate()`
 
-Updates the DID document on blockchain
+Deactivates the DID document on blockchain
 
 **API Definition**
 
@@ -467,6 +479,7 @@ const result = await hypersignDID.deactivate({
   gasWanted: 106555
 }
 ```
+
 ## Security Concerns
 
 // TODO
