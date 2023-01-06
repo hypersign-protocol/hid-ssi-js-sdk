@@ -131,13 +131,13 @@ Sing a DID Document and generated proof
 
 ```js
 sign(params: {
-    doc: object;
+    didDocument: object;
     privateKey?: string;
     challenge: string;
     domain: string;
     did: string;
     verificationMethodId: string;
-  }): Promise<object>;
+  }): Promise<ISignedDIDDocument>;
 ```
 
 **Usage**
@@ -148,7 +148,7 @@ const params = {
       challenge: '1231231231', // Random challenge
       domain: 'www.hypersign.id', // Domain name
       did: '', // If passed, then DID will be resolved and `doc` parameter will not be used
-      doc: didDocument, // A DID Document to signed
+      didDocument: didDocument, // A DID Document to signed
       verificationMethodId: verificationMethodId, // Verification method identifier
     };
 
@@ -158,7 +158,6 @@ const signedDocument = await hypersignDID.sign(params);
 **Outputs**
 ```json
 {
-  "signedDidDocument": {
     "@context": [
       "https://www.w3.org/ns/did/v1",
       "https://w3id.org/security/suites/ed25519-2020/v1"
@@ -203,7 +202,6 @@ const signedDocument = await hypersignDID.sign(params);
       "domain": "www.hypersign.id",
       "proofValue": "z5aX3uHmzhX2kvx5kiSgs8d2RHfEh7akMUvU35wVKqpm9vqsbptSCL7Ak6rLE9DX3DC98buzruvQ6RJgmeC73gHxP"
     }
-  }
 }
 ```
 
@@ -214,13 +212,18 @@ Verifies a signed DID Document.
 **API Definition**
 
 ```js
-verify(params: { doc: object; verificationMethodId: string; challenge: string; domain?: string }): Promise<object>;
+verify(params: { 
+  didDocument: object; 
+  verificationMethodId: string; 
+  challenge: string; 
+  domain?: string 
+}): Promise<object>;
 ```
 **Usage**
 
 ```js
 const result = await hypersignDID.verify({
-      doc: signedDocument, // Signed did document
+      didDocument: signedDocument, // Signed did document
       verificationMethodId, // The verification method
       challenge: '1231231231', // Random challenge
       domain: 'www.hypersign.id',   // The domain name
@@ -231,7 +234,6 @@ const result = await hypersignDID.verify({
 
 ```json
 {
-  "verificationResult": {
     "verified": true,
     "results": [
       {
@@ -267,7 +269,6 @@ const result = await hypersignDID.verify({
       }
     ]
   }
-}
 ```
 
 ## Onchain APIs

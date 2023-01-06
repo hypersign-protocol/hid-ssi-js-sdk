@@ -292,7 +292,7 @@ describe('#sign() this is to sign didDoc', function () {
       challenge: challenge as string,
       domain: domain as string,
       did: didDocId,
-      doc: didDocument as object,
+      didDocument: didDocument as object,
       verificationMethodId: verificationMethodId as string,
       publicKey,
       controller,
@@ -310,7 +310,7 @@ describe('#sign() this is to sign didDoc', function () {
       challenge: challenge as string,
       domain: domain as string,
       did: didDocId,
-      doc: didDocument as object,
+      didDocument: didDocument as object,
       verificationMethodId: verificationMethodId as string,
       publicKey,
       controller,
@@ -328,7 +328,7 @@ describe('#sign() this is to sign didDoc', function () {
       challenge: challenge as string,
       domain: domain as string,
       did: didDocId,
-      doc: didDocument as object,
+      didDocument: didDocument as object,
       verificationMethodId: verificationMethodId as string,
       publicKey,
       controller,
@@ -346,7 +346,7 @@ describe('#sign() this is to sign didDoc', function () {
       challenge: challenge as string,
       domain: domain as string,
       did: didDocId as string,
-      doc: didDocument as object,
+      didDocument: didDocument as object,
       verificationMethodId: verificationMethodId as string,
       publicKey,
       controller,
@@ -363,7 +363,7 @@ describe('#sign() this is to sign didDoc', function () {
       challenge: challenge as string,
       domain: domain as string,
       did: '',
-      doc: didDocument as object,
+      didDocument: didDocument as object,
       verificationMethodId: verificationMethodId as string,
       publicKey,
       controller,
@@ -382,7 +382,7 @@ describe('#sign() this is to sign didDoc', function () {
       challenge: challenge as string,
       domain: domain as string,
       did: '', // This is taken as empty as didDoc is yet not register on blockchain and won't able to resolve based on did
-      doc: didDocument as object,
+      didDocument: didDocument as object,
       verificationMethodId: verificationMethodId as string,
       publicKey,
       controller,
@@ -390,7 +390,6 @@ describe('#sign() this is to sign didDoc', function () {
     signedDocument = await hypersignDID.sign(params);
     //console.log(JSON.stringify(signedDocument))
     expect(signedDocument).to.be.a('object');
-    signedDocument = signedDocument.signedDidDocument;
     should().exist(signedDocument['@context']);
     should().exist(signedDocument['id']);
     expect(didDocId).to.be.equal(signedDocument['id']);
@@ -409,7 +408,7 @@ describe('#sign() this is to sign didDoc', function () {
 describe('#verify() method to verify did document', function () {
   it('should not able to verify did document and throw error as verificationMethodId is not passed or it is empty', function () {
     return hypersignDID
-      .verify({ doc: signedDocument, verificationMethodId: '', challenge, domain })
+      .verify({ didDocument: signedDocument, verificationMethodId: '', challenge, domain })
       .catch(function (err) {
         expect(function () {
           throw err;
@@ -418,7 +417,7 @@ describe('#verify() method to verify did document', function () {
   });
   it('should not able to verify did document and throw error as challenge is not passed or it is empty', function () {
     return hypersignDID
-      .verify({ doc: signedDocument, verificationMethodId, challenge: '', domain })
+      .verify({ didDocument: signedDocument, verificationMethodId, challenge: '', domain })
       .catch(function (err) {
         expect(function () {
           throw err;
@@ -428,17 +427,39 @@ describe('#verify() method to verify did document', function () {
 
   it('should return verification result', async function () {
     const result = await hypersignDID.verify({
-      doc: signedDocument,
+      didDocument: signedDocument,
       verificationMethodId,
       challenge,
       domain,
     });
     expect(result).to.be.a('object');
-    //console.log(JSON.stringify(result))
-    should().exist(result.verificationResult);
-    should().exist(result.verificationResult.verified);
-    should().exist(result.verificationResult.results);
-    expect(result.verificationResult.results).to.be.a('array');
-    expect(result.verificationResult.verified).to.equal(true);
+    should().exist(result);
+    should().exist(result.verified);
+    should().exist(result.results);
+    expect(result.results).to.be.a('array');
+    expect(result.verified).to.equal(true);
+  });
+
+  it('should not able to verify did document and throw error as unknown verification method id is passed', function () {
+    const verMethIdMod = verificationMethodId + 'somerandomtext';
+    return hypersignDID
+      .verify({ didDocument: signedDocument, verificationMethodId: verMethIdMod, challenge, domain })
+      .catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: Error: could not find verification method for verificationMethodId: ' + verMethIdMod + ' in did document');
+      });
+  });
+
+  it('should not able to verify did document and throw error as proof is not present in the signedDID doc', function () {
+    const signedDIDDoc = signedDocument;
+    delete signedDIDDoc['proof']
+    return hypersignDID
+      .verify({ didDocument: signedDIDDoc, verificationMethodId, challenge, domain })
+      .catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: Error: params.didDocument.proof is not present in the signed did document');
+      });
   });
 });
