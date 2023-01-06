@@ -288,7 +288,7 @@ describe('#sign() this is to sign didDoc', function () {
 
   it('should not able to sign did document and throw error as privateKey is not passed or it is empty', function () {
     const params = {
-      privateKey: privateKeyMultibase as string,
+      privateKeyMultibase: privateKeyMultibase as string,
       challenge: challenge as string,
       domain: domain as string,
       did: didDocId,
@@ -297,7 +297,7 @@ describe('#sign() this is to sign didDoc', function () {
       publicKey,
       controller,
     };
-    params.privateKey = '';
+    params.privateKeyMultibase = '';
     return hypersignDID.sign(params).catch(function (err) {
       expect(function () {
         throw err;
@@ -306,7 +306,7 @@ describe('#sign() this is to sign didDoc', function () {
   });
   it('should not able to sign did document and throw error as challenge is not passed or it is empty', function () {
     const params = {
-      privateKey: privateKeyMultibase as string,
+      privateKeyMultibase: privateKeyMultibase as string,
       challenge: challenge as string,
       domain: domain as string,
       did: didDocId,
@@ -324,7 +324,7 @@ describe('#sign() this is to sign didDoc', function () {
   });
   it('should not able to sign did document and throw error as domain is not passed or it is empty', function () {
     const params = {
-      privateKey: privateKeyMultibase as string,
+      privateKeyMultibase: privateKeyMultibase as string,
       challenge: challenge as string,
       domain: domain as string,
       did: didDocId,
@@ -342,7 +342,7 @@ describe('#sign() this is to sign didDoc', function () {
   });
   it('should not able to sign did document and throw error as did is not resolved', function () {
     const params = {
-      privateKey: privateKeyMultibase as string,
+      privateKeyMultibase: privateKeyMultibase as string,
       challenge: challenge as string,
       domain: domain as string,
       did: didDocId as string,
@@ -359,7 +359,7 @@ describe('#sign() this is to sign didDoc', function () {
   });
   it('should not able to sign did document and throw error as verificationMethodId is invalid or wrong', function () {
     const params = {
-      privateKey: privateKeyMultibase as string,
+      privateKeyMultibase: privateKeyMultibase as string,
       challenge: challenge as string,
       domain: domain as string,
       did: '',
@@ -378,7 +378,7 @@ describe('#sign() this is to sign didDoc', function () {
 
   it('should able to sign did document', async function () {
     const params = {
-      privateKey: privateKeyMultibase as string,
+      privateKeyMultibase: privateKeyMultibase as string,
       challenge: challenge as string,
       domain: domain as string,
       did: '', // This is taken as empty as didDoc is yet not register on blockchain and won't able to resolve based on did

@@ -131,12 +131,12 @@ Sing a DID Document and generated proof
 
 ```js
 sign(params: {
-    didDocument: object;
-    privateKey?: string;
-    challenge: string;
-    domain: string;
-    did: string;
-    verificationMethodId: string;
+    didDocument: object;            // A DID Document to signed
+    privateKeyMultibase: string;    // private key mulibase of type ED25519
+    challenge: string;              // Random challenge
+    domain: string;                 // Domain name
+    did: string;                    // DID, if passed then DID will be resolved and `didDocument` parameter will not be used
+    verificationMethodId: string    // Verification method identifier
   }): Promise<ISignedDIDDocument>;
 ```
 
@@ -144,12 +144,12 @@ sign(params: {
 
 ```js
 const params = {
-      privateKey: privateKeyMultibase, // private key of type ED25519
-      challenge: '1231231231', // Random challenge
-      domain: 'www.hypersign.id', // Domain name
-      did: '', // If passed, then DID will be resolved and `doc` parameter will not be used
-      didDocument: didDocument, // A DID Document to signed
-      verificationMethodId: verificationMethodId, // Verification method identifier
+      privateKey: privateKeyMultibase, 
+      challenge: '1231231231', 
+      domain: 'www.hypersign.id', 
+      did: '', 
+      didDocument: didDocument, 
+      verificationMethodId: verificationMethodId, 
     };
 
 const signedDocument = await hypersignDID.sign(params);
@@ -213,20 +213,20 @@ Verifies a signed DID Document.
 
 ```js
 verify(params: { 
-  didDocument: object; 
-  verificationMethodId: string; 
-  challenge: string; 
-  domain?: string 
+  didDocument: object;            // Signed did documen
+  verificationMethodId: string;   // The verification method
+  challenge: string;              // Random challenge
+  domain?: string                 // The domain name
 }): Promise<object>;
 ```
 **Usage**
 
 ```js
 const result = await hypersignDID.verify({
-      didDocument: signedDocument, // Signed did document
-      verificationMethodId, // The verification method
-      challenge: '1231231231', // Random challenge
-      domain: 'www.hypersign.id',   // The domain name
+      didDocument: signedDocument, 
+      verificationMethodId, 
+      challenge: '1231231231', 
+      domain: 'www.hypersign.id',   
 });
 ```
 
@@ -303,7 +303,11 @@ Registers a DID and DIDDocument on blockchain
 **API Definition**
 
 ```js
-register(params: { didDocument: object; privateKeyMultibase: string; verificationMethodId: string }): Promise<object>;
+register(params: { 
+  didDocument: object; 
+  privateKeyMultibase: string; 
+  verificationMethodId: string
+}): Promise<object>;
 ```
 **Usage**
 
@@ -334,7 +338,10 @@ Resolves a DID document from blockchain provided the DID.
 **API Definition**
 
 ```js
-resolve(params: { did: string; ed25519verificationkey2020?: boolean }): Promise<object>;
+resolve(params: { 
+  did: string; 
+  ed25519verificationkey2020?: boolean 
+}): Promise<object>;
 ```
 **Usage**
 

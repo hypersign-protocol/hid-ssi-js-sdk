@@ -73,7 +73,7 @@ export interface IDID {
   // didAuth
   sign(params: {
     didDocument: object;
-    privateKey?: string;
+    privateKeyMultibase: string;
     challenge: string;
     domain: string;
     did: string;
