@@ -375,7 +375,7 @@ describe('#sign() this is to sign didDoc', function () {
       }).to.throw(Error, 'HID-SSI-SDK:: Error: Incorrect verification method id');
     });
   });
-  
+
   it('should able to sign did document', async function () {
     const params = {
       privateKey: privateKeyMultibase as string,
@@ -442,5 +442,3 @@ describe('#verify() method to verify did document', function () {
     expect(result.verificationResult.verified).to.equal(true);
   });
 });
-
-

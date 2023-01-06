@@ -39,57 +39,81 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var did_1 = __importDefault(require("../did/did"));
 var chai_1 = require("chai");
-var nameSpace = 'Fyre';
-var hypersignDid = new did_1.default();
-var hypersignDidWithNameSpace = new did_1.default({ namespace: nameSpace });
-var seed = '';
+var did_1 = __importDefault(require("../did/did"));
+var config_1 = require("./config");
 var privateKeyMultibase;
 var publicKeyMultibase;
 var verificationMethodId;
 var didDocument;
 var didDocId;
+var offlineSigner;
+var versionId;
+var hypersignDID;
+var transactionHash;
 var signedDocument;
 var challenge = '1231231231';
 var domain = 'www.adbv.com';
-var didDocumentWithNameSpace;
-var didDocIdWithNameSpace;
+//add mnemonic of wallet that have balance
+beforeEach(function () {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, (0, config_1.createWallet)(config_1.mnemonic)];
+                case 1:
+                    offlineSigner = _a.sent();
+                    hypersignDID = new did_1.default({
+                        offlineSigner: offlineSigner,
+                        nodeRestEndpoint: config_1.hidNodeEp.rest,
+                        nodeRpcEndpoint: config_1.hidNodeEp.rpc,
+                        namespace: config_1.hidNodeEp.namespace,
+                    });
+                    return [4 /*yield*/, hypersignDID.init()];
+                case 2:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+});
+//remove seed while creating did so that wallet can generate different did every time
 describe('#generateKeys() method to generate publicKyeMultibase and privateKeyMultiBase', function () {
     it('should return publickeyMultibase and privateKeyMultibase', function () {
         return __awaiter(this, void 0, void 0, function () {
-            var result;
+            var kp;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, hypersignDid.generateKeys({ seed: seed })];
+                    case 0: return [4 /*yield*/, hypersignDID.generateKeys()];
                     case 1:
-                        result = _a.sent();
-                        privateKeyMultibase = result.privateKeyMultibase;
-                        publicKeyMultibase = result.publicKeyMultibase;
-                        (0, chai_1.expect)(result).to.be.a('object');
-                        (0, chai_1.should)().exist(result.privateKeyMultibase);
-                        (0, chai_1.should)().exist(result.publicKeyMultibase);
+                        kp = _a.sent();
+                        //console.log(kp)
+                        privateKeyMultibase = kp.privateKeyMultibase;
+                        publicKeyMultibase = kp.publicKeyMultibase;
+                        (0, chai_1.expect)(kp).to.be.a('object');
+                        (0, chai_1.should)().exist(kp.privateKeyMultibase);
+                        (0, chai_1.should)().exist(kp.publicKeyMultibase);
                         return [2 /*return*/];
                 }
             });
         });
     });
 });
-describe('#generate() method to generate did document', function () {
-    it('should not able to generate did document and throw error as publickKeyMultibase is not passed or it is empty', function () {
-        return hypersignDid.generate({ publicKeyMultibase: '' }).catch(function (err) {
+describe('#generate() to generate did', function () {
+    it('should not be able to generate did document and throw error as publicKeyMultibase passed is null or empty', function () {
+        return hypersignDID.generate({ publicKeyMultibase: '' }).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, 'HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
         });
     });
-    it('should return didDocument', function () {
+    it('should be able to generate didDocument', function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, hypersignDid.generate({ publicKeyMultibase: publicKeyMultibase })];
+                    case 0: return [4 /*yield*/, hypersignDID.generate({ publicKeyMultibase: publicKeyMultibase })];
                     case 1:
                         didDocument = _a.sent();
+                        //console.log(didDocument)
                         didDocId = didDocument['id'];
                         verificationMethodId = didDocument['verificationMethod'][0].id;
                         (0, chai_1.expect)(didDocument).to.be.a('object');
@@ -111,6 +135,253 @@ describe('#generate() method to generate did document', function () {
                         (0, chai_1.should)().exist(didDocument['capabilityInvocation']);
                         (0, chai_1.should)().exist(didDocument['capabilityDelegation']);
                         (0, chai_1.should)().exist(didDocument['service']);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+});
+describe('#register() this is to register did on the blockchain', function () {
+    it('should not able to register did document and throw error as didDocument is not passed or it is empty', function () {
+        return hypersignDID.register({ didDocument: {}, privateKeyMultibase: privateKeyMultibase, verificationMethodId: verificationMethodId }).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, "Cannot read property 'length' of undefined");
+        });
+    });
+    it('should not be able to register did document as privateKeyMultibase is null or empty', function () {
+        return hypersignDID.register({ didDocument: didDocument, privateKeyMultibase: '', verificationMethodId: verificationMethodId }).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKeyMultibase is required to register a did');
+        });
+    });
+    it('should not be able to register did document as verificationMethodId is null or empty', function () {
+        return hypersignDID.register({ didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: '' }).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
+        });
+    });
+    it('should be able to register didDocument in the blockchain', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, hypersignDID.register({ didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: verificationMethodId })];
+                    case 1:
+                        result = _a.sent();
+                        //console.log(result)
+                        transactionHash = result.transactionHash;
+                        (0, chai_1.should)().exist(result.code);
+                        (0, chai_1.should)().exist(result.height);
+                        (0, chai_1.should)().exist(result.rawLog);
+                        (0, chai_1.should)().exist(result.transactionHash);
+                        (0, chai_1.should)().exist(result.gasUsed);
+                        (0, chai_1.should)().exist(result.gasWanted);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+});
+describe('#resolve() this is to resolve didDocument based on didDocId', function () {
+    it('should not able to resolve did document and throw error didDocId is not passed', function () {
+        return hypersignDID.resolve({ params: { did: '' } }).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.did is required to resolve a did');
+        });
+    });
+    it('should be able to resolve did', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var params, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        params = {
+                            did: didDocId,
+                        };
+                        return [4 /*yield*/, hypersignDID.resolve(params)];
+                    case 1:
+                        result = _a.sent();
+                        //console.log(result);
+                        (0, chai_1.expect)(result).to.be.a('object');
+                        (0, chai_1.expect)(result.didDocument.id).to.be.equal(didDocId);
+                        (0, chai_1.expect)(result.didDocumentMetadata).to.be.a('object');
+                        versionId = result.didDocumentMetadata.versionId;
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+});
+describe('#update() this is to update didDocument based on didDocId', function () {
+    it('should not be able to update did document as privateKeyMultibase is null or empty', function () {
+        return hypersignDID
+            .update({ didDocument: didDocument, privateKeyMultibase: '', verificationMethodId: verificationMethodId, versionId: '1.0' })
+            .catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKeyMultibase is required to update a did');
+        });
+    });
+    it('should not be able to update did document as verificationMethodId is null or empty', function () {
+        return hypersignDID
+            .update({ didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: '', versionId: '1.0' })
+            .catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to update a did');
+        });
+    });
+    it('should not be able to update did document as versionId is null or empty', function () {
+        return hypersignDID
+            .update({ didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: verificationMethodId, versionId: '' })
+            .catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.versionId is required to update a did');
+        });
+    });
+    it('should not be able to update did document as versionId pased is incorrect', function () {
+        var updateBody = { didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: verificationMethodId, versionId: '1.0.1' };
+        return hypersignDID.update(updateBody).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, "Query failed with (18): failed to execute message; message index: 0: Expected ".concat(didDocId, " with version ").concat(versionId, ". Got version ").concat(updateBody.versionId, ": Unexpected DID version: invalid request"));
+        });
+    });
+    it('should be able to update did document', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, hypersignDID.update({
+                            didDocument: didDocument,
+                            privateKeyMultibase: privateKeyMultibase,
+                            verificationMethodId: verificationMethodId,
+                            versionId: versionId,
+                        })];
+                    case 1:
+                        result = _a.sent();
+                        //console.log(result);
+                        (0, chai_1.should)().exist(result.code);
+                        (0, chai_1.should)().exist(result.height);
+                        (0, chai_1.should)().exist(result.rawLog);
+                        (0, chai_1.should)().exist(result.transactionHash);
+                        (0, chai_1.should)().exist(result.gasUsed);
+                        (0, chai_1.should)().exist(result.gasWanted);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+});
+describe('#resolve() did after updating did document', function () {
+    it('should be able to resolve did', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var params, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        params = {
+                            did: didDocId,
+                        };
+                        return [4 /*yield*/, hypersignDID.resolve(params)];
+                    case 1:
+                        result = _a.sent();
+                        (0, chai_1.expect)(result).to.be.a('object');
+                        (0, chai_1.expect)(result.didDocument.id).to.be.equal(didDocId);
+                        (0, chai_1.expect)(result.didDocumentMetadata).to.be.a('object');
+                        (0, chai_1.expect)(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.not.equal(publicKeyMultibase);
+                        versionId = result.didDocumentMetadata.versionId;
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+    // should we able to get same publicKeyMultibase as generated in the begining in didDoc
+    it('should be able to resolve did if params.ed25519verificationkey2020 is passed', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var params, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        params = {
+                            did: didDocId,
+                            ed25519verificationkey2020: true,
+                        };
+                        return [4 /*yield*/, hypersignDID.resolve(params)];
+                    case 1:
+                        result = _a.sent();
+                        (0, chai_1.expect)(result).to.be.a('object');
+                        (0, chai_1.expect)(result.didDocument.id).to.be.equal(didDocId);
+                        (0, chai_1.expect)(result.didDocumentMetadata).to.be.a('object');
+                        (0, chai_1.expect)(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.equal(publicKeyMultibase);
+                        versionId = result.didDocumentMetadata.versionId;
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+});
+describe('#deactivate() this is to deactivate didDocument based on didDocId', function () {
+    it('should not be able to deactivate did document as privateKeyMultibase is null or empty', function () {
+        return hypersignDID
+            .deactivate({ didDocument: didDocument, privateKeyMultibase: '', verificationMethodId: verificationMethodId, versionId: '1.0' })
+            .catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKeyMultibase is required to deactivate a did');
+        });
+    });
+    it('should not be able to deactivate did document as verificationMethodId is null or empty', function () {
+        return hypersignDID
+            .deactivate({ didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: '', versionId: '1.0' })
+            .catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to deactivate a did');
+        });
+    });
+    it('should not be able to deactivate did document as versionId is null or empty', function () {
+        return hypersignDID
+            .deactivate({ didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: verificationMethodId, versionId: '' })
+            .catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
+        });
+    });
+    it('should not be able to deactivate did document as versionId pased is incorrect', function () {
+        var deactivateBody = { didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: verificationMethodId, versionId: '1.0.1' };
+        return hypersignDID.deactivate(deactivateBody).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, "Query failed with (18): failed to execute message; message index: 0: Expected ".concat(didDocId, " with version ").concat(versionId, ". Got version ").concat(deactivateBody.versionId, ": Unexpected DID version: invalid request"));
+        });
+    });
+    it('should be able to deactivate did document', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, hypersignDID.deactivate({
+                            didDocument: didDocument,
+                            privateKeyMultibase: privateKeyMultibase,
+                            verificationMethodId: verificationMethodId,
+                            versionId: versionId,
+                        })];
+                    case 1:
+                        result = _a.sent();
+                        //console.log(JSON.stringify(result));
+                        (0, chai_1.should)().exist(result.code);
+                        (0, chai_1.should)().exist(result.height);
+                        (0, chai_1.should)().exist(result.rawLog);
+                        (0, chai_1.should)().exist(result.transactionHash);
+                        (0, chai_1.should)().exist(result.gasUsed);
+                        (0, chai_1.should)().exist(result.gasWanted);
                         return [2 /*return*/];
                 }
             });
@@ -141,7 +412,7 @@ describe('#sign() this is to sign didDoc', function () {
             controller: controller,
         };
         params.privateKey = '';
-        return hypersignDid.sign(params).catch(function (err) {
+        return hypersignDID.sign(params).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKey is required to sign a did');
@@ -159,7 +430,7 @@ describe('#sign() this is to sign didDoc', function () {
             controller: controller,
         };
         params.challenge = '';
-        return hypersignDid.sign(params).catch(function (err) {
+        return hypersignDID.sign(params).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, 'HID-SSI-SDK:: Error: params.challenge is required to sign a did');
@@ -177,7 +448,7 @@ describe('#sign() this is to sign didDoc', function () {
             controller: controller,
         };
         params.domain = '';
-        return hypersignDid.sign(params).catch(function (err) {
+        return hypersignDID.sign(params).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, 'HID-SSI-SDK:: Error: params.domain is required to sign a did');
@@ -194,7 +465,7 @@ describe('#sign() this is to sign didDoc', function () {
             publicKey: publicKey,
             controller: controller,
         };
-        return hypersignDid.sign(params).catch(function (err) {
+        return hypersignDID.sign(params).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, "HID-SSI-SDK:: Error: could not resolve did ".concat(params.did));
@@ -212,35 +483,12 @@ describe('#sign() this is to sign didDoc', function () {
             controller: controller,
         };
         params.verificationMethodId = '';
-        return hypersignDid.sign(params).catch(function (err) {
+        return hypersignDID.sign(params).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, 'HID-SSI-SDK:: Error: Incorrect verification method id');
         });
     });
-    /**
-     * Commented for time being
-     * Add a check in code that didDoc should be non empty object and also that follow some type with particular properties
-     */
-    // it('should not able to sign did document and throw error as neither did nor doc is passed', function () {
-    //   const params = {
-    //     privateKey: privateKeyMultibase as string,
-    //     challenge: challenge as string,
-    //     domain: domain as string,
-    //     did: didDocId as string,
-    //     doc: didDocId,
-    //     verificationMethodId: verificationMethodId as string,
-    //     publicKey,
-    //     controller,
-    //   };
-    //   params.did = '';
-    //   params.doc= {}
-    //   return hypersignDid.signDid(params).catch(function (err) {
-    //     expect(function () {
-    //       throw err;
-    //     }).to.throw(Error, 'HID-SSI-SDK:: Error: params.did or params.doc is required to sign a did');
-    //   });
-    // });
     it('should able to sign did document', function () {
         return __awaiter(this, void 0, void 0, function () {
             var params;
@@ -257,9 +505,10 @@ describe('#sign() this is to sign didDoc', function () {
                             publicKey: publicKey,
                             controller: controller,
                         };
-                        return [4 /*yield*/, hypersignDid.sign(params)];
+                        return [4 /*yield*/, hypersignDID.sign(params)];
                     case 1:
                         signedDocument = _a.sent();
+                        //console.log(JSON.stringify(signedDocument))
                         (0, chai_1.expect)(signedDocument).to.be.a('object');
                         signedDocument = signedDocument.signedDidDocument;
                         (0, chai_1.should)().exist(signedDocument['@context']);
@@ -283,7 +532,7 @@ describe('#sign() this is to sign didDoc', function () {
 });
 describe('#verify() method to verify did document', function () {
     it('should not able to verify did document and throw error as verificationMethodId is not passed or it is empty', function () {
-        return hypersignDid
+        return hypersignDID
             .verify({ doc: signedDocument, verificationMethodId: '', challenge: challenge, domain: domain })
             .catch(function (err) {
             (0, chai_1.expect)(function () {
@@ -292,7 +541,7 @@ describe('#verify() method to verify did document', function () {
         });
     });
     it('should not able to verify did document and throw error as challenge is not passed or it is empty', function () {
-        return hypersignDid
+        return hypersignDID
             .verify({ doc: signedDocument, verificationMethodId: verificationMethodId, challenge: '', domain: domain })
             .catch(function (err) {
             (0, chai_1.expect)(function () {
@@ -305,7 +554,7 @@ describe('#verify() method to verify did document', function () {
             var result;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, hypersignDid.verify({
+                    case 0: return [4 /*yield*/, hypersignDID.verify({
                             doc: signedDocument,
                             verificationMethodId: verificationMethodId,
                             challenge: challenge,
@@ -314,271 +563,7 @@ describe('#verify() method to verify did document', function () {
                     case 1:
                         result = _a.sent();
                         (0, chai_1.expect)(result).to.be.a('object');
-                        (0, chai_1.should)().exist(result.verificationResult);
-                        (0, chai_1.should)().exist(result.verificationResult.verified);
-                        (0, chai_1.should)().exist(result.verificationResult.results);
-                        (0, chai_1.expect)(result.verificationResult.results).to.be.a('array');
-                        (0, chai_1.expect)(result.verificationResult.verified).to.equal(true);
-                        return [2 /*return*/];
-                }
-            });
-        });
-    });
-});
-describe('#register() this is to register didDoc on blockchain', function () {
-    // it('should not be able to register did document on blockchain as didDocument is null or empty', function () {
-    //   return hypersignDid.register({ didDocument: {}, privateKeyMultibase, verificationMethodId }).catch(function (err) {
-    //     expect(function () {
-    //       throw err;
-    //     }).to.throw(Error, 'HID-SSI-SDK:: Error:  params.didDocString is required to register a did');
-    //   });
-    // });
-    it('should not be able to register did document on blockchain as privateKeyMultibase is null or empty', function () {
-        return hypersignDid
-            .register({ didDocument: signedDocument, privateKeyMultibase: '', verificationMethodId: verificationMethodId })
-            .catch(function (err) {
-            (0, chai_1.expect)(function () {
-                throw err;
-            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKeyMultibase is required to register a did');
-        });
-    });
-    it('should not be able to register did document on blockchain as verificationMethodId is null or empty', function () {
-        return hypersignDid
-            .register({ didDocument: signedDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: '' })
-            .catch(function (err) {
-            (0, chai_1.expect)(function () {
-                throw err;
-            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
-        });
-    });
-    it('should not be able to register did document on blockchain as HypersignDID instance is not initialised with offlinesigner', function () {
-        return hypersignDid
-            .register({ didDocument: signedDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: verificationMethodId })
-            .catch(function (err) {
-            (0, chai_1.expect)(function () {
-                throw err;
-            }).to.throw(Error, 'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized');
-        });
-    });
-});
-describe('#resolve() this is to resolve didDoc', function () {
-    it('should not be able to resolve didDocument as did is not passed or it is empty', function () {
-        var params = {
-            did: '',
-        };
-        return hypersignDid.resolve(params).catch(function (err) {
-            (0, chai_1.expect)(function () {
-                throw err;
-            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.did is required to resolve a did');
-        });
-    });
-    it('should not be able to resolve did document on blockchain as HypersignDID instance is not initialised with offlinesigner', function () {
-        var params = { did: didDocId };
-        return hypersignDid.resolve(params).catch(function (err) {
-            (0, chai_1.expect)(function () {
-                throw err;
-            }).to.throw(Error, 'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized');
-        });
-    });
-});
-describe('#update() this is to update didDoc', function () {
-    // it('should not be able to update did document as didDocument is null or empty', function () {
-    //   return hypersignDid
-    //     .update({ didDocument: {}, privateKeyMultibase, verificationMethodId, versionId: '1.0' })
-    //     .catch(function (err) {
-    //       expect(function () {
-    //         throw err;
-    //       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.didDocument is required to update a did');
-    //     });
-    // });
-    it('should not be able to update did document as privateKeyMultibase is null or empty', function () {
-        return hypersignDid
-            .update({ didDocument: didDocument, privateKeyMultibase: '', verificationMethodId: verificationMethodId, versionId: '1.0' })
-            .catch(function (err) {
-            (0, chai_1.expect)(function () {
-                throw err;
-            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKeyMultibase is required to update a did');
-        });
-    });
-    it('should not be able to update did document as verificationMethodId is null or empty', function () {
-        return hypersignDid
-            .update({ didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: '', versionId: '1.0' })
-            .catch(function (err) {
-            (0, chai_1.expect)(function () {
-                throw err;
-            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to update a did');
-        });
-    });
-    it('should not be able to update did document as versionId is null or empty', function () {
-        return hypersignDid
-            .update({ didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: verificationMethodId, versionId: '' })
-            .catch(function (err) {
-            (0, chai_1.expect)(function () {
-                throw err;
-            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.versionId is required to update a did');
-        });
-    });
-    it('should not be able to update did document on blockchain as HypersignDID instance is not initialised with offlinesigner', function () {
-        return hypersignDid
-            .update({ didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: verificationMethodId, versionId: '1.0' })
-            .catch(function (err) {
-            (0, chai_1.expect)(function () {
-                throw err;
-            }).to.throw(Error, 'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized');
-        });
-    });
-});
-describe('#deactivate() this is to deactivate didDoc', function () {
-    // it('should not be able to deactivate did document as didDocument is null or empty', function () {
-    //   return hypersignDid
-    //     .deactivate({ didDocument: {}, privateKeyMultibase, verificationMethodId, versionId: '1.0' })
-    //     .catch(function (err) {
-    //       expect(function () {
-    //         throw err;
-    //       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.didDocument is required to deactivate a did');
-    //     });
-    // });
-    it('should not be able to deactivate did document as privateKeyMultibase is null or empty', function () {
-        return hypersignDid
-            .deactivate({ didDocument: didDocument, privateKeyMultibase: '', verificationMethodId: verificationMethodId, versionId: '1.0' })
-            .catch(function (err) {
-            (0, chai_1.expect)(function () {
-                throw err;
-            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKeyMultibase is required to deactivate a did');
-        });
-    });
-    it('should not be able to deactivate did document as verificationMethodId is null or empty', function () {
-        return hypersignDid
-            .deactivate({ didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: '', versionId: '1.0' })
-            .catch(function (err) {
-            (0, chai_1.expect)(function () {
-                throw err;
-            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to deactivate a did');
-        });
-    });
-    it('should not be able to deactivate did document as versionId is null or empty', function () {
-        return hypersignDid
-            .deactivate({ didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: verificationMethodId, versionId: '' })
-            .catch(function (err) {
-            (0, chai_1.expect)(function () {
-                throw err;
-            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
-        });
-    });
-    it('should not be able to deactivate did document on blockchain as HypersignDID instance is not initialised with offlinesigner', function () {
-        return hypersignDid
-            .deactivate({ didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: verificationMethodId, versionId: '1.0' })
-            .catch(function (err) {
-            (0, chai_1.expect)(function () {
-                throw err;
-            }).to.throw(Error, 'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized');
-        });
-    });
-});
-// Test case for generating did with particular nameSpace
-describe('#generate() method to generate did document with nameSpace', function () {
-    it('should return didDocument that has nameSpcae', function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, hypersignDidWithNameSpace.generate({ publicKeyMultibase: publicKeyMultibase })];
-                    case 1:
-                        didDocumentWithNameSpace = _a.sent();
-                        didDocIdWithNameSpace = didDocumentWithNameSpace['id'];
-                        verificationMethodId = didDocumentWithNameSpace['verificationMethod'][0].id;
-                        (0, chai_1.expect)(didDocumentWithNameSpace).to.be.a('object');
-                        (0, chai_1.should)().exist(didDocumentWithNameSpace['@context']);
-                        (0, chai_1.should)().exist(didDocumentWithNameSpace['id']);
-                        (0, chai_1.expect)(didDocumentWithNameSpace['id']).to.contain.oneOf(["".concat(nameSpace)]);
-                        (0, chai_1.should)().exist(didDocumentWithNameSpace['controller']);
-                        (0, chai_1.should)().exist(didDocumentWithNameSpace['alsoKnownAs']);
-                        (0, chai_1.should)().exist(didDocumentWithNameSpace['verificationMethod']);
-                        (0, chai_1.expect)(didDocumentWithNameSpace['verificationMethod'] &&
-                            didDocumentWithNameSpace['authentication'] &&
-                            didDocumentWithNameSpace['assertionMethod'] &&
-                            didDocumentWithNameSpace['keyAgreement'] &&
-                            didDocumentWithNameSpace['capabilityInvocation'] &&
-                            didDocumentWithNameSpace['capabilityDelegation'] &&
-                            didDocumentWithNameSpace['service']).to.be.a('array');
-                        (0, chai_1.should)().exist(didDocumentWithNameSpace['authentication']);
-                        (0, chai_1.should)().exist(didDocumentWithNameSpace['assertionMethod']);
-                        (0, chai_1.should)().exist(didDocumentWithNameSpace['keyAgreement']);
-                        (0, chai_1.should)().exist(didDocumentWithNameSpace['capabilityInvocation']);
-                        (0, chai_1.should)().exist(didDocumentWithNameSpace['capabilityDelegation']);
-                        (0, chai_1.should)().exist(didDocumentWithNameSpace['service']);
-                        return [2 /*return*/];
-                }
-            });
-        });
-    });
-});
-describe('#sign() this is to sign didDoc that has didDocId with some nameSpace', function () {
-    var publicKey = {
-        '@context': '',
-        id: '',
-        type: '',
-        publicKeyBase58: '',
-    };
-    var controller = {
-        '@context': '',
-        id: '',
-        authentication: [],
-    };
-    it('should able to sign did document that has nameSpace', function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var params;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        params = {
-                            privateKey: privateKeyMultibase,
-                            challenge: challenge,
-                            domain: domain,
-                            did: '',
-                            doc: didDocumentWithNameSpace,
-                            verificationMethodId: verificationMethodId,
-                            publicKey: publicKey,
-                            controller: controller,
-                        };
-                        return [4 /*yield*/, hypersignDidWithNameSpace.sign(params)];
-                    case 1:
-                        signedDocument = _a.sent();
-                        (0, chai_1.expect)(signedDocument).to.be.a('object');
-                        signedDocument = signedDocument.signedDidDocument;
-                        (0, chai_1.should)().exist(signedDocument['@context']);
-                        (0, chai_1.should)().exist(signedDocument['id']);
-                        (0, chai_1.expect)(didDocIdWithNameSpace).to.be.equal(signedDocument['id']);
-                        (0, chai_1.should)().exist(signedDocument['controller']);
-                        (0, chai_1.should)().exist(signedDocument['alsoKnownAs']);
-                        (0, chai_1.should)().exist(signedDocument['verificationMethod']);
-                        (0, chai_1.should)().exist(signedDocument['authentication']);
-                        (0, chai_1.should)().exist(signedDocument['assertionMethod']);
-                        (0, chai_1.should)().exist(signedDocument['keyAgreement']);
-                        (0, chai_1.should)().exist(signedDocument['capabilityInvocation']);
-                        (0, chai_1.should)().exist(signedDocument['capabilityDelegation']);
-                        (0, chai_1.should)().exist(signedDocument['service']);
-                        (0, chai_1.should)().exist(signedDocument['proof']);
-                        return [2 /*return*/];
-                }
-            });
-        });
-    });
-});
-describe('#verify() method to verify did document that has nameSpace', function () {
-    it('should return verification result of diDocument with nameSpace', function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, hypersignDidWithNameSpace.verify({
-                            doc: signedDocument,
-                            verificationMethodId: verificationMethodId,
-                            challenge: challenge,
-                            domain: domain,
-                        })];
-                    case 1:
-                        result = _a.sent();
-                        (0, chai_1.expect)(result).to.be.a('object');
+                        //console.log(JSON.stringify(result))
                         (0, chai_1.should)().exist(result.verificationResult);
                         (0, chai_1.should)().exist(result.verificationResult.verified);
                         (0, chai_1.should)().exist(result.verificationResult.results);
