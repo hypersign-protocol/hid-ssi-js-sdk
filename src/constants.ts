@@ -80,6 +80,8 @@ export const SCHEMA = {
   NAMESPACE: 'devnet',
   SCHEMA_JSON: 'http://json-schema.org/draft-07/schema',
   SCHEMA_TYPE: 'https://w3c-ccg.github.io/vc-json-schemas/v1/schema/1.0/schema.json',
+  SIGNATURE_TYPE: "Ed25519Signature2020",
+  PROOF_PURPOSE: "assertion",
 };
 Object.freeze(SCHEMA);
 

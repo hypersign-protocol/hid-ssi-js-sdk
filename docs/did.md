@@ -55,7 +55,7 @@ const hypersignDID = new HypersignDID();
 
 // OR initialize by passing a namepace. Default 'did:hid'
 // More complex way to initialize this class can be found in this documentation later
-const namespace = 'did:hid';
+const namespace = 'testnet';
 const hypersignDID = new HypersignDID({ namespace });
 ```
 

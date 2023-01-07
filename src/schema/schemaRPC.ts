@@ -1,6 +1,12 @@
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+
 import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_SCHEMA_PATH } from '../constants';
 import * as generatedProto from '../generated/ssi/tx';
-
+import { OfflineSigner } from '@cosmjs/proto-signing';
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
 import { Schema, SchemaProof } from '../generated/ssi/schema';
@@ -14,34 +20,27 @@ export interface ISchemaRPC {
 
 export class SchemaRpc implements ISchemaRPC {
   public schemaRestEp: string;
-  constructor() {
+  private hidClient: any;
+
+  constructor(
+    {
+      offlineSigner,
+      nodeRpcEndpoint,
+      nodeRestEndpoint,
+    }: {
+      offlineSigner: OfflineSigner;
+      nodeRpcEndpoint: string;
+      nodeRestEndpoint: string;
+    }
+  ) {
+    this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
     this.schemaRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_SCHEMA_PATH;
   }
 
-  // async createSchema(schema: Schema, signature: string, verificationMethodId: string): Promise<object> {
-  //   const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateSchema}`;
-
-  //   const signInfo: SignInfo = {
-  //     verification_method_id: verificationMethodId,
-  //     signature,
-  //   };
-
-  //   const txMessage = {
-  //     typeUrl, // Same as above
-  //     value: generatedProto[HIDRpcEnums.MsgCreateSchema].fromJSON({
-  //       schema,
-  //       signatures: [signInfo],
-  //       creator: HIDClient.getHidWalletAddress(),
-  //     }),
-  //   };
-
-  //   // TODO: need to find a way to make it dynamic
-  //   const fee = 'auto';
-  //   const hidClient: SigningStargateClient = HIDClient.getHidClient();
-  //   const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
-  //   return txResult;
-  // }
-
+  async init() {
+    await this.hidClient.init();
+  }
+  
   async createSchema(schema: Schema, proof: SchemaProof): Promise<object> {
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateSchema}`;
 
