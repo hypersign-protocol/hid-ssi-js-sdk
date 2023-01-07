@@ -1,4 +1,9 @@
 "use strict";
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
@@ -64,29 +69,23 @@ var generatedProto = __importStar(require("../generated/ssi/tx"));
 var axios_1 = __importDefault(require("axios"));
 var client_1 = require("../hid/client");
 var SchemaRpc = /** @class */ (function () {
-    function SchemaRpc() {
+    function SchemaRpc(_a) {
+        var offlineSigner = _a.offlineSigner, nodeRpcEndpoint = _a.nodeRpcEndpoint, nodeRestEndpoint = _a.nodeRestEndpoint;
+        this.hidClient = new client_1.HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
         this.schemaRestEp = client_1.HIDClient.hidNodeRestEndpoint + constants_1.HYPERSIGN_NETWORK_SCHEMA_PATH;
     }
-    // async createSchema(schema: Schema, signature: string, verificationMethodId: string): Promise<object> {
-    //   const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateSchema}`;
-    //   const signInfo: SignInfo = {
-    //     verification_method_id: verificationMethodId,
-    //     signature,
-    //   };
-    //   const txMessage = {
-    //     typeUrl, // Same as above
-    //     value: generatedProto[HIDRpcEnums.MsgCreateSchema].fromJSON({
-    //       schema,
-    //       signatures: [signInfo],
-    //       creator: HIDClient.getHidWalletAddress(),
-    //     }),
-    //   };
-    //   // TODO: need to find a way to make it dynamic
-    //   const fee = 'auto';
-    //   const hidClient: SigningStargateClient = HIDClient.getHidClient();
-    //   const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
-    //   return txResult;
-    // }
+    SchemaRpc.prototype.init = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.hidClient.init()];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     SchemaRpc.prototype.createSchema = function (schema, proof) {
         return __awaiter(this, void 0, void 0, function () {
             var typeUrl, txMessage, fee, hidClient, txResult;

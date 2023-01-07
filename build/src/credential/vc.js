@@ -100,7 +100,13 @@ var HypersignVerifiableCredential = /** @class */ (function () {
         // TODO: handle schemaUrl variable properly later.
         this.getCredentialContext = function (schemaId, schemaProperties) {
             var context = [];
-            var schemaUrl = "".concat(_this.hsSchema.schemaRpc.schemaRestEp, "/").concat(schemaId, ":");
+            var schemaUrl;
+            if (_this.hsSchema && _this.hsSchema.schemaRpc) {
+                schemaUrl = "".concat(_this.hsSchema.schemaRpc.schemaRestEp, "/").concat(schemaId, ":");
+            }
+            else {
+                throw new Error('Error: HypersigSchema object may not be initialized');
+            }
             context.push(constants_1.VC.CREDENTAIL_BASE_CONTEXT);
             //context.push(VC.CREDENTAIL_SECURITY_SUITE);
             context.push({
@@ -114,10 +120,10 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             });
             return context;
         };
-        this.hsSchema = new schema_1.default();
-        this.hsDid = new did_1.default();
         this.credStatusRPC = new credRPC_1.CredentialRPC();
         this.namespace = namespace && namespace != '' ? namespace : '';
+        this.hsDid = new did_1.default();
+        this.hsSchema = new schema_1.default();
         this.context = [];
         this.id = '';
         this.type = [];

@@ -18,7 +18,7 @@ let schemaId;
 let verificationMethod;
 let hypersignDID;
 let signedSchema;
-let signSchema = {} as Schema;
+const signSchema = {} as Schema;
 signSchema.proof = {} as SchemaProof;
 const schemaBody = {
   name: 'testSchema',
@@ -40,7 +40,7 @@ beforeEach(async function () {
     nodeRestEndpoint: hidNodeEp.rest,
     nodeRpcEndpoint: hidNodeEp.rpc,
     namespace: hidNodeEp.namespace,
-  })
+  });
   await hypersignSchema.init();
 
   hypersignDID = new HypersignDID({
@@ -144,7 +144,11 @@ describe('#generate() method to create schema', function () {
 
 describe('#sign() function to sign schema', function () {
   it('should be able to sign newly created schema', async function () {
-    signedSchema = await hypersignSchema.sign({ privateKeyMultibase: privateKeyMultibase, schema: schemaObject, verificationMethodId: didDocument['assertionMethod'][0] });
+    signedSchema = await hypersignSchema.sign({
+      privateKeyMultibase: privateKeyMultibase,
+      schema: schemaObject,
+      verificationMethodId: didDocument['assertionMethod'][0],
+    });
     //onsole.log(JSON.stringify(signedSchema, null, 2))
     expect(signedSchema).to.be.a('object');
     should().exist(signedSchema.proof);
@@ -164,7 +168,7 @@ describe('#sign() function to sign schema', function () {
   });
 });
 
-describe('#register() function to register schema on blockchain', function () { 
+describe('#register() function to register schema on blockchain', function () {
   // it('should not be able to register  schema on blockchain as proof.created is null or empty', async function () {
   //   let tempParam = {} as Schema;
   //   tempParam.proof = {} as SchemaProof;
@@ -174,7 +178,7 @@ describe('#register() function to register schema on blockchain', function () {
   //   console.log({
   //     signedSchema, tempParam
   //   });
-    
+
   //   return hypersignSchema.register({schema: tempParam}).catch(function (err) {
   //     expect(function () {
   //       throw err;
@@ -224,9 +228,9 @@ describe('#register() function to register schema on blockchain', function () {
   //   let tempParam = {} as Schema;
   //   tempParam.proof = {} as SchemaProof;
   //   Object.assign(tempParam, {...signedSchema})
-    
+
   //   tempParam.proof.verificationMethod = '';
-    
+
   //   return hypersignSchema.register({schema: tempParam}).catch(function (err) {
   //     expect(function () {
   //       throw err;
@@ -284,7 +288,7 @@ describe('#register() function to register schema on blockchain', function () {
 
   it('should be able to register schema on blockchain', async function () {
     const registeredSchema = await hypersignSchema.register({
-      schema: signedSchema
+      schema: signedSchema,
     });
     //console.log(JSON.stringify(registeredSchema, null, 2))
     expect(registeredSchema).to.be.a('object');

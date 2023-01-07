@@ -21,15 +21,17 @@ export default class HyperSignSchema implements ISchemaMethods {
   author: string;
   authored: string;
   schema: SchemaProperty;
-  schemaRpc: SchemaRpc  | null;
+  schemaRpc: SchemaRpc | null;
   namespace: string;
 
-  constructor(params: {
-    namespace?: string;
-    offlineSigner?: OfflineSigner;
-    nodeRpcEndpoint?: string;
-    nodeRestEndpoint?: string;
-  } = {}) {
+  constructor(
+    params: {
+      namespace?: string;
+      offlineSigner?: OfflineSigner;
+      nodeRpcEndpoint?: string;
+      nodeRestEndpoint?: string;
+    } = {}
+  ) {
     const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint } = params;
     const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
@@ -86,7 +88,7 @@ export default class HyperSignSchema implements ISchemaMethods {
 
   /**
    * Generates a new schema doc without proof
-   * @params 
+   * @params
    *  - params.name                 : Name of the schema
    *  - params.description          : Optional - Description of the schema
    *  - params.author               : DID of the author
@@ -150,22 +152,22 @@ export default class HyperSignSchema implements ISchemaMethods {
     };
   }
 
-
   /**
    * Signs a schema document and attaches proof
    * @params
-   *  - params.schema               : The schema document without proof 
+   *  - params.schema               : The schema document without proof
    *  - params.privateKeyMultibase  : Private Key to sign the doc
    *  - params.verificationMethodId : VerificationMethodId of the document
    * @returns {Promise<Schema>} Schema with proof
    */
-  public async sign(params: { 
-    privateKeyMultibase: string; 
-    schema: SchemaDocument, 
-    verificationMethodId: string }): Promise<Schema> {
-    
+  public async sign(params: {
+    privateKeyMultibase: string;
+    schema: SchemaDocument;
+    verificationMethodId: string;
+  }): Promise<Schema> {
     if (!params.privateKeyMultibase) throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase must be passed');
-    if (!params.verificationMethodId)  throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId must be passed');
+    if (!params.verificationMethodId)
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId must be passed');
     if (!params.schema) throw new Error('HID-SSI-SDK:: Error: Schema must be passed');
 
     const { privateKeyMultibase: privateKeyMultibaseConverted } =
@@ -183,12 +185,11 @@ export default class HyperSignSchema implements ISchemaMethods {
       verificationMethod: params.verificationMethodId,
       proofPurpose: constants.SCHEMA.PROOF_PURPOSE,
       proofValue: Buffer.from(signed).toString('base64'),
-    }
+    };
     schemaDoc.proof = {} as SchemaProof;
     Object.assign(schemaDoc.proof, { ...proof });
     return schemaDoc;
   }
-
 
   /**
    * Register a schema Document in Hypersign blockchain - an onchain activity
@@ -196,14 +197,16 @@ export default class HyperSignSchema implements ISchemaMethods {
    *  - params.schema               : The schema document with schemaProof
    * @returns {Promise<object>} Result of the registration
    */
-  public async register(params: { schema: Schema; }): Promise<object> {
+  public async register(params: { schema: Schema }): Promise<object> {
     if (!params.schema) throw new Error('HID-SSI-SDK:: Error: schema must be passed');
     if (!params.schema.proof) throw new Error('HID-SSI-SDK:: Error: schema.proof must be passed');
     if (!params.schema.proof.created) throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain created');
-    if (!params.schema.proof.proofPurpose) throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain proofPurpose');
+    if (!params.schema.proof.proofPurpose)
+      throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain proofPurpose');
     if (!params.schema.proof.proofValue) throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain proofValue');
     if (!params.schema.proof.type) throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain type');
-    if (!params.schema.proof.verificationMethod) throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain verificationMethod');
+    if (!params.schema.proof.verificationMethod)
+      throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain verificationMethod');
 
     if (!this.schemaRpc) {
       throw new Error(
@@ -221,7 +224,7 @@ export default class HyperSignSchema implements ISchemaMethods {
    */
   public async resolve(params: { schemaId: string }): Promise<Schema> {
     if (!params.schemaId) throw new Error('HID-SSI-SDK:: Error: SchemaId must be passed');
-    
+
     if (!this.schemaRpc) {
       throw new Error(
         'HID-SSI-SDK:: Error: HypersignSchema class is not instantiated with Offlinesigner or have not been initilized'

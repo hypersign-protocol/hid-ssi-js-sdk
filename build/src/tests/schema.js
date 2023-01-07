@@ -126,10 +126,10 @@ describe('#generate() method to generate did document', function () {
         });
     });
 });
-describe('#getSchema() method to create schema', function () {
+describe('#generate() method to create schema', function () {
     it('should not be able to create a new schema as author is not passed', function () {
         var tempSchemaBody = __assign({}, schemaBody);
-        return hypersignSchema.getSchema(tempSchemaBody).catch(function (err) {
+        return hypersignSchema.generate(tempSchemaBody).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, 'HID-SSI-SDK:: Error: Author must be passed');
@@ -143,9 +143,10 @@ describe('#getSchema() method to create schema', function () {
                     case 0:
                         tempSchemaBody = __assign({}, schemaBody);
                         tempSchemaBody.author = didDocId;
-                        return [4 /*yield*/, hypersignSchema.getSchema(tempSchemaBody)];
+                        return [4 /*yield*/, hypersignSchema.generate(tempSchemaBody)];
                     case 1:
                         schemaObject = _a.sent();
+                        console.log(schemaObject);
                         schemaId = schemaObject['id'];
                         (0, chai_1.expect)(schemaObject).to.be.a('object');
                         (0, chai_1.should)().exist(schemaObject['type']);
@@ -164,9 +165,11 @@ describe('#getSchema() method to create schema', function () {
         });
     });
 });
-describe('#signSchema() method to sign schema', function () {
+describe('#sign() method to sign schema', function () {
     it('should not be able to sign newly created schema as privateKey is not passed or empty', function () {
-        return hypersignSchema.signSchema({ privateKey: '', schema: schemaObject }).catch(function (err) {
+        return hypersignSchema
+            .sign({ privateKeyMultibase: '', schema: schemaObject, verificationMethodId: '' })
+            .catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, 'HID-SSI-SDK:: Error: PrivateKey must be passed');
@@ -177,10 +180,15 @@ describe('#signSchema() method to sign schema', function () {
             var signedSchema;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, hypersignSchema.signSchema({ privateKey: privateKeyMultibase, schema: schemaObject })];
+                    case 0: return [4 /*yield*/, hypersignSchema.sign({
+                            privateKeyMultibase: privateKeyMultibase,
+                            schema: schemaObject,
+                            verificationMethodId: '',
+                        })];
                     case 1:
                         signedSchema = _a.sent();
                         schemaSignature = signedSchema;
+                        console.log(signedSchema);
                         (0, chai_1.expect)(signedSchema).to.be.a('string');
                         return [2 /*return*/];
                 }
@@ -188,7 +196,7 @@ describe('#signSchema() method to sign schema', function () {
         });
     });
 });
-describe('#registerSchema() method to register schema on blockchain', function () {
+describe('#register() method to register schema on blockchain', function () {
     var schema = schemaObject;
     var proof = {
         type: 'Ed25519Signature2020',
@@ -202,7 +210,7 @@ describe('#registerSchema() method to register schema on blockchain', function (
         var tempParam = __assign({}, params);
         tempParam.schema = undefined;
         tempParam.proof.created = '';
-        return hypersignSchema.registerSchema(tempParam).catch(function (err) {
+        return hypersignSchema.register(tempParam).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, 'HID-SSI-SDK:: Error: Schema must be passed');
@@ -212,7 +220,7 @@ describe('#registerSchema() method to register schema on blockchain', function (
         var tempParam = __assign({}, params);
         tempParam.schema = schemaObject;
         tempParam.proof.created = '';
-        return hypersignSchema.registerSchema(tempParam).catch(function (err) {
+        return hypersignSchema.register(tempParam).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
             }).to.throw(Error, 'HID-SSI-SDK:: Error: Proof must Contain created');
@@ -226,7 +234,7 @@ describe('#registerSchema() method to register schema on blockchain', function (
                 tempParam.schema = schemaObject;
                 tempParam.proof.created = schemaObject.authored;
                 tempParam.proof.proofPurpose = '';
-                return [2 /*return*/, hypersignSchema.registerSchema(tempParam).catch(function (err) {
+                return [2 /*return*/, hypersignSchema.register(tempParam).catch(function (err) {
                         (0, chai_1.expect)(function () {
                             throw err;
                         }).to.throw(Error, 'HID-SSI-SDK:: Error: Proof must Contain proofPurpose');
@@ -242,7 +250,7 @@ describe('#registerSchema() method to register schema on blockchain', function (
                 tempParam.schema = schemaObject;
                 tempParam.proof.proofPurpose = 'assertion';
                 tempParam.proof.created = schemaObject.authored;
-                return [2 /*return*/, hypersignSchema.registerSchema(tempParam).catch(function (err) {
+                return [2 /*return*/, hypersignSchema.register(tempParam).catch(function (err) {
                         (0, chai_1.expect)(function () {
                             throw err;
                         }).to.throw(Error, 'HID-SSI-SDK:: Error: Proof must Contain proofValue');
@@ -260,7 +268,7 @@ describe('#registerSchema() method to register schema on blockchain', function (
                 tempParam.proof.proofValue = schemaSignature;
                 tempParam.proof.proofPurpose = 'assertion';
                 tempParam.proof.type = '';
-                return [2 /*return*/, hypersignSchema.registerSchema(tempParam).catch(function (err) {
+                return [2 /*return*/, hypersignSchema.register(tempParam).catch(function (err) {
                         (0, chai_1.expect)(function () {
                             throw err;
                         }).to.throw(Error, 'HID-SSI-SDK:: Error: Proof must Contain type');
@@ -278,7 +286,7 @@ describe('#registerSchema() method to register schema on blockchain', function (
                 tempParam.proof.created = schemaObject.authored;
                 tempParam.proof.proofValue = schemaSignature;
                 tempParam.proof.type = 'Ed25519Signature2020';
-                return [2 /*return*/, hypersignSchema.registerSchema(tempParam).catch(function (err) {
+                return [2 /*return*/, hypersignSchema.register(tempParam).catch(function (err) {
                         (0, chai_1.expect)(function () {
                             throw err;
                         }).to.throw(Error, 'HID-SSI-SDK:: Error: Proof must Contain verificationMethod');
@@ -297,7 +305,7 @@ describe('#registerSchema() method to register schema on blockchain', function (
                 proof['verificationMethod'] = verificationMethod;
                 schema = schemaObject;
                 params = { schema: schema, proof: proof };
-                return [2 /*return*/, hypersignSchema.registerSchema(params).catch(function (err) {
+                return [2 /*return*/, hypersignSchema.register(params).catch(function (err) {
                         (0, chai_1.expect)(function () {
                             throw err;
                         }).to.throw(TypeError, "Cannot read property 'signAndBroadcast' of undefined");

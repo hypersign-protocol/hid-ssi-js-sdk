@@ -4,7 +4,7 @@
  * Author: Hypermine Core Team
  */
 
-import { Schema as ISchemaProto, Schema, SchemaDocument} from '../generated/ssi/schema';
+import { Schema as ISchemaProto, Schema, SchemaDocument } from '../generated/ssi/schema';
 export interface ISchemaFields {
   type: string;
   format?: string;
@@ -21,7 +21,7 @@ export interface ISchemaMethods {
     additionalProperties: boolean;
   }): Promise<SchemaDocument>;
 
-  sign(params: { privateKeyMultibase: string; schema: SchemaDocument, verificationMethodId: string }): Promise<Schema>;
+  sign(params: { privateKeyMultibase: string; schema: SchemaDocument; verificationMethodId: string }): Promise<Schema>;
 
   register(params: { schema: Schema }): Promise<object>;
 

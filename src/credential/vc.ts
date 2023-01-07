@@ -37,7 +37,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     this.credStatusRPC = new CredentialRPC();
     this.namespace = namespace && namespace != '' ? namespace : '';
     this.hsDid = new HypersignDID();
-    this.hsSchema = new HypersignSchema()
+    this.hsSchema = new HypersignSchema();
 
     this.context = [];
     this.id = '';
@@ -139,11 +139,11 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   private getCredentialContext = (schemaId: string, schemaProperties: object) => {
     const context: any = [];
 
-    let schemaUrl
-    if(this.hsSchema && this.hsSchema.schemaRpc){
+    let schemaUrl;
+    if (this.hsSchema && this.hsSchema.schemaRpc) {
       schemaUrl = `${this.hsSchema.schemaRpc.schemaRestEp}/${schemaId}:`;
     } else {
-      throw new Error('Error: HypersigSchema object may not be initialized')
+      throw new Error('Error: HypersigSchema object may not be initialized');
     }
 
     context.push(VC.CREDENTAIL_BASE_CONTEXT);

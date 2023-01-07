@@ -22,17 +22,15 @@ export class SchemaRpc implements ISchemaRPC {
   public schemaRestEp: string;
   private hidClient: any;
 
-  constructor(
-    {
-      offlineSigner,
-      nodeRpcEndpoint,
-      nodeRestEndpoint,
-    }: {
-      offlineSigner: OfflineSigner;
-      nodeRpcEndpoint: string;
-      nodeRestEndpoint: string;
-    }
-  ) {
+  constructor({
+    offlineSigner,
+    nodeRpcEndpoint,
+    nodeRestEndpoint,
+  }: {
+    offlineSigner: OfflineSigner;
+    nodeRpcEndpoint: string;
+    nodeRestEndpoint: string;
+  }) {
     this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
     this.schemaRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_SCHEMA_PATH;
   }
@@ -40,7 +38,7 @@ export class SchemaRpc implements ISchemaRPC {
   async init() {
     await this.hidClient.init();
   }
-  
+
   async createSchema(schema: Schema, proof: SchemaProof): Promise<object> {
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateSchema}`;
 
