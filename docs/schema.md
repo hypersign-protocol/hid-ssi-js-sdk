@@ -70,6 +70,8 @@ const hypersignSchema = new HypersignSchema({ namespace });
 
 ### `generate()`
 
+Generates a new schema doc without proof
+
 **API Definition**
 
 ```js
@@ -130,6 +132,8 @@ const schema = await hypersignSchema.generate(schemaBody);
 ```
 
 ### `sign()`
+
+Signs a schema document and attaches proof
 
 **API Definition**
 
@@ -200,6 +204,8 @@ await hypersignSchema.init();
 
 ### `register()`
 
+Register a schema Document in Hypersign blockchain
+
 **API Definition**
 
 ```js
@@ -228,6 +234,8 @@ const registeredSchema = await hypersignSchema.register({
 ```
 
 ### `resolve()`
+
+Resolves a schema document with schemId from Hypersign blockchain 
 
 **API Definition**
 
