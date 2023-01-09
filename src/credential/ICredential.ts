@@ -53,11 +53,12 @@ export interface ICredentialMethods {
     issuerDid: string;
     privateKeyMultibase: string;
     registerCredential?: boolean;
-  }): Promise<{ 
-    signedCredential: IVerifiableCredential, 
-    credentialStatus: CredentialStatus, 
-    credentialStatusProof: CredentialProof
-    credentialStatusRegistrationResult?: DeliverTxResponse }>;
+  }): Promise<{
+    signedCredential: IVerifiableCredential;
+    credentialStatus: CredentialStatus;
+    credentialStatusProof: CredentialProof;
+    credentialStatusRegistrationResult?: DeliverTxResponse;
+  }>;
 
   verifyCredential(params: { credential: IVerifiableCredential; issuerDid: string }): Promise<object>;
   checkCredentialStatus(credentialId: string): Promise<{ verified: boolean }>;

@@ -408,9 +408,19 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             });
         });
     };
-    HypersignVerifiableCredential.prototype.issueCredential = function (params) {
+    /**
+     * Generates signed credentials document and registers its status on Hypersign blockchain
+     * @params
+     *  - params.credential             : Hypersign credentail document
+     *  - params.privateKeyMultibase    : P
+     *  - params.issuerDid              : DID of the issuer
+     *  - params.verificationMethodId   : Verifcation Method of Issuer
+     *  - params.registerCredential     : If false, does not registers credentail status on Hypersign blockchain. Default is true.
+     * @returns {Promise<object>}
+     */
+    HypersignVerifiableCredential.prototype.issue = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, credIssuerDidDoc, credIssuerController, issuerPublicKeyVerMethod, proof, signedVC, resp;
+            var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, credentialHash, credentialStatus, proofValue, issuerDID, credIssuerDidDoc, credIssuerController, issuerPublicKeyVerMethod, proof, signedVC, credentialStatusRegistrationResult;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -420,8 +430,8 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         if (!params.credential) {
                             throw new Error('HID-SSI-SDK:: Error: params.credential is required to issue credential');
                         }
-                        if (!params.privateKey) {
-                            throw new Error('HID-SSI-SDK:: Error: params.privateKey is required to issue credential');
+                        if (!params.privateKeyMultibase) {
+                            throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to issue credential');
                         }
                         if (!params.issuerDid) {
                             throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to issue credential');
@@ -436,14 +446,17 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                     case 1:
                         signerDidDoc = (_a.sent()).didDocument;
                         if (signerDidDoc === null || signerDidDoc === undefined)
-                            throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
+                            throw new Error('HID-SSI-SDK:: Error: Could not resolve issuerDid = ' + params.issuerDid);
                         publicKeyId = params.verificationMethodId;
                         publicKeyVerMethod = signerDidDoc['verificationMethod'].find(function (x) { return x.id == publicKeyId; });
+                        if (!publicKeyVerMethod) {
+                            throw new Error('HID-SSI-SDK:: Error: Could not find verification method for id = ' + params.verificationMethodId);
+                        }
                         convertedKeyPair = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
                             publicKey: publicKeyVerMethod.publicKeyMultibase,
                         });
                         publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
-                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: params.privateKey }, publicKeyVerMethod))];
+                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: params.privateKeyMultibase }, publicKeyVerMethod))];
                     case 2:
                         keyPair = _a.sent();
                         suite = new ed25519_signature_2020_1.Ed25519Signature2020({
@@ -464,7 +477,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         };
                         return [4 /*yield*/, this._sign({
                                 message: JSON.stringify(credentialStatus),
-                                privateKeyMultibase: params.privateKey,
+                                privateKeyMultibase: params.privateKeyMultibase,
                             })];
                     case 3:
                         proofValue = _a.sent();
@@ -497,28 +510,34 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         if (!params.registerCredential) return [3 /*break*/, 7];
                         return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, proof)];
                     case 6:
-                        resp = _a.sent();
-                        if (!resp || resp.code != 0) {
-                            throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+                        credentialStatusRegistrationResult = _a.sent();
+                        if (!credentialStatusRegistrationResult || credentialStatusRegistrationResult.code != 0) {
+                            throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + credentialStatusRegistrationResult.rawLog);
                         }
-                        return [2 /*return*/, signedVC];
-                    case 7: return [2 /*return*/, { signedVC: signedVC, credentialStatus: credentialStatus, proof: proof }];
+                        return [2 /*return*/, {
+                                signedCredential: signedVC,
+                                credentialStatus: credentialStatus,
+                                credentialStatusProof: proof,
+                                credentialStatusRegistrationResult: credentialStatusRegistrationResult,
+                            }];
+                    case 7: return [2 /*return*/, { signedCredential: signedVC, credentialStatus: credentialStatus, credentialStatusProof: proof }];
                 }
             });
         });
     };
-    HypersignVerifiableCredential.prototype.registerCredentialStatus = function (credentialStatus, proof) {
+    HypersignVerifiableCredential.prototype.registerCredentialStatus = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var resp;
+            var credentialStatus, credentialStatusProof, resp;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!credentialStatus || !proof)
-                            throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
+                        credentialStatus = params.credentialStatus, credentialStatusProof = params.credentialStatusProof;
+                        if (!credentialStatus || !credentialStatusProof)
+                            throw new Error('HID-SSI-SDK:: Error: credentialStatus and credentialStatusProof are required to register credential status');
                         if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
                             throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
                         }
-                        return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, proof)];
+                        return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, credentialStatusProof)];
                     case 1:
                         resp = _a.sent();
                         if (!resp || resp.code != 0) {

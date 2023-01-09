@@ -69,6 +69,7 @@ var hypersignDID;
 var hypersignSchema;
 var hypersignVC;
 var signedSchema;
+var credentialStatusId;
 var credentialStatusProof = {};
 var credentialStatus2 = {};
 var credentialStatus;
@@ -90,7 +91,8 @@ var issueCredentialBody = {
     credential: credentialDetail,
     issuerDid: didDocId,
     verificationMethodId: verificationMethodId,
-    privateKey: privateKeyMultibase,
+    privateKeyMultibase: privateKeyMultibase,
+    registerCredential: true,
 };
 beforeEach(function () {
     return __awaiter(this, void 0, void 0, function () {
@@ -118,12 +120,9 @@ beforeEach(function () {
                     return [4 /*yield*/, hypersignVC.init()];
                 case 4:
                     _a.sent();
-                    return [4 /*yield*/, (0, config_1.createWallet)(config_1.mnemonic)];
-                case 5:
-                    offlineSigner = _a.sent();
                     hsSdk = new index_1.HypersignSSISdk(offlineSigner, config_1.hidNodeEp.rpc, config_1.hidNodeEp.rest, config_1.hidNodeEp.namespace);
                     return [4 /*yield*/, hsSdk.init()];
-                case 6:
+                case 5:
                     _a.sent();
                     return [2 /*return*/];
             }
@@ -519,112 +518,168 @@ describe('#getCredential() method to generate a credential', function () {
         });
     });
 });
-// describe('#issueCredential() method for issuing credential', function () {
-//   it('should not be able to issueCredential as verificationMethodId is null or empty', async function () {
-//     const tempIssueCredentialBody = { ...issueCredentialBody };
-//     tempIssueCredentialBody.credential = credentialDetail;
-//     tempIssueCredentialBody.issuerDid = didDocId;
-//     tempIssueCredentialBody.verificationMethodId = '';
-//     tempIssueCredentialBody.privateKey = privateKeyMultibase;
-//     return hsSdk.vc.issueCredential(tempIssueCredentialBody).catch(function (err) {
-//       expect(function () {
-//         throw err;
-//       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to issue credential');
-//     });
-//   });
-//   it('should not be able to issueCredential as credentialObject is null or undefined', async function () {
-//     const tempIssueCredentialBody = { ...issueCredentialBody };
-//     tempIssueCredentialBody.credential = undefined;
-//     tempIssueCredentialBody.issuerDid = didDocId;
-//     tempIssueCredentialBody.verificationMethodId = verificationMethodId;
-//     tempIssueCredentialBody.privateKey = privateKeyMultibase;
-//     return hsSdk.vc.issueCredential(tempIssueCredentialBody).catch(function (err) {
-//       expect(function () {
-//         throw err;
-//       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.credential is required to issue credential');
-//     });
-//   });
-//   it('should not be able to issueCredential as privateKey is null or empty', async function () {
-//     const tempIssueCredentialBody = { ...issueCredentialBody };
-//     tempIssueCredentialBody.credential = credentialDetail;
-//     tempIssueCredentialBody.issuerDid = didDocId;
-//     tempIssueCredentialBody.verificationMethodId = verificationMethodId;
-//     tempIssueCredentialBody.privateKey = '';
-//     return hsSdk.vc.issueCredential(tempIssueCredentialBody).catch(function (err) {
-//       expect(function () {
-//         throw err;
-//       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKey is required to issue credential');
-//     });
-//   });
-//   it('should not be able to issueCredential as issuerDid is null or empty', async function () {
-//     const tempIssueCredentialBody = { ...issueCredentialBody };
-//     tempIssueCredentialBody.credential = credentialDetail;
-//     tempIssueCredentialBody.issuerDid = '';
-//     tempIssueCredentialBody.verificationMethodId = verificationMethodId;
-//     tempIssueCredentialBody.privateKey = publicKeyMultibase;
-//     return hsSdk.vc.issueCredential(tempIssueCredentialBody).catch(function (err) {
-//       expect(function () {
-//         throw err;
-//       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.issuerDid is required to issue credential');
-//     });
-//   });
-//   it('should be able to issue credential to particular user', async function () {
-//     const tempIssueCredentialBody = { ...issueCredentialBody };
-//     tempIssueCredentialBody.credential = credentialDetail;
-//     tempIssueCredentialBody.issuerDid = didDocId;
-//     tempIssueCredentialBody.verificationMethodId = verificationMethodId;
-//     tempIssueCredentialBody.privateKey = privateKeyMultibase;
-//     const issuedCredResult = await hsSdk.vc.issueCredential(tempIssueCredentialBody);
-//     credentialStatusId = issuedCredResult['credentialStatus'].id;
-//     expect(issuedCredResult).to.be.a('object');
-//     should().exist(issuedCredResult['@context']);
-//     should().exist(issuedCredResult['id']);
-//     should().exist(issuedCredResult['type']);
-//     should().exist(issuedCredResult['expirationDate']);
-//     should().exist(issuedCredResult['issuanceDate']);
-//     should().exist(issuedCredResult['issuer']);
-//     should().exist(issuedCredResult['credentialSubject']);
-//     should().exist(issuedCredResult['credentialSchema']);
-//     should().exist(issuedCredResult['credentialStatus']);
-//     should().exist(issuedCredResult['proof']);
-//     expect(issuedCredResult['id']).to.be.equal(credentialId);
-//   });
-//   it('should be able to issue credential but will not register on chain', async () => {
-//     const expirationDate = new Date('12/11/2027');
-//     const tempCredentialBody = { ...credentialBody };
-//     tempCredentialBody.schemaId = schemaId;
-//     tempCredentialBody['subjectDidDocSigned'] = signedDocument;
-//     tempCredentialBody['expirationDate'] = expirationDate;
-//     tempCredentialBody.issuerDid = didDocId;
-//     tempCredentialBody.fields = { name: 'varshaxyz' };
-//     const newCredDetails = await hsSdk.vc.getCredential(tempCredentialBody);
-//     const tempIssueCredentialBody = { ...issueCredentialBody };
-//     tempIssueCredentialBody['registerCredential'] = false;
-//     tempIssueCredentialBody.credential = newCredDetails;
-//     tempIssueCredentialBody.issuerDid = didDocId;
-//     tempIssueCredentialBody.verificationMethodId = verificationMethodId;
-//     tempIssueCredentialBody.privateKey = privateKeyMultibase;
-//     const {
-//       signedVC: issuedCredResult,
-//       credentialStatus,
-//       proof,
-//     } = await hsSdk.vc.issueCredential(tempIssueCredentialBody);
-//     Object.assign(credentialStatus2, credentialStatus);
-//     Object.assign(credentialStatusProof, proof);
-//     expect(issuedCredResult).to.be.a('object');
-//     should().exist(issuedCredResult['@context']);
-//     should().exist(issuedCredResult['id']);
-//     should().exist(issuedCredResult['type']);
-//     should().exist(issuedCredResult['expirationDate']);
-//     should().exist(issuedCredResult['issuanceDate']);
-//     should().exist(issuedCredResult['issuer']);
-//     should().exist(issuedCredResult['credentialSubject']);
-//     should().exist(issuedCredResult['credentialSchema']);
-//     should().exist(issuedCredResult['credentialStatus']);
-//     should().exist(issuedCredResult['proof']);
-//     expect(issuedCredResult['id']).to.be.equal(newCredDetails.id);
-//   });
-// });
+describe('#issueCredential() method for issuing credential', function () {
+    it('should not be able to issueCredential as verificationMethodId is null or empty', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var tempIssueCredentialBody;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        tempIssueCredentialBody = __assign({}, issueCredentialBody);
+                        tempIssueCredentialBody.credential = credentialDetail;
+                        tempIssueCredentialBody.issuerDid = didDocId;
+                        tempIssueCredentialBody.verificationMethodId = '';
+                        tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
+                        return [4 /*yield*/, hypersignVC.issue(tempIssueCredentialBody).catch(function (err) {
+                                (0, chai_1.expect)(function () {
+                                    throw err;
+                                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to issue credential');
+                            })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    });
+    it('should not be able to issueCredential as credentialObject is null or undefined', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var tempIssueCredentialBody;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        tempIssueCredentialBody = __assign({}, issueCredentialBody);
+                        tempIssueCredentialBody.credential = undefined;
+                        tempIssueCredentialBody.issuerDid = didDocId;
+                        tempIssueCredentialBody.verificationMethodId = verificationMethodId;
+                        tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
+                        return [4 /*yield*/, hypersignVC.issue(tempIssueCredentialBody).catch(function (err) {
+                                (0, chai_1.expect)(function () {
+                                    throw err;
+                                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.credential is required to issue credential');
+                            })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    });
+    it('should not be able to issueCredential as privateKey is null or empty', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var tempIssueCredentialBody;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        tempIssueCredentialBody = __assign({}, issueCredentialBody);
+                        tempIssueCredentialBody.credential = credentialDetail;
+                        tempIssueCredentialBody.issuerDid = didDocId;
+                        tempIssueCredentialBody.verificationMethodId = verificationMethodId;
+                        tempIssueCredentialBody.privateKeyMultibase = '';
+                        return [4 /*yield*/, hypersignVC.issue(tempIssueCredentialBody).catch(function (err) {
+                                (0, chai_1.expect)(function () {
+                                    throw err;
+                                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKey is required to issue credential');
+                            })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    });
+    it('should not be able to issueCredential as issuerDid is null or empty', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var tempIssueCredentialBody;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        tempIssueCredentialBody = __assign({}, issueCredentialBody);
+                        tempIssueCredentialBody.credential = credentialDetail;
+                        tempIssueCredentialBody.issuerDid = '';
+                        tempIssueCredentialBody.verificationMethodId = verificationMethodId;
+                        tempIssueCredentialBody.privateKeyMultibase = publicKeyMultibase;
+                        return [4 /*yield*/, hypersignVC.issue(tempIssueCredentialBody).catch(function (err) {
+                                (0, chai_1.expect)(function () {
+                                    throw err;
+                                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.issuerDid is required to issue credential');
+                            })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    });
+    it('should be able to issue credential with credential status registered on chain', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var tempIssueCredentialBody, issuedCredResult, signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        tempIssueCredentialBody = __assign({}, issueCredentialBody);
+                        tempIssueCredentialBody.credential = credentialDetail;
+                        tempIssueCredentialBody.issuerDid = didDocId;
+                        tempIssueCredentialBody.verificationMethodId = verificationMethodId;
+                        tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
+                        return [4 /*yield*/, hypersignVC.issue(tempIssueCredentialBody)];
+                    case 1:
+                        issuedCredResult = _a.sent();
+                        signedCredential = issuedCredResult.signedCredential, credentialStatus = issuedCredResult.credentialStatus, credentialStatusProof = issuedCredResult.credentialStatusProof, credentialStatusRegistrationResult = issuedCredResult.credentialStatusRegistrationResult;
+                        credentialStatusId = signedCredential['credentialStatus'].id;
+                        (0, chai_1.expect)(signedCredential).to.be.a('object');
+                        (0, chai_1.should)().exist(signedCredential['@context']);
+                        (0, chai_1.should)().exist(signedCredential['id']);
+                        (0, chai_1.should)().exist(signedCredential['type']);
+                        (0, chai_1.should)().exist(signedCredential['expirationDate']);
+                        (0, chai_1.should)().exist(signedCredential['issuanceDate']);
+                        (0, chai_1.should)().exist(signedCredential['issuer']);
+                        (0, chai_1.should)().exist(signedCredential['credentialSubject']);
+                        (0, chai_1.should)().exist(signedCredential['credentialSchema']);
+                        (0, chai_1.should)().exist(signedCredential['credentialStatus']);
+                        (0, chai_1.should)().exist(signedCredential['proof']);
+                        (0, chai_1.expect)(signedCredential['id']).to.be.equal(credentialId);
+                        (0, chai_1.expect)(credentialStatus).to.be.a('object');
+                        (0, chai_1.should)().exist(credentialStatus['claim']);
+                        (0, chai_1.should)().exist(credentialStatus['issuer']);
+                        (0, chai_1.should)().exist(credentialStatus['issuanceDate']);
+                        (0, chai_1.should)().exist(credentialStatus['expirationDate']);
+                        (0, chai_1.should)().exist(credentialStatus['credentialHash']);
+                        (0, chai_1.expect)(credentialStatusProof).to.be.a('object');
+                        (0, chai_1.should)().exist(credentialStatusProof['type']);
+                        (0, chai_1.should)().exist(credentialStatusProof['created']);
+                        (0, chai_1.should)().exist(credentialStatusProof['updated']);
+                        (0, chai_1.should)().exist(credentialStatusProof['verificationMethod']);
+                        (0, chai_1.should)().exist(credentialStatusProof['proofPurpose']);
+                        (0, chai_1.should)().exist(credentialStatusProof['proofValue']);
+                        (0, chai_1.expect)(credentialStatusRegistrationResult).to.be.a('object');
+                        (0, chai_1.should)().exist(credentialStatusRegistrationResult['height']);
+                        (0, chai_1.should)().exist(credentialStatusRegistrationResult['transactionHash']);
+                        (0, chai_1.should)().exist(credentialStatusRegistrationResult['gasUsed']);
+                        (0, chai_1.should)().exist(credentialStatusRegistrationResult['gasWanted']);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+    it('should be able to issue credential without having the credential status registered on chain', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var tempIssueCredentialBody, issuedCredResult, signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        tempIssueCredentialBody = __assign({}, issueCredentialBody);
+                        tempIssueCredentialBody.credential = credentialDetail;
+                        tempIssueCredentialBody.issuerDid = didDocId;
+                        tempIssueCredentialBody.verificationMethodId = verificationMethodId;
+                        tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
+                        tempIssueCredentialBody.registerCredential = false;
+                        return [4 /*yield*/, hypersignVC.issue(tempIssueCredentialBody)];
+                    case 1:
+                        issuedCredResult = _a.sent();
+                        signedCredential = issuedCredResult.signedCredential, credentialStatus = issuedCredResult.credentialStatus, credentialStatusProof = issuedCredResult.credentialStatusProof, credentialStatusRegistrationResult = issuedCredResult.credentialStatusRegistrationResult;
+                        (0, chai_1.expect)(signedCredential).to.be.a('object');
+                        (0, chai_1.expect)(credentialStatus).to.be.a('object');
+                        (0, chai_1.expect)(credentialStatusProof).to.be.a('object');
+                        (0, chai_1.should)().not.exist(credentialStatusRegistrationResult);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+});
 // describe('#verifyCredential() method to verify a credential', function () {
 //   it('should not be able to verify credential as verificationMethodId is null or empty', async function () {
 //     const params = {

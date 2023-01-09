@@ -44,7 +44,7 @@ const issueCredentialBody = {
   issuerDid: didDocId,
   verificationMethodId,
   privateKeyMultibase: privateKeyMultibase,
-  registerCredential: true
+  registerCredential: true,
 };
 
 beforeEach(async function () {
@@ -415,11 +415,12 @@ describe('#issueCredential() method for issuing credential', function () {
     tempIssueCredentialBody.verificationMethodId = verificationMethodId;
     tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
     const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);
-    
-    const {signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult }  = issuedCredResult;
-  
+
+    const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
+      issuedCredResult;
+
     credentialStatusId = signedCredential['credentialStatus'].id;
-    
+
     expect(signedCredential).to.be.a('object');
     should().exist(signedCredential['@context']);
     should().exist(signedCredential['id']);
@@ -432,7 +433,7 @@ describe('#issueCredential() method for issuing credential', function () {
     should().exist(signedCredential['credentialStatus']);
     should().exist(signedCredential['proof']);
     expect(signedCredential['id']).to.be.equal(credentialId);
-    
+
     expect(credentialStatus).to.be.a('object');
     should().exist(credentialStatus['claim']);
     should().exist(credentialStatus['issuer']);
@@ -463,13 +464,14 @@ describe('#issueCredential() method for issuing credential', function () {
     tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
     tempIssueCredentialBody.registerCredential = false;
     const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);
-    
-    const {signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult }  = issuedCredResult;
+
+    const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
+      issuedCredResult;
 
     expect(signedCredential).to.be.a('object');
     expect(credentialStatus).to.be.a('object');
     expect(credentialStatusProof).to.be.a('object');
-    should().not.exist(credentialStatusRegistrationResult)
+    should().not.exist(credentialStatusRegistrationResult);
   });
 });
 
