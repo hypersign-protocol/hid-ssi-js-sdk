@@ -148,50 +148,102 @@ const credential = await hypersignVC.generate(credentialBody)
 }
 ```
 
-### `sign()`
+### `issue()`
 
 Signs a schema document and attaches proof
 
 **API Definition**
 
 ```js
-sign(params: { privateKeyMultibase: string; schema: SchemaDocument, verificationMethodId: string }): Promise<Schema>;
-```
+issue(params: {
+    credential: IVerifiableCredential;
+    issuerDid: string;
+    privateKeyMultibase: string;
+    registerCredential?: boolean;
+  }): Promise<{ 
+    signedCredential: IVerifiableCredential, 
+    credentialStatus: CredentialStatus, 
+    credentialStatusProof: CredentialProof
+    credentialStatusRegistrationResult?: DeliverTxResponse }>;
 
-Note: The difference between `SchemaDocument` and `Schema` types is, `Schema` type is `SchemaDocument` with `proof` attached to it. see the example below.
+```
 
 **Usage**
 
 ```js
-
-const signedSchema = await hypersignSchema.sign({ privateKeyMultibase: privateKeyMultibase, schema: schema, verificationMethodId: 'did:hid:testnet:zAtZ8oBrVPvaKKou21KRnmzRtZaJpWxsgWuB9GNRLTQ6R#key-1' });
+const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);    const {signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult }  = issuedCredResult;
 ```
 
 **Output**
 
 ```json
 {
-  "type": "https://w3c-ccg.github.io/vc-json-schemas/v1/schema/1.0/schema.json",
-  "modelVersion": "1.0",
-  "id": "sch:hid:testnet:z57BBNTNqkFXpsFfSMLvfvBhhiSEicGK3nVvJMXRKcE3S:1.0",
-  "name": "testSchema",
-  "author": "did:hid:testnet:zAtZ8oBrVPvaKKou21KRnmzRtZaJpWxsgWuB9GNRLTQ6R",
-  "authored": "2023-01-07T07:24:06Z",
-  "schema": {
-    "schema": "http://json-schema.org/draft-07/schema",
-    "description": "This is a test schema generation",
-    "type": "object",
-    "properties": "{\"name\":{\"type\":\"integer\"}}",
-    "required": [],
-    "additionalProperties": false
-  },
-  "proof": {
-    "type": "Ed25519Signature2020",
-    "created": "2023-01-07T07:24:07Z",
-    "verificationMethod": "did:hid:testnet:zAtZ8oBrVPvaKKou21KRnmzRtZaJpWxsgWuB9GNRLTQ6R#key-1",
-    "proofPurpose": "assertion",
-    "proofValue": "aozlK3ZSAHuP2x7is60jYXdhS8zc68bO2y9CVShgLNaXxTHdeLIIgqY5Ci6ji0nrC5Q4e+YiGtV/SNIFkvO4CQ=="
-  }
+   "signedCredential":{
+      "@context":[
+         "https://www.w3.org/2018/credentials/v1",
+         {
+            "hs":"https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/schema/sch:hid:testnet:zHxz3ZGTAqA2j9AoVoXEEUNmhBMW7RftmbZufQovyVjfT:1.0:"
+         },
+         {
+            "name":"hs:name"
+         },
+         "https://w3id.org/security/suites/ed25519-2020/v1"
+      ],
+      "id":"vc:hid:testnet:z2g2Ty13EYau1tLUJgJtZ5xcvLLcywwzX3H2785ro5HJW",
+      "type":[
+         "VerifiableCredential",
+         "testSchema"
+      ],
+      "expirationDate":"2027-12-10T18:30:00Z",
+      "issuanceDate":"2023-01-09T11:17:15Z",
+      "issuer":"did:hid:testnet:z5DErRspu8PTZf8W8WNy35mKBpL9bryp1i58hGz1kBtLL",
+      "credentialSubject":{
+         "name":"varsha",
+         "id":"did:hid:testnet:z5DErRspu8PTZf8W8WNy35mKBpL9bryp1i58hGz1kBtLL"
+      },
+      "credentialSchema":{
+         "id":"sch:hid:testnet:zHxz3ZGTAqA2j9AoVoXEEUNmhBMW7RftmbZufQovyVjfT:1.0",
+         "type":"JsonSchemaValidator2018"
+      },
+      "credentialStatus":{
+         "id":"https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/credential/vc:hid:testnet:z2g2Ty13EYau1tLUJgJtZ5xcvLLcywwzX3H2785ro5HJW",
+         "type":"CredentialStatusList2017"
+      },
+      "proof":{
+         "type":"Ed25519Signature2020",
+         "created":"2023-01-09T11:18:56Z",
+         "verificationMethod":"did:hid:testnet:z5DErRspu8PTZf8W8WNy35mKBpL9bryp1i58hGz1kBtLL#key-1",
+         "proofPurpose":"assertionMethod",
+         "proofValue":"zF49uwXB4XwjPyScApUhPTrUbXPTJ3ipdHsASDngj1oKX8SXMf9zrYmUzMHNfXLNXHMPvP5g6qhLj4czjQ4AmmpX"
+      }
+   },
+   "credentialStatus":{
+      "claim":{
+         "id":"vc:hid:testnet:z2g2Ty13EYau1tLUJgJtZ5xcvLLcywwzX3H2785ro5HJW",
+         "currentStatus":"Live",
+         "statusReason":"Credential is active"
+      },
+      "issuer":"did:hid:testnet:z5DErRspu8PTZf8W8WNy35mKBpL9bryp1i58hGz1kBtLL",
+      "issuanceDate":"2023-01-09T11:17:15Z",
+      "expirationDate":"2027-12-10T18:30:00Z",
+      "credentialHash":"2f8722f72bd9dc5d2ebe51104bdc5983a80c4e1f5a20e6ba4758162b2d910cac"
+   },
+   "credentialStatusProof":{
+      "type":"Ed25519Signature2020",
+      "created":"2023-01-09T11:17:16Z",
+      "updated":"2023-01-09T11:17:16Z",
+      "verificationMethod":"did:hid:testnet:z5DErRspu8PTZf8W8WNy35mKBpL9bryp1i58hGz1kBtLL#key-1",
+      "proofValue":"F+PETguuXqJyfbWSimVEPlQ4pon815ovGVU9++aA2JhD8Yz/A2C02WQDqe1uztFDiQTZMtWqm5mNHrxCHHrrBw==",
+      "proofPurpose":"assertion"
+   },
+   "credentialStatusRegistrationResult":{
+      "code":0,
+      "height":1482453,
+      "rawLog":"[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/hypersignprotocol.hidnode.ssi.MsgRegisterCredentialStatus\"}]}]}]",
+      "transactionHash":"59A3F0566C05853085EB3C4239857E77B6C658B0D929D11FA18AAA7B03AE6A50",
+      "gasUsed":92561,
+      "gasWanted":106334
+   }
 }
 ```
 

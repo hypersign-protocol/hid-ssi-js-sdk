@@ -377,13 +377,28 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return vc;
   }
 
-  public async issueCredential(params: {
+  /**
+   * Generates signed credentials document and registers its status on Hypersign blockchain
+   * @params
+   *  - params.credential             : Hypersign credentail document
+   *  - params.privateKeyMultibase    : P
+   *  - params.issuerDid              : DID of the issuer
+   *  - params.verificationMethodId   : Verifcation Method of Issuer 
+   *  - params.registerCredential     : If false, does not registers credentail status on Hypersign blockchain. Default is true.
+   * @returns {Promise<object>} 
+   */
+  public async issue(params: {
     credential: IVerifiableCredential;
     issuerDid: string;
     verificationMethodId: string; // vermethod of issuer for assestion
-    privateKey: string;
+    privateKeyMultibase: string;
     registerCredential?: boolean;
-  }): Promise<object> {
+  }): Promise<{ 
+    signedCredential: IVerifiableCredential, 
+    credentialStatus: CredentialStatus, 
+    credentialStatusProof: CredentialProof,
+    credentialStatusRegistrationResult?: DeliverTxResponse
+  }> {
     if (!params.verificationMethodId) {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to issue credential');
     }
@@ -392,8 +407,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       throw new Error('HID-SSI-SDK:: Error: params.credential is required to issue credential');
     }
 
-    if (!params.privateKey) {
-      throw new Error('HID-SSI-SDK:: Error: params.privateKey is required to issue credential');
+    if (!params.privateKeyMultibase) {
+      throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to issue credential');
     }
 
     if (!params.issuerDid) {
@@ -412,13 +427,20 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
     if (signerDidDoc === null || signerDidDoc === undefined)
-      throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
+      throw new Error('HID-SSI-SDK:: Error: Could not resolve issuerDid = ' + params.issuerDid);
 
     // TODO: take verification method from params
     const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
     const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
       (x) => x.id == publicKeyId
     ) as VerificationMethod;
+
+    if(!publicKeyVerMethod){
+      throw new Error(
+        'HID-SSI-SDK:: Error: Could not find verification method for id = ' + params.verificationMethodId
+      )
+    }
+
 
     const convertedKeyPair = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
       publicKey: publicKeyVerMethod.publicKeyMultibase,
@@ -427,7 +449,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
 
     const keyPair = await Ed25519VerificationKey2020.from({
-      privateKeyMultibase: params.privateKey,
+      privateKeyMultibase: params.privateKeyMultibase,
       ...publicKeyVerMethod,
     });
 
@@ -455,7 +477,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const proofValue = await this._sign({
       message: JSON.stringify(credentialStatus),
-      privateKeyMultibase: params.privateKey,
+      privateKeyMultibase: params.privateKeyMultibase,
     });
 
     // check params.issuer is a controller of params.credential.issuer
@@ -492,24 +514,28 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       suite,
       documentLoader,
     });
-    if (params.registerCredential) {
-      const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
 
-      if (!resp || resp.code != 0) {
-        throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+    let credentialStatusRegistrationResult: DeliverTxResponse;
+    if (params.registerCredential) {
+      credentialStatusRegistrationResult = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
+      
+      if (!credentialStatusRegistrationResult || credentialStatusRegistrationResult.code != 0) {
+        throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + credentialStatusRegistrationResult.rawLog);
       }
 
-      return signedVC;
+      return { signedCredential: signedVC, credentialStatus, credentialStatusProof: proof,  credentialStatusRegistrationResult };
     }
 
-    return { signedVC, credentialStatus, proof };
-
-    // const credentialJson = Utils.ldToJsonConvertor(params.credential);
-    //console.log(credentialJson);
+    return { signedCredential: signedVC, credentialStatus, credentialStatusProof: proof };
   }
-  public async registerCredentialStatus(credentialStatus: CredentialStatus, proof: CredentialProof) {
-    if (!credentialStatus || !proof)
-      throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
+
+
+  public async registerCredentialStatus(params: {
+    credentialStatus: CredentialStatus, 
+    credentialStatusProof: CredentialProof}): Promise<DeliverTxResponse> {
+    const {  credentialStatus, credentialStatusProof } = params;
+    if (!credentialStatus || !credentialStatusProof)
+      throw new Error('HID-SSI-SDK:: Error: credentialStatus and credentialStatusProof are required to register credential status');
 
     if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
       throw new Error(
@@ -517,12 +543,14 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       );
     }
 
-    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
+    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, credentialStatusProof);
     if (!resp || resp.code != 0) {
       throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
     }
     return resp;
   }
+
+
   public async updateCredentialStatus(params: {
     credStatus: CredentialStatus;
     issuerDid: string;
@@ -530,7 +558,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     privateKey: string;
     status: string;
     statusReason?: string;
-  }): Promise<object> {
+  }): Promise<DeliverTxResponse>  {
     if (!params.verificationMethodId) {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required revoke credential');
     }
