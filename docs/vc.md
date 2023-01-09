@@ -165,7 +165,6 @@ issue(params: {
     credentialStatus: CredentialStatus, 
     credentialStatusProof: CredentialProof
     credentialStatusRegistrationResult?: DeliverTxResponse }>;
-
 ```
 
 **Usage**

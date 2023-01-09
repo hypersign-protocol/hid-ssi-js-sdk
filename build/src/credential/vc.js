@@ -416,7 +416,12 @@ var HypersignVerifiableCredential = /** @class */ (function () {
      *  - params.issuerDid              : DID of the issuer
      *  - params.verificationMethodId   : Verifcation Method of Issuer
      *  - params.registerCredential     : If false, does not registers credentail status on Hypersign blockchain. Default is true.
-     * @returns {Promise<object>}
+     * @returns {Promise<{
+      signedCredential: IVerifiableCredential;
+      credentialStatus: CredentialStatus;
+      credentialStatusProof: CredentialProof;
+      credentialStatusRegistrationResult?: DeliverTxResponse;
+    }>}
      */
     HypersignVerifiableCredential.prototype.issue = function (params) {
         return __awaiter(this, void 0, void 0, function () {

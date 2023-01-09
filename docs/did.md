@@ -95,12 +95,20 @@ Generates a new DID Document
 **API Definition**
 
 ```js
-generate(params: { publicKeyMultibase: string }): Promise<object>;
+generate(params: { 
+  methodSpecificId?: string, // min 32 bit alphanumeric
+  publicKeyMultibase: string 
+}): Promise<object>;
 ```
 **Usage**
 
 ```js
 const didDocument = await hypersignDID.generate({ publicKeyMultibase });
+
+// OR using custom methodSpecificId
+const methodSpecificId = 'e157620d69d003e12d935c37b8c21baa78d24898398829b39d943d253c006332' // 32 bit alphanumeric 
+const didDocument = await hypersignDID.generate({ methodSpecificId, publicKeyMultibase });
+
 ```
 **Outputs**
 

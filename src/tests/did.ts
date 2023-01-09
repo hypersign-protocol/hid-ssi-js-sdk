@@ -77,6 +77,35 @@ describe('#generate() to generate did', function () {
     should().exist(didDocument['capabilityDelegation']);
     should().exist(didDocument['service']);
   });
+
+  it('should be able to generate didDocument with custom id', async function () {
+    const methodSpecificId = 'e157620d69d003e12d935c37b8c21baa78d24898398829b39d943d253c006332'
+    const didDocument = await hypersignDID.generate({ publicKeyMultibase, methodSpecificId  });
+    const didDocId = didDocument['id'];
+    expect(didDocument).to.be.a('object');
+    expect(didDocId).to.be.equal('did:hid:testnet:'+ methodSpecificId)
+    should().exist(didDocument['@context']);
+    should().exist(didDocument['id']);
+    should().exist(didDocument['controller']);
+    should().exist(didDocument['alsoKnownAs']);
+
+    should().exist(didDocument['verificationMethod']);
+    expect(
+      didDocument['verificationMethod'] &&
+        didDocument['authentication'] &&
+        didDocument['assertionMethod'] &&
+        didDocument['keyAgreement'] &&
+        didDocument['capabilityInvocation'] &&
+        didDocument['capabilityDelegation'] &&
+        didDocument['service']
+    ).to.be.a('array');
+    should().exist(didDocument['authentication']);
+    should().exist(didDocument['assertionMethod']);
+    should().exist(didDocument['keyAgreement']);
+    should().exist(didDocument['capabilityInvocation']);
+    should().exist(didDocument['capabilityDelegation']);
+    should().exist(didDocument['service']);
+  });
 });
 describe('#register() this is to register did on the blockchain', function () {
   it('should not able to register did document and throw error as didDocument is not passed or it is empty', function () {
