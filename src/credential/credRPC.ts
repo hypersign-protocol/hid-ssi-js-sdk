@@ -5,11 +5,27 @@ import axios from 'axios';
 import { HIDClient } from '../hid/client';
 import { ICredentialRPC } from './ICredential';
 import { CredentialStatus, CredentialProof, Credential } from '../generated/ssi/credential';
+import { OfflineSigner } from '@cosmjs/proto-signing';
 
 export class CredentialRPC implements ICredentialRPC {
   public credentialRestEP: string;
-  constructor() {
+  private hidClient: any;
+
+  constructor({
+    offlineSigner,
+    nodeRpcEndpoint,
+    nodeRestEndpoint,
+  }: {
+    offlineSigner: OfflineSigner;
+    nodeRpcEndpoint: string;
+    nodeRestEndpoint: string;
+  }) {
+    this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
     this.credentialRestEP = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
+  }
+
+  async init() {
+    await this.hidClient.init();
   }
 
   async registerCredentialStatus(

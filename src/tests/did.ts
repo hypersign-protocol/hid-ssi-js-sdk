@@ -384,7 +384,6 @@ describe('#sign() this is to sign didDoc', function () {
       did: '', // This is taken as empty as didDoc is yet not register on blockchain and won't able to resolve based on did
       didDocument: didDocument as object,
       verificationMethodId: verificationMethodId as string,
-      publicKey,
       controller,
     };
     signedDocument = await hypersignDID.sign(params);

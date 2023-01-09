@@ -37,13 +37,17 @@ export interface IVerifiableCredential {
 }
 
 export interface ICredentialMethods {
-  getCredential(params: {
+  generate(params: {
     schemaId: string;
-    subjectDid: string;
+    subjectDid?: string;
+    subjectDidDocSigned?: JSON;
+    schemaContext?: Array<string>;
+    type?: Array<string>;
     issuerDid: string;
     expirationDate: string;
     fields: object;
   }): Promise<IVerifiableCredential>;
+
   issueCredential(params: {
     credential: IVerifiableCredential;
     issuerDid: string;
