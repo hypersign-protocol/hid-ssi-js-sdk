@@ -1,0 +1,198 @@
+import { expect, should } from 'chai';
+
+
+let verifiablePresentation;
+let signedPresentation;
+let verifiableCredentialPresentationId;
+let credentialStatusId; 
+let credentialId2;
+describe('#getPresentation() method to generate presentation', function () {
+    const presentationBody = {
+      verifiableCredentials: [credentialDetail],
+      holderDid: didDocId,
+    };
+    it('should be able to generate presentation', async function () {
+      const tempPresentationBody = { ...presentationBody };
+      tempPresentationBody.verifiableCredentials[0] = credentialDetail;
+      tempPresentationBody.holderDid = didDocId;
+      verifiablePresentation = await hsSdk.vp.getPresentation(tempPresentationBody);
+      should().exist(verifiablePresentation['@context']);
+      should().exist(verifiablePresentation['type']);
+      expect(verifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
+      should().exist(verifiablePresentation['verifiableCredential']);
+      expect(verifiablePresentation.verifiableCredential).to.be.a('array');
+      should().exist(verifiablePresentation['id']);
+      should().exist(verifiablePresentation['holder']);
+      verifiableCredentialPresentationId = verifiablePresentation.id;
+      expect(verifiablePresentation['verifiableCredential'][0].id).to.be.equal(credentialId);
+    });
+  });
+  
+  describe('#signPresentation() method to sign presentation', function () {
+    const signPresentationBody = {
+      presentation: verifiablePresentation,
+      holderDid: didDocId,
+      verificationMethodId,
+      privateKey: privateKeyMultibase,
+      challenge,
+    };
+    it('should not be able to sign presentation as either holderDid or holderDidDocSigned is required but passed both', async function () {
+      const tempSignPresentationBody = { ...signPresentationBody };
+      tempSignPresentationBody.presentation = verifiablePresentation;
+      tempSignPresentationBody.holderDid = didDocId;
+      tempSignPresentationBody.verificationMethodId = verificationMethodId;
+      tempSignPresentationBody.privateKey = privateKeyMultibase;
+      tempSignPresentationBody['holderDidDocSigned'] = signedDocument;
+      return hsSdk.vp.signPresentation(tempSignPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
+      });
+    });
+    it('should not be able to sign presentation as privateKey in null or empty', async function () {
+      const tempSignPresentationBody = { ...signPresentationBody };
+      tempSignPresentationBody.privateKey = '';
+      return hsSdk.vp.signPresentation(tempSignPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.privateKey is required for signinng a presentation');
+      });
+    });
+    it('should not be able to sign presentation as either holderDid or holderDidDocSigned is required but passed both', async function () {
+      const tempSignPresentationBody = { ...signPresentationBody };
+      tempSignPresentationBody.privateKey = privateKeyMultibase;
+      tempSignPresentationBody.presentation = undefined;
+  
+      return hsSdk.vp.signPresentation(tempSignPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+      });
+    });
+    it('should not be able to sign presentation as either holderDid or holderDidDocSigned is required but passed both', async function () {
+      const tempSignPresentationBody = { ...signPresentationBody };
+      tempSignPresentationBody.privateKey = privateKeyMultibase;
+      tempSignPresentationBody.presentation = verifiablePresentation;
+      tempSignPresentationBody.challenge = '';
+      return hsSdk.vp.signPresentation(tempSignPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+      });
+    });
+    it('should not be able to sign presentation as either holderDid or holderDidDocSigned is required but passed both', async function () {
+      const tempSignPresentationBody = { ...signPresentationBody };
+      tempSignPresentationBody.privateKey = privateKeyMultibase;
+      tempSignPresentationBody.presentation = verifiablePresentation;
+      tempSignPresentationBody.challenge = challenge;
+      tempSignPresentationBody.verificationMethodId = '';
+      return hsSdk.vp.signPresentation(tempSignPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+      });
+    });
+    it('should be able to sign presentation', async function () {
+      const tempSignPresentationBody = { ...signPresentationBody };
+      tempSignPresentationBody.presentation = verifiablePresentation;
+      tempSignPresentationBody.holderDid = didDocId;
+      tempSignPresentationBody.verificationMethodId = verificationMethodId;
+      tempSignPresentationBody.privateKey = privateKeyMultibase;
+      signedPresentation = await hsSdk.vp.signPresentation(tempSignPresentationBody);
+      should().exist(signedPresentation['@context']);
+      should().exist(signedPresentation['type']);
+      expect(signedPresentation.type[0]).to.be.equal('VerifiablePresentation');
+      should().exist(signedPresentation['verifiableCredential']);
+      expect(signedPresentation.id).to.be.equal(verifiableCredentialPresentationId);
+    });
+  });
+  
+  describe('#verifyPresentation() method to verify presentation', function () {
+    const verifyPresentationBody = {
+      signedPresentation: signedPresentation,
+      holderDid: didDocId,
+      holderVerificationMethodId: verificationMethodId,
+      issuerVerificationMethodId: verificationMethodId,
+      privateKey: privateKeyMultibase,
+      challenge,
+      issuerDid: didDocId,
+    };
+    it('should not be able to verify presentation as either holderDid or holderDidDocSigned is required but passed both', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.signedPresentation = signedPresentation;
+      tempverifyPresentationBody.holderDid = didDocId;
+      tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
+      tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
+      tempverifyPresentationBody.privateKey = privateKeyMultibase;
+      tempverifyPresentationBody['holderDidDocSigned'] = signedDocument;
+      return hsSdk.vp.verifyPresentation(tempverifyPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
+      });
+    });
+    it('should not be able to verify presentation as issuerDid is null or empty', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.issuerDid = '';
+      return hsSdk.vp.verifyPresentation(tempverifyPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.issuerDid is required for verifying a presentation');
+      });
+    });
+    it('should not be able to verify presentation as challenge is null or empty', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.issuerDid = didDocId;
+      tempverifyPresentationBody.challenge = '';
+  
+      return hsSdk.vp.verifyPresentation(tempverifyPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.challenge is required for verifying a presentation');
+      });
+    });
+    it('should not be able to verify presentation as holderVerificationMethodId is null or empty', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.issuerDid = didDocId;
+      tempverifyPresentationBody.challenge = challenge;
+      tempverifyPresentationBody.holderVerificationMethodId = '';
+  
+      return hsSdk.vp.verifyPresentation(tempverifyPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.holderVerificationMethodId is required for verifying a presentation');
+      });
+    });
+    it('should not be able to verify presentation as issuerVerificationMethodId is null or empty', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.issuerDid = didDocId;
+      tempverifyPresentationBody.challenge = challenge;
+      tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
+      tempverifyPresentationBody.issuerVerificationMethodId = '';
+  
+      return hsSdk.vp.verifyPresentation(tempverifyPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.issuerVerificationMethodId is required for verifying a presentation');
+      });
+    });
+    it('should be able to verify presentation', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.signedPresentation = signedPresentation;
+      tempverifyPresentationBody.issuerDid = didDocId;
+      tempverifyPresentationBody.holderDid = didDocId;
+      tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
+      tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
+      tempverifyPresentationBody.challenge = didDocId;
+      const verifiedPresentationDetail = await hsSdk.vp.verifyPresentation(tempverifyPresentationBody);
+      should().exist(verifiedPresentationDetail.verified);
+      expect(verifiedPresentationDetail.verified).to.be.equal(true);
+      expect(verifiedPresentationDetail).to.be.a('object');
+      should().exist(verifiedPresentationDetail.results);
+      expect(verifiedPresentationDetail.results).to.be.a('array');
+      should().exist(verifiedPresentationDetail.credentialResults);
+      expect(verifiedPresentationDetail.credentialResults).to.be.a('array');
+      expect(verifiedPresentationDetail.credentialResults[0].verified).to.be.equal(true);
+      expect(verifiedPresentationDetail.credentialResults[0].credentialId).to.be.equal(credentialId);
+    });
+  });

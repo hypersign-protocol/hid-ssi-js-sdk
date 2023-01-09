@@ -34,14 +34,16 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   private hsSchema: HypersignSchema | null;
   private hsDid: HypersignDID | null;
 
-  constructor(params: {
+  constructor(
+    params: {
       namespace?: string;
       offlineSigner?: OfflineSigner;
       nodeRpcEndpoint?: string;
       nodeRestEndpoint?: string;
-    } = {}) {
+    } = {}
+  ) {
     const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint } = params;
-    
+
     this.namespace = namespace && namespace != '' ? namespace : '';
 
     const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
@@ -56,8 +58,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       this.hsDid = null;
       this.hsSchema = null;
     }
-
-   
 
     this.context = [];
     this.id = '';
@@ -226,7 +226,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     await this.hsDid.init();
     await this.hsSchema.init();
   }
-  
+
   // encode a multibase base58-btc multicodec key
   // TEST
 
@@ -235,8 +235,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
    * @params
    *  - params.schemaId             : Hypersign schema id
    *  - params.subjectDid           : DID of the subject, if not provided, will be taken from subjectDidDocSigned
-   *  - params.schemaContext        : 
-   *  - params.type                 :  
+   *  - params.schemaContext        :
+   *  - params.type                 :
    *  - params.issuerDid            :  DID of the issuer
    *  - params.expirationDate       :  Date of the expiration for this credential
    *  - params.fields               :  Schema fields values for this credential
@@ -262,7 +262,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
       );
     }
-
 
     const issuerDid = params.issuerDid;
     const subjectDid = params.subjectDid;
@@ -511,13 +510,13 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public async registerCredentialStatus(credentialStatus: CredentialStatus, proof: CredentialProof) {
     if (!credentialStatus || !proof)
       throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
-  
+
     if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
       throw new Error(
         'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
       );
     }
-    
+
     const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
     if (!resp || resp.code != 0) {
       throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
@@ -645,7 +644,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public async generateRegisterCredentialStatusTxnMessage(credentialStatus: CredentialStatus, proof: CredentialProof) {
     if (!credentialStatus || !proof)
       throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
-    
+
     if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
       throw new Error(
         'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
@@ -658,8 +657,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
   public async registerCredentialStatusTxnBulk(txnMessage: []) {
     if (!txnMessage) throw new Error('HID-SSI-SDK:: Error: txnMessage is required to register credential status');
-    
-    
+
     if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
       throw new Error(
         'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
@@ -689,7 +687,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public async resolveCredentialStatus(params: { credentialId }): Promise<CredentialStatus> {
     if (!params.credentialId)
       throw new Error('HID-SSI-SDK:: Error: credentialId is required to resolve credential status');
-    
+
     if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
       throw new Error(
         'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'

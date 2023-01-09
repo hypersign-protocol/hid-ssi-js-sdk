@@ -502,7 +502,6 @@ describe('#sign() this is to sign didDoc', function () {
                             did: '',
                             didDocument: didDocument,
                             verificationMethodId: verificationMethodId,
-                            publicKey: publicKey,
                             controller: controller,
                         };
                         return [4 /*yield*/, hypersignDID.sign(params)];

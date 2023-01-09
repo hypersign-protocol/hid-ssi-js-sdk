@@ -19,7 +19,7 @@ let credentialId;
 let credentialDetail;
 let hypersignDID;
 let hypersignSchema;
-let hypersignVC; 
+let hypersignVC;
 let signedSchema;
 
 const credentialStatusProof = {};
@@ -53,18 +53,16 @@ beforeEach(async function () {
     nodeRestEndpoint: hidNodeEp.rest,
     nodeRpcEndpoint: hidNodeEp.rpc,
     namespace: hidNodeEp.namespace,
-  }
+  };
 
   hypersignDID = new HypersignDID(constructorParams);
   await hypersignDID.init();
-  
+
   hypersignSchema = new HypersignSchema(constructorParams);
   await hypersignSchema.init();
-  
-  hypersignVC = new HypersignVerifiableCredential(constructorParams)
-  await hypersignVC.init()
 
-
+  hypersignVC = new HypersignVerifiableCredential(constructorParams);
+  await hypersignVC.init();
 
   offlineSigner = await createWallet(mnemonic);
   hsSdk = new HypersignSSISdk(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest, hidNodeEp.namespace);
@@ -208,7 +206,6 @@ describe('#registerSchema() function to register schema on blockchain', function
   });
 });
 
-
 /**
  * Test cases related to credential
  */
@@ -310,16 +307,16 @@ describe('#getCredential() method to generate a credential', function () {
     const expirationDate = new Date('12/11/2027');
     const tempCredentialBody = { ...credentialBody };
     tempCredentialBody.schemaId = schemaId;
-    tempCredentialBody.subjectDid = didDocId; 
+    tempCredentialBody.subjectDid = didDocId;
     tempCredentialBody['expirationDate'] = expirationDate;
     tempCredentialBody.issuerDid = didDocId;
     tempCredentialBody.fields = { name: 'varsha' };
-    
-    console.log(tempCredentialBody)
+
+    console.log(tempCredentialBody);
 
     credentialDetail = await hypersignVC.generate(tempCredentialBody);
     console.log(JSON.stringify(credentialDetail));
-    
+
     expect(credentialDetail).to.be.a('object');
     should().exist(credentialDetail['@context']);
     should().exist(credentialDetail['id']);
@@ -333,7 +330,6 @@ describe('#getCredential() method to generate a credential', function () {
     should().exist(credentialDetail['credentialStatus']);
     expect(credentialDetail['credentialStatus'].type).to.be.equal('CredentialStatusList2017');
   });
-
 
   it('should be able to generate new credential for a schema with signed subject DID doc', async function () {
     const expirationDate = new Date('12/11/2027');
@@ -682,5 +678,3 @@ describe('#getCredential() method to generate a credential', function () {
 //     should().exist(registerCredDetail.transactionHash);
 //   });
 // });
-
-

@@ -64,9 +64,23 @@ var generatedProto = __importStar(require("../generated/ssi/tx"));
 var axios_1 = __importDefault(require("axios"));
 var client_1 = require("../hid/client");
 var CredentialRPC = /** @class */ (function () {
-    function CredentialRPC() {
+    function CredentialRPC(_a) {
+        var offlineSigner = _a.offlineSigner, nodeRpcEndpoint = _a.nodeRpcEndpoint, nodeRestEndpoint = _a.nodeRestEndpoint;
+        this.hidClient = new client_1.HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
         this.credentialRestEP = client_1.HIDClient.hidNodeRestEndpoint + constants_1.HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
     }
+    CredentialRPC.prototype.init = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.hidClient.init()];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     CredentialRPC.prototype.registerCredentialStatus = function (credentialStatus, proof) {
         return __awaiter(this, void 0, void 0, function () {
             var typeUrl, txMessage, fee, hidClient, txResult;
