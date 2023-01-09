@@ -79,11 +79,11 @@ describe('#generate() to generate did', function () {
   });
 
   it('should be able to generate didDocument with custom id', async function () {
-    const methodSpecificId = 'e157620d69d003e12d935c37b8c21baa78d24898398829b39d943d253c006332'
-    const didDocument = await hypersignDID.generate({ publicKeyMultibase, methodSpecificId  });
+    const methodSpecificId = 'e157620d69d003e12d935c37b8c21baa78d24898398829b39d943d253c006332';
+    const didDocument = await hypersignDID.generate({ publicKeyMultibase, methodSpecificId });
     const didDocId = didDocument['id'];
     expect(didDocument).to.be.a('object');
-    expect(didDocId).to.be.equal('did:hid:testnet:'+ methodSpecificId)
+    expect(didDocId).to.be.equal('did:hid:testnet:' + methodSpecificId);
     should().exist(didDocument['@context']);
     should().exist(didDocument['id']);
     should().exist(didDocument['controller']);

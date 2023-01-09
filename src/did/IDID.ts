@@ -50,7 +50,7 @@ export interface ISignedDIDDocument extends IDidProto {
 export interface IDID {
   generateKeys(params: { seed?: string }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }>;
 
-  generate(params: { methodSpecificId?: string, publicKeyMultibase: string }): Promise<object>;
+  generate(params: { methodSpecificId?: string; publicKeyMultibase: string }): Promise<object>;
 
   register(params: { didDocument: object; privateKeyMultibase: string; verificationMethodId: string }): Promise<object>;
 

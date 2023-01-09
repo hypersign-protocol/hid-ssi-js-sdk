@@ -210,12 +210,14 @@ var HypersignDID = /** @class */ (function () {
     };
     /**
      * Generates a new DID Document
-     * @params params.publicKeyMultibase - public key
+     * @params
+     *  - params.publicKeyMultibase : public key
+     *  - params.methodSpecificId   : Optional methodSpecificId (min 32 bit alhanumeric) else it will generate new random methodSpecificId
      * @returns {Promise<object>} DidDocument object
      */
     HypersignDID.prototype.generate = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var publicKeyMultibase1, methodSpecificId, did, newDid;
+            var publicKeyMultibase1, methodSpecificId, didId, newDid;
             return __generator(this, function (_a) {
                 if (!params.publicKeyMultibase) {
                     throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
@@ -224,8 +226,13 @@ var HypersignDID = /** @class */ (function () {
                     publicKey: params.publicKeyMultibase,
                 }).publicKeyMultibase;
                 methodSpecificId = publicKeyMultibase1;
-                did = this._getId(methodSpecificId);
-                newDid = new DIDDocument(publicKeyMultibase1, did);
+                if (params.methodSpecificId) {
+                    didId = this._getId(params.methodSpecificId);
+                }
+                else {
+                    didId = this._getId(methodSpecificId);
+                }
+                newDid = new DIDDocument(publicKeyMultibase1, didId);
                 return [2 /*return*/, utils_1.default.jsonToLdConvertor(__assign({}, newDid))];
             });
         });

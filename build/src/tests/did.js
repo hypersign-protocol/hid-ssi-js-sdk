@@ -140,6 +140,42 @@ describe('#generate() to generate did', function () {
             });
         });
     });
+    it('should be able to generate didDocument with custom id', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var methodSpecificId, didDocument, didDocId;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        methodSpecificId = 'e157620d69d003e12d935c37b8c21baa78d24898398829b39d943d253c006332';
+                        return [4 /*yield*/, hypersignDID.generate({ publicKeyMultibase: publicKeyMultibase, methodSpecificId: methodSpecificId })];
+                    case 1:
+                        didDocument = _a.sent();
+                        didDocId = didDocument['id'];
+                        (0, chai_1.expect)(didDocument).to.be.a('object');
+                        (0, chai_1.expect)(didDocId).to.be.equal('did:hid:testnet:' + methodSpecificId);
+                        (0, chai_1.should)().exist(didDocument['@context']);
+                        (0, chai_1.should)().exist(didDocument['id']);
+                        (0, chai_1.should)().exist(didDocument['controller']);
+                        (0, chai_1.should)().exist(didDocument['alsoKnownAs']);
+                        (0, chai_1.should)().exist(didDocument['verificationMethod']);
+                        (0, chai_1.expect)(didDocument['verificationMethod'] &&
+                            didDocument['authentication'] &&
+                            didDocument['assertionMethod'] &&
+                            didDocument['keyAgreement'] &&
+                            didDocument['capabilityInvocation'] &&
+                            didDocument['capabilityDelegation'] &&
+                            didDocument['service']).to.be.a('array');
+                        (0, chai_1.should)().exist(didDocument['authentication']);
+                        (0, chai_1.should)().exist(didDocument['assertionMethod']);
+                        (0, chai_1.should)().exist(didDocument['keyAgreement']);
+                        (0, chai_1.should)().exist(didDocument['capabilityInvocation']);
+                        (0, chai_1.should)().exist(didDocument['capabilityDelegation']);
+                        (0, chai_1.should)().exist(didDocument['service']);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
 });
 describe('#register() this is to register did on the blockchain', function () {
     it('should not able to register did document and throw error as didDocument is not passed or it is empty', function () {

@@ -141,12 +141,12 @@ export default class HypersignDID implements IDID {
 
   /**
    * Generates a new DID Document
-   * @params 
+   * @params
    *  - params.publicKeyMultibase : public key
    *  - params.methodSpecificId   : Optional methodSpecificId (min 32 bit alhanumeric) else it will generate new random methodSpecificId
    * @returns {Promise<object>} DidDocument object
    */
-  public async generate(params: {  methodSpecificId?: string, publicKeyMultibase: string }): Promise<object> {
+  public async generate(params: { methodSpecificId?: string; publicKeyMultibase: string }): Promise<object> {
     if (!params.publicKeyMultibase) {
       throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
     }
@@ -155,8 +155,8 @@ export default class HypersignDID implements IDID {
     });
 
     const methodSpecificId = publicKeyMultibase1;
-    let didId
-    if(params.methodSpecificId){
+    let didId;
+    if (params.methodSpecificId) {
       didId = this._getId(params.methodSpecificId);
     } else {
       didId = this._getId(methodSpecificId);
