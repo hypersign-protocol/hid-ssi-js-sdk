@@ -1,4 +1,9 @@
 "use strict";
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -203,39 +208,6 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             });
         });
     };
-    HypersignVerifiableCredential.prototype.checkCredentialStatus = function (credentialId) {
-        return __awaiter(this, void 0, void 0, function () {
-            var credentialStatus, claim, currentStatus, statusReason;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!credentialId) {
-                            throw new Error('CredentialId must be passed to check its status');
-                        }
-                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
-                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
-                        }
-                        return [4 /*yield*/, this.credStatusRPC.resolveCredentialStatus(credentialId)];
-                    case 1:
-                        credentialStatus = _a.sent();
-                        if (!credentialStatus) {
-                            throw new Error('Error while checking credential status of credentialID ' + credentialId);
-                        }
-                        claim = credentialStatus.claim;
-                        currentStatus = claim.currentStatus, statusReason = claim.statusReason;
-                        /// TODO:  probably we should also verify the credential HASH by recalculating the hash of the crdential and
-                        // matching with credentialHash property.
-                        // const { credentialHash } = credentialStatus;
-                        if (currentStatus != constants_1.VC.CRED_STATUS_TYPES.LIVE) {
-                            console.log('WARN: Credential status is  not LIVE, currentStatus ' + currentStatus);
-                            console.log('WARN: Status reason is ' + statusReason);
-                            return [2 /*return*/, { verified: false }];
-                        }
-                        return [2 /*return*/, { verified: true }];
-                }
-            });
-        });
-    };
     /**
      * Initialise the offlinesigner to interact with Hypersign blockchain
      */
@@ -261,8 +233,6 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             });
         });
     };
-    // encode a multibase base58-btc multicodec key
-    // TEST
     /**
      * Generates a new credential document
      * @params
@@ -417,11 +387,11 @@ var HypersignVerifiableCredential = /** @class */ (function () {
      *  - params.verificationMethodId   : Verifcation Method of Issuer
      *  - params.registerCredential     : If false, does not registers credentail status on Hypersign blockchain. Default is true.
      * @returns {Promise<{
-      signedCredential: IVerifiableCredential;
-      credentialStatus: CredentialStatus;
-      credentialStatusProof: CredentialProof;
-      credentialStatusRegistrationResult?: DeliverTxResponse;
-    }>}
+     * signedCredential: IVerifiableCredential;
+     * credentialStatus: CredentialStatus;
+     * credentialStatusProof: CredentialProof;
+     * credentialStatusRegistrationResult?: DeliverTxResponse;
+     * }>}
      */
     HypersignVerifiableCredential.prototype.issue = function (params) {
         return __awaiter(this, void 0, void 0, function () {
@@ -537,7 +507,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
      *  - params.credential             : Signed Hypersign credentail document of type IVerifiableCredential
      *  - params.issuerDid              : DID of the issuer
      *  - params.verificationMethodId   : Verifcation Method of Issuer
-     * @returns {Promise<{object}>}
+     * @returns {Promise<object>}
      */
     HypersignVerifiableCredential.prototype.verify = function (params) {
         return __awaiter(this, void 0, void 0, function () {
@@ -545,6 +515,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        console.log(params.credential.id);
                         if (!params.credential) {
                             throw new Error('HID-SSI-SDK:: params.credential is required to verify credential');
                         }
@@ -592,7 +563,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                                     return __awaiter(this, void 0, void 0, function () {
                                         return __generator(this, function (_a) {
                                             switch (_a.label) {
-                                                case 0: return [4 /*yield*/, that.checkCredentialStatus(options.credential.id)];
+                                                case 0: return [4 /*yield*/, that.checkCredentialStatus({ credentialId: options.credential.id })];
                                                 case 1: return [2 /*return*/, _a.sent()];
                                             }
                                         });
@@ -607,15 +578,10 @@ var HypersignVerifiableCredential = /** @class */ (function () {
         });
     };
     /**
-     *
-     * This method is used to resolve credential status from the Hypersign Identity Network
-     * @params {credentialId}
-     *
-     * @example
-     * const credentialStatus = await sdk.vc.resolveCredentialStatus({credentialId: 'vc:hid:testnet:Zlakfjkjs....'})
-     * console.log(credentialStatus)
-     *
-     * @returns CredentialStatus
+     * Resolves credential status from Hypersign Blokchain
+     * @params
+     *  - params.credentialId           : Verifiable credential id
+     * @returns {Promise<CredentialStatus>}
      */
     HypersignVerifiableCredential.prototype.resolveCredentialStatus = function (params) {
         return __awaiter(this, void 0, void 0, function () {
@@ -623,8 +589,9 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!params.credentialId)
-                            throw new Error('HID-SSI-SDK:: Error: credentialId is required to resolve credential status');
+                        console.log(params);
+                        if (!params || !params.credentialId)
+                            throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
                         if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
                             throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
                         }
@@ -636,6 +603,52 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Check credential status from Hypersign Blokchain
+     * @params
+     *  - params.credentialId           : Verifiable credential id
+     * @returns {Promise<{verified: boolean}>}
+     */
+    HypersignVerifiableCredential.prototype.checkCredentialStatus = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var credentialId, credentialStatus, claim, currentStatus, statusReason;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!params || !params.credentialId)
+                            throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
+                        credentialId = params.credentialId;
+                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
+                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
+                        }
+                        return [4 /*yield*/, this.credStatusRPC.resolveCredentialStatus(credentialId)];
+                    case 1:
+                        credentialStatus = _a.sent();
+                        if (!credentialStatus) {
+                            throw new Error('HID-SSI-SDK:: Error: while checking credential status of credentialID ' + credentialId);
+                        }
+                        claim = credentialStatus.claim;
+                        currentStatus = claim.currentStatus, statusReason = claim.statusReason;
+                        /// TODO:  probably we should also verify the credential HASH by recalculating the hash of the crdential and
+                        // matching with credentialHash property.
+                        // const { credentialHash } = credentialStatus;
+                        if (currentStatus != constants_1.VC.CRED_STATUS_TYPES.LIVE) {
+                            console.log('WARN: Credential status is  not LIVE, currentStatus ' + currentStatus);
+                            console.log('WARN: Status reason is ' + statusReason);
+                            return [2 /*return*/, { verified: false }];
+                        }
+                        return [2 /*return*/, { verified: true }];
+                }
+            });
+        });
+    };
+    /**
+     * Registers credential status in blockchain Hypersign Blokchain
+     * @params
+     *  - params.credentialStatus           : Status of the credential of type CredentialStatus
+     *  - params.credentialStatusProof      : Proof of the credential status of type credentialStatusProof
+     * @returns {Promise<DeliverTxResponse>}
+     */
     HypersignVerifiableCredential.prototype.registerCredentialStatus = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var credentialStatus, credentialStatusProof, resp;
@@ -659,6 +672,17 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             });
         });
     };
+    /**
+     * Update credential status in blockchain Hypersign Blokchain
+     * @params
+     *  - params.credentialStatus           : Status of the credential of type CredentialStatus
+     *  - params.issuerDid                  : DID of the issuer
+     *  - params.verificationMethodId       : verificationMethodId
+     *  - params.privateKeyMultibase        : privateKey of the issuer
+     *  - params.status                     : Status LIVE/REVOKE/SUSPENDED
+     *  - params.statusReason               : Reason for the status change
+     * @returns {Promise<DeliverTxResponse>}
+     */
     HypersignVerifiableCredential.prototype.updateCredentialStatus = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, claim, credentialStatus, proofValue, issuerDID, issuerDidDoc, issuerDidDocController, verificationMethodController, controllerDidDoc, didDocofController, issuerPublicKeyId, issuerPublicKeyVerMethod, proof, resp;
@@ -666,19 +690,19 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         if (!params.verificationMethodId) {
-                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required revoke credential');
+                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update credential status');
                         }
-                        if (!params.credStatus) {
-                            throw new Error('HID-SSI-SDK:: Error: params.credential is required to revoke credential');
+                        if (!params.credentialStatus) {
+                            throw new Error('HID-SSI-SDK:: Error: params.credentialStatus is required to update credential status');
                         }
-                        if (!params.privateKey) {
-                            throw new Error('HID-SSI-SDK:: Error: params.privateKey is required to revoke credential');
+                        if (!params.privateKeyMultibase) {
+                            throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to update credential status');
                         }
                         if (!params.issuerDid) {
-                            throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to revoke credential');
+                            throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to update credential status');
                         }
                         if (!params.status) {
-                            throw new Error('HID-SSI-SDK:: Error: params.status is required to revoke credential');
+                            throw new Error('HID-SSI-SDK:: Error: params.status is required to update credential status');
                         }
                         if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
                             throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
@@ -694,7 +718,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                             publicKey: publicKeyVerMethod.publicKeyMultibase,
                         });
                         publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
-                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: params.privateKey }, publicKeyVerMethod))];
+                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: params.privateKeyMultibase }, publicKeyVerMethod))];
                     case 2:
                         keyPair = _a.sent();
                         suite = new ed25519_signature_2020_1.Ed25519Signature2020({
@@ -705,25 +729,25 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         /// for that we will call RegisterCredentialStatus RPC
                         //  Let us generate credentialHash first
                         params.status = params.status.toUpperCase();
-                        claim = params.credStatus.claim;
+                        claim = params.credentialStatus.claim;
                         credentialStatus = {
                             claim: {
                                 id: claim.id,
                                 currentStatus: constants_1.VC.CRED_STATUS_TYPES[params.status],
                                 statusReason: params.statusReason ? params.statusReason : constants_1.VC.CRED_STATUS_REASON_TYPES[params.status],
                             },
-                            issuer: params.credStatus.issuer,
-                            issuanceDate: params.credStatus.issuanceDate,
-                            expirationDate: params.credStatus.expirationDate,
-                            credentialHash: params.credStatus.credentialHash,
+                            issuer: params.credentialStatus.issuer,
+                            issuanceDate: params.credentialStatus.issuanceDate,
+                            expirationDate: params.credentialStatus.expirationDate,
+                            credentialHash: params.credentialStatus.credentialHash,
                         };
                         return [4 /*yield*/, this._sign({
                                 message: JSON.stringify(credentialStatus),
-                                privateKeyMultibase: params.privateKey,
+                                privateKeyMultibase: params.privateKeyMultibase,
                             })];
                     case 3:
                         proofValue = _a.sent();
-                        return [4 /*yield*/, this.hsDid.resolve({ did: params.credStatus.issuer })];
+                        return [4 /*yield*/, this.hsDid.resolve({ did: params.credentialStatus.issuer })];
                     case 4:
                         issuerDID = (_a.sent()).didDocument;
                         issuerDidDoc = issuerDID;
@@ -742,7 +766,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         issuerPublicKeyVerMethod = didDocofController.verificationMethod.find(function (x) { return x.id == issuerPublicKeyId; });
                         proof = {
                             type: constants_1.VC.VERIFICATION_METHOD_TYPE,
-                            created: params.credStatus.issuanceDate,
+                            created: params.credentialStatus.issuanceDate,
                             updated: this._dateNow(),
                             verificationMethod: issuerPublicKeyVerMethod.id,
                             proofValue: proofValue,

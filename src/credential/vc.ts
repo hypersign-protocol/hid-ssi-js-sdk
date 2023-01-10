@@ -187,8 +187,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return context;
   };
 
-  
-
   /**
    * Initialise the offlinesigner to interact with Hypersign blockchain
    */
@@ -527,7 +525,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     issuerDid: string;
     verificationMethodId: string;
   }): Promise<object> {
-    console.log(params.credential.id)
+    console.log(params.credential.id);
     if (!params.credential) {
       throw new Error('HID-SSI-SDK:: params.credential is required to verify credential');
     }
@@ -590,7 +588,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       suite,
       documentLoader,
       checkStatus: async function (options) {
-        return await that.checkCredentialStatus({credentialId: options.credential.id});
+        return await that.checkCredentialStatus({ credentialId: options.credential.id });
       },
     });
 
@@ -604,7 +602,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
    * @returns {Promise<CredentialStatus>}
    */
   public async resolveCredentialStatus(params: { credentialId: string }): Promise<CredentialStatus> {
-    console.log(params)
+    console.log(params);
     if (!params || !params.credentialId)
       throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
 
@@ -623,10 +621,10 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
    *  - params.credentialId           : Verifiable credential id
    * @returns {Promise<{verified: boolean}>}
    */
-  public async checkCredentialStatus(params: {credentialId: string}): Promise<{ verified: boolean }> {
+  public async checkCredentialStatus(params: { credentialId: string }): Promise<{ verified: boolean }> {
     if (!params || !params.credentialId)
-    throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
-    
+      throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
+
     const { credentialId } = params;
     if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
       throw new Error(

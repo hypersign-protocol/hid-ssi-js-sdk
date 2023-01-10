@@ -4,7 +4,6 @@
  * Author: Hypermine Core Team
  */
 
-
 import { CredentialStatus, CredentialProof, Credential } from '../generated/ssi/credential';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 
@@ -81,7 +80,7 @@ export interface ICredentialMethods {
     status: string;
     statusReason?: string;
   }): Promise<DeliverTxResponse>;
-  
+
   registerCredentialStatus(params: {
     credentialStatus: CredentialStatus;
     credentialStatusProof: CredentialProof;
@@ -89,7 +88,7 @@ export interface ICredentialMethods {
 
   resolveCredentialStatus(params: { credentialId: string }): Promise<CredentialStatus>;
 
-  checkCredentialStatus(params: { credentialId: string}): Promise<{ verified: boolean }>;
+  checkCredentialStatus(params: { credentialId: string }): Promise<{ verified: boolean }>;
 }
 
 export interface ICredentialRPC {
