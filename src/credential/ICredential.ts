@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+
+
 import { CredentialStatus, CredentialProof, Credential } from '../generated/ssi/credential';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 
@@ -66,7 +73,23 @@ export interface ICredentialMethods {
     verificationMethodId: string;
   }): Promise<object>;
 
-  checkCredentialStatus(credentialId: string): Promise<{ verified: boolean }>;
+  updateCredentialStatus(params: {
+    credentialStatus: CredentialStatus;
+    issuerDid: string;
+    verificationMethodId: string; // vermethod of issuer for assestion
+    privateKeyMultibase: string;
+    status: string;
+    statusReason?: string;
+  }): Promise<DeliverTxResponse>;
+  
+  registerCredentialStatus(params: {
+    credentialStatus: CredentialStatus;
+    credentialStatusProof: CredentialProof;
+  }): Promise<DeliverTxResponse>;
+
+  resolveCredentialStatus(params: { credentialId: string }): Promise<CredentialStatus>;
+
+  checkCredentialStatus(params: { credentialId: string}): Promise<{ verified: boolean }>;
 }
 
 export interface ICredentialRPC {

@@ -261,7 +261,7 @@ const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);    co
 }
 ```
 
-## `verify()`
+### `verify()`
 
 Verfies signed/issued credential
 
@@ -286,8 +286,6 @@ const params = {
 const verificationResult = await hypersignVC.verify(params);
 ```
 **Output**
-
-
 
 ```json
 {
@@ -329,6 +327,151 @@ const verificationResult = await hypersignVC.verify(params);
 }
 ```
 
+## Credential Status Operations
+
+### `checkCredentialStatus()`
+
+Checks status of the credential from Hypersign Blokchain
+
+**API Definition**
+
+```js
+checkCredentialStatus(params: { credentialId }): Promise<{verified: boolean}>;
+
+```
+
+**Usage**
+
+```js
+const verificationResult = await hypersignVC.verify({credentialId});
+```
+**Output**
+
+
+```js
+{
+  "verified": true
+}
+```
+
+### `resolveCredentialStatus()`
+
+Resolves credential status from Hypersign Blokchain
+
+**API Definition**
+
+```js
+resolveCredentialStatus(params: { credentialId }): Promise<CredentialStatus>;
+
+```
+
+**Usage**
+
+```js
+const verificationResult = await hypersignVC.verify({ credentialId });
+```
+**Output**
+
+
+```js
+{
+  "claim": {
+    "id": "vc:hid:testnet:zAkr6Ct7WKv2gtnJnNSbfRGAURXPVtepQpC8L6zDYbswb",
+    "currentStatus": "Live",
+    "statusReason": "Credential is active"
+  },
+  "issuer": "did:hid:testnet:z6ghGJCnWz4VRK6DgPQYWkcMiaGeEDoxF2EQCjSvQbejG",
+  "issuanceDate": "2023-01-10T16:28:01Z",
+  "expirationDate": "2027-12-10T18:30:00Z",
+  "credentialHash": "82b797d50e3593c167e46ef2081b36648706c23ddcfe534eb28c0a7120f2d692",
+  "proof": {
+    "type": "Ed25519Signature2020",
+    "created": "2023-01-10T16:28:05Z",
+    "updated": "2023-01-10T16:28:05Z",
+    "verificationMethod": "did:hid:testnet:z6ghGJCnWz4VRK6DgPQYWkcMiaGeEDoxF2EQCjSvQbejG#key-1",
+    "proofPurpose": "assertion",
+    "proofValue": "XOxpztZxRSzWdyQVF8G3wEK3JKENkDPLV8Rsbv1IYvCfDmI7Icjq0yRAakcxBPGNKmjdCoR0uAKCc2f7eRxeAA=="
+  }
+}
+```
+
+
+
+### `updateCredentialStatus()`
+
+Updates credential status into Hypersign Blokchain
+
+**API Definition**
+
+```js
+updateCredentialStatus(params: {
+    credentialStatus: CredentialStatus;
+    issuerDid: string;
+    verificationMethodId: string; // vermethod of issuer for assestion
+    privateKeyMultibase: string;
+    status: string;
+    statusReason?: string;
+  }): Promise<DeliverTxResponse>
+```
+
+**Usage**
+
+```js
+
+const params = {
+      credentialStatus,
+      issuerDid: didDocId,
+      verificationMethodId,
+      privateKeyMultibase,
+      status: 'SUSPENDED', 
+      statusReason: 'Suspending this credential for some time',
+};
+const updatedCredResult = await hypersignVC.updateCredentialStatus(params);
+```
+Supported status: `LIVE`, `SUSPENDED`, `REVOKED`. Please read the [doc]() for more details about status.
+
+**Output**
+
+
+```js
+{
+  code: 0,
+  height: 1501029,
+  rawLog: '[{"events":[{"type":"message","attributes":[{"key":"action","value":"/hypersignprotocol.hidnode.ssi.MsgRegisterCredentialStatus"}]}]}]',
+  transactionHash: '462CAC8DBA88276975B67D1A7DC1AD9895290FB8D307E5371DAE1F02F8F75676',
+  gasUsed: 96250,
+  gasWanted: 111176
+}
+```
+
+### `registerCredentialStatus()`
+
+Registers credential status in blockchain Hypersign Blokchain
+
+**API Definition**
+
+```js
+registerCredentialStatus(params: {
+    credentialStatus: CredentialStatus;
+    credentialStatusProof: CredentialProof;
+  }): Promise<DeliverTxResponse>
+```
+
+**Usage**
+
+
+```js
+const registerCredDetail = await hypersignVC.registerCredentialStatus({
+        credentialStatus,
+        credentialStatusProof
+      });
+```
+
+**Output**
+
+```js
+
+```
 ## Security Concerns
 
 // TODO

@@ -1,3 +1,9 @@
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+
 import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH } from '../constants';
 import * as generatedProto from '../generated/ssi/tx';
 import { SigningStargateClient, DeliverTxResponse } from '@cosmjs/stargate';
