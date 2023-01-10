@@ -314,7 +314,7 @@ describe('#getCredential() method to generate a credential', function () {
     tempCredentialBody.fields = { name: 'varsha' };
 
     credentialDetail = await hypersignVC.generate(tempCredentialBody);
-    console.log('New Credential --------------------------------')
+    console.log('New Credential --------------------------------');
     console.log(JSON.stringify(credentialDetail, null, 2));
 
     expect(credentialDetail).to.be.a('object');
@@ -421,8 +421,8 @@ describe('#issueCredential() method for issuing credential', function () {
 
     signedVC = signedCredential;
 
-    console.log('Signed Credential --------------------------------')
-    console.log(JSON.stringify(signedVC, null, 2))
+    console.log('Signed Credential --------------------------------');
+    console.log(JSON.stringify(signedVC, null, 2));
 
     credentialStatusId = signedCredential['credentialStatus'].id;
 
@@ -438,10 +438,10 @@ describe('#issueCredential() method for issuing credential', function () {
     should().exist(signedCredential['credentialStatus']);
     should().exist(signedCredential['proof']);
     console.log({
-      signedCredentialId : signedCredential['id'], 
+      signedCredentialId: signedCredential['id'],
       credentialId,
-      id: tempIssueCredentialBody.credential.id
-    })
+      id: tempIssueCredentialBody.credential.id,
+    });
     expect(signedCredential['id']).to.be.equal(tempIssueCredentialBody.credential.id);
 
     expect(credentialStatus).to.be.a('object');
@@ -493,11 +493,11 @@ describe('#verifyCredential() method to verify a credential', function () {
       verificationMethodId,
     };
 
-    console.log('Signed vc --------------------------------')
-    console.log(JSON.stringify(params.credential, null, 2))
+    console.log('Signed vc --------------------------------');
+    console.log(JSON.stringify(params.credential, null, 2));
     const verificationResult = await hypersignVC.verify(params);
-    console.log('Credential Verifification result --------------------------------')
-    console.log(JSON.stringify(verificationResult, null, 2))
+    console.log('Credential Verifification result --------------------------------');
+    console.log(JSON.stringify(verificationResult, null, 2));
     expect(verificationResult).to.be.a('object');
     should().exist(verificationResult.verified);
     expect(verificationResult.verified).to.be.equal(true);
@@ -520,7 +520,7 @@ describe('#verifyCredential() method to verify a credential', function () {
       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to verify credential');
     });
   });
-  
+
   it('should not be able to verify credential as issuerDid is null or empty', async function () {
     const params = {
       credential: signedVC,
@@ -534,8 +534,6 @@ describe('#verifyCredential() method to verify a credential', function () {
       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
     });
   });
-
-  
 
   it('should not be able to verify credential as proof is null or undefined', async function () {
     const params = {
@@ -564,7 +562,6 @@ describe('#verifyCredential() method to verify a credential', function () {
       }).to.throw(Error, 'HID-SSI-SDK:: params.credential is required to verify credential');
     });
   });
-  
 });
 
 // describe('#checkCredentialStatus() method to check status of the credential', function () {

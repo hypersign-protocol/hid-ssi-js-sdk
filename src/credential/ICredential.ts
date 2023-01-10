@@ -60,10 +60,10 @@ export interface ICredentialMethods {
     credentialStatusRegistrationResult?: DeliverTxResponse;
   }>;
 
-  verify(params: { 
-    credential: IVerifiableCredential; 
+  verify(params: {
+    credential: IVerifiableCredential;
     issuerDid: string;
-    verificationMethodId: string; 
+    verificationMethodId: string;
   }): Promise<object>;
 
   checkCredentialStatus(credentialId: string): Promise<{ verified: boolean }>;

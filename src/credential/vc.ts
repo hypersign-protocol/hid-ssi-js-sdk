@@ -17,7 +17,6 @@ import { DeliverTxResponse } from '@cosmjs/stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import crypto from 'crypto';
 
-
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
   public context: Array<string>;
   public id: string;
@@ -459,7 +458,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const suite = new Ed25519Signature2020({
       verificationMethod: publicKeyId,
-      key: keyPair
+      key: keyPair,
     });
 
     /// Before we issue the credential the credential status has to be added
@@ -516,7 +515,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     const signedVC = await vc.issue({
       credential: params.credential,
       suite,
-      documentLoader
+      documentLoader,
     });
 
     let credentialStatusRegistrationResult: DeliverTxResponse;
@@ -540,8 +539,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return { signedCredential: signedVC, credentialStatus, credentialStatusProof: proof };
   }
 
- // Ref: https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
- /**
+  // Ref: https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
+  /**
    * Verfies signed/issued credential
    * @params
    *  - params.credential             : Signed Hypersign credentail document of type IVerifiableCredential
@@ -558,7 +557,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       throw new Error('HID-SSI-SDK:: params.credential is required to verify credential');
     }
 
-    if(!params.credential.proof) {
+    if (!params.credential.proof) {
       throw new Error('HID-SSI-SDK:: params.credential.proof is required to verify credential');
     }
 
@@ -622,7 +621,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     return result;
   }
-
 
   /**
    *
@@ -823,8 +821,4 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return resp;
   }
   // TODO:  Implement a method to update credential status of a doc.
-
-  
-
-  
 }

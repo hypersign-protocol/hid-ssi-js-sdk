@@ -70,6 +70,7 @@ var hypersignSchema;
 var hypersignVC;
 var signedSchema;
 var credentialStatusId;
+var signedVC;
 var credentialStatusProof = {};
 var credentialStatus2 = {};
 var credentialStatus;
@@ -460,11 +461,11 @@ describe('#getCredential() method to generate a credential', function () {
                         tempCredentialBody['expirationDate'] = expirationDate;
                         tempCredentialBody.issuerDid = didDocId;
                         tempCredentialBody.fields = { name: 'varsha' };
-                        console.log(tempCredentialBody);
                         return [4 /*yield*/, hypersignVC.generate(tempCredentialBody)];
                     case 1:
                         credentialDetail = _a.sent();
-                        console.log(JSON.stringify(credentialDetail));
+                        console.log('New Credential --------------------------------');
+                        console.log(JSON.stringify(credentialDetail, null, 2));
                         (0, chai_1.expect)(credentialDetail).to.be.a('object');
                         (0, chai_1.should)().exist(credentialDetail['@context']);
                         (0, chai_1.should)().exist(credentialDetail['id']);
@@ -484,7 +485,7 @@ describe('#getCredential() method to generate a credential', function () {
     });
     it('should be able to generate new credential for a schema with signed subject DID doc', function () {
         return __awaiter(this, void 0, void 0, function () {
-            var expirationDate, tempCredentialBody;
+            var expirationDate, tempCredentialBody, credentialDetail;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -497,7 +498,6 @@ describe('#getCredential() method to generate a credential', function () {
                         tempCredentialBody.fields = { name: 'varsha' };
                         return [4 /*yield*/, hypersignVC.generate(tempCredentialBody)];
                     case 1:
-                        // console.log(tempCredentialBody)
                         credentialDetail = _a.sent();
                         // console.log(JSON.stringify(credentialDetail));
                         (0, chai_1.expect)(credentialDetail).to.be.a('object');
@@ -575,7 +575,7 @@ describe('#issueCredential() method for issuing credential', function () {
                         return [4 /*yield*/, hypersignVC.issue(tempIssueCredentialBody).catch(function (err) {
                                 (0, chai_1.expect)(function () {
                                     throw err;
-                                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKey is required to issue credential');
+                                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKeyMultibase is required to issue credential');
                             })];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
@@ -618,6 +618,9 @@ describe('#issueCredential() method for issuing credential', function () {
                     case 1:
                         issuedCredResult = _a.sent();
                         signedCredential = issuedCredResult.signedCredential, credentialStatus = issuedCredResult.credentialStatus, credentialStatusProof = issuedCredResult.credentialStatusProof, credentialStatusRegistrationResult = issuedCredResult.credentialStatusRegistrationResult;
+                        signedVC = signedCredential;
+                        console.log('Signed Credential --------------------------------');
+                        console.log(JSON.stringify(signedVC, null, 2));
                         credentialStatusId = signedCredential['credentialStatus'].id;
                         (0, chai_1.expect)(signedCredential).to.be.a('object');
                         (0, chai_1.should)().exist(signedCredential['@context']);
@@ -630,7 +633,12 @@ describe('#issueCredential() method for issuing credential', function () {
                         (0, chai_1.should)().exist(signedCredential['credentialSchema']);
                         (0, chai_1.should)().exist(signedCredential['credentialStatus']);
                         (0, chai_1.should)().exist(signedCredential['proof']);
-                        (0, chai_1.expect)(signedCredential['id']).to.be.equal(credentialId);
+                        console.log({
+                            signedCredentialId: signedCredential['id'],
+                            credentialId: credentialId,
+                            id: tempIssueCredentialBody.credential.id,
+                        });
+                        (0, chai_1.expect)(signedCredential['id']).to.be.equal(tempIssueCredentialBody.credential.id);
                         (0, chai_1.expect)(credentialStatus).to.be.a('object');
                         (0, chai_1.should)().exist(credentialStatus['claim']);
                         (0, chai_1.should)().exist(credentialStatus['issuer']);
@@ -680,62 +688,110 @@ describe('#issueCredential() method for issuing credential', function () {
         });
     });
 });
-// describe('#verifyCredential() method to verify a credential', function () {
-//   it('should not be able to verify credential as verificationMethodId is null or empty', async function () {
-//     const params = {
-//       credential: credentialDetail,
-//       issuerDid: didDocId,
-//       verificationMethodId,
-//     };
-//     params.verificationMethodId = '';
-//     return hsSdk.vc.verifyCredential(params).catch(function (err) {
-//       expect(function () {
-//         throw err;
-//       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to verify credential');
-//     });
-//   });
-//   it('should not be able to verify credential as credential is null or undefined', async function () {
-//     const params = {
-//       credential: credentialDetail,
-//       issuerDid: didDocId,
-//       verificationMethodId,
-//     };
-//     params.credential = undefined;
-//     return hsSdk.vc.verifyCredential(params).catch(function (err) {
-//       expect(function () {
-//         throw err;
-//       }).to.throw(Error, 'HID-SSI-SDK:: Credential is required to verify credential');
-//     });
-//   });
-//   it('should not be able to verify credential as credential is null or empty', async function () {
-//     const params = {
-//       credential: credentialDetail,
-//       issuerDid: didDocId,
-//       verificationMethodId,
-//     };
-//     params.issuerDid = '';
-//     return hsSdk.vc.verifyCredential(params).catch(function (err) {
-//       expect(function () {
-//         throw err;
-//       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
-//     });
-//   });
-//   it('should be able to verify credential', async function () {
-//     const params = {
-//       credential: credentialDetail,
-//       issuerDid: didDocId,
-//       verificationMethodId,
-//     };
-//     const verificationResult = await hsSdk.vc.verifyCredential(params);
-//     expect(verificationResult).to.be.a('object');
-//     should().exist(verificationResult.verified);
-//     expect(verificationResult.verified).to.be.equal(true);
-//     should().exist(verificationResult.results);
-//     expect(verificationResult.results).to.be.a('array');
-//     should().exist(verificationResult.statusResult);
-//     expect(verificationResult.statusResult.verified).to.be.equal(true);
-//   });
-// });
+describe('#verifyCredential() method to verify a credential', function () {
+    it('should be able to verify credential', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var params, verificationResult;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        params = {
+                            credential: signedVC,
+                            issuerDid: didDocId,
+                            verificationMethodId: verificationMethodId,
+                        };
+                        console.log('Signed vc --------------------------------');
+                        console.log(JSON.stringify(params.credential, null, 2));
+                        return [4 /*yield*/, hypersignVC.verify(params)];
+                    case 1:
+                        verificationResult = _a.sent();
+                        console.log('Credential Verifification result --------------------------------');
+                        console.log(JSON.stringify(verificationResult, null, 2));
+                        (0, chai_1.expect)(verificationResult).to.be.a('object');
+                        (0, chai_1.should)().exist(verificationResult.verified);
+                        (0, chai_1.expect)(verificationResult.verified).to.be.equal(true);
+                        (0, chai_1.should)().exist(verificationResult.results);
+                        (0, chai_1.expect)(verificationResult.results).to.be.a('array');
+                        (0, chai_1.should)().exist(verificationResult.statusResult);
+                        (0, chai_1.expect)(verificationResult.statusResult.verified).to.be.equal(true);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+    it('should not be able to verify credential as verificationMethodId is null or empty', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var params;
+            return __generator(this, function (_a) {
+                params = {
+                    credential: signedVC,
+                    issuerDid: didDocId,
+                    verificationMethodId: verificationMethodId,
+                };
+                params.verificationMethodId = '';
+                return [2 /*return*/, hypersignVC.verify(params).catch(function (err) {
+                        (0, chai_1.expect)(function () {
+                            throw err;
+                        }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to verify credential');
+                    })];
+            });
+        });
+    });
+    it('should not be able to verify credential as issuerDid is null or empty', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var params;
+            return __generator(this, function (_a) {
+                params = {
+                    credential: signedVC,
+                    issuerDid: didDocId,
+                    verificationMethodId: verificationMethodId,
+                };
+                params.issuerDid = '';
+                return [2 /*return*/, hypersignVC.verify(params).catch(function (err) {
+                        (0, chai_1.expect)(function () {
+                            throw err;
+                        }).to.throw(Error, 'HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
+                    })];
+            });
+        });
+    });
+    it('should not be able to verify credential as proof is null or undefined', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var params;
+            return __generator(this, function (_a) {
+                params = {
+                    credential: signedVC,
+                    issuerDid: didDocId,
+                    verificationMethodId: verificationMethodId,
+                };
+                params.credential.proof = undefined;
+                return [2 /*return*/, hypersignVC.verify(params).catch(function (err) {
+                        (0, chai_1.expect)(function () {
+                            throw err;
+                        }).to.throw(Error, 'HID-SSI-SDK:: params.credential.proof is required to verify credential');
+                    })];
+            });
+        });
+    });
+    it('should not be able to verify credential as credential is null or undefined', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var params;
+            return __generator(this, function (_a) {
+                params = {
+                    credential: signedVC,
+                    issuerDid: didDocId,
+                    verificationMethodId: verificationMethodId,
+                };
+                params.credential = undefined;
+                return [2 /*return*/, hypersignVC.verify(params).catch(function (err) {
+                        (0, chai_1.expect)(function () {
+                            throw err;
+                        }).to.throw(Error, 'HID-SSI-SDK:: params.credential is required to verify credential');
+                    })];
+            });
+        });
+    });
+});
 // describe('#checkCredentialStatus() method to check status of the credential', function () {
 //   it('should not be able to check credential as credentialId is null or empty', async function () {
 //     return hsSdk.vc.checkCredentialStatus().catch(function (err) {

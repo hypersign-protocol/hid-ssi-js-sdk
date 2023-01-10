@@ -530,6 +530,112 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             });
         });
     };
+    // Ref: https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
+    /**
+     * Verfies signed/issued credential
+     * @params
+     *  - params.credential             : Signed Hypersign credentail document of type IVerifiableCredential
+     *  - params.issuerDid              : DID of the issuer
+     *  - params.verificationMethodId   : Verifcation Method of Issuer
+     * @returns {Promise<{object}>}
+     */
+    HypersignVerifiableCredential.prototype.verify = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var issuerDID, issuerDidDoc, publicKeyId, publicKeyVerMethod, publicKeyMultibase, assertionController, keyPair, suite, that, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!params.credential) {
+                            throw new Error('HID-SSI-SDK:: params.credential is required to verify credential');
+                        }
+                        if (!params.credential.proof) {
+                            throw new Error('HID-SSI-SDK:: params.credential.proof is required to verify credential');
+                        }
+                        if (!params.verificationMethodId) {
+                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify credential');
+                        }
+                        if (!params.issuerDid) {
+                            throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
+                        }
+                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
+                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
+                        }
+                        return [4 /*yield*/, this.hsDid.resolve({ did: params.issuerDid })];
+                    case 1:
+                        issuerDID = (_a.sent()).didDocument;
+                        issuerDidDoc = issuerDID;
+                        publicKeyId = params.verificationMethodId;
+                        publicKeyVerMethod = issuerDidDoc.verificationMethod.find(function (x) { return x.id == publicKeyId; });
+                        publicKeyMultibase = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
+                            publicKey: publicKeyVerMethod.publicKeyMultibase,
+                        }).publicKeyMultibase;
+                        publicKeyVerMethod.publicKeyMultibase = publicKeyMultibase;
+                        assertionController = {
+                            '@context': constants_1.DID.CONTROLLER_CONTEXT,
+                            id: issuerDidDoc.id,
+                            assertionMethod: issuerDidDoc.assertionMethod,
+                        };
+                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: '' }, publicKeyVerMethod))];
+                    case 2:
+                        keyPair = _a.sent();
+                        suite = new ed25519_signature_2020_1.Ed25519Signature2020({
+                            verificationMethod: publicKeyId,
+                            key: keyPair,
+                        });
+                        that = this;
+                        return [4 /*yield*/, vc_js_1.default.verifyCredential({
+                                credential: params.credential,
+                                controller: assertionController,
+                                suite: suite,
+                                documentLoader: jsonld_1.documentLoader,
+                                checkStatus: function (options) {
+                                    return __awaiter(this, void 0, void 0, function () {
+                                        return __generator(this, function (_a) {
+                                            switch (_a.label) {
+                                                case 0: return [4 /*yield*/, that.checkCredentialStatus(options.credential.id)];
+                                                case 1: return [2 /*return*/, _a.sent()];
+                                            }
+                                        });
+                                    });
+                                },
+                            })];
+                    case 3:
+                        result = _a.sent();
+                        return [2 /*return*/, result];
+                }
+            });
+        });
+    };
+    /**
+     *
+     * This method is used to resolve credential status from the Hypersign Identity Network
+     * @params {credentialId}
+     *
+     * @example
+     * const credentialStatus = await sdk.vc.resolveCredentialStatus({credentialId: 'vc:hid:testnet:Zlakfjkjs....'})
+     * console.log(credentialStatus)
+     *
+     * @returns CredentialStatus
+     */
+    HypersignVerifiableCredential.prototype.resolveCredentialStatus = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var credentialStatus;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!params.credentialId)
+                            throw new Error('HID-SSI-SDK:: Error: credentialId is required to resolve credential status');
+                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
+                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
+                        }
+                        return [4 /*yield*/, this.credStatusRPC.resolveCredentialStatus(params.credentialId)];
+                    case 1:
+                        credentialStatus = _a.sent();
+                        return [2 /*return*/, credentialStatus];
+                }
+            });
+        });
+    };
     HypersignVerifiableCredential.prototype.registerCredentialStatus = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var credentialStatus, credentialStatusProof, resp;
@@ -690,101 +796,6 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                             throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
                         }
                         return [2 /*return*/, resp];
-                }
-            });
-        });
-    };
-    // TODO:  Implement a method to update credential status of a doc.
-    /**
-     *
-     * This method is used to resolve credential status from the Hypersign Identity Network
-     * @params {credentialId}
-     *
-     * @example
-     * const credentialStatus = await sdk.vc.resolveCredentialStatus({credentialId: 'vc:hid:testnet:Zlakfjkjs....'})
-     * console.log(credentialStatus)
-     *
-     * @returns CredentialStatus
-     */
-    HypersignVerifiableCredential.prototype.resolveCredentialStatus = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var credentialStatus;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!params.credentialId)
-                            throw new Error('HID-SSI-SDK:: Error: credentialId is required to resolve credential status');
-                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
-                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
-                        }
-                        return [4 /*yield*/, this.credStatusRPC.resolveCredentialStatus(params.credentialId)];
-                    case 1:
-                        credentialStatus = _a.sent();
-                        return [2 /*return*/, credentialStatus];
-                }
-            });
-        });
-    };
-    //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
-    HypersignVerifiableCredential.prototype.verifyCredential = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var issuerDID, issuerDidDoc, publicKeyId, publicKeyVerMethod, publicKeyMultibase, assertionController, keyPair, suite, that, result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!params.credential)
-                            throw new Error('HID-SSI-SDK:: Credential is required to verify credential');
-                        if (!params.verificationMethodId) {
-                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify credential');
-                        }
-                        if (!params.issuerDid) {
-                            throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
-                        }
-                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
-                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
-                        }
-                        return [4 /*yield*/, this.hsDid.resolve({ did: params.issuerDid })];
-                    case 1:
-                        issuerDID = (_a.sent()).didDocument;
-                        issuerDidDoc = issuerDID;
-                        publicKeyId = params.verificationMethodId;
-                        publicKeyVerMethod = issuerDidDoc.verificationMethod.find(function (x) { return x.id == publicKeyId; });
-                        publicKeyMultibase = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
-                            publicKey: publicKeyVerMethod.publicKeyMultibase,
-                        }).publicKeyMultibase;
-                        publicKeyVerMethod.publicKeyMultibase = publicKeyMultibase;
-                        assertionController = {
-                            '@context': constants_1.DID.CONTROLLER_CONTEXT,
-                            id: issuerDidDoc.id,
-                            assertionMethod: issuerDidDoc.assertionMethod,
-                        };
-                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: '' }, publicKeyVerMethod))];
-                    case 2:
-                        keyPair = _a.sent();
-                        suite = new ed25519_signature_2020_1.Ed25519Signature2020({
-                            verificationMethod: publicKeyId,
-                            key: keyPair,
-                        });
-                        that = this;
-                        return [4 /*yield*/, vc_js_1.default.verifyCredential({
-                                credential: params.credential,
-                                controller: assertionController,
-                                suite: suite,
-                                documentLoader: jsonld_1.documentLoader,
-                                checkStatus: function (options) {
-                                    return __awaiter(this, void 0, void 0, function () {
-                                        return __generator(this, function (_a) {
-                                            switch (_a.label) {
-                                                case 0: return [4 /*yield*/, that.checkCredentialStatus(options.credential.id)];
-                                                case 1: return [2 /*return*/, _a.sent()];
-                                            }
-                                        });
-                                    });
-                                },
-                            })];
-                    case 3:
-                        result = _a.sent();
-                        return [2 /*return*/, result];
                 }
             });
         });
