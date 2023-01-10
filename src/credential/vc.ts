@@ -15,8 +15,8 @@ import { VC, DID } from '../constants';
 import { CredentialStatus, CredentialProof, Credential, Claim } from '../generated/ssi/credential';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
-
 import crypto from 'crypto';
+
 
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
   public context: Array<string>;
@@ -459,7 +459,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const suite = new Ed25519Signature2020({
       verificationMethod: publicKeyId,
-      key: keyPair,
+      key: keyPair
     });
 
     /// Before we issue the credential the credential status has to be added
@@ -516,7 +516,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     const signedVC = await vc.issue({
       credential: params.credential,
       suite,
-      documentLoader,
+      documentLoader
     });
 
     let credentialStatusRegistrationResult: DeliverTxResponse;
@@ -538,6 +538,115 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     }
 
     return { signedCredential: signedVC, credentialStatus, credentialStatusProof: proof };
+  }
+
+ // Ref: https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
+ /**
+   * Verfies signed/issued credential
+   * @params
+   *  - params.credential             : Signed Hypersign credentail document of type IVerifiableCredential
+   *  - params.issuerDid              : DID of the issuer
+   *  - params.verificationMethodId   : Verifcation Method of Issuer
+   * @returns {Promise<{object}>}
+   */
+  public async verify(params: {
+    credential: IVerifiableCredential;
+    issuerDid: string;
+    verificationMethodId: string;
+  }): Promise<object> {
+    if (!params.credential) {
+      throw new Error('HID-SSI-SDK:: params.credential is required to verify credential');
+    }
+
+    if(!params.credential.proof) {
+      throw new Error('HID-SSI-SDK:: params.credential.proof is required to verify credential');
+    }
+
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify credential');
+    }
+
+    if (!params.issuerDid) {
+      throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
+    }
+
+    if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+
+    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.issuerDid });
+    const issuerDidDoc: Did = issuerDID as Did;
+    const publicKeyId = params.verificationMethodId;
+    const publicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+      (x) => x.id == publicKeyId
+    ) as VerificationMethod;
+
+    // TODO: Get rid of this hack later.
+    // Convert 45 byte publick key into 48
+    const { publicKeyMultibase } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
+      publicKey: publicKeyVerMethod.publicKeyMultibase,
+    });
+
+    publicKeyVerMethod.publicKeyMultibase = publicKeyMultibase;
+
+    const assertionController = {
+      '@context': DID.CONTROLLER_CONTEXT,
+      id: issuerDidDoc.id,
+      assertionMethod: issuerDidDoc.assertionMethod,
+    };
+
+    const keyPair = await Ed25519VerificationKey2020.from({
+      privateKeyMultibase: '',
+      ...publicKeyVerMethod,
+    });
+
+    const suite = new Ed25519Signature2020({
+      verificationMethod: publicKeyId,
+      key: keyPair,
+    });
+
+    /* eslint-disable */
+    const that = this;
+    /* eslint-enable */
+    const result = await vc.verifyCredential({
+      credential: params.credential,
+      controller: assertionController,
+      suite,
+      documentLoader,
+      checkStatus: async function (options) {
+        return await that.checkCredentialStatus(options.credential.id);
+      },
+    });
+
+    return result;
+  }
+
+
+  /**
+   *
+   * This method is used to resolve credential status from the Hypersign Identity Network
+   * @params {credentialId}
+   *
+   * @example
+   * const credentialStatus = await sdk.vc.resolveCredentialStatus({credentialId: 'vc:hid:testnet:Zlakfjkjs....'})
+   * console.log(credentialStatus)
+   *
+   * @returns CredentialStatus
+   */
+
+  public async resolveCredentialStatus(params: { credentialId }): Promise<CredentialStatus> {
+    if (!params.credentialId)
+      throw new Error('HID-SSI-SDK:: Error: credentialId is required to resolve credential status');
+
+    if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+    const credentialStatus: CredentialStatus = await this.credStatusRPC.resolveCredentialStatus(params.credentialId);
+    return credentialStatus;
   }
 
   public async registerCredentialStatus(params: {
@@ -715,96 +824,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   }
   // TODO:  Implement a method to update credential status of a doc.
 
-  /**
-   *
-   * This method is used to resolve credential status from the Hypersign Identity Network
-   * @params {credentialId}
-   *
-   * @example
-   * const credentialStatus = await sdk.vc.resolveCredentialStatus({credentialId: 'vc:hid:testnet:Zlakfjkjs....'})
-   * console.log(credentialStatus)
-   *
-   * @returns CredentialStatus
-   */
+  
 
-  public async resolveCredentialStatus(params: { credentialId }): Promise<CredentialStatus> {
-    if (!params.credentialId)
-      throw new Error('HID-SSI-SDK:: Error: credentialId is required to resolve credential status');
-
-    if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
-      throw new Error(
-        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
-      );
-    }
-    const credentialStatus: CredentialStatus = await this.credStatusRPC.resolveCredentialStatus(params.credentialId);
-    return credentialStatus;
-  }
-
-  //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
-  public async verifyCredential(params: {
-    credential: IVerifiableCredential;
-    issuerDid: string;
-    verificationMethodId: string;
-  }): Promise<object> {
-    if (!params.credential) throw new Error('HID-SSI-SDK:: Credential is required to verify credential');
-
-    if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify credential');
-    }
-
-    if (!params.issuerDid) {
-      throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
-    }
-
-    if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
-      throw new Error(
-        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
-      );
-    }
-
-    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.issuerDid });
-    const issuerDidDoc: Did = issuerDID as Did;
-    const publicKeyId = params.verificationMethodId;
-    const publicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
-      (x) => x.id == publicKeyId
-    ) as VerificationMethod;
-
-    // Convert 45 byte publick key into 48
-    const { publicKeyMultibase } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
-      publicKey: publicKeyVerMethod.publicKeyMultibase,
-    });
-
-    publicKeyVerMethod.publicKeyMultibase = publicKeyMultibase;
-
-    const assertionController = {
-      '@context': DID.CONTROLLER_CONTEXT,
-      id: issuerDidDoc.id,
-      assertionMethod: issuerDidDoc.assertionMethod,
-    };
-
-    const keyPair = await Ed25519VerificationKey2020.from({
-      privateKeyMultibase: '',
-      ...publicKeyVerMethod,
-    });
-
-    const suite = new Ed25519Signature2020({
-      verificationMethod: publicKeyId,
-      key: keyPair,
-    });
-
-    /* eslint-disable */
-    const that = this;
-    /* eslint-enable */
-    const result = await vc.verifyCredential({
-      credential: params.credential,
-      controller: assertionController,
-      suite,
-      documentLoader,
-      checkStatus: async function (options) {
-        return await that.checkCredentialStatus(options.credential.id);
-      },
-    });
-
-    return result;
-  }
+  
 }

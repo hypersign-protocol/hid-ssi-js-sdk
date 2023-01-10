@@ -99,6 +99,21 @@ generate(params: {
   }): Promise<IVerifiableCredential> 
 ```
 
+```js
+interface IVerifiableCredential {
+  context: Array<string>;
+  id: string;
+  type: Array<string>;
+  issuer: string;
+  issuanceDate: string;
+  expirationDate: string;
+  credentialSubject: object;
+  credentialSchema: ISchema;
+  credentialStatus: ICredentialStatus;
+  proof?: object;
+}
+```
+
 **Usage**
 
 ```js
@@ -119,30 +134,30 @@ const credential = await hypersignVC.generate(credentialBody)
   "@context": [
     "https://www.w3.org/2018/credentials/v1",
     {
-      "hs": "https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/schema/sch:hid:testnet:zBYQgcT4gUaFZ9CDb8W3hitfZTpZ1XkXuUyyFwAJne5HQ:1.0:"
+      "hs": "https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/schema/sch:hid:testnet:zDKTDL2V3BYdmxzXZuE6oQhbGQG9Gp9QVFKtTWoSHhjt6:1.0:"
     },
     {
       "name": "hs:name"
     }
   ],
-  "id": "vc:hid:testnet:zDjEwyQyZ8RC2ijs6DoqrVJRwUffBdP3n4fY2NYrzzw86",
+  "id": "vc:hid:testnet:zCgvWJQqiwbB3MPhhtaWpoyroYVgyVwSKaLPyYXXQmtmM",
   "type": [
     "VerifiableCredential",
     "testSchema"
   ],
   "expirationDate": "2027-12-10T18:30:00Z",
-  "issuanceDate": "2023-01-09T07:41:31Z",
-  "issuer": "did:hid:testnet:zHsDWbJFbg96KvTsiyPkQGAx2ANs6bFn1SPnwCmHTxrAi",
+  "issuanceDate": "2023-01-10T06:20:18Z",
+  "issuer": "did:hid:testnet:zE1tjuapkmcpE32HDYH6dPDaMmVuRzLLQVuMBPHBZr7gG",
   "credentialSubject": {
     "name": "varsha",
-    "id": "did:hid:testnet:zHsDWbJFbg96KvTsiyPkQGAx2ANs6bFn1SPnwCmHTxrAi"
+    "id": "did:hid:testnet:zE1tjuapkmcpE32HDYH6dPDaMmVuRzLLQVuMBPHBZr7gG"
   },
   "credentialSchema": {
-    "id": "sch:hid:testnet:zBYQgcT4gUaFZ9CDb8W3hitfZTpZ1XkXuUyyFwAJne5HQ:1.0",
+    "id": "sch:hid:testnet:zDKTDL2V3BYdmxzXZuE6oQhbGQG9Gp9QVFKtTWoSHhjt6:1.0",
     "type": "JsonSchemaValidator2018"
   },
   "credentialStatus": {
-    "id": "https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/credential/vc:hid:testnet:zDjEwyQyZ8RC2ijs6DoqrVJRwUffBdP3n4fY2NYrzzw86",
+    "id": "https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/credential/vc:hid:testnet:zCgvWJQqiwbB3MPhhtaWpoyroYVgyVwSKaLPyYXXQmtmM",
     "type": "CredentialStatusList2017"
   }
 }
@@ -178,43 +193,43 @@ const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);    co
 ```json
 {
    "signedCredential":{
-      "@context":[
+      "@context": [
          "https://www.w3.org/2018/credentials/v1",
          {
-            "hs":"https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/schema/sch:hid:testnet:zHxz3ZGTAqA2j9AoVoXEEUNmhBMW7RftmbZufQovyVjfT:1.0:"
+            "hs": "https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/schema/sch:hid:testnet:zDKTDL2V3BYdmxzXZuE6oQhbGQG9Gp9QVFKtTWoSHhjt6:1.0:"
          },
          {
-            "name":"hs:name"
+            "name": "hs:name"
          },
          "https://w3id.org/security/suites/ed25519-2020/v1"
       ],
-      "id":"vc:hid:testnet:z2g2Ty13EYau1tLUJgJtZ5xcvLLcywwzX3H2785ro5HJW",
-      "type":[
+      "id": "vc:hid:testnet:zCgvWJQqiwbB3MPhhtaWpoyroYVgyVwSKaLPyYXXQmtmM",
+      "type": [
          "VerifiableCredential",
          "testSchema"
       ],
-      "expirationDate":"2027-12-10T18:30:00Z",
-      "issuanceDate":"2023-01-09T11:17:15Z",
-      "issuer":"did:hid:testnet:z5DErRspu8PTZf8W8WNy35mKBpL9bryp1i58hGz1kBtLL",
-      "credentialSubject":{
-         "name":"varsha",
-         "id":"did:hid:testnet:z5DErRspu8PTZf8W8WNy35mKBpL9bryp1i58hGz1kBtLL"
+      "expirationDate": "2027-12-10T18:30:00Z",
+      "issuanceDate": "2023-01-10T06:20:18Z",
+      "issuer": "did:hid:testnet:zE1tjuapkmcpE32HDYH6dPDaMmVuRzLLQVuMBPHBZr7gG",
+      "credentialSubject": {
+         "name": "varsha",
+         "id": "did:hid:testnet:zE1tjuapkmcpE32HDYH6dPDaMmVuRzLLQVuMBPHBZr7gG"
       },
-      "credentialSchema":{
-         "id":"sch:hid:testnet:zHxz3ZGTAqA2j9AoVoXEEUNmhBMW7RftmbZufQovyVjfT:1.0",
-         "type":"JsonSchemaValidator2018"
+      "credentialSchema": {
+         "id": "sch:hid:testnet:zDKTDL2V3BYdmxzXZuE6oQhbGQG9Gp9QVFKtTWoSHhjt6:1.0",
+         "type": "JsonSchemaValidator2018"
       },
-      "credentialStatus":{
-         "id":"https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/credential/vc:hid:testnet:z2g2Ty13EYau1tLUJgJtZ5xcvLLcywwzX3H2785ro5HJW",
-         "type":"CredentialStatusList2017"
+      "credentialStatus": {
+         "id": "https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/credential/vc:hid:testnet:zCgvWJQqiwbB3MPhhtaWpoyroYVgyVwSKaLPyYXXQmtmM",
+         "type": "CredentialStatusList2017"
       },
-      "proof":{
-         "type":"Ed25519Signature2020",
-         "created":"2023-01-09T11:18:56Z",
-         "verificationMethod":"did:hid:testnet:z5DErRspu8PTZf8W8WNy35mKBpL9bryp1i58hGz1kBtLL#key-1",
-         "proofPurpose":"assertionMethod",
-         "proofValue":"zF49uwXB4XwjPyScApUhPTrUbXPTJ3ipdHsASDngj1oKX8SXMf9zrYmUzMHNfXLNXHMPvP5g6qhLj4czjQ4AmmpX"
-      }
+      "proof": {
+         "type": "Ed25519Signature2020",
+         "created": "2023-01-10T06:22:02Z",
+         "verificationMethod": "did:hid:testnet:zE1tjuapkmcpE32HDYH6dPDaMmVuRzLLQVuMBPHBZr7gG#key-1",
+         "proofPurpose": "assertionMethod",
+         "proofValue": "z5xGFtmPHzdizcRrYAGJqZZ5Ut9EijBwyLLW14mY7dPAUYuNkBYEvXM5xdcz9gqtcW2sCCZQXGFNoqfoPCBQeDR1L"
+      } 
    },
    "credentialStatus":{
       "claim":{
@@ -246,6 +261,73 @@ const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);    co
 }
 ```
 
+## `verify()`
+
+Verfies signed/issued credential
+
+**API Definition**
+
+```js
+verify(params: {
+    credential: IVerifiableCredential; // Signed/issued Hypersign credentail document
+    issuerDid: string;
+    verificationMethodId: string;
+  }): Promise<object>
+```
+
+**Usage**
+
+```js
+const params = {
+      credential: signedCredential,
+      issuerDid: didDocId,
+      verificationMethodId,
+    };
+const verificationResult = await hypersignVC.verify(params);
+```
+**Output**
+
+
+
+```json
+{
+  "verified": true,
+  "results": [
+    {
+      "proof": {
+        "@context": [
+          "https://www.w3.org/2018/credentials/v1",
+          {
+            "hs": "https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/schema/sch:hid:testnet:zDKTDL2V3BYdmxzXZuE6oQhbGQG9Gp9QVFKtTWoSHhjt6:1.0:"
+          },
+          {
+            "name": "hs:name"
+          },
+          "https://w3id.org/security/suites/ed25519-2020/v1"
+        ],
+        "type": "Ed25519Signature2020",
+        "created": "2023-01-10T06:22:02Z",
+        "verificationMethod": "did:hid:testnet:zE1tjuapkmcpE32HDYH6dPDaMmVuRzLLQVuMBPHBZr7gG#key-1",
+        "proofPurpose": "assertionMethod",
+        "proofValue": "z5xGFtmPHzdizcRrYAGJqZZ5Ut9EijBwyLLW14mY7dPAUYuNkBYEvXM5xdcz9gqtcW2sCCZQXGFNoqfoPCBQeDR1L"
+      },
+      "verified": true,
+      "verificationMethod": {
+        "id": "did:hid:testnet:zE1tjuapkmcpE32HDYH6dPDaMmVuRzLLQVuMBPHBZr7gG#key-1",
+        "type": "Ed25519VerificationKey2020",
+        "controller": "did:hid:testnet:zE1tjuapkmcpE32HDYH6dPDaMmVuRzLLQVuMBPHBZr7gG",
+        "publicKeyMultibase": "z6MksU9nVq5C7AJh9X7vDr4UEK8Mb5BHQDamBvG7DZ9amLTe"
+      },
+      "purposeResult": {
+        "valid": true
+      }
+    }
+  ],
+  "statusResult": {
+    "verified": true
+  }
+}
+```
 
 ## Security Concerns
 

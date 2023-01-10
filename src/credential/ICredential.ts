@@ -33,7 +33,7 @@ export interface IVerifiableCredential {
   // Ref: https://www.w3.org/TR/vc-data-model/#status
   credentialStatus: ICredentialStatus;
 
-  proof: object;
+  proof?: object;
 }
 
 export interface ICredentialMethods {
@@ -60,7 +60,12 @@ export interface ICredentialMethods {
     credentialStatusRegistrationResult?: DeliverTxResponse;
   }>;
 
-  verifyCredential(params: { credential: IVerifiableCredential; issuerDid: string }): Promise<object>;
+  verify(params: { 
+    credential: IVerifiableCredential; 
+    issuerDid: string;
+    verificationMethodId: string; 
+  }): Promise<object>;
+
   checkCredentialStatus(credentialId: string): Promise<{ verified: boolean }>;
 }
 
