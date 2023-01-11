@@ -20,7 +20,9 @@ Note: Often, Issuer and Autor of schema may be same.
 
 ## HypersignSchema SDK
 
-Is a javascript library to interact with Hypersign Blockchain and to perform onchain and offchain schema operations.
+
+Is a javascript library for Schema related operation (generate, sign, register etc). It also provides APIs to store/update/retrive Schema to/from the [Hypersign Schema Registry](https://docs.hypersign.id/self-sovereign-identity-ssi/schema/schema-registry) on the Hypersign Blockchain network easily.
+
 
 ## **NOTES**
 
@@ -196,6 +198,11 @@ const hypersignSchema = new HypersignSchema({
     offlineSigner
 })
 ```
+
+
+Read about `OfflineSigner` [here](https://docs.hypersign.id/developers/hid-ssi-sdk/offlinesigner)
+
+
 **Call `init()` to initalize the offlineSigner**
 
 ```js

@@ -1,27 +1,41 @@
 # Introduction
 
-// TODO
-## What is Verifiable Credential Schema or Data Models? 
-// TODO
+The Hypersign Verifiable Credential comply [W3C Verifiable Credentials Data Model v1.1](https://www.w3.org/TR/vc-data-model/) specification whoes status can be stored in [Hypersign Credential Revocation Registry](https://docs.hypersign.id/self-sovereign-identity-ssi/verifiable-credential-vc/credential-revocation-registry) on  [Hypersign Identity Blockchain Network](https://explorer.hypersign.id/hypersign-testnet).
+
+
+## What is Verifiable Credential ? 
+
+As per [W3C Credentials Data Model specfiation v1.1](https://www.w3.org/TR/vc-data-model/): 
+
+**What is credential?***
+
+> Credentials are a part of our daily lives; driver's licenses are used to assert that we are capable of operating a motor vehicle, university degrees can be used to assert our level of education, and government-issued passports enable us to travel between countries
+
+**What is verifiable credential**
+
+> A digital credential document which is represented in a way that is cryptographically secure, privacy respecting, and machine-verifiable.
+
+Read more about verifiable credential [here](https://docs.hypersign.id/self-sovereign-identity-ssi/verifiable-credential-vc).
 
 ## HypersignVerifiableCredentail SDK
 
-Is a javascript library to interact with Hypersign Blockchain and to perform onchain and offchain schema operations.
-
-## **NOTES**
+Is a javascript library for verifiable credentials operation (generate, issue etc). It also provides APIs to store/update/retrive credential status to/from the [Hypersign Credential Revocation Registry](https://docs.hypersign.id/self-sovereign-identity-ssi/verifiable-credential-vc/credential-revocation-registry) on the Hypersign Blockchain network easily.
 
 
-1. Let us assume that we have created a DID - acting as an issuer and subject both - and have also registered a schema on the Hypersign blockchain. See documentation for [HypersignDID]() and [HypersignSchema]() before proceeding.
+### **NOTES**
+
+
+1. Let us assume that we have created a DID - acting as an issuer and subject both (for demonstration purpose) - and have also registered a schema on the Hypersign blockchain. See documentation for [HypersignDID]() and [HypersignSchema]() before proceeding.
     - [Sample Schema](https://explorer.hypersign.id/hypersign-testnet/schemas/sch:hid:testnet:zBYQgcT4gUaFZ9CDb8W3hitfZTpZ1XkXuUyyFwAJne5HQ:1.0) has only one property called `name`. 
     - [Sample issuer/subject DID](https://explorer.hypersign.id/hypersign-testnet/identity/did:hid:testnet:zHsDWbJFbg96KvTsiyPkQGAx2ANs6bFn1SPnwCmHTxrAi)
-2. Although Subject DID may or may not be a [private DID]()
+2. The subject DID may or may not be a private DID. Read concept of private and public DIDs [here]().
 
 
 ## Table of Contents
 - [Install The Package](#install-the-package)
 - [Import The Package](#import-the-package)
 - [APIs](#apis)
-    - [Initialize Instance of HypersignVerifiableCredential with offlineSigner](#initialize-with-offlinesigner)
+    - [Initialize Instance of HypersignVerifiableCredential with offlineSigner](#initialize-instance-of-hypersignverifiablecredential-with-offlinesigner)
     - [generate()](#generate)
     - [issue()](#issue)   
     - [Credential Status Operations](#credential-status-operations) 
@@ -59,6 +73,9 @@ const hypersignVC = new HypersignVerifiableCredential({
     offlineSigner
 })
 ```
+
+Read about `OfflineSigner` [here](https://docs.hypersign.id/developers/hid-ssi-sdk/offlinesigner)
+
 **Call `init()` to initalize the offlineSigner**
 
 ```js
@@ -67,7 +84,7 @@ await hypersignVC.init();
 
 ### `generate()`
 
-Generates a new credential document
+Generates a new credential document of type [IVerifiableCredential]()
 
 **API Definition**
 
@@ -82,21 +99,6 @@ generate(params: {
     expirationDate: string;
     fields: object;
   }): Promise<IVerifiableCredential> 
-```
-
-```js
-interface IVerifiableCredential {
-  context: Array<string>;
-  id: string;
-  type: Array<string>;
-  issuer: string;
-  issuanceDate: string;
-  expirationDate: string;
-  credentialSubject: object;
-  credentialSchema: ISchema;
-  credentialStatus: ICredentialStatus;
-  proof?: object;
-}
 ```
 
 **Usage**
@@ -150,7 +152,7 @@ const credential = await hypersignVC.generate(credentialBody)
 
 ### `issue()`
 
-Signs a schema document and attaches proof
+Signs a credential document and registers [credential status](https://docs.hypersign.id/self-sovereign-identity-ssi/verifiable-credential-vc/credential-revocation-registry) on the Hypersign blockchain.
 
 **API Definition**
 
@@ -170,8 +172,12 @@ issue(params: {
 
 ```js
 const tempIssueCredentialBody = {
-  
+  credential, // unsigned credential generated using `generated()` method
+  issuerDid: "did:hid:testnet:zJ4aCsFKNtk2Ph4GzCiiqDDs2aAbDLbnRcRCrvjJWMq3X",
+  verificationMethodId: "did:hid:testnet:zJ4aCsFKNtk2Ph4GzCiiqDDs2aAbDLbnRcRCrvjJWMq3X#key-1",
+  privateKeyMultibase: "zrv4EUum4pk24tpCmWewukQeJXYKy47kiEt7Xqd9mofaXfYk6yF4XwEgynHxzNFhaMV4PVhm6g66ahpGrpT8eD8cVbP"
 }
+
 const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);    const {signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult }  = issuedCredResult;
 ```
 
@@ -321,7 +327,7 @@ const verificationResult = await hypersignVC.verify(params);
 
 #### `resolveCredentialStatus()`
 
-Resolves credential status from Hypersign Blokchain
+Resolves credential status from Hypersign Blokchain and returns status of the credential of type [`CredentialStatus`]()
 
 **API Definition**
 
@@ -360,8 +366,6 @@ const verificationResult = await hypersignVC.verify({ credentialId });
 }
 ```
 
-
-
 #### `updateCredentialStatus()`
 
 Updates credential status into Hypersign Blokchain
@@ -393,7 +397,7 @@ const params = {
 };
 const updatedCredResult = await hypersignVC.updateCredentialStatus(params);
 ```
-Supported status: `LIVE`, `SUSPENDED`, `REVOKED`. Please read the [doc]() for more details about status.
+Supported status: `LIVE`, `SUSPENDED`, `REVOKED` and `EXPIRED`. Please read the [doc](https://docs.hypersign.id/self-sovereign-identity-ssi/verifiable-credential-vc/credential-revocation-registry#supported-vc-statuses) for more details about status.
 
 **Output**
 

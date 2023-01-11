@@ -14,7 +14,8 @@ In simple words, decentralised identifiers are cryptographically-verifiable iden
 
 ## Hypersign DID SDK
 
-Is a javascript library to interact with Hypersign Blockchain and to perform onchain and offchain DID operations.
+Is a javascript library for DID related operation (generate, sign, verify etc). It also provides APIs to store/update/retrive DID and DID Documents to/from the [Hypersign DID Registry](https://docs.hypersign.id/self-sovereign-identity-ssi/decentralized-identifier-did/did-registry) on the Hypersign Blockchain network easily.
+
 
 ## Table of Contents
 - [Install The Package](#install-the-package)
@@ -311,6 +312,9 @@ const hypersignDid = new HypersignDID({
     offlineSigner
 })
 ```
+
+Read about `OfflineSigner` [here](https://docs.hypersign.id/developers/hid-ssi-sdk/offlinesigner)
+
 **Call `init()` to initalize the offlineSigner**
 
 ```js
