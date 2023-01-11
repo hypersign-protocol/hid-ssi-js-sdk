@@ -805,6 +805,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     };
 
     /// RegisterCRedeRPC
+    // We use the same RPC (i.e. MsgRegisterCredentialStatus) for register and update of credential status on blockchain
     const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
 
     if (!resp || resp.code != 0) {

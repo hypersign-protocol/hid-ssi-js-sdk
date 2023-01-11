@@ -1,9 +1,8 @@
 # Introduction
 
-The Hypersign Schema comply [Verifiable Credentials JSON Schema 2022 data model](https://w3c-ccg.github.io/vc-json-schemas/#data_model) specification and is stored on [Hypersign Identity Blockchain Network](https://explorer.hypersign.id/hypersign-testnet) as it is [adviced to store](https://w3c-ccg.github.io/vc-json-schemas/#storage) schema documents  and made available as immutable objects. 
-
+// TODO
 ## What is Verifiable Credential Schema or Data Models? 
-
+// TODO
 
 ## HypersignVerifiableCredentail SDK
 
@@ -21,16 +20,16 @@ Is a javascript library to interact with Hypersign Blockchain and to perform onc
 ## Table of Contents
 - [Install The Package](#install-the-package)
 - [Import The Package](#import-the-package)
-- [OffChain APIs](#offchain-apis)
-    - [Initialize Instance of HypersignSchema](#initialize-instance-of-hypersignschema)
+- [APIs](#apis)
+    - [Initialize Instance of HypersignVerifiableCredential with offlineSigner](#initialize-with-offlinesigner)
     - [generate()](#generate)
-    - [sign()](#sign)
-- [OnChain APIs](#onchain-apis)
-    - [Initialize Instance of HypersignSchema with offlineSigner](#initialize-with-offlinesigner)
-    - [register()](#register)
-    - [resolve()](#resolve)
+    - [issue()](#issue)   
+    - [Credential Status Operations](#credential-status-operations) 
+      - [checkCredentialStatus()](#checkcredentialstatus)
+      - [resolveCredentialStatus()](#resolveCredentialStatus)
+      - [updateCredentialStatus()](#updateCredentialStatus)
+      - [registerCredentialStatus()](#registerCredentialStatus)
 - [Security Concerns](#security)
-
 
 ## Install The Package
 
@@ -44,25 +43,13 @@ npm i hid-ssi-sdk --save
 import { HypersignVerifiableCredential } from 'hid-ssi-sdk';
 ```
 
-## Offchain APIs
+## APIs
 
-
-### Initialize Instance of HypersignVerifiableCredential
-
-```js
-const hypersignVC = new HypersignVerifiableCredential();
-
-// OR initialize by passing a namepace. Default ''
-// More complex way to initialize this class can be found in this documentation later
-const namespace = 'testnet';
-const hypersignVC = new HypersignVerifiableCredential({ namespace });
-```
-
-### Initialize with offlineSigner 
+### Initialize instance of HypersignVerifiableCredential with offlineSigner 
 
 **Create Instance of the class**
 ```js
-const hypersignSchema = new HypersignSchema({
+const hypersignVC = new HypersignVerifiableCredential({
     offlineSigner,                    // OPTIONAL signer of type OfflineSigner
     nodeRestEndpoint: hidNodeEp.rest, // OPTIONAL RPC endpoint of the Hypersign blockchain, Default 'TEST'
     nodeRpcEndpoint: hidNodeEp.rpc,   // OPTIONAL REST endpoint of the Hypersign blockchain
@@ -70,14 +57,14 @@ const hypersignSchema = new HypersignSchema({
   });
 
 // OR Just initalize with offlineSigner
-const hypersignSchema = new HypersignSchema({
+const hypersignVC = new HypersignVerifiableCredential({
     offlineSigner
 })
 ```
 **Call `init()` to initalize the offlineSigner**
 
 ```js
-await hypersignSchema.init();
+await hypersignVC.init();
 ```
 
 ### `generate()`
@@ -261,6 +248,9 @@ const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);    co
 }
 ```
 
+Note: When we issue credential, only cryptographic hash of the credential document get stored on the blockchain for privacy purpose and security purpose. The `credentialHash` in `credentialStatus` is a digest of the verifiable credential, generated using `sha256` hashing algorithm which is of length `256 bits` and is represented into `64 HEX` characters. 
+
+
 ### `verify()`
 
 Verfies signed/issued credential
@@ -327,9 +317,9 @@ const verificationResult = await hypersignVC.verify(params);
 }
 ```
 
-## Credential Status Operations
+### Credential Status Operations
 
-### `checkCredentialStatus()`
+#### `checkCredentialStatus()`
 
 Checks status of the credential from Hypersign Blokchain
 
@@ -354,7 +344,7 @@ const verificationResult = await hypersignVC.verify({credentialId});
 }
 ```
 
-### `resolveCredentialStatus()`
+#### `resolveCredentialStatus()`
 
 Resolves credential status from Hypersign Blokchain
 
@@ -397,7 +387,7 @@ const verificationResult = await hypersignVC.verify({ credentialId });
 
 
 
-### `updateCredentialStatus()`
+#### `updateCredentialStatus()`
 
 Updates credential status into Hypersign Blokchain
 
@@ -444,7 +434,7 @@ Supported status: `LIVE`, `SUSPENDED`, `REVOKED`. Please read the [doc]() for mo
 }
 ```
 
-### `registerCredentialStatus()`
+#### `registerCredentialStatus()`
 
 Registers credential status in blockchain Hypersign Blokchain
 
@@ -470,8 +460,17 @@ const registerCredDetail = await hypersignVC.registerCredentialStatus({
 **Output**
 
 ```js
-
+{
+  "code": 0,
+  "height": 1508092,
+  "rawLog": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/hypersignprotocol.hidnode.ssi.MsgRegisterCredentialStatus\"}]}]}]",
+  "transactionHash": "5CE9A48DCCE6326839E588E1F1DE8CC9D41C52A76B65944F3C677D2CBD4DEAA5",
+  "gasUsed": 92525,
+  "gasWanted": 106334
+}
 ```
+
+
 ## Security Concerns
 
 // TODO
