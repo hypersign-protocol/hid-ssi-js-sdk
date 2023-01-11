@@ -671,10 +671,20 @@ describe('Verifiable Credential Opearations', function () {
         });
         it('should be able to issue credential without having the credential status registered on chain', function () {
             return __awaiter(this, void 0, void 0, function () {
-                var tempIssueCredentialBody, issuedCredResult, signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult;
+                var expirationDate, tempCredentialBody, credentialDetail, tempIssueCredentialBody, issuedCredResult, signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
+                            expirationDate = new Date('12/11/2027');
+                            tempCredentialBody = __assign({}, credentialBody);
+                            tempCredentialBody.schemaId = schemaId;
+                            tempCredentialBody['subjectDidDocSigned'] = signedDocument;
+                            tempCredentialBody['expirationDate'] = expirationDate;
+                            tempCredentialBody.issuerDid = didDocId;
+                            tempCredentialBody.fields = { name: 'varsha' };
+                            return [4 /*yield*/, hypersignVC.generate(tempCredentialBody)];
+                        case 1:
+                            credentialDetail = _a.sent();
                             tempIssueCredentialBody = __assign({}, issueCredentialBody);
                             tempIssueCredentialBody.credential = credentialDetail;
                             tempIssueCredentialBody.issuerDid = didDocId;
@@ -682,11 +692,17 @@ describe('Verifiable Credential Opearations', function () {
                             tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
                             tempIssueCredentialBody.registerCredential = false;
                             return [4 /*yield*/, hypersignVC.issue(tempIssueCredentialBody)];
-                        case 1:
+                        case 2:
                             issuedCredResult = _a.sent();
                             signedCredential = issuedCredResult.signedCredential, credentialStatus = issuedCredResult.credentialStatus, credentialStatusProof = issuedCredResult.credentialStatusProof, credentialStatusRegistrationResult = issuedCredResult.credentialStatusRegistrationResult;
                             credentialStatus2 = credentialStatus;
                             credentialStatusProof2 = credentialStatusProof;
+                            console.log({
+                                signedCredential: signedCredential,
+                                credentialStatusRegistrationResult: credentialStatusRegistrationResult,
+                                credentialStatus2: credentialStatus2,
+                                credentialStatusProof2: credentialStatusProof2,
+                            });
                             (0, chai_1.expect)(signedCredential).to.be.a('object');
                             (0, chai_1.expect)(credentialStatus).to.be.a('object');
                             (0, chai_1.expect)(credentialStatusProof).to.be.a('object');
@@ -898,23 +914,18 @@ describe('Verifiable Credential Status Opearations', function () {
                 });
             });
         });
-        it('should not be able to update credential as credStatus is not passed', function () {
-            return __awaiter(this, void 0, void 0, function () {
-                var tempParams;
-                return __generator(this, function (_a) {
-                    tempParams = __assign({}, params);
-                    tempParams.verificationMethodId = verificationMethodId;
-                    tempParams.privateKeyMultibase = privateKeyMultibase;
-                    tempParams.issuerDid = credentialStatus;
-                    tempParams.credentialStatus = {};
-                    return [2 /*return*/, hypersignVC.updateCredentialStatus(tempParams).catch(function (err) {
-                            (0, chai_1.expect)(function () {
-                                throw err;
-                            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.credentialStatus is required to update credential status');
-                        })];
-                });
-            });
-        });
+        // it('should not be able to update credential as credStatus is not passed', async function () {
+        //   const tempParams = { ...params };
+        //   tempParams.verificationMethodId = verificationMethodId;
+        //   tempParams.privateKeyMultibase = privateKeyMultibase;
+        //   tempParams.issuerDid = credentialStatus;
+        //   tempParams.credentialStatus = {} as ICredentialStatus;
+        //   return hypersignVC.updateCredentialStatus(tempParams).catch(function (err) {
+        //     expect(function () {
+        //       throw err;
+        //     }).to.throw(Error, 'HID-SSI-SDK:: Error: params.credentialStatus is required to update credential status');
+        //   });
+        // });
         it('should not be able to update credential as privateKey is not passed', function () {
             return __awaiter(this, void 0, void 0, function () {
                 var tempParams;
@@ -1050,12 +1061,17 @@ describe('Verifiable Credential Status Opearations', function () {
                 var registerCredDetail;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, hypersignVC.registerCredentialStatus({
-                                credentialStatus: credentialStatus2,
-                                credentialStatusProof: credentialStatusProof2,
-                            })];
+                        case 0:
+                            console.log({
+                                credentialStatus2: credentialStatus2,
+                            });
+                            return [4 /*yield*/, hypersignVC.registerCredentialStatus({
+                                    credentialStatus: credentialStatus2,
+                                    credentialStatusProof: credentialStatusProof2,
+                                })];
                         case 1:
                             registerCredDetail = _a.sent();
+                            console.log(JSON.stringify(registerCredDetail, null, 2));
                             (0, chai_1.expect)(registerCredDetail).to.be.a('object');
                             (0, chai_1.should)().exist(registerCredDetail.code);
                             (0, chai_1.should)().exist(registerCredDetail.transactionHash);

@@ -482,16 +482,15 @@ describe('Verifiable Credential Opearations', () => {
       tempCredentialBody.issuerDid = didDocId;
       tempCredentialBody.fields = { name: 'varsha' };
       const credentialDetail = await hypersignVC.generate(tempCredentialBody);
-      
 
       const tempIssueCredentialBody = { ...issueCredentialBody };
-      
+
       tempIssueCredentialBody.credential = credentialDetail;
       tempIssueCredentialBody.issuerDid = didDocId;
       tempIssueCredentialBody.verificationMethodId = verificationMethodId;
       tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
       tempIssueCredentialBody.registerCredential = false;
-      
+
       const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);
 
       const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
@@ -502,10 +501,10 @@ describe('Verifiable Credential Opearations', () => {
 
       console.log({
         signedCredential,
-        credentialStatusRegistrationResult, 
+        credentialStatusRegistrationResult,
         credentialStatus2,
-        credentialStatusProof2
-      })
+        credentialStatusProof2,
+      });
 
       expect(signedCredential).to.be.a('object');
       expect(credentialStatus).to.be.a('object');
@@ -771,8 +770,8 @@ describe('Verifiable Credential Status Opearations', () => {
     });
     it('should be able to register credential on blockchain', async function () {
       console.log({
-        credentialStatus2
-      })
+        credentialStatus2,
+      });
       const registerCredDetail = await hypersignVC.registerCredentialStatus({
         credentialStatus: credentialStatus2,
         credentialStatusProof: credentialStatusProof2,
