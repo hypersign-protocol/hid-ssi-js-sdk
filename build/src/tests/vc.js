@@ -619,6 +619,7 @@ describe('Verifiable Credential Opearations', function () {
                             tempIssueCredentialBody.issuerDid = didDocId;
                             tempIssueCredentialBody.verificationMethodId = verificationMethodId;
                             tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
+                            console.log(JSON.stringify(tempIssueCredentialBody, null, 2));
                             return [4 /*yield*/, hypersignVC.issue(tempIssueCredentialBody)];
                         case 1:
                             issuedCredResult = _a.sent();

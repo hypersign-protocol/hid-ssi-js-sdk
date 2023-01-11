@@ -743,7 +743,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return resp;
   }
 
-
   public async checkCredentialStatus(params: { credentialId: string }): Promise<{ verified: boolean }> {
     if (!params || !params.credentialId)
       throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');

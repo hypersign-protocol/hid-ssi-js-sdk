@@ -419,6 +419,7 @@ describe('Verifiable Credential Opearations', () => {
       tempIssueCredentialBody.issuerDid = didDocId;
       tempIssueCredentialBody.verificationMethodId = verificationMethodId;
       tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
+      console.log(JSON.stringify(tempIssueCredentialBody, null, 2));
       const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);
 
       const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
