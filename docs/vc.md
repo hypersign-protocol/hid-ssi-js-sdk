@@ -25,10 +25,8 @@ Is a javascript library to interact with Hypersign Blockchain and to perform onc
     - [generate()](#generate)
     - [issue()](#issue)   
     - [Credential Status Operations](#credential-status-operations) 
-      - [checkCredentialStatus()](#checkcredentialstatus)
       - [resolveCredentialStatus()](#resolveCredentialStatus)
       - [updateCredentialStatus()](#updateCredentialStatus)
-      - [registerCredentialStatus()](#registerCredentialStatus)
 - [Security Concerns](#security)
 
 ## Install The Package
@@ -161,7 +159,6 @@ issue(params: {
     credential: IVerifiableCredential;
     issuerDid: string;
     privateKeyMultibase: string;
-    registerCredential?: boolean;
   }): Promise<{ 
     signedCredential: IVerifiableCredential, 
     credentialStatus: CredentialStatus, 
@@ -172,6 +169,9 @@ issue(params: {
 **Usage**
 
 ```js
+const tempIssueCredentialBody = {
+  
+}
 const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);    const {signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult }  = issuedCredResult;
 ```
 
@@ -319,31 +319,6 @@ const verificationResult = await hypersignVC.verify(params);
 
 ### Credential Status Operations
 
-#### `checkCredentialStatus()`
-
-Checks status of the credential from Hypersign Blokchain
-
-**API Definition**
-
-```js
-checkCredentialStatus(params: { credentialId }): Promise<{verified: boolean}>;
-
-```
-
-**Usage**
-
-```js
-const verificationResult = await hypersignVC.verify({credentialId});
-```
-**Output**
-
-
-```js
-{
-  "verified": true
-}
-```
-
 #### `resolveCredentialStatus()`
 
 Resolves credential status from Hypersign Blokchain
@@ -433,43 +408,6 @@ Supported status: `LIVE`, `SUSPENDED`, `REVOKED`. Please read the [doc]() for mo
   gasWanted: 111176
 }
 ```
-
-#### `registerCredentialStatus()`
-
-Registers credential status in blockchain Hypersign Blokchain
-
-**API Definition**
-
-```js
-registerCredentialStatus(params: {
-    credentialStatus: CredentialStatus;
-    credentialStatusProof: CredentialProof;
-  }): Promise<DeliverTxResponse>
-```
-
-**Usage**
-
-
-```js
-const registerCredDetail = await hypersignVC.registerCredentialStatus({
-        credentialStatus,
-        credentialStatusProof
-      });
-```
-
-**Output**
-
-```js
-{
-  "code": 0,
-  "height": 1508092,
-  "rawLog": "[{\"events\":[{\"type\":\"message\",\"attributes\":[{\"key\":\"action\",\"value\":\"/hypersignprotocol.hidnode.ssi.MsgRegisterCredentialStatus\"}]}]}]",
-  "transactionHash": "5CE9A48DCCE6326839E588E1F1DE8CC9D41C52A76B65944F3C677D2CBD4DEAA5",
-  "gasUsed": 92525,
-  "gasWanted": 106334
-}
-```
-
 
 ## Security Concerns
 

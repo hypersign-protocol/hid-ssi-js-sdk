@@ -81,13 +81,7 @@ export interface ICredentialMethods {
     statusReason?: string;
   }): Promise<DeliverTxResponse>;
 
-  registerCredentialStatus(params: {
-    credentialStatus: CredentialStatus;
-    credentialStatusProof: CredentialProof;
-  }): Promise<DeliverTxResponse>;
-
   resolveCredentialStatus(params: { credentialId: string }): Promise<CredentialStatus>;
-
   checkCredentialStatus(params: { credentialId: string }): Promise<{ verified: boolean }>;
 }
 
