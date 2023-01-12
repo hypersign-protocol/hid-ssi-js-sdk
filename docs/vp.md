@@ -1,6 +1,58 @@
-# 
+# Hypersign Verifiable Presentation
+(W3C Verifiable Presentation Spec)[https://w3c-ccg.github.io/vp-request-spec/]
 
-## `generate()` 
+
+## Table of Contents
+- [Install The Package](#install-the-package)
+- [Import The Package](#import-the-package)
+- [APIs](#apis)
+    - [Initialize Instance of HypersignVerifiablePresentation with offlineSigner](#initialize-instance-of-hypersignverifiablepresentation-with-offlinesigner)
+    - [generate()](#generate)
+    - [sign()](#sign)   
+    - [verify()](#sign)   
+- [Security Concerns](#security)
+
+## Install The Package
+
+```bash
+npm i hid-ssi-sdk --save
+```
+
+## Import The Package
+
+```js
+import { HypersignVerifiablePresentation } from 'hid-ssi-sdk';
+```
+
+## APIs
+
+### Initialize instance of HypersignVerifiablePresentation with offlineSigner 
+
+**Create Instance of the class**
+```js
+const hypersignVP = new HypersignVerifiablePresentation({
+    offlineSigner,                    // OPTIONAL signer of type OfflineSigner
+    nodeRestEndpoint: hidNodeEp.rest, // OPTIONAL RPC endpoint of the Hypersign blockchain, Default 'TEST'
+    nodeRpcEndpoint: hidNodeEp.rpc,   // OPTIONAL REST endpoint of the Hypersign blockchain
+    namespace: hidNodeEp.namespace,   // OPTIONAL namespace of did id, Default 'did:hid'
+  });
+
+// OR Just initalize with offlineSigner
+const hypersignVP = new HypersignVerifiablePresentation({
+    offlineSigner
+})
+```
+
+Read about `OfflineSigner` [here](https://docs.hypersign.id/developers/hid-ssi-sdk/offlinesigner)
+
+**Call `init()` to initalize the offlineSigner**
+
+```js
+await hypersignVP.init();
+```
+
+
+### `generate()` 
 
 **API Definition**
 
@@ -97,7 +149,7 @@ const unsignedverifiablePresentation = await hypersignVP.generate(params);
 }
 ```
 
-## `sign()` 
+### `sign()` 
 
 Signs a new presentation document and returns presentation document with proofs
 
@@ -193,7 +245,7 @@ const signedVerifiablePresentation = await hypersignVP.sign(params);
 }
 ```
 
-## `verify()` 
+### `verify()` 
 
 
 **API Definition**
