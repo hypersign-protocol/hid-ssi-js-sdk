@@ -122,10 +122,7 @@ beforeEach(function () {
                     return [4 /*yield*/, hypersignVC.init()];
                 case 4:
                     _a.sent();
-                    hypersignVP = new index_1.HypersignVerifiablePresentation(constructorParams);
-                    return [4 /*yield*/, hypersignVP.init()];
-                case 5:
-                    _a.sent();
+                    hypersignVP = new index_1.HypersignVerifiablePresentation();
                     return [2 /*return*/];
             }
         });

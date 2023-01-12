@@ -68,19 +68,13 @@ var constants_1 = require("../constants");
 var HypersignVerifiablePresentation = /** @class */ (function () {
     function HypersignVerifiablePresentation(params) {
         if (params === void 0) { params = {}; }
-        var namespace = params.namespace, offlineSigner = params.offlineSigner, nodeRpcEndpoint = params.nodeRpcEndpoint, nodeRestEndpoint = params.nodeRestEndpoint;
+        var namespace = params.namespace, nodeRpcEndpoint = params.nodeRpcEndpoint, nodeRestEndpoint = params.nodeRestEndpoint;
         this.namespace = namespace && namespace != '' ? namespace : '';
         var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
         var nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
-        if (offlineSigner) {
-            var offlineConstuctorParams = { offlineSigner: offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
-            this.vc = new vc_1.default(offlineConstuctorParams);
-            this.hsDid = new did_1.default(offlineConstuctorParams);
-        }
-        else {
-            this.vc = null;
-            this.hsDid = null;
-        }
+        var offlineConstuctorParams = { nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
+        this.vc = new vc_1.default(offlineConstuctorParams);
+        this.hsDid = new did_1.default(offlineConstuctorParams);
         this.id = '';
         this.type = [];
         this.verifiableCredential = [];
@@ -102,28 +96,6 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                             id = "".concat(constants_1.VP.SCHEME, ":").concat(constants_1.VP.METHOD, ":").concat(uuid);
                         }
                         return [2 /*return*/, id];
-                }
-            });
-        });
-    };
-    /**
-     * Initialise the offlinesigner to interact with Hypersign blockchain
-     */
-    HypersignVerifiablePresentation.prototype.init = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!this.vc || !this.hsDid) {
-                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
-                        }
-                        return [4 /*yield*/, this.vc.init()];
-                    case 1:
-                        _a.sent();
-                        return [4 /*yield*/, this.hsDid.init()];
-                    case 2:
-                        _a.sent();
-                        return [2 /*return*/];
                 }
             });
         });
@@ -365,11 +337,7 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                                     return __awaiter(this, void 0, void 0, function () {
                                         return __generator(this, function (_a) {
                                             switch (_a.label) {
-                                                case 0:
-                                                    if (!that.vc) {
-                                                        throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
-                                                    }
-                                                    return [4 /*yield*/, that.vc.checkCredentialStatus({ credentialId: options.credential.id })];
+                                                case 0: return [4 /*yield*/, that.vc.checkCredentialStatus({ credentialId: options.credential.id })];
                                                 case 1: return [2 /*return*/, _a.sent()];
                                             }
                                         });
