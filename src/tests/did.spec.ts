@@ -259,8 +259,7 @@ describe('#resolve() did after updating did document', function () {
     expect(result.didDocument.id).to.be.equal(didDocId);
     expect(result.didDocumentMetadata).to.be.a('object');
     expect(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.equal(publicKeyMultibase);
-
-  })
+  });
 });
 describe('#deactivate() this is to deactivate didDocument based on didDocId', function () {
   it('should not be able to deactivate did document as privateKeyMultibase is null or empty', function () {

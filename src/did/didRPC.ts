@@ -27,7 +27,7 @@ export class DIDRpc implements IDIDRpc {
     nodeRestEndpoint: string;
   }) {
     this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_PATH;
-    if(offlineSigner){
+    if (offlineSigner) {
       this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
     } else {
       this.hidClient = null;
@@ -35,15 +35,15 @@ export class DIDRpc implements IDIDRpc {
   }
 
   async init() {
-    if(!this.hidClient){
-      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner')
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
     await this.hidClient.init();
   }
 
   async registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string): Promise<object> {
-    if(!this.hidClient){
-      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner')
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
 
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
@@ -73,8 +73,8 @@ export class DIDRpc implements IDIDRpc {
     verificationMethodId: string,
     versionId: string
   ): Promise<object> {
-    if(!this.hidClient){
-      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner')
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
 
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgUpdateDID}`;
@@ -108,10 +108,10 @@ export class DIDRpc implements IDIDRpc {
     verificationMethodId: string,
     versionId: string
   ): Promise<object> {
-    if(!this.hidClient){
-      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner')
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
-    
+
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgDeactivateDID}`;
     const signInfo: SignInfo = {
       verification_method_id: verificationMethodId,

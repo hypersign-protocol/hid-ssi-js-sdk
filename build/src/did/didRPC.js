@@ -72,13 +72,22 @@ var DIDRpc = /** @class */ (function () {
     function DIDRpc(_a) {
         var offlineSigner = _a.offlineSigner, nodeRpcEndpoint = _a.nodeRpcEndpoint, nodeRestEndpoint = _a.nodeRestEndpoint;
         this.didRestEp = client_1.HIDClient.hidNodeRestEndpoint + constants_1.HYPERSIGN_NETWORK_DID_PATH;
-        this.hidClient = new client_1.HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+        if (offlineSigner) {
+            this.hidClient = new client_1.HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+        }
+        else {
+            this.hidClient = null;
+        }
     }
     DIDRpc.prototype.init = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.hidClient.init()];
+                    case 0:
+                        if (!this.hidClient) {
+                            throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
+                        }
+                        return [4 /*yield*/, this.hidClient.init()];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -92,6 +101,9 @@ var DIDRpc = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!this.hidClient) {
+                            throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
+                        }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgCreateDID);
                         signInfo = {
                             verification_method_id: verificationMethodId,
@@ -121,6 +133,9 @@ var DIDRpc = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!this.hidClient) {
+                            throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
+                        }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgUpdateDID);
                         signInfo = {
                             verification_method_id: verificationMethodId,
@@ -151,6 +166,9 @@ var DIDRpc = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!this.hidClient) {
+                            throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
+                        }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgDeactivateDID);
                         signInfo = {
                             verification_method_id: verificationMethodId,

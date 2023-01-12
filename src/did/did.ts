@@ -77,8 +77,10 @@ export default class HypersignDID implements IDID {
     const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
     const rpcConstructorParams = {
-      offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp
-    }
+      offlineSigner,
+      nodeRpcEndpoint: nodeRPCEp,
+      nodeRestEndpoint: nodeRestEp,
+    };
     this.didrpc = new DIDRpc(rpcConstructorParams);
     this.namespace = namespace ? namespace : '';
   }

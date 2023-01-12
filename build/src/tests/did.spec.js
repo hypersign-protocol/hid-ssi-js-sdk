@@ -361,6 +361,29 @@ describe('#resolve() did after updating did document', function () {
             });
         });
     });
+    it('should be able to resolve DID even without offline signer passed to the constructor; making resolve RPC offchain activity', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var hypersignDID, params, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        hypersignDID = new did_1.default();
+                        params = {
+                            did: didDocId,
+                            ed25519verificationkey2020: true,
+                        };
+                        return [4 /*yield*/, hypersignDID.resolve(params)];
+                    case 1:
+                        result = _a.sent();
+                        (0, chai_1.expect)(result).to.be.a('object');
+                        (0, chai_1.expect)(result.didDocument.id).to.be.equal(didDocId);
+                        (0, chai_1.expect)(result.didDocumentMetadata).to.be.a('object');
+                        (0, chai_1.expect)(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.equal(publicKeyMultibase);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
 });
 describe('#deactivate() this is to deactivate didDocument based on didDocId', function () {
     it('should not be able to deactivate did document as privateKeyMultibase is null or empty', function () {

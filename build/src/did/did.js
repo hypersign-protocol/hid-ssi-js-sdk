@@ -130,14 +130,14 @@ var HypersignDID = /** @class */ (function () {
             return did;
         };
         var offlineSigner = params.offlineSigner, namespace = params.namespace, nodeRpcEndpoint = params.nodeRpcEndpoint, nodeRestEndpoint = params.nodeRestEndpoint;
-        if (offlineSigner) {
-            var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
-            var nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
-            this.didrpc = new didRPC_1.DIDRpc({ offlineSigner: offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
-        }
-        else {
-            this.didrpc = null;
-        }
+        var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
+        var nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
+        var rpcConstructorParams = {
+            offlineSigner: offlineSigner,
+            nodeRpcEndpoint: nodeRPCEp,
+            nodeRestEndpoint: nodeRestEp,
+        };
+        this.didrpc = new didRPC_1.DIDRpc(rpcConstructorParams);
         this.namespace = namespace ? namespace : '';
     }
     HypersignDID.prototype.init = function () {
@@ -302,7 +302,7 @@ var HypersignDID = /** @class */ (function () {
                             didDoc = result.didDocument;
                             verificationMethods = didDoc.verificationMethod;
                             verificationMethods.forEach(function (verificationMethod) {
-                                if (verificationMethod.type === 'Ed25519VerificationKey2020') {
+                                if (verificationMethod.type === constant.DID.VERIFICATION_METHOD_TYPE) {
                                     var ed25519PublicKey = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
                                         publicKey: verificationMethod.publicKeyMultibase,
                                     });
