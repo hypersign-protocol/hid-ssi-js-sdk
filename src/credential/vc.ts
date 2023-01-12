@@ -381,7 +381,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to issue credential');
     }
 
-
     if (!this.credStatusRPC) {
       throw new Error(
         'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
@@ -532,7 +531,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     if (!params.issuerDid) {
       throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
     }
-    
 
     const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.issuerDid });
     const issuerDidDoc: Did = issuerDID as Did;

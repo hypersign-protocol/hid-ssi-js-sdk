@@ -33,7 +33,7 @@ const credentialBody = {
   type: [],
   issuerDid: '',
   fields: { name: 'Varsha' },
-  expirationDate: ''
+  expirationDate: '',
 };
 const schemaBody = {
   name: 'testSchema',
@@ -345,7 +345,7 @@ describe('Verifiable Credential Opearations', () => {
 
       const hypersignVC1 = new HypersignVerifiableCredential();
       const credentialDetail = await hypersignVC1.generate(tempCredentialBody);
-      
+
       expect(credentialDetail).to.be.a('object');
       should().exist(credentialDetail['@context']);
       should().exist(credentialDetail['id']);
@@ -359,7 +359,6 @@ describe('Verifiable Credential Opearations', () => {
       expect(credentialDetail['credentialStatus'].type).to.be.equal('CredentialStatusList2017');
     });
 
-  
     it('should be able to generate new credential for a schema with signed subject DID doc', async function () {
       const expirationDate = new Date('12/11/2027');
       const tempCredentialBody = { ...credentialBody };
@@ -384,8 +383,6 @@ describe('Verifiable Credential Opearations', () => {
       should().exist(credentialDetail['credentialStatus']);
       expect(credentialDetail['credentialStatus'].type).to.be.equal('CredentialStatusList2017');
     });
-
-   
   });
 
   describe('#issueCredential() method for issuing credential', function () {
@@ -570,7 +567,7 @@ describe('Verifiable Credential Opearations', () => {
 
       const hypersignVC1 = new HypersignVerifiableCredential();
       const verificationResult = await hypersignVC1.verify(params);
-      
+
       expect(verificationResult).to.be.a('object');
       should().exist(verificationResult['verified']);
       expect(verificationResult['verified']).to.be.equal(true);

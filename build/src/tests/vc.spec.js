@@ -80,6 +80,7 @@ var credentialBody = {
     type: [],
     issuerDid: '',
     fields: { name: 'Varsha' },
+    expirationDate: '',
 };
 var schemaBody = {
     name: 'testSchema',
@@ -418,7 +419,7 @@ describe('Verifiable Credential Opearations', function () {
                     tempCredentialBody = __assign({}, credentialBody);
                     tempCredentialBody.schemaId = schemaId;
                     tempCredentialBody['subjectDidDocSigned'] = signedDocument;
-                    tempCredentialBody['expirationDate'] = expirationDate;
+                    tempCredentialBody['expirationDate'] = expirationDate.toString();
                     tempCredentialBody.issuerDid = didDocId;
                     return [2 /*return*/, hypersignVC.generate(tempCredentialBody).catch(function (err) {
                             (0, chai_1.expect)(function () {
@@ -436,7 +437,7 @@ describe('Verifiable Credential Opearations', function () {
                     tempCredentialBody = __assign({}, credentialBody);
                     tempCredentialBody.schemaId = schemaId;
                     tempCredentialBody['subjectDidDocSigned'] = signedDocument;
-                    tempCredentialBody['expirationDate'] = expirationDate;
+                    tempCredentialBody['expirationDate'] = expirationDate.toString();
                     tempCredentialBody.issuerDid = didDocId;
                     tempCredentialBody.fields['type'] = 'string';
                     tempCredentialBody.fields['value'] = 'Varsha';
@@ -459,7 +460,7 @@ describe('Verifiable Credential Opearations', function () {
                             tempCredentialBody = __assign({}, credentialBody);
                             tempCredentialBody.schemaId = schemaId;
                             tempCredentialBody.subjectDid = didDocId;
-                            tempCredentialBody['expirationDate'] = expirationDate;
+                            tempCredentialBody['expirationDate'] = expirationDate.toString();
                             tempCredentialBody.issuerDid = didDocId;
                             tempCredentialBody.fields = { name: 'varsha' };
                             return [4 /*yield*/, hypersignVC.generate(tempCredentialBody)];
@@ -484,6 +485,39 @@ describe('Verifiable Credential Opearations', function () {
                 });
             });
         });
+        it('should be able to generate new credential even without offlinesigner passed to constructor', function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var expirationDate, tempCredentialBody, hypersignVC1, credentialDetail;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            expirationDate = new Date('12/11/2027');
+                            tempCredentialBody = __assign({}, credentialBody);
+                            tempCredentialBody.schemaId = schemaId;
+                            tempCredentialBody.subjectDid = didDocId;
+                            tempCredentialBody['expirationDate'] = expirationDate.toString();
+                            tempCredentialBody.issuerDid = didDocId;
+                            tempCredentialBody.fields = { name: 'varsha' };
+                            hypersignVC1 = new index_1.HypersignVerifiableCredential();
+                            return [4 /*yield*/, hypersignVC1.generate(tempCredentialBody)];
+                        case 1:
+                            credentialDetail = _a.sent();
+                            (0, chai_1.expect)(credentialDetail).to.be.a('object');
+                            (0, chai_1.should)().exist(credentialDetail['@context']);
+                            (0, chai_1.should)().exist(credentialDetail['id']);
+                            (0, chai_1.should)().exist(credentialDetail['type']);
+                            (0, chai_1.should)().exist(credentialDetail['expirationDate']);
+                            (0, chai_1.should)().exist(credentialDetail['issuanceDate']);
+                            (0, chai_1.should)().exist(credentialDetail['issuer']);
+                            (0, chai_1.should)().exist(credentialDetail['credentialSubject']);
+                            (0, chai_1.should)().exist(credentialDetail['credentialSchema']);
+                            (0, chai_1.should)().exist(credentialDetail['credentialStatus']);
+                            (0, chai_1.expect)(credentialDetail['credentialStatus'].type).to.be.equal('CredentialStatusList2017');
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        });
         it('should be able to generate new credential for a schema with signed subject DID doc', function () {
             return __awaiter(this, void 0, void 0, function () {
                 var expirationDate, tempCredentialBody, credentialDetail;
@@ -494,7 +528,7 @@ describe('Verifiable Credential Opearations', function () {
                             tempCredentialBody = __assign({}, credentialBody);
                             tempCredentialBody.schemaId = schemaId;
                             tempCredentialBody['subjectDidDocSigned'] = signedDocument;
-                            tempCredentialBody['expirationDate'] = expirationDate;
+                            tempCredentialBody['expirationDate'] = expirationDate.toString();
                             tempCredentialBody.issuerDid = didDocId;
                             tempCredentialBody.fields = { name: 'varsha' };
                             return [4 /*yield*/, hypersignVC.generate(tempCredentialBody)];
@@ -674,7 +708,7 @@ describe('Verifiable Credential Opearations', function () {
                             tempCredentialBody = __assign({}, credentialBody);
                             tempCredentialBody.schemaId = schemaId;
                             tempCredentialBody['subjectDidDocSigned'] = signedDocument;
-                            tempCredentialBody['expirationDate'] = expirationDate;
+                            tempCredentialBody['expirationDate'] = expirationDate.toString();
                             tempCredentialBody.issuerDid = didDocId;
                             tempCredentialBody.fields = { name: 'varsha' };
                             return [4 /*yield*/, hypersignVC.generate(tempCredentialBody)];
@@ -732,6 +766,33 @@ describe('Verifiable Credential Opearations', function () {
                             (0, chai_1.expect)(verificationResult.results).to.be.a('array');
                             (0, chai_1.should)().exist(verificationResult.statusResult);
                             (0, chai_1.expect)(verificationResult.statusResult.verified).to.be.equal(true);
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        });
+        it('should be able to verify even without offlinesigner passed to constructor', function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var params, hypersignVC1, verificationResult;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            params = {
+                                credential: signedVC,
+                                issuerDid: didDocId,
+                                verificationMethodId: verificationMethodId,
+                            };
+                            hypersignVC1 = new index_1.HypersignVerifiableCredential();
+                            return [4 /*yield*/, hypersignVC1.verify(params)];
+                        case 1:
+                            verificationResult = _a.sent();
+                            (0, chai_1.expect)(verificationResult).to.be.a('object');
+                            (0, chai_1.should)().exist(verificationResult['verified']);
+                            (0, chai_1.expect)(verificationResult['verified']).to.be.equal(true);
+                            (0, chai_1.should)().exist(verificationResult['results']);
+                            (0, chai_1.expect)(verificationResult['results']).to.be.a('array');
+                            (0, chai_1.should)().exist(verificationResult['statusResult']);
+                            (0, chai_1.expect)(verificationResult['statusResult'].verified).to.be.equal(true);
                             return [2 /*return*/];
                     }
                 });

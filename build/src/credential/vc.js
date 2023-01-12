@@ -130,17 +130,10 @@ var HypersignVerifiableCredential = /** @class */ (function () {
         this.namespace = namespace && namespace != '' ? namespace : '';
         var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
         var nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
-        if (offlineSigner) {
-            var offlineConstuctorParams = { offlineSigner: offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
-            this.credStatusRPC = new credRPC_1.CredentialRPC(offlineConstuctorParams);
-            this.hsDid = new did_1.default(offlineConstuctorParams);
-            this.hsSchema = new schema_1.default(offlineConstuctorParams);
-        }
-        else {
-            this.credStatusRPC = null;
-            this.hsDid = null;
-            this.hsSchema = null;
-        }
+        var offlineConstuctorParams = { offlineSigner: offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
+        this.credStatusRPC = new credRPC_1.CredentialRPC(offlineConstuctorParams);
+        this.hsDid = new did_1.default(offlineConstuctorParams);
+        this.hsSchema = new schema_1.default(offlineConstuctorParams);
         this.context = [];
         this.id = '';
         this.type = [];
@@ -216,17 +209,11 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
+                        if (!this.credStatusRPC) {
                             throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
                         }
                         return [4 /*yield*/, this.credStatusRPC.init()];
                     case 1:
-                        _a.sent();
-                        return [4 /*yield*/, this.hsDid.init()];
-                    case 2:
-                        _a.sent();
-                        return [4 /*yield*/, this.hsSchema.init()];
-                    case 3:
                         _a.sent();
                         return [2 /*return*/];
                 }
@@ -255,7 +242,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         if (params.subjectDid && params.subjectDidDocSigned) {
                             throw new Error('HID-SSI-SDK:: Error: Both subjectDid and subjectDidDoc cannot be passed');
                         }
-                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
+                        if (!this.credStatusRPC) {
                             throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
                         }
                         issuerDid = params.issuerDid;
@@ -410,11 +397,11 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         if (!params.issuerDid) {
                             throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to issue credential');
                         }
+                        if (!this.credStatusRPC) {
+                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
+                        }
                         if (params.registerCredential == undefined) {
                             params.registerCredential = true;
-                        }
-                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
-                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
                         }
                         return [4 /*yield*/, this.hsDid.resolve({ did: params.issuerDid })];
                     case 1:
@@ -527,9 +514,6 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         if (!params.issuerDid) {
                             throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
                         }
-                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
-                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
-                        }
                         return [4 /*yield*/, this.hsDid.resolve({ did: params.issuerDid })];
                     case 1:
                         issuerDID = (_a.sent()).didDocument;
@@ -590,9 +574,6 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                     case 0:
                         if (!params || !params.credentialId)
                             throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
-                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
-                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
-                        }
                         return [4 /*yield*/, this.credStatusRPC.resolveCredentialStatus(params.credentialId)];
                     case 1:
                         credentialStatus = _a.sent();
@@ -633,7 +614,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         if (!params.status) {
                             throw new Error('HID-SSI-SDK:: Error: params.status is required to update credential status');
                         }
-                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
+                        if (!this.credStatusRPC) {
                             throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
                         }
                         return [4 /*yield*/, this.hsDid.resolve({ did: params.issuerDid })];
@@ -721,9 +702,6 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         if (!params || !params.credentialId)
                             throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
                         credentialId = params.credentialId;
-                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
-                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
-                        }
                         return [4 /*yield*/, this.credStatusRPC.resolveCredentialStatus(credentialId)];
                     case 1:
                         credentialStatus = _a.sent();
@@ -754,7 +732,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         credentialStatus = params.credentialStatus, credentialStatusProof = params.credentialStatusProof;
                         if (!credentialStatus || !credentialStatusProof)
                             throw new Error('HID-SSI-SDK:: Error: credentialStatus and credentialStatusProof are required to register credential status');
-                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
+                        if (!this.credStatusRPC) {
                             throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
                         }
                         return [4 /*yield*/, this.credStatusRPC.registerCredentialStatus(credentialStatus, credentialStatusProof)];
@@ -776,7 +754,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                     case 0:
                         if (!credentialStatus || !proof)
                             throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
-                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
+                        if (!this.credStatusRPC) {
                             throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
                         }
                         return [4 /*yield*/, this.credStatusRPC.generateCredentialStatusTxnMessage(credentialStatus, proof)];
@@ -795,7 +773,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                     case 0:
                         if (!txnMessage)
                             throw new Error('HID-SSI-SDK:: Error: txnMessage is required to register credential status');
-                        if (!this.credStatusRPC || !this.hsDid || !this.hsSchema) {
+                        if (!this.credStatusRPC) {
                             throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
                         }
                         return [4 /*yield*/, this.credStatusRPC.registerCredentialStatusBulk(txnMessage)];

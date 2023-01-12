@@ -26,7 +26,7 @@ export class CredentialRPC implements ICredentialRPC {
     nodeRpcEndpoint: string;
     nodeRestEndpoint: string;
   }) {
-    if(offlineSigner){
+    if (offlineSigner) {
       this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
     } else {
       this.hidClient = null;
@@ -105,7 +105,7 @@ export class CredentialRPC implements ICredentialRPC {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
     }
-    
+
     const fee = 'auto';
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult: DeliverTxResponse = await hidClient.signAndBroadcast(
