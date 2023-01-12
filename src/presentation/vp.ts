@@ -28,12 +28,14 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
   holder: string;
   proof: object;
   namespace: string;
-  constructor(params: {
-    namespace?: string;
-    offlineSigner?: OfflineSigner;
-    nodeRpcEndpoint?: string;
-    nodeRestEndpoint?: string;
-  } = {}) {
+  constructor(
+    params: {
+      namespace?: string;
+      offlineSigner?: OfflineSigner;
+      nodeRpcEndpoint?: string;
+      nodeRestEndpoint?: string;
+    } = {}
+  ) {
     const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint } = params;
 
     this.namespace = namespace && namespace != '' ? namespace : '';
@@ -78,7 +80,6 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     await this.vc.init();
     await this.hsDid.init();
   }
-  
 
   /**
    * Generates a new presentation document
@@ -87,10 +88,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
    *  - params.holderDid            : DID of the subject
    * @returns {Promise<object>}
    */
-  async generate(params: {
-    verifiableCredentials: Array<IVerifiableCredential>;
-    holderDid: string;
-  }): Promise<object> {
+  async generate(params: { verifiableCredentials: Array<IVerifiableCredential>; holderDid: string }): Promise<object> {
     const id = await this._getId();
     const presentation = vc.createPresentation({
       verifiableCredential: params.verifiableCredentials,
@@ -106,7 +104,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
    *  - params.presentation         : Array of Verifiable Credentials
    *  - params.holderDid            : DID of the subject
    *  - params.holderDidDocSigned   : DID of the subject
-   *  - params.verificationMethodId : verificationMethodId of holder 
+   *  - params.verificationMethodId : verificationMethodId of holder
    *  - params.privateKey           :
    *  - params.challenge            :
    * @returns {Promise<object>}
@@ -115,7 +113,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     presentation: IVerifiablePresentation;
     holderDid?: string;
     holderDidDocSigned?: JSON;
-    verificationMethodId: string; 
+    verificationMethodId: string;
     privateKey: string;
     challenge: string;
   }): Promise<object> {
@@ -358,7 +356,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
             'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
           );
         }
-        return await that.vc.checkCredentialStatus({credentialId :options.credential.id});
+        return await that.vc.checkCredentialStatus({ credentialId: options.credential.id });
       },
     });
 

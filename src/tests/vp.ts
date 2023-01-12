@@ -1,5 +1,10 @@
 import { expect, should } from 'chai';
-import { HypersignDID, HypersignSchema, HypersignVerifiableCredential, HypersignVerifiablePresentation } from '../index';
+import {
+  HypersignDID,
+  HypersignSchema,
+  HypersignVerifiableCredential,
+  HypersignVerifiablePresentation,
+} from '../index';
 import { createWallet, mnemonic, hidNodeEp } from './config';
 import { ICredentialStatus, IVerifiableCredential } from '../credential/ICredential';
 
@@ -21,7 +26,7 @@ let hypersignDID;
 let hypersignSchema;
 let hypersignVC;
 let signedSchema;
-let credentialStatusId
+let credentialStatusId;
 let signedVC: IVerifiableCredential;
 let credenStatus: ICredentialStatus;
 let hypersignVP;
@@ -320,9 +325,7 @@ describe('Verifiable Presentation Operataions', () => {
       holderDid: didDocId,
     };
 
-
     it('should be able to gnerate a new presentation document', async () => {
-
       const tempPresentationBody = { ...presentationBody };
       tempPresentationBody.verifiableCredentials[0] = credentialDetail;
       tempPresentationBody.holderDid = didDocId;
@@ -330,8 +333,8 @@ describe('Verifiable Presentation Operataions', () => {
       console.log(JSON.stringify(tempPresentationBody, null, 2));
 
       unsignedverifiablePresentation = await hypersignVP.generate(tempPresentationBody);
-      console.log(JSON.stringify(unsignedverifiablePresentation, null, 2))
-      should().exist(unsignedverifiablePresentation['@context'])
+      console.log(JSON.stringify(unsignedverifiablePresentation, null, 2));
+      should().exist(unsignedverifiablePresentation['@context']);
       should().exist(unsignedverifiablePresentation['type']);
       expect(unsignedverifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
       should().exist(unsignedverifiablePresentation['verifiableCredential']);
@@ -340,19 +343,17 @@ describe('Verifiable Presentation Operataions', () => {
       should().exist(unsignedverifiablePresentation['holder']);
       verifiableCredentialPresentationId = unsignedverifiablePresentation.id;
       expect(unsignedverifiablePresentation['verifiableCredential'][0].id).to.be.equal(credentialId);
-
-    })
-  })
+    });
+  });
   describe('#sign() method to sign presentation document', () => {
-
     const signPresentationBody = {
-          presentation: unsignedverifiablePresentation,
-          holderDid: didDocId,
-          verificationMethodId,
-          privateKey: privateKeyMultibase,
-          challenge,
+      presentation: unsignedverifiablePresentation,
+      holderDid: didDocId,
+      verificationMethodId,
+      privateKey: privateKeyMultibase,
+      challenge,
     };
-    it('should be able a sign presentation document', async() => {
+    it('should be able a sign presentation document', async () => {
       const tempSignPresentationBody = { ...signPresentationBody };
       tempSignPresentationBody.presentation = unsignedverifiablePresentation;
       tempSignPresentationBody.holderDid = didDocId;
@@ -367,43 +368,42 @@ describe('Verifiable Presentation Operataions', () => {
       expect(signedVerifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
       should().exist(signedVerifiablePresentation['verifiableCredential']);
       expect(signedVerifiablePresentation.id).to.be.equal(verifiableCredentialPresentationId);
-    })
-  })
+    });
+  });
 
   describe('#verify() method to verify a signed presentation document', () => {
-       const verifyPresentationBody = {
-          signedPresentation: signedVerifiablePresentation,
-          holderDid: didDocId,
-          holderVerificationMethodId: verificationMethodId,
-          issuerVerificationMethodId: verificationMethodId,
-          privateKey: privateKeyMultibase,
-          challenge,
-          issuerDid: didDocId,
-       }
+    const verifyPresentationBody = {
+      signedPresentation: signedVerifiablePresentation,
+      holderDid: didDocId,
+      holderVerificationMethodId: verificationMethodId,
+      issuerVerificationMethodId: verificationMethodId,
+      privateKey: privateKeyMultibase,
+      challenge,
+      issuerDid: didDocId,
+    };
     it('should be able a verify sgned presentation document', async () => {
       const tempverifyPresentationBody = { ...verifyPresentationBody };
-          tempverifyPresentationBody.signedPresentation = signedVerifiablePresentation;
-          tempverifyPresentationBody.issuerDid = didDocId;
-          tempverifyPresentationBody.holderDid = didDocId;
-          tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
-          tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
-          tempverifyPresentationBody.challenge = didDocId;
+      tempverifyPresentationBody.signedPresentation = signedVerifiablePresentation;
+      tempverifyPresentationBody.issuerDid = didDocId;
+      tempverifyPresentationBody.holderDid = didDocId;
+      tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
+      tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
+      tempverifyPresentationBody.challenge = didDocId;
 
-          console.log(JSON.stringify(tempverifyPresentationBody, null, 2));
+      console.log(JSON.stringify(tempverifyPresentationBody, null, 2));
 
-          const verifiedPresentationDetail = await hypersignVP.verify(tempverifyPresentationBody);
-          console.log(JSON.stringify(verifiedPresentationDetail, null, 2));
-          
-          should().exist(verifiedPresentationDetail.verified);
-          expect(verifiedPresentationDetail.verified).to.be.equal(true);
-          expect(verifiedPresentationDetail).to.be.a('object');
-          should().exist(verifiedPresentationDetail.results);
-          expect(verifiedPresentationDetail.results).to.be.a('array');
-          should().exist(verifiedPresentationDetail.credentialResults);
-          expect(verifiedPresentationDetail.credentialResults).to.be.a('array');
-          expect(verifiedPresentationDetail.credentialResults[0].verified).to.be.equal(true);
-          expect(verifiedPresentationDetail.credentialResults[0].credentialId).to.be.equal(credentialId);
-      
-    })
-  })
-})
+      const verifiedPresentationDetail = await hypersignVP.verify(tempverifyPresentationBody);
+      console.log(JSON.stringify(verifiedPresentationDetail, null, 2));
+
+      should().exist(verifiedPresentationDetail.verified);
+      expect(verifiedPresentationDetail.verified).to.be.equal(true);
+      expect(verifiedPresentationDetail).to.be.a('object');
+      should().exist(verifiedPresentationDetail.results);
+      expect(verifiedPresentationDetail.results).to.be.a('array');
+      should().exist(verifiedPresentationDetail.credentialResults);
+      expect(verifiedPresentationDetail.credentialResults).to.be.a('array');
+      expect(verifiedPresentationDetail.credentialResults[0].verified).to.be.equal(true);
+      expect(verifiedPresentationDetail.credentialResults[0].credentialId).to.be.equal(credentialId);
+    });
+  });
+});

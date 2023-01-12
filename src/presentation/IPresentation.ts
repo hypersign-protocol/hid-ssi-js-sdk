@@ -4,7 +4,7 @@ import { IVerifiableCredential } from '../credential/ICredential';
 //     id: string;
 //     type: string;
 //   }
-  
+
 // https://www.w3.org/TR/vc-data-model/#basic-concepts
 // export interface IVerifiableCredential {
 //     '@context': Array<string>;
@@ -17,36 +17,34 @@ import { IVerifiableCredential } from '../credential/ICredential';
 //     credentialSchema: ISchema;
 //     proof: object;
 //}
-  
+
 // https://www.w3.org/TR/vc-data-model/#presentations-0
 export interface IVerifiablePresentation {
-    id: string;
-    type: Array<string>;
-    verifiableCredential: Array<IVerifiableCredential>;
-    holder: string;
-    proof: object;
-  }
-  
+  id: string;
+  type: Array<string>;
+  verifiableCredential: Array<IVerifiableCredential>;
+  holder: string;
+  proof: object;
+}
+
 export interface IPresentationMethods {
-    generate(params: { 
-      verifiableCredentials: Array<IVerifiableCredential>; 
-      holderDid: string }): Promise<object>;
-    
-    sign(params: {
-      presentation: IVerifiablePresentation;
-      holderDid: string;
-      privateKey: string;
-      challenge: string;
-      verificationMethodId: string;
-    }): Promise<object>;
-    
-    verify(params: {
-      signedPresentation: IVerifiablePresentation;
-      challenge: string;
-      domain?: string;
-      issuerDid: string;
-      holderDid: string;
-      holderVerificationMethodId: string;
-      issuerVerificationMethodId: string;
-    }): Promise<object>;
-  }
+  generate(params: { verifiableCredentials: Array<IVerifiableCredential>; holderDid: string }): Promise<object>;
+
+  sign(params: {
+    presentation: IVerifiablePresentation;
+    holderDid: string;
+    privateKey: string;
+    challenge: string;
+    verificationMethodId: string;
+  }): Promise<object>;
+
+  verify(params: {
+    signedPresentation: IVerifiablePresentation;
+    challenge: string;
+    domain?: string;
+    issuerDid: string;
+    holderDid: string;
+    holderVerificationMethodId: string;
+    issuerVerificationMethodId: string;
+  }): Promise<object>;
+}

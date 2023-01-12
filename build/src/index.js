@@ -39,12 +39,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HypersignVerifiableCredential = exports.HypersignSchema = exports.HypersignDID = exports.HypersignSSISdk = void 0;
+exports.HypersignVerifiablePresentation = exports.HypersignVerifiableCredential = exports.HypersignSchema = exports.HypersignDID = exports.HypersignSSISdk = void 0;
 var did_1 = __importDefault(require("./did/did"));
 exports.HypersignDID = did_1.default;
 var vc_1 = __importDefault(require("./credential/vc"));
 exports.HypersignVerifiableCredential = vc_1.default;
-var vp_1 = __importDefault(require("./credential/vp"));
+var vp_1 = __importDefault(require("./presentation/vp"));
+exports.HypersignVerifiablePresentation = vp_1.default;
 var schema_1 = __importDefault(require("./schema/schema"));
 exports.HypersignSchema = schema_1.default;
 var client_1 = require("./hid/client");
@@ -72,7 +73,7 @@ var HypersignSSISdk = /** @class */ (function () {
                         this.did = new did_1.default({ namespace: this.namespace });
                         this.schema = new schema_1.default({ namespace: this.namespace });
                         this.vc = new vc_1.default({ namespace: this.namespace });
-                        this.vp = new vp_1.default(this.namespace);
+                        this.vp = new vp_1.default({ namespace: this.namespace });
                         return [2 /*return*/];
                 }
             });
