@@ -27,19 +27,30 @@ export class SchemaRpc implements ISchemaRPC {
     nodeRpcEndpoint,
     nodeRestEndpoint,
   }: {
-    offlineSigner: OfflineSigner;
+    offlineSigner?: OfflineSigner;
     nodeRpcEndpoint: string;
     nodeRestEndpoint: string;
   }) {
-    this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+    if(offlineSigner){
+      this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+    } else {
+      this.hidClient = null;
+    }
     this.schemaRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_SCHEMA_PATH;
   }
 
   async init() {
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: SchemaRpc class is not initialise with offlinesigner');
+    }
     await this.hidClient.init();
   }
 
   async createSchema(schema: Schema, proof: SchemaProof): Promise<object> {
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: SchemaRpc class is not initialise with offlinesigner');
+    }
+    
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateSchema}`;
 
     const txMessage = {

@@ -35,11 +35,8 @@ export default class HyperSignSchema implements ISchemaMethods {
     const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint } = params;
     const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
-    if (offlineSigner) {
-      this.schemaRpc = new SchemaRpc({ offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
-    } else {
-      this.schemaRpc = null;
-    }
+    this.schemaRpc = new SchemaRpc({ offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
+
     this.namespace = namespace && namespace != '' ? namespace : '';
     (this.type = constants.SCHEMA.SCHEMA_TYPE),
       (this.modelVersion = '1.0'),

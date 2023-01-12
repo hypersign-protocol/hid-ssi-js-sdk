@@ -322,4 +322,18 @@ describe('#resolve() this is to resolve schema', function () {
     expect(result.proof.verificationMethod).to.be.equal(verificationMethod);
     expect(result.proof).to.be.a('object');
   });
+
+  it('should be able to resolve schema  even without offline signer passed to the constructor; making resolve RPC offchain activity', async function () {
+    const hypersignSchema = new HypersignSchema();    
+    const params = {
+      schemaId,
+    };
+    const result = await hypersignSchema.resolve(params);
+    expect(result).to.be.a('object');
+    expect(result.id).to.be.equal(schemaId);
+    expect(result.proof).to.be.a('object');
+    if(result.proof){
+      expect(result.proof.verificationMethod).to.be.equal(verificationMethod);  
+    }
+  });
 });
