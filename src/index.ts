@@ -1,6 +1,6 @@
 import HypersignDID from './did/did';
 import HypersignVerifiableCredential  from './credential/vc'
-import VP  from './credential/vp'
+import HypersignVerifiablePresentation  from './presentation/vp'
 import HypersignSchema from './schema/schema';
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { HIDClient } from './hid/client'
@@ -37,7 +37,7 @@ class HypersignSSISdk{
         this.did = new HypersignDID({ namespace: this.namespace });
         this.schema = new HypersignSchema({ namespace: this.namespace });
         this.vc = new HypersignVerifiableCredential({namespace: this.namespace});
-        this.vp = new VP(this.namespace);
+        this.vp = new HypersignVerifiablePresentation({namespace:  this.namespace});
     }
 
 }
@@ -46,5 +46,6 @@ export  {
     HypersignSSISdk,
     HypersignDID,
     HypersignSchema,
-    HypersignVerifiableCredential
+    HypersignVerifiableCredential,
+    HypersignVerifiablePresentation
 }
