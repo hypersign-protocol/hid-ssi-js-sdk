@@ -157,11 +157,11 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
      * Signs a new presentation document
      * @params
      *  - params.presentation         : Array of Verifiable Credentials
-     *  - params.holderDid            : DID of the subject
-     *  - params.holderDidDocSigned   : DID of the subject
+     *  - params.holderDid            : *Optional* DID of the subject
+     *  - params.holderDidDocSigned   : *Optional* DID Doc of the subject
      *  - params.verificationMethodId : verificationMethodId of holder
-     *  - params.privateKey           :
-     *  - params.challenge            :
+     *  - params.privateKeyMultibase  : Private key associated with the verification method
+     *  - params.challenge            : Any random challenge
      * @returns {Promise<object>}
      */
     HypersignVerifiablePresentation.prototype.sign = function (params) {
@@ -173,8 +173,8 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                         if (params.holderDid && params.holderDidDocSigned) {
                             throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
                         }
-                        if (!params.privateKey) {
-                            throw new Error('HID-SSI-SDK:: params.privateKey is required for signinng a presentation');
+                        if (!params.privateKeyMultibase) {
+                            throw new Error('HID-SSI-SDK:: params.privateKeyMultibase is required for signing a presentation');
                         }
                         if (!params.presentation) {
                             throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
@@ -210,7 +210,7 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                             publicKey: publicKeyVerMethod.publicKeyMultibase,
                         });
                         publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
-                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: params.privateKey }, publicKeyVerMethod))];
+                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: params.privateKeyMultibase }, publicKeyVerMethod))];
                     case 4:
                         keyPair = _a.sent();
                         suite = new ed25519_signature_2020_1.Ed25519Signature2020({
@@ -232,10 +232,16 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
     };
     // https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L392
     /**
-     * Verifies signed presentation documen
+     * Verifies signed presentation document
      * @params
-     *  - params.verifiableCredentials: Array of Verifiable Credentials
-     *  - params.holderDid            : DID of the subject
+     *  - params.signedPresentation         : Signed presentation document
+     *  - params.holderDid                  : DID of the subject
+     *  - params.holderDidDocSigned         : DIDdocument of the subject
+     *  - params.holderVerificationMethodId : verificationMethodId of holder
+     *  - params.issuerDid                  : DID of the issuer
+     *  - params.issuerVerificationMethodId : Optional DIDDoc of the issuer
+     *  - params.domain                     : Optional domain
+     *  - params.challenge                  : Random challenge
      * @returns {Promise<object>}
      */
     HypersignVerifiablePresentation.prototype.verify = function (params) {
@@ -261,6 +267,9 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                         }
                         if (!this.vc || !this.hsDid) {
                             throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
+                        }
+                        if (!params.signedPresentation.proof) {
+                            throw new Error('HID-SSI-SDK:: params.signedPresentation must be signed');
                         }
                         if (!params.holderDid) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.hsDid.resolve({ did: params.holderDid })];

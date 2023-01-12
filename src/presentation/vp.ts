@@ -237,7 +237,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       );
     }
 
-    if(!params.signedPresentation.proof){
+    if (!params.signedPresentation.proof) {
       throw new Error('HID-SSI-SDK:: params.signedPresentation must be signed');
     }
 

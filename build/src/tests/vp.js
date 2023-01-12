@@ -477,9 +477,84 @@ describe('Verifiable Presentation Operataions', function () {
             presentation: unsignedverifiablePresentation,
             holderDid: didDocId,
             verificationMethodId: verificationMethodId,
-            privateKey: privateKeyMultibase,
+            privateKeyMultibase: privateKeyMultibase,
             challenge: challenge,
         };
+        it('should not be able to sign presentation as either holderDid or holderDidDocSigned is required but passed both', function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var tempSignPresentationBody;
+                return __generator(this, function (_a) {
+                    tempSignPresentationBody = __assign({}, signPresentationBody);
+                    tempSignPresentationBody.presentation = unsignedverifiablePresentation;
+                    tempSignPresentationBody.holderDid = didDocId;
+                    tempSignPresentationBody.verificationMethodId = verificationMethodId;
+                    tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
+                    tempSignPresentationBody['holderDidDocSigned'] = signedDocument;
+                    return [2 /*return*/, hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
+                            (0, chai_1.expect)(function () {
+                                throw err;
+                            }).to.throw(Error, 'HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
+                        })];
+                });
+            });
+        });
+        it('should not be able to sign presentation as privateKeyMultibase in null or empty', function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var tempSignPresentationBody;
+                return __generator(this, function (_a) {
+                    tempSignPresentationBody = __assign({}, signPresentationBody);
+                    tempSignPresentationBody.privateKeyMultibase = '';
+                    return [2 /*return*/, hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
+                            (0, chai_1.expect)(function () {
+                                throw err;
+                            }).to.throw(Error, 'HID-SSI-SDK:: params.privateKeyMultibase is required for signing a presentation');
+                        })];
+                });
+            });
+        });
+        // it('should not be able to sign presentation as either holderDid or holderDidDocSigned is required but passed both', async function () {
+        //   const tempSignPresentationBody = { ...signPresentationBody };
+        //   tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
+        //   tempSignPresentationBody.presentation = {} as IVerifiablePresentation;
+        //   return hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
+        //     expect(function () {
+        //       throw err;
+        //     }).to.throw(Error, 'HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+        //   });
+        // });
+        it('should not be able to sign presentation as challenge is not passed', function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var tempSignPresentationBody;
+                return __generator(this, function (_a) {
+                    tempSignPresentationBody = __assign({}, signPresentationBody);
+                    tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
+                    tempSignPresentationBody.presentation = unsignedverifiablePresentation;
+                    tempSignPresentationBody.challenge = '';
+                    return [2 /*return*/, hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
+                            (0, chai_1.expect)(function () {
+                                throw err;
+                            }).to.throw(Error, 'HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+                        })];
+                });
+            });
+        });
+        it('should not be able to sign presentation as verificationMethodId is not passed', function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var tempSignPresentationBody;
+                return __generator(this, function (_a) {
+                    tempSignPresentationBody = __assign({}, signPresentationBody);
+                    tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
+                    tempSignPresentationBody.presentation = unsignedverifiablePresentation;
+                    tempSignPresentationBody.challenge = challenge;
+                    tempSignPresentationBody.verificationMethodId = '';
+                    return [2 /*return*/, hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
+                            (0, chai_1.expect)(function () {
+                                throw err;
+                            }).to.throw(Error, 'HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+                        })];
+                });
+            });
+        });
         it('should be able a sign presentation document', function () { return __awaiter(void 0, void 0, void 0, function () {
             var tempSignPresentationBody;
             return __generator(this, function (_a) {
@@ -489,7 +564,7 @@ describe('Verifiable Presentation Operataions', function () {
                         tempSignPresentationBody.presentation = unsignedverifiablePresentation;
                         tempSignPresentationBody.holderDid = didDocId;
                         tempSignPresentationBody.verificationMethodId = verificationMethodId;
-                        tempSignPresentationBody.privateKey = privateKeyMultibase;
+                        tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
                         return [4 /*yield*/, hypersignVP.sign(tempSignPresentationBody)];
                     case 1:
                         signedVerifiablePresentation = _a.sent();
@@ -514,6 +589,87 @@ describe('Verifiable Presentation Operataions', function () {
             challenge: challenge,
             issuerDid: didDocId,
         };
+        it('should not be able to verify presentation as either holderDid or holderDidDocSigned is required but passed both', function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var tempverifyPresentationBody;
+                return __generator(this, function (_a) {
+                    tempverifyPresentationBody = __assign({}, verifyPresentationBody);
+                    tempverifyPresentationBody.signedPresentation = signedVerifiablePresentation;
+                    tempverifyPresentationBody.holderDid = didDocId;
+                    tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
+                    tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
+                    tempverifyPresentationBody.privateKey = privateKeyMultibase;
+                    tempverifyPresentationBody['holderDidDocSigned'] = signedDocument;
+                    return [2 /*return*/, hypersignVP.verify(tempverifyPresentationBody).catch(function (err) {
+                            (0, chai_1.expect)(function () {
+                                throw err;
+                            }).to.throw(Error, 'HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
+                        })];
+                });
+            });
+        });
+        it('should not be able to verify presentation as issuerDid is null or empty', function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var tempverifyPresentationBody;
+                return __generator(this, function (_a) {
+                    tempverifyPresentationBody = __assign({}, verifyPresentationBody);
+                    tempverifyPresentationBody.issuerDid = '';
+                    return [2 /*return*/, hypersignVP.verify(tempverifyPresentationBody).catch(function (err) {
+                            (0, chai_1.expect)(function () {
+                                throw err;
+                            }).to.throw(Error, 'HID-SSI-SDK:: params.issuerDid is required for verifying a presentation');
+                        })];
+                });
+            });
+        });
+        it('should not be able to verify presentation as challenge is null or empty', function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var tempverifyPresentationBody;
+                return __generator(this, function (_a) {
+                    tempverifyPresentationBody = __assign({}, verifyPresentationBody);
+                    tempverifyPresentationBody.issuerDid = didDocId;
+                    tempverifyPresentationBody.challenge = '';
+                    return [2 /*return*/, hypersignVP.verify(tempverifyPresentationBody).catch(function (err) {
+                            (0, chai_1.expect)(function () {
+                                throw err;
+                            }).to.throw(Error, 'HID-SSI-SDK:: params.challenge is required for verifying a presentation');
+                        })];
+                });
+            });
+        });
+        it('should not be able to verify presentation as holderVerificationMethodId is null or empty', function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var tempverifyPresentationBody;
+                return __generator(this, function (_a) {
+                    tempverifyPresentationBody = __assign({}, verifyPresentationBody);
+                    tempverifyPresentationBody.issuerDid = didDocId;
+                    tempverifyPresentationBody.challenge = challenge;
+                    tempverifyPresentationBody.holderVerificationMethodId = '';
+                    return [2 /*return*/, hypersignVP.verify(tempverifyPresentationBody).catch(function (err) {
+                            (0, chai_1.expect)(function () {
+                                throw err;
+                            }).to.throw(Error, 'HID-SSI-SDK:: params.holderVerificationMethodId is required for verifying a presentation');
+                        })];
+                });
+            });
+        });
+        it('should not be able to verify presentation as issuerVerificationMethodId is null or empty', function () {
+            return __awaiter(this, void 0, void 0, function () {
+                var tempverifyPresentationBody;
+                return __generator(this, function (_a) {
+                    tempverifyPresentationBody = __assign({}, verifyPresentationBody);
+                    tempverifyPresentationBody.issuerDid = didDocId;
+                    tempverifyPresentationBody.challenge = challenge;
+                    tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
+                    tempverifyPresentationBody.issuerVerificationMethodId = '';
+                    return [2 /*return*/, hypersignVP.verify(tempverifyPresentationBody).catch(function (err) {
+                            (0, chai_1.expect)(function () {
+                                throw err;
+                            }).to.throw(Error, 'HID-SSI-SDK:: params.issuerVerificationMethodId is required for verifying a presentation');
+                        })];
+                });
+            });
+        });
         it('should be able a verify sgned presentation document', function () { return __awaiter(void 0, void 0, void 0, function () {
             var tempverifyPresentationBody, verifiedPresentationDetail;
             return __generator(this, function (_a) {
@@ -526,7 +682,6 @@ describe('Verifiable Presentation Operataions', function () {
                         tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
                         tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
                         tempverifyPresentationBody.challenge = didDocId;
-                        console.log(JSON.stringify(tempverifyPresentationBody, null, 2));
                         return [4 /*yield*/, hypersignVP.verify(tempverifyPresentationBody)];
                     case 1:
                         verifiedPresentationDetail = _a.sent();
