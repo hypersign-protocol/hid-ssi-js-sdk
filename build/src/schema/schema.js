@@ -74,7 +74,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var schema_1 = require("../generated/ssi/schema");
+var schema_1 = require("../../libs/generated/ssi/schema");
 var schemaRPC_1 = require("./schemaRPC");
 var constants = __importStar(require("../constants"));
 var utils_1 = __importDefault(require("../utils"));

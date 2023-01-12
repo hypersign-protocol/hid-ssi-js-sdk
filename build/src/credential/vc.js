@@ -65,7 +65,7 @@ var ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
 var ed25519 = require('@stablelib/ed25519');
 var credRPC_1 = require("./credRPC");
 var constants_1 = require("../constants");
-var credential_1 = require("../generated/ssi/credential");
+var credential_1 = require("../../libs/generated/ssi/credential");
 var crypto_1 = __importDefault(require("crypto"));
 var HypersignVerifiableCredential = /** @class */ (function () {
     function HypersignVerifiableCredential(params) {

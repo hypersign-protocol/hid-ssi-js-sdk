@@ -453,11 +453,11 @@ describe('Verifiable Presentation Operataions', function () {
                         tempPresentationBody = __assign({}, presentationBody);
                         tempPresentationBody.verifiableCredentials[0] = credentialDetail;
                         tempPresentationBody.holderDid = didDocId;
-                        console.log(JSON.stringify(tempPresentationBody, null, 2));
                         return [4 /*yield*/, hypersignVP.generate(tempPresentationBody)];
                     case 1:
+                        // console.log(JSON.stringify(tempPresentationBody, null, 2));
                         unsignedverifiablePresentation = _a.sent();
-                        console.log(JSON.stringify(unsignedverifiablePresentation, null, 2));
+                        // console.log(JSON.stringify(unsignedverifiablePresentation, null, 2));
                         (0, chai_1.should)().exist(unsignedverifiablePresentation['@context']);
                         (0, chai_1.should)().exist(unsignedverifiablePresentation['type']);
                         (0, chai_1.expect)(unsignedverifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
@@ -568,7 +568,7 @@ describe('Verifiable Presentation Operataions', function () {
                         return [4 /*yield*/, hypersignVP.sign(tempSignPresentationBody)];
                     case 1:
                         signedVerifiablePresentation = _a.sent();
-                        console.log(JSON.stringify(signedVerifiablePresentation, null, 2));
+                        // console.log(JSON.stringify(signedVerifiablePresentation, null, 2));
                         (0, chai_1.should)().exist(signedVerifiablePresentation['@context']);
                         (0, chai_1.should)().exist(signedVerifiablePresentation['type']);
                         (0, chai_1.expect)(signedVerifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
@@ -685,7 +685,7 @@ describe('Verifiable Presentation Operataions', function () {
                         return [4 /*yield*/, hypersignVP.verify(tempverifyPresentationBody)];
                     case 1:
                         verifiedPresentationDetail = _a.sent();
-                        console.log(JSON.stringify(verifiedPresentationDetail, null, 2));
+                        // console.log(JSON.stringify(verifiedPresentationDetail, null, 2));
                         (0, chai_1.should)().exist(verifiedPresentationDetail.verified);
                         (0, chai_1.expect)(verifiedPresentationDetail.verified).to.be.equal(true);
                         (0, chai_1.expect)(verifiedPresentationDetail).to.be.a('object');

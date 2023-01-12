@@ -65,7 +65,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CredentialRPC = void 0;
 var constants_1 = require("../constants");
-var generatedProto = __importStar(require("../generated/ssi/tx"));
+var generatedProto = __importStar(require("../../libs/generated/ssi/tx"));
 var axios_1 = __importDefault(require("axios"));
 var client_1 = require("../hid/client");
 var CredentialRPC = /** @class */ (function () {

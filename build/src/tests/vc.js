@@ -465,8 +465,8 @@ describe('Verifiable Credential Opearations', function () {
                             return [4 /*yield*/, hypersignVC.generate(tempCredentialBody)];
                         case 1:
                             credentialDetail = _a.sent();
-                            console.log('New Credential --------------------------------');
-                            console.log(JSON.stringify(credentialDetail, null, 2));
+                            // console.log('New Credential --------------------------------');
+                            // console.log(JSON.stringify(credentialDetail, null, 2));
                             (0, chai_1.expect)(credentialDetail).to.be.a('object');
                             (0, chai_1.should)().exist(credentialDetail['@context']);
                             (0, chai_1.should)().exist(credentialDetail['id']);
@@ -614,7 +614,6 @@ describe('Verifiable Credential Opearations', function () {
                             tempIssueCredentialBody.issuerDid = didDocId;
                             tempIssueCredentialBody.verificationMethodId = verificationMethodId;
                             tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
-                            console.log(JSON.stringify(tempIssueCredentialBody, null, 2));
                             return [4 /*yield*/, hypersignVC.issue(tempIssueCredentialBody)];
                         case 1:
                             issuedCredResult = _a.sent();
@@ -622,8 +621,8 @@ describe('Verifiable Credential Opearations', function () {
                             signedVC = signedCredential;
                             credenStatus = credentialStatus;
                             credentialId = signedVC.id;
-                            console.log('Signed Credential --------------------------------');
-                            console.log(JSON.stringify(signedVC, null, 2));
+                            // console.log('Signed Credential --------------------------------');
+                            // console.log(JSON.stringify(signedVC, null, 2));
                             credentialStatusId = signedCredential['credentialStatus'].id;
                             (0, chai_1.expect)(signedCredential).to.be.a('object');
                             (0, chai_1.should)().exist(signedCredential['@context']);
@@ -693,12 +692,12 @@ describe('Verifiable Credential Opearations', function () {
                             signedCredential = issuedCredResult.signedCredential, credentialStatus = issuedCredResult.credentialStatus, credentialStatusProof = issuedCredResult.credentialStatusProof, credentialStatusRegistrationResult = issuedCredResult.credentialStatusRegistrationResult;
                             credentialStatus2 = credentialStatus;
                             credentialStatusProof2 = credentialStatusProof;
-                            console.log({
-                                signedCredential: signedCredential,
-                                credentialStatusRegistrationResult: credentialStatusRegistrationResult,
-                                credentialStatus2: credentialStatus2,
-                                credentialStatusProof2: credentialStatusProof2,
-                            });
+                            // console.log({
+                            //   signedCredential,
+                            //   credentialStatusRegistrationResult,
+                            //   credentialStatus2,
+                            //   credentialStatusProof2,
+                            // });
                             (0, chai_1.expect)(signedCredential).to.be.a('object');
                             (0, chai_1.expect)(credentialStatus).to.be.a('object');
                             (0, chai_1.expect)(credentialStatusProof).to.be.a('object');
@@ -721,13 +720,11 @@ describe('Verifiable Credential Opearations', function () {
                                 issuerDid: didDocId,
                                 verificationMethodId: verificationMethodId,
                             };
-                            console.log('Signed vc --------------------------------');
-                            console.log(JSON.stringify(params.credential, null, 2));
                             return [4 /*yield*/, hypersignVC.verify(params)];
                         case 1:
                             verificationResult = _a.sent();
-                            console.log('Credential Verifification result --------------------------------');
-                            console.log(JSON.stringify(verificationResult, null, 2));
+                            // console.log('Credential Verifification result --------------------------------');
+                            // console.log(JSON.stringify(verificationResult, null, 2));
                             (0, chai_1.expect)(verificationResult).to.be.a('object');
                             (0, chai_1.should)().exist(verificationResult.verified);
                             (0, chai_1.expect)(verificationResult.verified).to.be.equal(true);
@@ -840,12 +837,10 @@ describe('Verifiable Credential Status Opearations', function () {
                 var credentialStatus;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0:
-                            console.log('Credential ID ' + credentialId);
-                            return [4 /*yield*/, hypersignVC.checkCredentialStatus({ credentialId: credentialId })];
+                        case 0: return [4 /*yield*/, hypersignVC.checkCredentialStatus({ credentialId: credentialId })];
                         case 1:
                             credentialStatus = _a.sent();
-                            console.log(JSON.stringify(credentialStatus, null, 2));
+                            // console.log(JSON.stringify(credentialStatus, null, 2));
                             (0, chai_1.expect)(credentialStatus).to.be.a('object');
                             (0, chai_1.should)().exist(credentialStatus.verified);
                             (0, chai_1.expect)(credentialStatus.verified).to.be.equal(true);
@@ -874,7 +869,7 @@ describe('Verifiable Credential Status Opearations', function () {
                         case 0: return [4 /*yield*/, hypersignVC.resolveCredentialStatus({ credentialId: credentialId })];
                         case 1:
                             credentialStatus = _a.sent();
-                            console.log(JSON.stringify(credentialStatus, null, 2));
+                            // console.log(JSON.stringify(credentialStatus, null, 2));
                             (0, chai_1.expect)(credentialStatus).to.be.a('object');
                             (0, chai_1.should)().exist(credentialStatus.issuer);
                             (0, chai_1.should)().exist(credentialStatus.issuanceDate);
@@ -992,7 +987,7 @@ describe('Verifiable Credential Status Opearations', function () {
                             return [4 /*yield*/, hypersignVC.updateCredentialStatus(params)];
                         case 2:
                             updatedCredResult = _a.sent();
-                            console.log(updatedCredResult);
+                            // console.log(updatedCredResult);
                             (0, chai_1.expect)(updatedCredResult).to.be.a('object');
                             (0, chai_1.expect)(updatedCredResult.code).to.be.equal(0);
                             return [2 /*return*/];
@@ -1057,17 +1052,13 @@ describe('Verifiable Credential Status Opearations', function () {
                 var registerCredDetail;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0:
-                            console.log({
-                                credentialStatus2: credentialStatus2,
-                            });
-                            return [4 /*yield*/, hypersignVC.registerCredentialStatus({
-                                    credentialStatus: credentialStatus2,
-                                    credentialStatusProof: credentialStatusProof2,
-                                })];
+                        case 0: return [4 /*yield*/, hypersignVC.registerCredentialStatus({
+                                credentialStatus: credentialStatus2,
+                                credentialStatusProof: credentialStatusProof2,
+                            })];
                         case 1:
                             registerCredDetail = _a.sent();
-                            console.log(JSON.stringify(registerCredDetail, null, 2));
+                            // console.log(JSON.stringify(registerCredDetail, null, 2));
                             (0, chai_1.expect)(registerCredDetail).to.be.a('object');
                             (0, chai_1.should)().exist(registerCredDetail.code);
                             (0, chai_1.should)().exist(registerCredDetail.transactionHash);
