@@ -26,10 +26,10 @@ Is a javascript library for DID related operation (generate, sign, verify etc). 
     - [generate()](#generate)
     - [sign()](#sign)
     - [verify()](#verify)
+    - [resolve()](#resolve)
 - [OnChain APIs](#onchain-apis)
     - [Initialize Instance of HypersignDID with offlineSigner](#initialize-with-offlinesigner)
     - [register()](#register)
-    - [resolve()](#resolve)
     - [update()](#update)
     - [deactivate()](#deactivate)
 - [Security Concerns](#security)
@@ -294,67 +294,6 @@ const result = await hypersignDID.verify({
   }
 ```
 
-## Onchain APIs
-
-### Initialize with offlineSigner 
-
-**Create Instance of the class**
-```js
-const hypersignDid = new HypersignDID({
-    offlineSigner,                    // OPTIONAL signer of type OfflineSigner
-    nodeRestEndpoint: hidNodeEp.rest, // OPTIONAL RPC endpoint of the Hypersign blockchain, Default 'TEST'
-    nodeRpcEndpoint: hidNodeEp.rpc,   // OPTIONAL REST endpoint of the Hypersign blockchain
-    namespace: hidNodeEp.namespace,   // OPTIONAL namespace of did id, Default 'did:hid'
-  });
-
-// OR Just initalize with offlineSigner
-const hypersignDid = new HypersignDID({
-    offlineSigner
-})
-```
-
-Read about `OfflineSigner` [here](https://docs.hypersign.id/developers/hid-ssi-sdk/offlinesigner)
-
-**Call `init()` to initalize the offlineSigner**
-
-```js
-await hypersignDid.init();
-```
-
-### `register()`
-
-Registers a DID and DIDDocument on blockchain
-
-**API Definition**
-
-```js
-register(params: { 
-  didDocument: object; 
-  privateKeyMultibase: string; 
-  verificationMethodId: string
-}): Promise<object>;
-```
-**Usage**
-
-```js
-const result = await hypersignDID.register({ 
-  didDocument, 
-  privateKeyMultibase, 
-  verificationMethodId
-});
-```
-
-**Outputs**
-```js
-{
-  code: 0,
-  height: 1432291,
-  rawLog: '[{"events":[{"type":"message","attributes":[{"key":"action","value":"/hypersignprotocol.hidnode.ssi.MsgCreateDID"}]}]}]',
-  transactionHash: 'E4B985104BC233E4EC4A7F9A6B501812B92D059677D6543C024E6B7936BC5BC3',
-  gasUsed: 99152,
-  gasWanted: 114906
-}
-```
 
 ### `resolve()`
 
@@ -414,6 +353,69 @@ const result = await hypersignDID.resolve({
     deactivated: false,
     versionId: 'E4B985104BC233E4EC4A7F9A6B501812B92D059677D6543C024E6B7936BC5BC3'
   }
+}
+```
+
+
+## Onchain APIs
+
+### Initialize with offlineSigner 
+
+**Create Instance of the class**
+```js
+const hypersignDid = new HypersignDID({
+    offlineSigner,                    // OPTIONAL signer of type OfflineSigner
+    nodeRestEndpoint: hidNodeEp.rest, // OPTIONAL RPC endpoint of the Hypersign blockchain, Default 'TEST'
+    nodeRpcEndpoint: hidNodeEp.rpc,   // OPTIONAL REST endpoint of the Hypersign blockchain
+    namespace: hidNodeEp.namespace,   // OPTIONAL namespace of did id, Default 'did:hid'
+  });
+
+// OR Just initalize with offlineSigner
+const hypersignDid = new HypersignDID({
+    offlineSigner
+})
+```
+
+Read about `OfflineSigner` [here](https://docs.hypersign.id/developers/hid-ssi-sdk/offlinesigner)
+
+**Call `init()` to initalize the offlineSigner**
+
+```js
+await hypersignDid.init();
+```
+
+### `register()`
+
+Registers a DID and DIDDocument on blockchain
+
+**API Definition**
+
+```js
+register(params: { 
+  didDocument: object; 
+  privateKeyMultibase: string; 
+  verificationMethodId: string
+}): Promise<object>;
+```
+**Usage**
+
+```js
+const result = await hypersignDID.register({ 
+  didDocument, 
+  privateKeyMultibase, 
+  verificationMethodId
+});
+```
+
+**Outputs**
+```js
+{
+  code: 0,
+  height: 1432291,
+  rawLog: '[{"events":[{"type":"message","attributes":[{"key":"action","value":"/hypersignprotocol.hidnode.ssi.MsgCreateDID"}]}]}]',
+  transactionHash: 'E4B985104BC233E4EC4A7F9A6B501812B92D059677D6543C024E6B7936BC5BC3',
+  gasUsed: 99152,
+  gasWanted: 114906
 }
 ```
 

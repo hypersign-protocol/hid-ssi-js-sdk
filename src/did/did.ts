@@ -74,14 +74,12 @@ export default class HypersignDID implements IDID {
     } = {}
   ) {
     const { offlineSigner, namespace, nodeRpcEndpoint, nodeRestEndpoint } = params;
-    if (offlineSigner) {
-      const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
-      const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
-      this.didrpc = new DIDRpc({ offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
-    } else {
-      this.didrpc = null;
+    const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
+    const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
+    const rpcConstructorParams = {
+      offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp
     }
-
+    this.didrpc = new DIDRpc(rpcConstructorParams);
     this.namespace = namespace ? namespace : '';
   }
 
@@ -226,7 +224,7 @@ export default class HypersignDID implements IDID {
       const didDoc: IDidDocument = result.didDocument as IDidDocument;
       const verificationMethods = didDoc.verificationMethod;
       verificationMethods.forEach((verificationMethod) => {
-        if (verificationMethod.type === 'Ed25519VerificationKey2020') {
+        if (verificationMethod.type === constant.DID.VERIFICATION_METHOD_TYPE) {
           const ed25519PublicKey = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
             publicKey: verificationMethod.publicKeyMultibase,
           });

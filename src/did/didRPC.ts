@@ -16,25 +16,36 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 
 export class DIDRpc implements IDIDRpc {
   private didRestEp: string;
-  private hidClient: any;
+  private hidClient: HIDClient | null;
   constructor({
     offlineSigner,
     nodeRpcEndpoint,
     nodeRestEndpoint,
   }: {
-    offlineSigner: OfflineSigner;
+    offlineSigner?: OfflineSigner;
     nodeRpcEndpoint: string;
     nodeRestEndpoint: string;
   }) {
     this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_PATH;
-    this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+    if(offlineSigner){
+      this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+    } else {
+      this.hidClient = null;
+    }
   }
 
   async init() {
+    if(!this.hidClient){
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner')
+    }
     await this.hidClient.init();
   }
 
   async registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string): Promise<object> {
+    if(!this.hidClient){
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner')
+    }
+
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
     const signInfo: SignInfo = {
       verification_method_id: verificationMethodId,
@@ -62,6 +73,10 @@ export class DIDRpc implements IDIDRpc {
     verificationMethodId: string,
     versionId: string
   ): Promise<object> {
+    if(!this.hidClient){
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner')
+    }
+
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgUpdateDID}`;
 
     const signInfo: SignInfo = {
@@ -93,6 +108,10 @@ export class DIDRpc implements IDIDRpc {
     verificationMethodId: string,
     versionId: string
   ): Promise<object> {
+    if(!this.hidClient){
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner')
+    }
+    
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgDeactivateDID}`;
     const signInfo: SignInfo = {
       verification_method_id: verificationMethodId,

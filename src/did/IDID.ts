@@ -89,7 +89,7 @@ export interface IDID {
 }
 
 export interface IDIDResolve {
-  didDocument: object;
+  didDocument: IDidDocument;
   didDocumentMetadata: Metadata;
 }
 
