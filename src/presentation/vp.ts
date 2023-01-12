@@ -37,7 +37,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     const { namespace, nodeRpcEndpoint, nodeRestEndpoint } = params;
 
     this.namespace = namespace && namespace != '' ? namespace : '';
-    const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
+    const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
     const offlineConstuctorParams = { nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
     this.vc = new HypersignVerifiableCredential(offlineConstuctorParams);

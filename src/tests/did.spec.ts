@@ -1,5 +1,8 @@
 import { expect, should } from 'chai';
-import HypersignDID from '../did/did';
+import {
+  HypersignDID,
+  HypersignSSISdk
+} from '../index';
 import { IPublicKey, IController, IDID } from '../did/IDID';
 
 import { createWallet, mnemonic, hidNodeEp } from './config';
@@ -15,18 +18,25 @@ let transactionHash;
 let signedDocument;
 const challenge = '1231231231';
 const domain = 'www.adbv.com';
+let hypersignSSISDK;
+
 
 //add mnemonic of wallet that have balance
 
 beforeEach(async function () {
   offlineSigner = await createWallet(mnemonic);
-  hypersignDID = new HypersignDID({
+  const params =  {
     offlineSigner,
     nodeRestEndpoint: hidNodeEp.rest,
     nodeRpcEndpoint: hidNodeEp.rpc,
     namespace: hidNodeEp.namespace,
-  });
+  }
+  hypersignDID = new HypersignDID(params);
   await hypersignDID.init();
+
+ 
+
+
 });
 
 //remove seed while creating did so that wallet can generate different did every time
@@ -80,6 +90,47 @@ describe('#generate() to generate did', function () {
 
   it('should be able to generate didDocument with custom id', async function () {
     const methodSpecificId = 'e157620d69d003e12d935c37b8c21baa78d24898398829b39d943d253c006332';
+    const didDocument = await hypersignDID.generate({ publicKeyMultibase, methodSpecificId });
+    const didDocId = didDocument['id'];
+    expect(didDocument).to.be.a('object');
+    expect(didDocId).to.be.equal('did:hid:testnet:' + methodSpecificId);
+    should().exist(didDocument['@context']);
+    should().exist(didDocument['id']);
+    should().exist(didDocument['controller']);
+    should().exist(didDocument['alsoKnownAs']);
+
+    should().exist(didDocument['verificationMethod']);
+    expect(
+      didDocument['verificationMethod'] &&
+        didDocument['authentication'] &&
+        didDocument['assertionMethod'] &&
+        didDocument['keyAgreement'] &&
+        didDocument['capabilityInvocation'] &&
+        didDocument['capabilityDelegation'] &&
+        didDocument['service']
+    ).to.be.a('array');
+    should().exist(didDocument['authentication']);
+    should().exist(didDocument['assertionMethod']);
+    should().exist(didDocument['keyAgreement']);
+    should().exist(didDocument['capabilityInvocation']);
+    should().exist(didDocument['capabilityDelegation']);
+    should().exist(didDocument['service']);
+  });
+
+  it('should be able to generate didDocument with custom id using HypersignSSISDk instance', async function () {
+    const methodSpecificId = 'e157620d69d003e12d935c37b8c21baa78d24898398829b39d943d253c006332';
+   
+    const params =  {
+      offlineSigner,
+      nodeRestEndpoint: hidNodeEp.rest,
+      nodeRpcEndpoint: hidNodeEp.rpc,
+      namespace: hidNodeEp.namespace,
+    }
+
+    hypersignSSISDK = new HypersignSSISdk(params)
+    await hypersignSSISDK.init();
+    hypersignDID = hypersignSSISDK.did;
+
     const didDocument = await hypersignDID.generate({ publicKeyMultibase, methodSpecificId });
     const didDocId = didDocument['id'];
     expect(didDocument).to.be.a('object');

@@ -49,7 +49,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint } = params;
 
     this.namespace = namespace && namespace != '' ? namespace : '';
-    const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
+    const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
     const offlineConstuctorParams = { offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
     this.credStatusRPC = new CredentialRPC(offlineConstuctorParams);

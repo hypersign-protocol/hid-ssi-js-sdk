@@ -4,11 +4,13 @@ import {
   HypersignSchema,
   HypersignVerifiableCredential,
   HypersignVerifiablePresentation,
+  HypersignSSISdk
 } from '../index';
 import { createWallet, mnemonic, hidNodeEp } from './config';
 import { IVerifiablePresentation } from '../presentation/IPresentation';
 import { ICredentialStatus, IVerifiableCredential } from '../credential/ICredential';
 
+let hypersignSSISDK;
 let privateKeyMultibase;
 let publicKeyMultibase;
 let didDocId;
@@ -65,8 +67,8 @@ beforeEach(async function () {
     namespace: hidNodeEp.namespace,
   };
 
-  hypersignDID = new HypersignDID(constructorParams);
-  await hypersignDID.init();
+  // hypersignDID = new HypersignDID(constructorParams);
+  // await hypersignDID.init();
 
   hypersignSchema = new HypersignSchema(constructorParams);
   await hypersignSchema.init();
@@ -74,7 +76,17 @@ beforeEach(async function () {
   hypersignVC = new HypersignVerifiableCredential(constructorParams);
   await hypersignVC.init();
 
-  hypersignVP = new HypersignVerifiablePresentation();
+  // hypersignVP = new HypersignVerifiablePresentation();
+
+  hypersignSSISDK = new HypersignSSISdk(constructorParams);
+  await hypersignSSISDK.init();
+
+  const { vc, vp, did, schema } = hypersignSSISDK;
+
+  hypersignDID  = did;
+  hypersignSchema = schema;
+  hypersignVP = vp;
+  hypersignVC = vc;
 });
 
 // Generate public and private key pair

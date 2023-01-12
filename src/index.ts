@@ -3,41 +3,44 @@ import HypersignVerifiableCredential  from './credential/vc'
 import HypersignVerifiablePresentation  from './presentation/vp'
 import HypersignSchema from './schema/schema';
 import { OfflineSigner } from "@cosmjs/proto-signing";
-import { HIDClient } from './hid/client'
+
 
 class HypersignSSISdk{
-    // TODO: Make sure to use proper type so that dev can see list of available methods.
-    did: any;
-    vc: any;
-    vp: any;
-    schema: any;
-    namespace: string;
+    did: HypersignDID;
+    vc: HypersignVerifiableCredential;
+    vp: HypersignVerifiablePresentation;
+    schema: HypersignSchema;
     
+    private namespace: string;
     private signer: OfflineSigner;
-    private nodeEndpoint: string; // http://localhost:26657 | 'TEST' | 'MAIN'
+    private nodeRpcEndpoint: string; // http://localhost:26657 | 'TEST' | 'MAIN'
     private nodeRestEndpoint: string; // "" | http://localhost:1317
-    constructor(offlineSigner: OfflineSigner, nodeEndpoint: string, nodeRestEndpoint?: string, namespace?: string){
+    constructor(params: {offlineSigner: OfflineSigner, nodeRpcEndpoint?: string, nodeRestEndpoint?: string, namespace?: string}){
         
-        // TODO validate if offlinesigner is of type OfflineSiner
+        const { offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, namespace } = params;
         this.signer = offlineSigner; 
-
-        if(!nodeEndpoint){
-            throw new Error("HID Node enpoint must be passed. Possible values:  'TEST' | 'MAIN' | <custom node url>")
-        }
-
-        this.nodeEndpoint = nodeEndpoint; 
+        this.nodeRpcEndpoint = nodeRpcEndpoint ? nodeRpcEndpoint : "MAIN"; 
         this.nodeRestEndpoint = nodeRestEndpoint ? nodeRestEndpoint : "";
         this.namespace = namespace? namespace: "";
+
+        const constructorParams = {
+            offlineSigner: this.signer,
+            nodeRpcEndpoint:this.nodeRpcEndpoint, 
+            nodeRestEndpoint: this.nodeRestEndpoint,
+            namespace: this.namespace
+        }
+        
+        this.did = new HypersignDID(constructorParams);
+        this.schema = new HypersignSchema(constructorParams);
+        this.vc = new HypersignVerifiableCredential(constructorParams);
+        this.vp = new HypersignVerifiablePresentation(constructorParams);
+        
     }
 
     async init(){
-        const hidClient = new HIDClient(this.signer, this.nodeEndpoint, this.nodeRestEndpoint);
-        await hidClient.init();
-
-        this.did = new HypersignDID({ namespace: this.namespace });
-        this.schema = new HypersignSchema({ namespace: this.namespace });
-        this.vc = new HypersignVerifiableCredential({namespace: this.namespace});
-        this.vp = new HypersignVerifiablePresentation({namespace:  this.namespace});
+        await this.did.init()
+        await this.schema.init()
+        await this.vc.init()
     }
 
 }
