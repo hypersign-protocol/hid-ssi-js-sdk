@@ -26,31 +26,20 @@ import { HypersignVerifiablePresentation } from 'hid-ssi-sdk';
 
 ## APIs
 
-### Initialize instance of HypersignVerifiablePresentation with offlineSigner 
+### Initialize instance of HypersignVerifiablePresentation 
 
-**Create Instance of the class**
 ```js
 const hypersignVP = new HypersignVerifiablePresentation({
-    offlineSigner,                    // OPTIONAL signer of type OfflineSigner
     nodeRestEndpoint: hidNodeEp.rest, // OPTIONAL RPC endpoint of the Hypersign blockchain, Default 'TEST'
     nodeRpcEndpoint: hidNodeEp.rpc,   // OPTIONAL REST endpoint of the Hypersign blockchain
     namespace: hidNodeEp.namespace,   // OPTIONAL namespace of did id, Default 'did:hid'
   });
 
-// OR Just initalize with offlineSigner
-const hypersignVP = new HypersignVerifiablePresentation({
-    offlineSigner
-})
+// OR Just initalize without parameters
+const hypersignVP = new HypersignVerifiablePresentation()
 ```
 
-Read about `OfflineSigner` [here](https://docs.hypersign.id/developers/hid-ssi-sdk/offlinesigner)
-
-**Call `init()` to initalize the offlineSigner**
-
-```js
-await hypersignVP.init();
-```
-
+All operation in presentation are offchain. So need to pass offlinesigner. However, we do need to pass RPC and REST endpoints to query states from blockchain
 
 ### `generate()` 
 

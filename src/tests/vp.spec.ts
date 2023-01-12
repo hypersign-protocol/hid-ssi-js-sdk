@@ -74,8 +74,7 @@ beforeEach(async function () {
   hypersignVC = new HypersignVerifiableCredential(constructorParams);
   await hypersignVC.init();
 
-  hypersignVP = new HypersignVerifiablePresentation(constructorParams);
-  await hypersignVP.init();
+  hypersignVP = new HypersignVerifiablePresentation();
 });
 
 // Generate public and private key pair

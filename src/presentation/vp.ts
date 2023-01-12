@@ -17,11 +17,10 @@ import { IVerifiableCredential } from '../credential/ICredential';
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 import { VP, DID } from '../constants';
 import { IPresentationMethods, IVerifiablePresentation } from './IPresentation';
-import { OfflineSigner } from '@cosmjs/proto-signing';
 
 export default class HypersignVerifiablePresentation implements IPresentationMethods, IVerifiablePresentation {
   private hsDid: HypersignDID | null;
-  private vc: HypersignVerifiableCredential | null;
+  private vc: HypersignVerifiableCredential;
   id: string;
   type: Array<string>;
   verifiableCredential: Array<IVerifiableCredential>;
@@ -31,24 +30,18 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
   constructor(
     params: {
       namespace?: string;
-      offlineSigner?: OfflineSigner;
       nodeRpcEndpoint?: string;
       nodeRestEndpoint?: string;
     } = {}
   ) {
-    const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint } = params;
+    const { namespace, nodeRpcEndpoint, nodeRestEndpoint } = params;
 
     this.namespace = namespace && namespace != '' ? namespace : '';
     const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
-    if (offlineSigner) {
-      const offlineConstuctorParams = { offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
-      this.vc = new HypersignVerifiableCredential(offlineConstuctorParams);
-      this.hsDid = new HypersignDID(offlineConstuctorParams);
-    } else {
-      this.vc = null;
-      this.hsDid = null;
-    }
+    const offlineConstuctorParams = { nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
+    this.vc = new HypersignVerifiableCredential(offlineConstuctorParams);
+    this.hsDid = new HypersignDID(offlineConstuctorParams);
 
     this.id = '';
     this.type = [];
@@ -66,19 +59,6 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       id = `${VP.SCHEME}:${VP.METHOD}:${uuid}`;
     }
     return id;
-  }
-
-  /**
-   * Initialise the offlinesigner to interact with Hypersign blockchain
-   */
-  public async init() {
-    if (!this.vc || !this.hsDid) {
-      throw new Error(
-        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
-      );
-    }
-    await this.vc.init();
-    await this.hsDid.init();
   }
 
   /**
@@ -361,11 +341,6 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       documentLoader,
       unsignedPresentation: true,
       checkStatus: async function (options) {
-        if (!that.vc) {
-          throw new Error(
-            'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
-          );
-        }
         return await that.vc.checkCredentialStatus({ credentialId: options.credential.id });
       },
     });
