@@ -85,12 +85,7 @@ var HyperSignSchema = /** @class */ (function () {
         var namespace = params.namespace, offlineSigner = params.offlineSigner, nodeRpcEndpoint = params.nodeRpcEndpoint, nodeRestEndpoint = params.nodeRestEndpoint;
         var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
         var nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
-        if (offlineSigner) {
-            this.schemaRpc = new schemaRPC_1.SchemaRpc({ offlineSigner: offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
-        }
-        else {
-            this.schemaRpc = null;
-        }
+        this.schemaRpc = new schemaRPC_1.SchemaRpc({ offlineSigner: offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
         this.namespace = namespace && namespace != '' ? namespace : '';
         (this.type = constants.SCHEMA.SCHEMA_TYPE),
             (this.modelVersion = '1.0'),

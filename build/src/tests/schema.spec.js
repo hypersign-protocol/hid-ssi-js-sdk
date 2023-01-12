@@ -425,4 +425,28 @@ describe('#resolve() this is to resolve schema', function () {
             });
         });
     });
+    it('should be able to resolve schema  even without offline signer passed to the constructor; making resolve RPC offchain activity', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var hypersignSchema, params, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        hypersignSchema = new index_1.HypersignSchema();
+                        params = {
+                            schemaId: schemaId,
+                        };
+                        return [4 /*yield*/, hypersignSchema.resolve(params)];
+                    case 1:
+                        result = _a.sent();
+                        (0, chai_1.expect)(result).to.be.a('object');
+                        (0, chai_1.expect)(result.id).to.be.equal(schemaId);
+                        (0, chai_1.expect)(result.proof).to.be.a('object');
+                        if (result.proof) {
+                            (0, chai_1.expect)(result.proof.verificationMethod).to.be.equal(verificationMethod);
+                        }
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
 });

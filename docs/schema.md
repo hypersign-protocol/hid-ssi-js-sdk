@@ -37,10 +37,10 @@ Is a javascript library for Schema related operation (generate, sign, register e
     - [Initialize Instance of HypersignSchema](#initialize-instance-of-hypersignschema)
     - [generate()](#generate)
     - [sign()](#sign)
+    - [resolve()](#resolve)
 - [OnChain APIs](#onchain-apis)
     - [Initialize Instance of HypersignSchema with offlineSigner](#initialize-with-offlinesigner)
     - [register()](#register)
-    - [resolve()](#resolve)
 - [Security Concerns](#security)
 
 
@@ -180,6 +180,54 @@ const signedSchema = await hypersignSchema.sign({ privateKeyMultibase: privateKe
 }
 ```
 
+
+### `resolve()`
+
+Resolves a schema document with schemId from Hypersign blockchain 
+
+**API Definition**
+
+```js
+resolve(params: { schemaId: string }): Promise<Schema>;
+
+```
+
+**Usage**
+
+```js
+const result = await hypersignSchema.resolve({ schemaId: schema['id']});
+
+```
+
+**Output**
+
+```json
+{
+  "type": "https://w3c-ccg.github.io/vc-json-schemas/v1/schema/1.0/schema.json",
+  "modelVersion": "1.0",
+  "id": "sch:hid:testnet:z57BBNTNqkFXpsFfSMLvfvBhhiSEicGK3nVvJMXRKcE3S:1.0",
+  "name": "testSchema",
+  "author": "did:hid:testnet:zAtZ8oBrVPvaKKou21KRnmzRtZaJpWxsgWuB9GNRLTQ6R",
+  "authored": "2023-01-07T07:24:06Z",
+  "schema": {
+    "schema": "http://json-schema.org/draft-07/schema",
+    "description": "This is a test schema generation",
+    "type": "object",
+    "properties": "{\"name\":{\"type\":\"integer\"}}",
+    "required": [],
+    "additionalProperties": false
+  },
+  "proof": {
+    "type": "Ed25519Signature2020",
+    "created": "2023-01-07T07:24:07Z",
+    "verificationMethod": "did:hid:testnet:zAtZ8oBrVPvaKKou21KRnmzRtZaJpWxsgWuB9GNRLTQ6R#key-1",
+    "proofPurpose": "assertion",
+    "proofValue": "aozlK3ZSAHuP2x7is60jYXdhS8zc68bO2y9CVShgLNaXxTHdeLIIgqY5Ci6ji0nrC5Q4e+YiGtV/SNIFkvO4CQ=="
+  }
+}
+```
+
+
 ## OnChain APIs
 
 ### Initialize with offlineSigner 
@@ -237,52 +285,6 @@ const registeredSchema = await hypersignSchema.register({
   "transactionHash": "A4909951861464DA4FF0E8CB101E128895E166891AF68909B7622B212CCEEDE2",
   "gasUsed": 90160,
   "gasWanted": 103216
-}
-```
-
-### `resolve()`
-
-Resolves a schema document with schemId from Hypersign blockchain 
-
-**API Definition**
-
-```js
-resolve(params: { schemaId: string }): Promise<Schema>;
-
-```
-
-**Usage**
-
-```js
-const result = await hypersignSchema.resolve({ schemaId: schema['id']});
-
-```
-
-**Output**
-
-```json
-{
-  "type": "https://w3c-ccg.github.io/vc-json-schemas/v1/schema/1.0/schema.json",
-  "modelVersion": "1.0",
-  "id": "sch:hid:testnet:z57BBNTNqkFXpsFfSMLvfvBhhiSEicGK3nVvJMXRKcE3S:1.0",
-  "name": "testSchema",
-  "author": "did:hid:testnet:zAtZ8oBrVPvaKKou21KRnmzRtZaJpWxsgWuB9GNRLTQ6R",
-  "authored": "2023-01-07T07:24:06Z",
-  "schema": {
-    "schema": "http://json-schema.org/draft-07/schema",
-    "description": "This is a test schema generation",
-    "type": "object",
-    "properties": "{\"name\":{\"type\":\"integer\"}}",
-    "required": [],
-    "additionalProperties": false
-  },
-  "proof": {
-    "type": "Ed25519Signature2020",
-    "created": "2023-01-07T07:24:07Z",
-    "verificationMethod": "did:hid:testnet:zAtZ8oBrVPvaKKou21KRnmzRtZaJpWxsgWuB9GNRLTQ6R#key-1",
-    "proofPurpose": "assertion",
-    "proofValue": "aozlK3ZSAHuP2x7is60jYXdhS8zc68bO2y9CVShgLNaXxTHdeLIIgqY5Ci6ji0nrC5Q4e+YiGtV/SNIFkvO4CQ=="
-  }
 }
 ```
 

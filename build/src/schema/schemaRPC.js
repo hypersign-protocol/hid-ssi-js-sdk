@@ -71,14 +71,23 @@ var client_1 = require("../hid/client");
 var SchemaRpc = /** @class */ (function () {
     function SchemaRpc(_a) {
         var offlineSigner = _a.offlineSigner, nodeRpcEndpoint = _a.nodeRpcEndpoint, nodeRestEndpoint = _a.nodeRestEndpoint;
-        this.hidClient = new client_1.HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+        if (offlineSigner) {
+            this.hidClient = new client_1.HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+        }
+        else {
+            this.hidClient = null;
+        }
         this.schemaRestEp = client_1.HIDClient.hidNodeRestEndpoint + constants_1.HYPERSIGN_NETWORK_SCHEMA_PATH;
     }
     SchemaRpc.prototype.init = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.hidClient.init()];
+                    case 0:
+                        if (!this.hidClient) {
+                            throw new Error('HID-SSI-SDK:: Error: SchemaRpc class is not initialise with offlinesigner');
+                        }
+                        return [4 /*yield*/, this.hidClient.init()];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -92,6 +101,9 @@ var SchemaRpc = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!this.hidClient) {
+                            throw new Error('HID-SSI-SDK:: Error: SchemaRpc class is not initialise with offlinesigner');
+                        }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgCreateSchema);
                         txMessage = {
                             typeUrl: typeUrl,
