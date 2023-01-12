@@ -781,4 +781,3 @@ describe('Verifiable Credential Status Opearations', () => {
     });
   });
 });
-

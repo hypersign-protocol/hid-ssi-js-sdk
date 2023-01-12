@@ -62,7 +62,6 @@ var schemaSignature;
 var challenge = '1231231231';
 var domain = 'www.adbv.com';
 var offlineSigner;
-var hsSdk;
 var credentialId;
 var credentialDetail;
 var hypersignDID;
@@ -121,10 +120,6 @@ beforeEach(function () {
                     hypersignVC = new index_1.HypersignVerifiableCredential(constructorParams);
                     return [4 /*yield*/, hypersignVC.init()];
                 case 4:
-                    _a.sent();
-                    hsSdk = new index_1.HypersignSSISdk(offlineSigner, config_1.hidNodeEp.rpc, config_1.hidNodeEp.rest, config_1.hidNodeEp.namespace);
-                    return [4 /*yield*/, hsSdk.init()];
-                case 5:
                     _a.sent();
                     return [2 /*return*/];
             }
