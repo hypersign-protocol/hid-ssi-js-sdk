@@ -1,4 +1,20 @@
 "use strict";
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
@@ -58,14 +74,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var schema_1 = require("../generated/ssi/schema");
+var schema_1 = require("../../libs/generated/ssi/schema");
 var schemaRPC_1 = require("./schemaRPC");
 var constants = __importStar(require("../constants"));
 var utils_1 = __importDefault(require("../utils"));
 var ed25519 = require('@stablelib/ed25519');
 var HyperSignSchema = /** @class */ (function () {
-    function HyperSignSchema(namespace) {
-        this.schemaRpc = new schemaRPC_1.SchemaRpc();
+    function HyperSignSchema(params) {
+        if (params === void 0) { params = {}; }
+        var namespace = params.namespace, offlineSigner = params.offlineSigner, nodeRpcEndpoint = params.nodeRpcEndpoint, nodeRestEndpoint = params.nodeRestEndpoint;
+        var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
+        var nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
+        this.schemaRpc = new schemaRPC_1.SchemaRpc({ offlineSigner: offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
         this.namespace = namespace && namespace != '' ? namespace : '';
         (this.type = constants.SCHEMA.SCHEMA_TYPE),
             (this.modelVersion = '1.0'),
@@ -83,7 +103,7 @@ var HyperSignSchema = /** @class */ (function () {
         };
     }
     // Ref:
-    HyperSignSchema.prototype.getSchemaId = function () {
+    HyperSignSchema.prototype._getSchemaId = function () {
         return __awaiter(this, void 0, void 0, function () {
             var b, id;
             return __generator(this, function (_a) {
@@ -102,7 +122,39 @@ var HyperSignSchema = /** @class */ (function () {
             });
         });
     };
-    HyperSignSchema.prototype.getSchema = function (params) {
+    HyperSignSchema.prototype._getDateTime = function () {
+        return new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z';
+    };
+    /**
+     * Initialise the offlinesigner to interact with Hypersign blockchain
+     */
+    HyperSignSchema.prototype.init = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!this.schemaRpc) {
+                            throw new Error('HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignSchema class is not instantiated with Offlinesigner or have not been initilized');
+                        }
+                        return [4 /*yield*/, this.schemaRpc.init()];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    /**
+     * Generates a new schema doc without proof
+     * @params
+     *  - params.name                 : Name of the schema
+     *  - params.description          : Optional - Description of the schema
+     *  - params.author               : DID of the author
+     *  - params.fields               : Schema fields of type ISchemaFields
+     *  - params.additionalProperties : If additionalProperties can be added, boolean
+     * @returns {Promise<SchemaDocument>} SchemaDocument object
+     */
+    HyperSignSchema.prototype.generate = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, t;
             var _this = this;
@@ -112,12 +164,12 @@ var HyperSignSchema = /** @class */ (function () {
                         if (!params.author)
                             throw new Error('HID-SSI-SDK:: Error: Author must be passed');
                         _a = this;
-                        return [4 /*yield*/, this.getSchemaId()];
+                        return [4 /*yield*/, this._getSchemaId()];
                     case 1:
                         _a.id = _b.sent();
                         this.name = params.name;
                         this.author = params.author;
-                        this.authored = new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z';
+                        this.authored = this._getDateTime();
                         this.schema = {
                             schema: constants.SCHEMA.SCHEMA_JSON,
                             description: params.description ? params.description : '',
@@ -155,49 +207,84 @@ var HyperSignSchema = /** @class */ (function () {
             });
         });
     };
-    HyperSignSchema.prototype.signSchema = function (params) {
+    /**
+     * Signs a schema document and attaches proof
+     * @params
+     *  - params.schema               : The schema document without proof
+     *  - params.privateKeyMultibase  : Private Key to sign the doc
+     *  - params.verificationMethodId : VerificationMethodId of the document
+     * @returns {Promise<Schema>} Schema with proof
+     */
+    HyperSignSchema.prototype.sign = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var privateKeyMultibaseConverted, dataBytes, signed;
+            var privateKeyMultibaseConverted, schemaDoc, dataBytes, signed, proof;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!params.privateKey)
-                            throw new Error('HID-SSI-SDK:: Error: PrivateKey must be passed');
+                        if (!params.privateKeyMultibase)
+                            throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase must be passed');
+                        if (!params.verificationMethodId)
+                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId must be passed');
                         if (!params.schema)
                             throw new Error('HID-SSI-SDK:: Error: Schema must be passed');
                         privateKeyMultibaseConverted = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
-                            privKey: params.privateKey,
+                            privKey: params.privateKeyMultibase,
                         }).privateKeyMultibase;
-                        return [4 /*yield*/, schema_1.Schema.encode(params.schema)];
+                        schemaDoc = params.schema;
+                        return [4 /*yield*/, schema_1.Schema.encode(schemaDoc)];
                     case 1:
                         dataBytes = (_a.sent()).finish();
                         signed = ed25519.sign(privateKeyMultibaseConverted, dataBytes);
-                        return [2 /*return*/, Buffer.from(signed).toString('base64')];
+                        proof = {
+                            type: constants.SCHEMA.SIGNATURE_TYPE,
+                            created: this._getDateTime(),
+                            verificationMethod: params.verificationMethodId,
+                            proofPurpose: constants.SCHEMA.PROOF_PURPOSE,
+                            proofValue: Buffer.from(signed).toString('base64'),
+                        };
+                        schemaDoc.proof = {};
+                        Object.assign(schemaDoc.proof, __assign({}, proof));
+                        return [2 /*return*/, schemaDoc];
                 }
             });
         });
     };
-    HyperSignSchema.prototype.registerSchema = function (params) {
+    /**
+     * Register a schema Document in Hypersign blockchain - an onchain activity
+     * @params
+     *  - params.schema               : The schema document with schemaProof
+     * @returns {Promise<object>} Result of the registration
+     */
+    HyperSignSchema.prototype.register = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 if (!params.schema)
-                    throw new Error('HID-SSI-SDK:: Error: Schema must be passed');
-                if (!params.proof)
-                    throw new Error('HID-SSI-SDK:: Error: Proof must be passed');
-                if (!params.proof.created)
-                    throw new Error('HID-SSI-SDK:: Error: Proof must Contain created');
-                if (!params.proof.proofPurpose)
-                    throw new Error('HID-SSI-SDK:: Error: Proof must Contain proofPurpose');
-                if (!params.proof.proofValue)
-                    throw new Error('HID-SSI-SDK:: Error: Proof must Contain proofValue');
-                if (!params.proof.type)
-                    throw new Error('HID-SSI-SDK:: Error: Proof must Contain type');
-                if (!params.proof.verificationMethod)
-                    throw new Error('HID-SSI-SDK:: Error: Proof must Contain verificationMethod');
-                return [2 /*return*/, this.schemaRpc.createSchema(params.schema, params.proof)];
+                    throw new Error('HID-SSI-SDK:: Error: schema must be passed');
+                if (!params.schema.proof)
+                    throw new Error('HID-SSI-SDK:: Error: schema.proof must be passed');
+                if (!params.schema.proof.created)
+                    throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain created');
+                if (!params.schema.proof.proofPurpose)
+                    throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain proofPurpose');
+                if (!params.schema.proof.proofValue)
+                    throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain proofValue');
+                if (!params.schema.proof.type)
+                    throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain type');
+                if (!params.schema.proof.verificationMethod)
+                    throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain verificationMethod');
+                if (!this.schemaRpc) {
+                    throw new Error('HID-SSI-SDK:: Error: HypersignSchema class is not instantiated with Offlinesigner or have not been initilized');
+                }
+                return [2 /*return*/, this.schemaRpc.createSchema(params.schema, params.schema.proof)];
             });
         });
     };
+    /**
+     * Resolves a schema document with schemId from Hypersign blockchain - an onchain activity
+     * @params
+     *  - params.schemaId             : Id of the schema document
+     * @returns {Promise<Schema>} Returns schema document
+     */
     HyperSignSchema.prototype.resolve = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var schemaArr, schema;
@@ -206,6 +293,9 @@ var HyperSignSchema = /** @class */ (function () {
                     case 0:
                         if (!params.schemaId)
                             throw new Error('HID-SSI-SDK:: Error: SchemaId must be passed');
+                        if (!this.schemaRpc) {
+                            throw new Error('HID-SSI-SDK:: Error: HypersignSchema class is not instantiated with Offlinesigner or have not been initilized');
+                        }
                         return [4 /*yield*/, this.schemaRpc.resolveSchema(params.schemaId)];
                     case 1:
                         schemaArr = _a.sent();

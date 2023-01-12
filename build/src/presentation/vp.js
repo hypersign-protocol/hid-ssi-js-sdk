@@ -1,4 +1,9 @@
 "use strict";
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -57,21 +62,26 @@ var did_1 = __importDefault(require("../did/did"));
 var ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
 var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
 var utils_1 = __importDefault(require("../utils"));
-var vc_1 = __importDefault(require("./vc"));
+var vc_1 = __importDefault(require("../credential/vc"));
 var _a = jsonld_signatures_1.default.purposes, AuthenticationProofPurpose = _a.AuthenticationProofPurpose, AssertionProofPurpose = _a.AssertionProofPurpose;
 var constants_1 = require("../constants");
 var HypersignVerifiablePresentation = /** @class */ (function () {
-    function HypersignVerifiablePresentation(namespace) {
-        this.hsDid = new did_1.default();
-        this.vc = new vc_1.default();
+    function HypersignVerifiablePresentation(params) {
+        if (params === void 0) { params = {}; }
+        var namespace = params.namespace, nodeRpcEndpoint = params.nodeRpcEndpoint, nodeRestEndpoint = params.nodeRestEndpoint;
         this.namespace = namespace && namespace != '' ? namespace : '';
+        var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
+        var nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
+        var offlineConstuctorParams = { nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
+        this.vc = new vc_1.default(offlineConstuctorParams);
+        this.hsDid = new did_1.default(offlineConstuctorParams);
         this.id = '';
         this.type = [];
         this.verifiableCredential = [];
         this.holder = '';
         this.proof = {};
     }
-    HypersignVerifiablePresentation.prototype.getId = function () {
+    HypersignVerifiablePresentation.prototype._getId = function () {
         return __awaiter(this, void 0, void 0, function () {
             var uuid, id;
             return __generator(this, function (_a) {
@@ -90,12 +100,19 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
             });
         });
     };
-    HypersignVerifiablePresentation.prototype.getPresentation = function (params) {
+    /**
+     * Generates a new presentation document
+     * @params
+     *  - params.verifiableCredentials: Array of Verifiable Credentials
+     *  - params.holderDid            : DID of the subject
+     * @returns {Promise<object>}
+     */
+    HypersignVerifiablePresentation.prototype.generate = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var id, presentation;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.getId()];
+                    case 0: return [4 /*yield*/, this._getId()];
                     case 1:
                         id = _a.sent();
                         presentation = vc_js_1.default.createPresentation({
@@ -108,7 +125,18 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
             });
         });
     };
-    HypersignVerifiablePresentation.prototype.signPresentation = function (params) {
+    /**
+     * Signs a new presentation document
+     * @params
+     *  - params.presentation         : Array of Verifiable Credentials
+     *  - params.holderDid            : *Optional* DID of the subject
+     *  - params.holderDidDocSigned   : *Optional* DID Doc of the subject
+     *  - params.verificationMethodId : verificationMethodId of holder
+     *  - params.privateKeyMultibase  : Private key associated with the verification method
+     *  - params.challenge            : Any random challenge
+     * @returns {Promise<object>}
+     */
+    HypersignVerifiablePresentation.prototype.sign = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var resolvedDidDoc, signerDidDoc, publicKeyId, publicKeyVerMethod, convertedKeyPair, keyPair, suite, signedVP;
             return __generator(this, function (_a) {
@@ -117,8 +145,8 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                         if (params.holderDid && params.holderDidDocSigned) {
                             throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
                         }
-                        if (!params.privateKey) {
-                            throw new Error('HID-SSI-SDK:: params.privateKey is required for signinng a presentation');
+                        if (!params.privateKeyMultibase) {
+                            throw new Error('HID-SSI-SDK:: params.privateKeyMultibase is required for signing a presentation');
                         }
                         if (!params.presentation) {
                             throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
@@ -128,6 +156,9 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                         }
                         if (!params.verificationMethodId) {
                             throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+                        }
+                        if (!this.hsDid) {
+                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
                         }
                         if (!params.holderDid) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.hsDid.resolve({ did: params.holderDid })];
@@ -151,7 +182,7 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                             publicKey: publicKeyVerMethod.publicKeyMultibase,
                         });
                         publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
-                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: params.privateKey }, publicKeyVerMethod))];
+                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(__assign({ privateKeyMultibase: params.privateKeyMultibase }, publicKeyVerMethod))];
                     case 4:
                         keyPair = _a.sent();
                         suite = new ed25519_signature_2020_1.Ed25519Signature2020({
@@ -172,7 +203,20 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
         });
     };
     // https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L392
-    HypersignVerifiablePresentation.prototype.verifyPresentation = function (params) {
+    /**
+     * Verifies signed presentation document
+     * @params
+     *  - params.signedPresentation         : Signed presentation document
+     *  - params.holderDid                  : DID of the subject
+     *  - params.holderDidDocSigned         : DIDdocument of the subject
+     *  - params.holderVerificationMethodId : verificationMethodId of holder
+     *  - params.issuerDid                  : DID of the issuer
+     *  - params.issuerVerificationMethodId : Optional DIDDoc of the issuer
+     *  - params.domain                     : Optional domain
+     *  - params.challenge                  : Random challenge
+     * @returns {Promise<object>}
+     */
+    HypersignVerifiablePresentation.prototype.verify = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var resolvedDidDoc, holderDID, holderDidDoc, holderPublicKeyId, holderPublicKeyVerMethod, holderPublicKeyMultibase, holderController, presentationPurpose, keyPair, vpSuite_holder, issuerDID, issuerDidDoc, issuerDidDocController, issuerDidDocControllerVerificationMethod, issuerPublicKeyId, issuerPublicKeyVerMethod, controllerDidDocT, controllerDidDoc, issuerPublicKeyMultibase, issuerController, purpose, issuerKeyPair, vcSuite_issuer, that, result;
             return __generator(this, function (_a) {
@@ -192,6 +236,12 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                         }
                         if (!params.issuerVerificationMethodId) {
                             throw new Error('HID-SSI-SDK:: params.issuerVerificationMethodId is required for verifying a presentation');
+                        }
+                        if (!this.vc || !this.hsDid) {
+                            throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
+                        }
+                        if (!params.signedPresentation.proof) {
+                            throw new Error('HID-SSI-SDK:: params.signedPresentation must be signed');
                         }
                         if (!params.holderDid) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.hsDid.resolve({ did: params.holderDid })];
@@ -287,7 +337,7 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                                     return __awaiter(this, void 0, void 0, function () {
                                         return __generator(this, function (_a) {
                                             switch (_a.label) {
-                                                case 0: return [4 /*yield*/, that.vc.checkCredentialStatus(options.credential.id)];
+                                                case 0: return [4 /*yield*/, that.vc.checkCredentialStatus({ credentialId: options.credential.id })];
                                                 case 1: return [2 /*return*/, _a.sent()];
                                             }
                                         });

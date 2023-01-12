@@ -1,4 +1,10 @@
-import { Did as IDidProto, Metadata } from '../generated/ssi/did';
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+
+import { Did as IDidProto, Metadata, VerificationMethod, Service } from '../../libs/generated/ssi/did';
 export interface IPublicKey {
   '@context': string;
   id: string;
@@ -27,17 +33,36 @@ export interface IDid extends IDidProto {
   '@context': Array<any>;
 }
 
+interface IProof {
+  type: string;
+  created: string;
+  verificationMethod: string;
+  proofPurpose: string;
+  challenge: string;
+  domain: string;
+  proofValue: string;
+}
+
+export interface ISignedDIDDocument extends IDidProto {
+  proof: IProof;
+}
+
 export interface IDID {
-  generateKeys(params: { seed: string }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }>;
-  generate(params: { publicKeyMultibase: string }): Promise<object>;
+  generateKeys(params: { seed?: string }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }>;
+
+  generate(params: { methodSpecificId?: string; publicKeyMultibase: string }): Promise<object>;
+
   register(params: { didDocument: object; privateKeyMultibase: string; verificationMethodId: string }): Promise<object>;
-  resolve(params: { did: string }): Promise<object>;
+
+  resolve(params: { did: string; ed25519verificationkey2020?: boolean }): Promise<object>;
+
   update(params: {
     didDocument: object;
     privateKeyMultibase: string;
     verificationMethodId: string;
     versionId: string;
   }): Promise<object>;
+
   deactivate(params: {
     didDocument: object;
     privateKeyMultibase: string;
@@ -46,12 +71,25 @@ export interface IDID {
   }): Promise<object>;
 
   // didAuth
-  signDid(params: IParams): Promise<object>;
-  verify(params: IParams): Promise<object>;
+  sign(params: {
+    didDocument: object;
+    privateKeyMultibase: string;
+    challenge: string;
+    domain: string;
+    did: string;
+    verificationMethodId: string;
+  }): Promise<object>;
+
+  verify(params: {
+    didDocument: object;
+    verificationMethodId: string;
+    challenge: string;
+    domain?: string;
+  }): Promise<object>;
 }
 
 export interface IDIDResolve {
-  didDocument: object;
+  didDocument: IDidDocument;
   didDocumentMetadata: Metadata;
 }
 
@@ -60,4 +98,19 @@ export interface IDIDRpc {
   updateDID(didDoc: IDidProto, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
   deactivateDID(did: string, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
   resolveDID(did: string): Promise<IDIDResolve>;
+  init(): Promise<void>;
+}
+
+export interface IDidDocument {
+  context: string[];
+  id: string;
+  controller: string[];
+  alsoKnownAs: string[];
+  verificationMethod: Array<VerificationMethod>;
+  authentication: string[];
+  assertionMethod: string[];
+  keyAgreement: string[];
+  capabilityInvocation: string[];
+  capabilityDelegation: string[];
+  service: Service[];
 }

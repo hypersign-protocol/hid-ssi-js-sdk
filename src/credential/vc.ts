@@ -1,20 +1,25 @@
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+
 import vc from 'vc-js';
 import Utils from '../utils';
 import { documentLoader } from 'jsonld';
-import { v4 as uuidv4 } from 'uuid';
 import HypersignSchema from '../schema/schema';
-import { Schema, SchemaProperty } from '../generated/ssi/schema';
+import { Schema, SchemaProperty } from '../../libs/generated/ssi/schema';
 import HypersignDID from '../did/did';
-import { Did, VerificationMethod } from '../generated/ssi/did';
+import { Did, VerificationMethod } from '../../libs/generated/ssi/did';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 const ed25519 = require('@stablelib/ed25519');
 import { CredentialRPC } from './credRPC';
-import { ICredentialRPC, ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema } from './ICredential';
+import { ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema } from './ICredential';
 import { VC, DID } from '../constants';
-import { CredentialStatus, CredentialProof, Credential, Claim } from '../generated/ssi/credential';
+import { CredentialStatus, CredentialProof, Credential, Claim } from '../../libs/generated/ssi/credential';
 import { DeliverTxResponse } from '@cosmjs/stargate';
-
+import { OfflineSigner } from '@cosmjs/proto-signing';
 import crypto from 'crypto';
 
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
@@ -28,16 +33,28 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public credentialSchema: ISchema;
   public proof: object;
   public credentialStatus: ICredentialStatus;
-  private credStatusRPC: ICredentialRPC;
+  private credStatusRPC: CredentialRPC;
   private namespace: string;
-
   private hsSchema: HypersignSchema;
   private hsDid: HypersignDID;
-  constructor(namespace?: string) {
-    this.hsSchema = new HypersignSchema();
-    this.hsDid = new HypersignDID();
-    this.credStatusRPC = new CredentialRPC();
+
+  constructor(
+    params: {
+      namespace?: string;
+      offlineSigner?: OfflineSigner;
+      nodeRpcEndpoint?: string;
+      nodeRestEndpoint?: string;
+    } = {}
+  ) {
+    const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint } = params;
+
     this.namespace = namespace && namespace != '' ? namespace : '';
+    const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
+    const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
+    const offlineConstuctorParams = { offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
+    this.credStatusRPC = new CredentialRPC(offlineConstuctorParams);
+    this.hsDid = new HypersignDID(offlineConstuctorParams);
+    this.hsSchema = new HypersignSchema(offlineConstuctorParams);
 
     this.context = [];
     this.id = '';
@@ -57,7 +74,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     this.proof = {};
   }
 
-  private async sign(params: { message: string; privateKeyMultibase: string }): Promise<string> {
+  private async _sign(params: { message: string; privateKeyMultibase: string }): Promise<string> {
     const { privateKeyMultibase: privateKeyMultibaseConverted } =
       Utils.convertEd25519verificationkey2020toStableLibKeysInto({
         privKey: params.privateKeyMultibase,
@@ -71,7 +88,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return Buffer.from(signed).toString('base64');
   }
 
-  private dateNow(date?: string): string {
+  private _dateNow(date?: string): string {
     if (date) {
       return new Date(date).toISOString().slice(0, -5) + 'Z';
     } else {
@@ -79,12 +96,12 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     }
   }
 
-  private sha256Hash(message: string): string {
+  private _sha256Hash(message: string): string {
     const sha256 = crypto.createHash('sha256');
     return sha256.update(message).digest('hex');
   }
 
-  private async getId(): Promise<string> {
+  private async _getId(): Promise<string> {
     const uuid = await Utils.getUUID();
     let id;
     if (this.namespace && this.namespace != '') {
@@ -95,11 +112,11 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return id;
   }
 
-  private checkIfAllRequiredPropsAreSent = (sentAttributes: Array<string>, requiredProps: Array<string>) => {
+  private _checkIfAllRequiredPropsAreSent = (sentAttributes: Array<string>, requiredProps: Array<string>) => {
     return !requiredProps.some((x) => sentAttributes.indexOf(x) === -1);
   };
 
-  private getCredentialSubject = (schemaProperty: SchemaProperty, attributesMap: object): object => {
+  private _getCredentialSubject = (schemaProperty: SchemaProperty, attributesMap: object): object => {
     const cs: object = {};
 
     const sentPropes: Array<string> = Object.keys(attributesMap);
@@ -111,7 +128,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     // Check for "additionalProperties" in schemaProperty
     if (!schemaProperty.additionalProperties) {
-      if (sentPropes.length > SchemaProps.length || !this.checkIfAllRequiredPropsAreSent(SchemaProps, sentPropes))
+      if (sentPropes.length > SchemaProps.length || !this._checkIfAllRequiredPropsAreSent(SchemaProps, sentPropes))
         throw new Error(
           `Only ${JSON.stringify(SchemaProps)} attributes are possible. additionalProperties is false in the schema`
         );
@@ -122,7 +139,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     // Check all required propes
     const requiredPros: Array<string> = Object.values(schemaProperty.required);
-    if (!this.checkIfAllRequiredPropsAreSent(sentPropes, requiredPros))
+    if (!this._checkIfAllRequiredPropsAreSent(sentPropes, requiredPros))
       throw new Error(`${JSON.stringify(requiredPros)} are required properties`);
 
     // Attach the values of props
@@ -136,10 +153,15 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   //
   // TODO: https://www.w3.org/TR/vc-data-model/#data-schemas
   // TODO: handle schemaUrl variable properly later.
-  private getCredentialContext = (schemaId: string, schemaProperties: object) => {
+  private _getCredentialContext = (schemaId: string, schemaProperties: object) => {
     const context: any = [];
 
-    const schemaUrl = `${this.hsSchema.schemaRpc.schemaRestEp}/${schemaId}:`;
+    let schemaUrl;
+    if (this.hsSchema && this.hsSchema.schemaRpc) {
+      schemaUrl = `${this.hsSchema.schemaRpc.schemaRestEp}/${schemaId}:`;
+    } else {
+      throw new Error('Error: HypersigSchema object may not be initialized');
+    }
 
     context.push(VC.CREDENTAIL_BASE_CONTEXT);
     //context.push(VC.CREDENTAIL_SECURITY_SUITE);
@@ -158,33 +180,31 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return context;
   };
 
-  public async checkCredentialStatus(credentialId: string): Promise<{ verified: boolean }> {
-    if (!credentialId) {
-      throw new Error('CredentialId must be passed to check its status');
+  /**
+   * Initialise the offlinesigner to interact with Hypersign blockchain
+   */
+  public async init() {
+    if (!this.credStatusRPC) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
     }
-    const credentialStatus: Credential = await this.credStatusRPC.resolveCredentialStatus(credentialId);
-
-    if (!credentialStatus) {
-      throw new Error('Error while checking credential status of credentialID ' + credentialId);
-    }
-    const claim: Claim = credentialStatus.claim as Claim;
-    const { currentStatus, statusReason } = claim;
-
-    /// TODO:  probably we should also verify the credential HASH by recalculating the hash of the crdential and
-    // matching with credentialHash property.
-    // const { credentialHash } = credentialStatus;
-    if (currentStatus != VC.CRED_STATUS_TYPES.LIVE) {
-      console.log('WARN: Credential status is  not LIVE, currentStatus ' + currentStatus);
-      console.log('WARN: Status reason is ' + statusReason);
-      return { verified: false };
-    }
-
-    return { verified: true };
+    await this.credStatusRPC.init();
   }
 
-  // encode a multibase base58-btc multicodec key
-  // TEST
-  public async getCredential(params: {
+  /**
+   * Generates a new credential document
+   * @params
+   *  - params.schemaId             : Hypersign schema id
+   *  - params.subjectDid           : DID of the subject, if not provided, will be taken from subjectDidDocSigned
+   *  - params.schemaContext        :
+   *  - params.type                 :
+   *  - params.issuerDid            :  DID of the issuer
+   *  - params.expirationDate       :  Date of the expiration for this credential
+   *  - params.fields               :  Schema fields values for this credential
+   * @returns {Promise<IVerifiableCredential>} Result a credential document
+   */
+  public async generate(params: {
     schemaId: string;
     subjectDid?: string;
     subjectDidDocSigned?: JSON;
@@ -192,12 +212,17 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     type?: Array<string>;
     issuerDid: string;
     expirationDate: string;
-
     fields: object;
   }): Promise<IVerifiableCredential> {
     let schemaDoc: Schema = {} as Schema;
     if (params.subjectDid && params.subjectDidDocSigned) {
       throw new Error('HID-SSI-SDK:: Error: Both subjectDid and subjectDidDoc cannot be passed');
+    }
+
+    if (!this.credStatusRPC) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
     }
 
     const issuerDid = params.issuerDid;
@@ -237,7 +262,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
         const vc: IVerifiableCredential = {} as IVerifiableCredential;
         vc['@context'] = context;
-        vc.id = await this.getId();
+        vc.id = await this._getId();
         vc.type = [];
         vc.type.push('VerifiableCredential');
         params.type.forEach((x) => {
@@ -245,8 +270,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         });
 
         vc.issuer = issuerDid;
-        vc.issuanceDate = this.dateNow(new Date(new Date().getTime() - 100000).toISOString());
-        vc.expirationDate = this.dateNow(expirationDate);
+        vc.issuanceDate = this._dateNow(new Date(new Date().getTime() - 100000).toISOString());
+        vc.expirationDate = this._dateNow(expirationDate);
         vc.credentialSubject = credentialSubject;
         vc.credentialSubject['id'] = subjectDid && subjectDid != undefined ? subjectDid : subjectDidDoc.id;
 
@@ -279,23 +304,23 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     const schemaInternal = schemaDoc.schema as SchemaProperty;
     const schemaProperties = JSON.parse(schemaInternal.properties);
     // context
-    vc['@context'] = this.getCredentialContext(params.schemaId, schemaProperties);
+    vc['@context'] = this._getCredentialContext(params.schemaId, schemaProperties);
 
     /// TODO:  need to implement this properly
-    vc.id = await this.getId();
+    vc.id = await this._getId();
 
     // Type
     vc.type = [];
     vc.type.push('VerifiableCredential');
     vc.type.push(schemaDoc.name);
 
-    vc.expirationDate = this.dateNow(params.expirationDate);
-    vc.issuanceDate = this.dateNow(); // TODO: need to remove this.
+    vc.expirationDate = this._dateNow(params.expirationDate);
+    vc.issuanceDate = this._dateNow(); // TODO: need to remove this.
 
     vc.issuer = issuerDid;
     vc.credentialSubject = {};
     vc.credentialSubject = {
-      ...this.getCredentialSubject(schemaDoc.schema as SchemaProperty, params.fields),
+      ...this._getCredentialSubject(schemaDoc.schema as SchemaProperty, params.fields),
     };
     vc.credentialSubject['id'] = subjectDid && subjectDid != undefined ? subjectDid : subjectDidDoc.id;
     vc.credentialSchema = {
@@ -314,13 +339,32 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return vc;
   }
 
-  public async issueCredential(params: {
+  /**
+   * Generates signed credentials document and registers its status on Hypersign blockchain
+   * @params
+   *  - params.credential             : Hypersign credentail document
+   *  - params.privateKeyMultibase    : P
+   *  - params.issuerDid              : DID of the issuer
+   *  - params.verificationMethodId   : Verifcation Method of Issuer
+   * @returns {Promise<{
+   * signedCredential: IVerifiableCredential;
+   * credentialStatus: CredentialStatus;
+   * credentialStatusProof: CredentialProof;
+   * credentialStatusRegistrationResult?: DeliverTxResponse;
+   * }>}
+   */
+  public async issue(params: {
     credential: IVerifiableCredential;
     issuerDid: string;
     verificationMethodId: string; // vermethod of issuer for assestion
-    privateKey: string;
+    privateKeyMultibase: string;
     registerCredential?: boolean;
-  }): Promise<object> {
+  }): Promise<{
+    signedCredential: IVerifiableCredential;
+    credentialStatus: CredentialStatus;
+    credentialStatusProof: CredentialProof;
+    credentialStatusRegistrationResult?: DeliverTxResponse;
+  }> {
     if (!params.verificationMethodId) {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to issue credential');
     }
@@ -329,12 +373,18 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       throw new Error('HID-SSI-SDK:: Error: params.credential is required to issue credential');
     }
 
-    if (!params.privateKey) {
-      throw new Error('HID-SSI-SDK:: Error: params.privateKey is required to issue credential');
+    if (!params.privateKeyMultibase) {
+      throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to issue credential');
     }
 
     if (!params.issuerDid) {
       throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to issue credential');
+    }
+
+    if (!this.credStatusRPC) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
     }
 
     if (params.registerCredential == undefined) {
@@ -343,13 +393,19 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
     if (signerDidDoc === null || signerDidDoc === undefined)
-      throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
+      throw new Error('HID-SSI-SDK:: Error: Could not resolve issuerDid = ' + params.issuerDid);
 
     // TODO: take verification method from params
     const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
     const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
       (x) => x.id == publicKeyId
     ) as VerificationMethod;
+
+    if (!publicKeyVerMethod) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: Could not find verification method for id = ' + params.verificationMethodId
+      );
+    }
 
     const convertedKeyPair = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
       publicKey: publicKeyVerMethod.publicKeyMultibase,
@@ -358,7 +414,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
 
     const keyPair = await Ed25519VerificationKey2020.from({
-      privateKeyMultibase: params.privateKey,
+      privateKeyMultibase: params.privateKeyMultibase,
       ...publicKeyVerMethod,
     });
 
@@ -370,7 +426,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     /// Before we issue the credential the credential status has to be added
     /// for that we will call RegisterCredentialStatus RPC
     //  Let us generate credentialHash first
-    const credentialHash = this.sha256Hash(JSON.stringify(params.credential));
+    const credentialHash = this._sha256Hash(JSON.stringify(params.credential));
 
     const credentialStatus: CredentialStatus = {
       claim: {
@@ -384,9 +440,9 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       credentialHash,
     };
 
-    const proofValue = await this.sign({
+    const proofValue = await this._sign({
       message: JSON.stringify(credentialStatus),
-      privateKeyMultibase: params.privateKey,
+      privateKeyMultibase: params.privateKeyMultibase,
     });
 
     // check params.issuer is a controller of params.credential.issuer
@@ -410,8 +466,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const proof: CredentialProof = {
       type: VC.VERIFICATION_METHOD_TYPE,
-      created: this.dateNow(),
-      updated: this.dateNow(),
+      created: this._dateNow(),
+      updated: this._dateNow(),
       verificationMethod: issuerPublicKeyVerMethod.id,
       proofValue,
       proofPurpose: VC.PROOF_PURPOSE,
@@ -423,186 +479,50 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       suite,
       documentLoader,
     });
-    if (params.registerCredential) {
-      const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
 
-      if (!resp || resp.code != 0) {
-        throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+    let credentialStatusRegistrationResult: DeliverTxResponse;
+    if (params.registerCredential) {
+      credentialStatusRegistrationResult = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
+
+      if (!credentialStatusRegistrationResult || credentialStatusRegistrationResult.code != 0) {
+        throw new Error(
+          'HID-SSI-SDK:: Error while issuing the credential error = ' + credentialStatusRegistrationResult.rawLog
+        );
       }
 
-      return signedVC;
+      return {
+        signedCredential: signedVC,
+        credentialStatus,
+        credentialStatusProof: proof,
+        credentialStatusRegistrationResult,
+      };
     }
 
-    return { signedVC, credentialStatus, proof };
-
-    // const credentialJson = Utils.ldToJsonConvertor(params.credential);
-    //console.log(credentialJson);
-  }
-  public async registerCredentialStatus(credentialStatus: CredentialStatus, proof: CredentialProof) {
-    if (!credentialStatus || !proof)
-      throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
-    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
-    if (!resp || resp.code != 0) {
-      throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
-    }
-    return resp;
-  }
-  public async updateCredentialStatus(params: {
-    credStatus: CredentialStatus;
-    issuerDid: string;
-    verificationMethodId: string; // vermethod of issuer for assestion
-    privateKey: string;
-    status: string;
-    statusReason?: string;
-  }): Promise<object> {
-    if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required revoke credential');
-    }
-
-    if (!params.credStatus) {
-      throw new Error('HID-SSI-SDK:: Error: params.credential is required to revoke credential');
-    }
-
-    if (!params.privateKey) {
-      throw new Error('HID-SSI-SDK:: Error: params.privateKey is required to revoke credential');
-    }
-
-    if (!params.issuerDid) {
-      throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to revoke credential');
-    }
-    if (!params.status) {
-      throw new Error('HID-SSI-SDK:: Error: params.status is required to revoke credential');
-    }
-
-    const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
-    if (!signerDidDoc) throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
-
-    // TODO: take verification method from params
-    const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
-    const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
-      (x) => x.id == publicKeyId
-    ) as VerificationMethod;
-
-    const convertedKeyPair = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
-      publicKey: publicKeyVerMethod.publicKeyMultibase,
-    });
-
-    publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
-
-    const keyPair = await Ed25519VerificationKey2020.from({
-      privateKeyMultibase: params.privateKey,
-      ...publicKeyVerMethod,
-    });
-
-    const suite = new Ed25519Signature2020({
-      verificationMethod: publicKeyId,
-      key: keyPair,
-    });
-
-    /// Before we issue the credential the credential status has to be added
-    /// for that we will call RegisterCredentialStatus RPC
-    //  Let us generate credentialHash first
-    params.status = params.status.toUpperCase();
-    const claim: Claim = params.credStatus.claim as Claim;
-    const credentialStatus: CredentialStatus = {
-      claim: {
-        id: claim.id,
-        currentStatus: VC.CRED_STATUS_TYPES[params.status],
-        statusReason: params.statusReason ? params.statusReason : VC.CRED_STATUS_REASON_TYPES[params.status],
-      },
-      issuer: params.credStatus.issuer,
-      issuanceDate: params.credStatus.issuanceDate,
-      expirationDate: params.credStatus.expirationDate,
-      credentialHash: params.credStatus.credentialHash,
-    };
-
-    const proofValue = await this.sign({
-      message: JSON.stringify(credentialStatus),
-      privateKeyMultibase: params.privateKey,
-    });
-
-    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credStatus.issuer });
-    const issuerDidDoc: Did = issuerDID as Did;
-    const issuerDidDocController = issuerDidDoc.controller;
-    const verificationMethodController = params.verificationMethodId.split('#')[0];
-
-    if (!issuerDidDocController.includes(verificationMethodController)) {
-      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
-    }
-
-    const { didDocument: controllerDidDoc } = await this.hsDid.resolve({ did: verificationMethodController });
-    if (!controllerDidDoc)
-      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
-    const didDocofController = controllerDidDoc as Did;
-
-    const issuerPublicKeyId = params.verificationMethodId;
-    const issuerPublicKeyVerMethod: VerificationMethod = didDocofController.verificationMethod.find(
-      (x) => x.id == issuerPublicKeyId
-    ) as VerificationMethod;
-
-    const proof: CredentialProof = {
-      type: VC.VERIFICATION_METHOD_TYPE,
-      created: params.credStatus.issuanceDate,
-      updated: this.dateNow(),
-      verificationMethod: issuerPublicKeyVerMethod.id,
-      proofValue,
-      proofPurpose: VC.PROOF_PURPOSE,
-    };
-
-    /// RegisterCRedeRPC
-    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
-
-    if (!resp || resp.code != 0) {
-      throw new Error('HID-SSI-SDK:: Error while revoking the credential error = ' + resp.rawLog);
-    }
-
-    return resp;
+    return { signedCredential: signedVC, credentialStatus, credentialStatusProof: proof };
   }
 
-  public async generateRegisterCredentialStatusTxnMessage(credentialStatus: CredentialStatus, proof: CredentialProof) {
-    if (!credentialStatus || !proof)
-      throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
-    const txnMessage = await this.credStatusRPC.generateCredentialStatusTxnMessage(credentialStatus, proof);
-
-    return txnMessage;
-  }
-
-  public async registerCredentialStatusTxnBulk(txnMessage: []) {
-    if (!txnMessage) throw new Error('HID-SSI-SDK:: Error: txnMessage is required to register credential status');
-    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatusBulk(txnMessage);
-    if (!resp || resp.code != 0) {
-      throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
-    }
-    return resp;
-  }
-  // TODO:  Implement a method to update credential status of a doc.
-
+  // Ref: https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
   /**
-   *
-   * This method is used to resolve credential status from the Hypersign Identity Network
-   * @params {credentialId}
-   *
-   * @example
-   * const credentialStatus = await sdk.vc.resolveCredentialStatus({credentialId: 'vc:hid:testnet:Zlakfjkjs....'})
-   * console.log(credentialStatus)
-   *
-   * @returns CredentialStatus
+   * Verfies signed/issued credential
+   * @params
+   *  - params.credential             : Signed Hypersign credentail document of type IVerifiableCredential
+   *  - params.issuerDid              : DID of the issuer
+   *  - params.verificationMethodId   : Verifcation Method of Issuer
+   * @returns {Promise<object>}
    */
-
-  public async resolveCredentialStatus(params: { credentialId }): Promise<CredentialStatus> {
-    if (!params.credentialId)
-      throw new Error('HID-SSI-SDK:: Error: credentialId is required to resolve credential status');
-    const credentialStatus: CredentialStatus = await this.credStatusRPC.resolveCredentialStatus(params.credentialId);
-    return credentialStatus;
-  }
-
-  //https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
-  public async verifyCredential(params: {
+  public async verify(params: {
     credential: IVerifiableCredential;
     issuerDid: string;
     verificationMethodId: string;
   }): Promise<object> {
-    if (!params.credential) throw new Error('HID-SSI-SDK:: Credential is required to verify credential');
+    console.log(params.credential.id);
+    if (!params.credential) {
+      throw new Error('HID-SSI-SDK:: params.credential is required to verify credential');
+    }
+
+    if (!params.credential.proof) {
+      throw new Error('HID-SSI-SDK:: params.credential.proof is required to verify credential');
+    }
 
     if (!params.verificationMethodId) {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify credential');
@@ -619,6 +539,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       (x) => x.id == publicKeyId
     ) as VerificationMethod;
 
+    // TODO: Get rid of this hack later.
     // Convert 45 byte publick key into 48
     const { publicKeyMultibase } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
       publicKey: publicKeyVerMethod.publicKeyMultibase,
@@ -651,10 +572,235 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       suite,
       documentLoader,
       checkStatus: async function (options) {
-        return await that.checkCredentialStatus(options.credential.id);
+        return await that.checkCredentialStatus({ credentialId: options.credential.id });
       },
     });
 
     return result;
+  }
+
+  /**
+   * Resolves credential status from Hypersign Blokchain
+   * @params
+   *  - params.credentialId           : Verifiable credential id
+   * @returns {Promise<CredentialStatus>}
+   */
+  public async resolveCredentialStatus(params: { credentialId: string }): Promise<CredentialStatus> {
+    if (!params || !params.credentialId)
+      throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
+
+    const credentialStatus: CredentialStatus = await this.credStatusRPC.resolveCredentialStatus(params.credentialId);
+    return credentialStatus;
+  }
+
+  /**
+   * Update credential status in blockchain Hypersign Blokchain
+   * @params
+   *  - params.credentialStatus           : Status of the credential of type CredentialStatus
+   *  - params.issuerDid                  : DID of the issuer
+   *  - params.verificationMethodId       : verificationMethodId
+   *  - params.privateKeyMultibase        : privateKey of the issuer
+   *  - params.status                     : Status LIVE/REVOKE/SUSPENDED
+   *  - params.statusReason               : Reason for the status change
+   * @returns {Promise<DeliverTxResponse>}
+   */
+  public async updateCredentialStatus(params: {
+    credentialStatus: CredentialStatus;
+    issuerDid: string;
+    verificationMethodId: string; // vermethod of issuer for assestion
+    privateKeyMultibase: string;
+    status: string;
+    statusReason?: string;
+  }): Promise<DeliverTxResponse> {
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update credential status');
+    }
+
+    if (!params.credentialStatus) {
+      throw new Error('HID-SSI-SDK:: Error: params.credentialStatus is required to update credential status');
+    }
+
+    if (!params.privateKeyMultibase) {
+      throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to update credential status');
+    }
+
+    if (!params.issuerDid) {
+      throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to update credential status');
+    }
+    if (!params.status) {
+      throw new Error('HID-SSI-SDK:: Error: params.status is required to update credential status');
+    }
+
+    if (!this.credStatusRPC) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+
+    const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
+    if (!signerDidDoc) throw new Error('Could not resolve issuerDid = ' + params.issuerDid);
+
+    // TODO: take verification method from params
+    const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
+    const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
+      (x) => x.id == publicKeyId
+    ) as VerificationMethod;
+
+    const convertedKeyPair = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
+      publicKey: publicKeyVerMethod.publicKeyMultibase,
+    });
+
+    publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
+
+    const keyPair = await Ed25519VerificationKey2020.from({
+      privateKeyMultibase: params.privateKeyMultibase,
+      ...publicKeyVerMethod,
+    });
+
+    const suite = new Ed25519Signature2020({
+      verificationMethod: publicKeyId,
+      key: keyPair,
+    });
+
+    /// Before we issue the credential the credential status has to be added
+    /// for that we will call RegisterCredentialStatus RPC
+    //  Let us generate credentialHash first
+    params.status = params.status.toUpperCase();
+    const claim: Claim = params.credentialStatus.claim as Claim;
+    const credentialStatus: CredentialStatus = {
+      claim: {
+        id: claim.id,
+        currentStatus: VC.CRED_STATUS_TYPES[params.status],
+        statusReason: params.statusReason ? params.statusReason : VC.CRED_STATUS_REASON_TYPES[params.status],
+      },
+      issuer: params.credentialStatus.issuer,
+      issuanceDate: params.credentialStatus.issuanceDate,
+      expirationDate: params.credentialStatus.expirationDate,
+      credentialHash: params.credentialStatus.credentialHash,
+    };
+
+    const proofValue = await this._sign({
+      message: JSON.stringify(credentialStatus),
+      privateKeyMultibase: params.privateKeyMultibase,
+    });
+
+    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credentialStatus.issuer });
+    const issuerDidDoc: Did = issuerDID as Did;
+    const issuerDidDocController = issuerDidDoc.controller;
+    const verificationMethodController = params.verificationMethodId.split('#')[0];
+
+    if (!issuerDidDocController.includes(verificationMethodController)) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
+    }
+
+    const { didDocument: controllerDidDoc } = await this.hsDid.resolve({ did: verificationMethodController });
+    if (!controllerDidDoc)
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
+    const didDocofController = controllerDidDoc as Did;
+
+    const issuerPublicKeyId = params.verificationMethodId;
+    const issuerPublicKeyVerMethod: VerificationMethod = didDocofController.verificationMethod.find(
+      (x) => x.id == issuerPublicKeyId
+    ) as VerificationMethod;
+
+    const proof: CredentialProof = {
+      type: VC.VERIFICATION_METHOD_TYPE,
+      created: params.credentialStatus.issuanceDate,
+      updated: this._dateNow(),
+      verificationMethod: issuerPublicKeyVerMethod.id,
+      proofValue,
+      proofPurpose: VC.PROOF_PURPOSE,
+    };
+
+    /// RegisterCRedeRPC
+    // We use the same RPC (i.e. MsgRegisterCredentialStatus) for register and update of credential status on blockchain
+    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
+
+    if (!resp || resp.code != 0) {
+      throw new Error('HID-SSI-SDK:: Error while revoking the credential error = ' + resp.rawLog);
+    }
+
+    return resp;
+  }
+
+  public async checkCredentialStatus(params: { credentialId: string }): Promise<{ verified: boolean }> {
+    if (!params || !params.credentialId)
+      throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
+
+    const { credentialId } = params;
+    const credentialStatus: CredentialStatus = await this.credStatusRPC.resolveCredentialStatus(credentialId);
+
+    if (!credentialStatus) {
+      throw new Error('HID-SSI-SDK:: Error: while checking credential status of credentialID ' + credentialId);
+    }
+    const claim: Claim = credentialStatus.claim as Claim;
+    const { currentStatus, statusReason } = claim;
+
+    /// TODO:  probably we should also verify the credential HASH by recalculating the hash of the crdential and
+    // matching with credentialHash property.
+    // const { credentialHash } = credentialStatus;
+    if (currentStatus != VC.CRED_STATUS_TYPES.LIVE) {
+      console.log('WARN: Credential status is  not LIVE, currentStatus ' + currentStatus);
+      console.log('WARN: Status reason is ' + statusReason);
+      return { verified: false };
+    }
+
+    return { verified: true };
+  }
+
+  public async registerCredentialStatus(params: {
+    credentialStatus: CredentialStatus;
+    credentialStatusProof: CredentialProof;
+  }): Promise<DeliverTxResponse> {
+    const { credentialStatus, credentialStatusProof } = params;
+    if (!credentialStatus || !credentialStatusProof)
+      throw new Error(
+        'HID-SSI-SDK:: Error: credentialStatus and credentialStatusProof are required to register credential status'
+      );
+
+    if (!this.credStatusRPC) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+
+    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(
+      credentialStatus,
+      credentialStatusProof
+    );
+    if (!resp || resp.code != 0) {
+      throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+    }
+    return resp;
+  }
+
+  public async generateRegisterCredentialStatusTxnMessage(credentialStatus: CredentialStatus, proof: CredentialProof) {
+    if (!credentialStatus || !proof)
+      throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
+
+    if (!this.credStatusRPC) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+    const txnMessage = await this.credStatusRPC.generateCredentialStatusTxnMessage(credentialStatus, proof);
+
+    return txnMessage;
+  }
+
+  public async registerCredentialStatusTxnBulk(txnMessage: []) {
+    if (!txnMessage) throw new Error('HID-SSI-SDK:: Error: txnMessage is required to register credential status');
+
+    if (!this.credStatusRPC) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+
+    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatusBulk(txnMessage);
+    if (!resp || resp.code != 0) {
+      throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+    }
+    return resp;
   }
 }

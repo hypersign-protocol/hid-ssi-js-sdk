@@ -1,4 +1,9 @@
 "use strict";
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
@@ -60,13 +65,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CredentialRPC = void 0;
 var constants_1 = require("../constants");
-var generatedProto = __importStar(require("../generated/ssi/tx"));
+var generatedProto = __importStar(require("../../libs/generated/ssi/tx"));
 var axios_1 = __importDefault(require("axios"));
 var client_1 = require("../hid/client");
 var CredentialRPC = /** @class */ (function () {
-    function CredentialRPC() {
+    function CredentialRPC(_a) {
+        var offlineSigner = _a.offlineSigner, nodeRpcEndpoint = _a.nodeRpcEndpoint, nodeRestEndpoint = _a.nodeRestEndpoint;
+        if (offlineSigner) {
+            this.hidClient = new client_1.HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+        }
+        else {
+            this.hidClient = null;
+        }
         this.credentialRestEP = client_1.HIDClient.hidNodeRestEndpoint + constants_1.HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
     }
+    CredentialRPC.prototype.init = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!this.hidClient) {
+                            throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
+                        }
+                        return [4 /*yield*/, this.hidClient.init()];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
     CredentialRPC.prototype.registerCredentialStatus = function (credentialStatus, proof) {
         return __awaiter(this, void 0, void 0, function () {
             var typeUrl, txMessage, fee, hidClient, txResult;
@@ -78,6 +106,9 @@ var CredentialRPC = /** @class */ (function () {
                         }
                         if (!proof) {
                             throw new Error('Proof must be passed as a param while registering crdential status');
+                        }
+                        if (!this.hidClient) {
+                            throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
                         }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgRegisterCredentialStatus);
                         txMessage = {
@@ -127,6 +158,9 @@ var CredentialRPC = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        if (!this.hidClient) {
+                            throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
+                        }
                         fee = 'auto';
                         hidClient = client_1.HIDClient.getHidClient();
                         return [4 /*yield*/, hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), txMessages, fee)];

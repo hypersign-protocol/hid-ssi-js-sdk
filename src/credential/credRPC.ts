@@ -1,15 +1,44 @@
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+
 import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH } from '../constants';
-import * as generatedProto from '../generated/ssi/tx';
+import * as generatedProto from '../../libs/generated/ssi/tx';
 import { SigningStargateClient, DeliverTxResponse } from '@cosmjs/stargate';
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
 import { ICredentialRPC } from './ICredential';
-import { CredentialStatus, CredentialProof, Credential } from '../generated/ssi/credential';
+import { CredentialStatus, CredentialProof, Credential } from '../../libs/generated/ssi/credential';
+import { OfflineSigner } from '@cosmjs/proto-signing';
 
 export class CredentialRPC implements ICredentialRPC {
   public credentialRestEP: string;
-  constructor() {
+  private hidClient: any;
+
+  constructor({
+    offlineSigner,
+    nodeRpcEndpoint,
+    nodeRestEndpoint,
+  }: {
+    offlineSigner?: OfflineSigner;
+    nodeRpcEndpoint: string;
+    nodeRestEndpoint: string;
+  }) {
+    if (offlineSigner) {
+      this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+    } else {
+      this.hidClient = null;
+    }
     this.credentialRestEP = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
+  }
+
+  async init() {
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
+    }
+    await this.hidClient.init();
   }
 
   async registerCredentialStatus(
@@ -22,6 +51,10 @@ export class CredentialRPC implements ICredentialRPC {
 
     if (!proof) {
       throw new Error('Proof must be passed as a param while registering crdential status');
+    }
+
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
     }
 
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgRegisterCredentialStatus}`;
@@ -69,6 +102,10 @@ export class CredentialRPC implements ICredentialRPC {
   }
 
   async registerCredentialStatusBulk(txMessages: []) {
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
+    }
+
     const fee = 'auto';
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult: DeliverTxResponse = await hidClient.signAndBroadcast(

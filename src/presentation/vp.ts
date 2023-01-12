@@ -1,77 +1,47 @@
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+
 import vc from 'vc-js';
 import jsonSigs from 'jsonld-signatures';
 import { documentLoader } from 'jsonld';
 import HypersignDID from '../did/did';
-import { Did, VerificationMethod } from '../generated/ssi/did';
+import { Did, VerificationMethod } from '../../libs/generated/ssi/did';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import Utils from '../utils';
-import HypersignVerifiableCredential from './vc';
-import { ICredentialMethods } from './ICredential';
+import HypersignVerifiableCredential from '../credential/vc';
+import { IVerifiableCredential } from '../credential/ICredential';
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 import { VP, DID } from '../constants';
-
-interface ISchema {
-  id: string;
-  type: string;
-}
-
-// https://www.w3.org/TR/vc-data-model/#basic-concepts
-interface IVerifiableCredential {
-  '@context': Array<string>;
-  id: string;
-  type: Array<string>;
-  issuer: string;
-  issuanceDate: string;
-  expirationDate: string;
-  credentialSubject: object;
-  credentialSchema: ISchema;
-  proof: object;
-}
-
-// https://www.w3.org/TR/vc-data-model/#presentations-0
-interface IVerifiablePresentation {
-  id: string;
-  type: Array<string>;
-  verifiableCredential: Array<IVerifiableCredential>;
-  holder: string;
-  proof: object;
-}
-
-export interface IPresentationMethods {
-  getPresentation(params: { verifiableCredentials: Array<IVerifiableCredential>; holderDid: string }): Promise<object>;
-  signPresentation(params: {
-    presentation: IVerifiablePresentation;
-    holderDid: string;
-    privateKey: string;
-    challenge: string;
-    verificationMethodId: string;
-  }): Promise<object>;
-  verifyPresentation(params: {
-    signedPresentation: IVerifiablePresentation;
-    challenge: string;
-    domain?: string;
-    issuerDid: string;
-    holderDid: string;
-    holderVerificationMethodId: string;
-    issuerVerificationMethodId: string;
-  }): Promise<object>;
-}
+import { IPresentationMethods, IVerifiablePresentation } from './IPresentation';
 
 export default class HypersignVerifiablePresentation implements IPresentationMethods, IVerifiablePresentation {
-  private hsDid: HypersignDID;
-
+  private hsDid: HypersignDID | null;
+  private vc: HypersignVerifiableCredential;
   id: string;
-  vc: ICredentialMethods;
   type: Array<string>;
   verifiableCredential: Array<IVerifiableCredential>;
   holder: string;
   proof: object;
   namespace: string;
-  constructor(namespace?: string) {
-    this.hsDid = new HypersignDID();
-    this.vc = new HypersignVerifiableCredential();
+  constructor(
+    params: {
+      namespace?: string;
+      nodeRpcEndpoint?: string;
+      nodeRestEndpoint?: string;
+    } = {}
+  ) {
+    const { namespace, nodeRpcEndpoint, nodeRestEndpoint } = params;
+
     this.namespace = namespace && namespace != '' ? namespace : '';
+    const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
+    const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
+    const offlineConstuctorParams = { nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
+    this.vc = new HypersignVerifiableCredential(offlineConstuctorParams);
+    this.hsDid = new HypersignDID(offlineConstuctorParams);
 
     this.id = '';
     this.type = [];
@@ -80,7 +50,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     this.proof = {};
   }
 
-  private async getId(): Promise<string> {
+  private async _getId(): Promise<string> {
     const uuid = await Utils.getUUID();
     let id;
     if (this.namespace && this.namespace != '') {
@@ -91,11 +61,15 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     return id;
   }
 
-  async getPresentation(params: {
-    verifiableCredentials: Array<IVerifiableCredential>;
-    holderDid: string;
-  }): Promise<object> {
-    const id = await this.getId();
+  /**
+   * Generates a new presentation document
+   * @params
+   *  - params.verifiableCredentials: Array of Verifiable Credentials
+   *  - params.holderDid            : DID of the subject
+   * @returns {Promise<object>}
+   */
+  async generate(params: { verifiableCredentials: Array<IVerifiableCredential>; holderDid: string }): Promise<object> {
+    const id = await this._getId();
     const presentation = vc.createPresentation({
       verifiableCredential: params.verifiableCredentials,
       id: id,
@@ -104,19 +78,30 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     return presentation;
   }
 
-  async signPresentation(params: {
+  /**
+   * Signs a new presentation document
+   * @params
+   *  - params.presentation         : Array of Verifiable Credentials
+   *  - params.holderDid            : *Optional* DID of the subject
+   *  - params.holderDidDocSigned   : *Optional* DID Doc of the subject
+   *  - params.verificationMethodId : verificationMethodId of holder
+   *  - params.privateKeyMultibase  : Private key associated with the verification method
+   *  - params.challenge            : Any random challenge
+   * @returns {Promise<object>}
+   */
+  async sign(params: {
     presentation: IVerifiablePresentation;
     holderDid?: string;
     holderDidDocSigned?: JSON;
-    verificationMethodId: string; // verificationMethodId of holder for assertion
-    privateKey: string;
+    verificationMethodId: string;
+    privateKeyMultibase: string;
     challenge: string;
-  }): Promise<object> {
+  }): Promise<IVerifiablePresentation> {
     if (params.holderDid && params.holderDidDocSigned) {
       throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
     }
-    if (!params.privateKey) {
-      throw new Error('HID-SSI-SDK:: params.privateKey is required for signinng a presentation');
+    if (!params.privateKeyMultibase) {
+      throw new Error('HID-SSI-SDK:: params.privateKeyMultibase is required for signing a presentation');
     }
 
     if (!params.presentation) {
@@ -130,6 +115,13 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     if (!params.verificationMethodId) {
       throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
     }
+
+    if (!this.hsDid) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+
     let resolvedDidDoc;
     if (params.holderDid) {
       resolvedDidDoc = await this.hsDid.resolve({ did: params.holderDid });
@@ -156,7 +148,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
 
     const keyPair = await Ed25519VerificationKey2020.from({
-      privateKeyMultibase: params.privateKey,
+      privateKeyMultibase: params.privateKeyMultibase,
       ...publicKeyVerMethod,
     });
 
@@ -176,7 +168,20 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
   }
 
   // https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L392
-  async verifyPresentation(params: {
+  /**
+   * Verifies signed presentation document
+   * @params
+   *  - params.signedPresentation         : Signed presentation document
+   *  - params.holderDid                  : DID of the subject
+   *  - params.holderDidDocSigned         : DIDdocument of the subject
+   *  - params.holderVerificationMethodId : verificationMethodId of holder
+   *  - params.issuerDid                  : DID of the issuer
+   *  - params.issuerVerificationMethodId : Optional DIDDoc of the issuer
+   *  - params.domain                     : Optional domain
+   *  - params.challenge                  : Random challenge
+   * @returns {Promise<object>}
+   */
+  async verify(params: {
     signedPresentation: IVerifiablePresentation;
     challenge: string;
     domain?: string;
@@ -204,6 +209,16 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
 
     if (!params.issuerVerificationMethodId) {
       throw new Error('HID-SSI-SDK:: params.issuerVerificationMethodId is required for verifying a presentation');
+    }
+
+    if (!this.vc || !this.hsDid) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+
+    if (!params.signedPresentation.proof) {
+      throw new Error('HID-SSI-SDK:: params.signedPresentation must be signed');
     }
 
     ///---------------------------------------
@@ -326,7 +341,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       documentLoader,
       unsignedPresentation: true,
       checkStatus: async function (options) {
-        return await that.vc.checkCredentialStatus(options.credential.id);
+        return await that.vc.checkCredentialStatus({ credentialId: options.credential.id });
       },
     });
 

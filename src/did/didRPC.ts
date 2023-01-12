@@ -1,19 +1,51 @@
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+
 import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_DID_PATH } from '../constants';
-import * as generatedProto from '../generated/ssi/tx';
-import { Did as IDidProto, SignInfo } from '../generated/ssi/did';
+import * as generatedProto from '../../libs/generated/ssi/tx';
+import { Did as IDidProto, SignInfo } from '../../libs/generated/ssi/did';
 import { SigningStargateClient } from '@cosmjs/stargate';
 
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
 import { IDIDResolve, IDIDRpc } from './IDID';
+import { OfflineSigner } from '@cosmjs/proto-signing';
 
 export class DIDRpc implements IDIDRpc {
   private didRestEp: string;
-  constructor() {
+  private hidClient: HIDClient | null;
+  constructor({
+    offlineSigner,
+    nodeRpcEndpoint,
+    nodeRestEndpoint,
+  }: {
+    offlineSigner?: OfflineSigner;
+    nodeRpcEndpoint: string;
+    nodeRestEndpoint: string;
+  }) {
     this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_PATH;
+    if (offlineSigner) {
+      this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+    } else {
+      this.hidClient = null;
+    }
+  }
+
+  async init() {
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
+    }
+    await this.hidClient.init();
   }
 
   async registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string): Promise<object> {
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
+    }
+
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
     const signInfo: SignInfo = {
       verification_method_id: verificationMethodId,
@@ -41,6 +73,10 @@ export class DIDRpc implements IDIDRpc {
     verificationMethodId: string,
     versionId: string
   ): Promise<object> {
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
+    }
+
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgUpdateDID}`;
 
     const signInfo: SignInfo = {
@@ -72,6 +108,10 @@ export class DIDRpc implements IDIDRpc {
     verificationMethodId: string,
     versionId: string
   ): Promise<object> {
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
+    }
+
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgDeactivateDID}`;
     const signInfo: SignInfo = {
       verification_method_id: verificationMethodId,

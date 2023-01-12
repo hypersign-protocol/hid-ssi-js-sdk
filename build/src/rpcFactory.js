@@ -22,7 +22,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.HIDRpcFactory = void 0;
 var proto_signing_1 = require("@cosmjs/proto-signing");
 var stargate_1 = require("@cosmjs/stargate");
-var generatedProto = __importStar(require("./generated/ssi/tx"));
+var generatedProto = __importStar(require("../libs/generated/ssi/tx"));
 var constants_1 = require("./constants");
 var HIDRpcFactory = /** @class */ (function () {
     function HIDRpcFactory() {

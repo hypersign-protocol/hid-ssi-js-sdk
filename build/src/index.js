@@ -38,41 +38,47 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.HypersignVerifiablePresentation = exports.HypersignVerifiableCredential = exports.HypersignSchema = exports.HypersignDID = exports.HypersignSSISdk = void 0;
 var did_1 = __importDefault(require("./did/did"));
+exports.HypersignDID = did_1.default;
 var vc_1 = __importDefault(require("./credential/vc"));
-var vp_1 = __importDefault(require("./credential/vp"));
+exports.HypersignVerifiableCredential = vc_1.default;
+var vp_1 = __importDefault(require("./presentation/vp"));
+exports.HypersignVerifiablePresentation = vp_1.default;
 var schema_1 = __importDefault(require("./schema/schema"));
-var client_1 = require("./hid/client");
-module.exports = /** @class */ (function () {
-    function HypersignSSISdk(offlineSigner, nodeEndpoint, nodeRestEndpoint, namespace) {
-        // TODO validate if offlinesigner is of type OfflineSiner
+exports.HypersignSchema = schema_1.default;
+var HypersignSSISdk = /** @class */ (function () {
+    function HypersignSSISdk(params) {
+        var offlineSigner = params.offlineSigner, nodeRpcEndpoint = params.nodeRpcEndpoint, nodeRestEndpoint = params.nodeRestEndpoint, namespace = params.namespace;
         this.signer = offlineSigner;
-        if (!nodeEndpoint) {
-            throw new Error("HID Node enpoint must be passed. Possible values:  'TEST' | 'MAIN' | <custom node url>");
-        }
-        this.nodeEndpoint = nodeEndpoint;
+        this.nodeRpcEndpoint = nodeRpcEndpoint ? nodeRpcEndpoint : "MAIN";
         this.nodeRestEndpoint = nodeRestEndpoint ? nodeRestEndpoint : "";
         this.namespace = namespace ? namespace : "";
-        // this.did = {} as Did;
-        // this.vc = {} as VC;
-        // this.vp = {} as VP;
-        // this.schema = {} as Schema;
-        // this.did = {} as Did;
+        var constructorParams = {
+            offlineSigner: this.signer,
+            nodeRpcEndpoint: this.nodeRpcEndpoint,
+            nodeRestEndpoint: this.nodeRestEndpoint,
+            namespace: this.namespace
+        };
+        this.did = new did_1.default(constructorParams);
+        this.schema = new schema_1.default(constructorParams);
+        this.vc = new vc_1.default(constructorParams);
+        this.vp = new vp_1.default(constructorParams);
     }
     HypersignSSISdk.prototype.init = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var hidClient;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        hidClient = new client_1.HIDClient(this.signer, this.nodeEndpoint, this.nodeRestEndpoint);
-                        return [4 /*yield*/, hidClient.init()];
+                    case 0: return [4 /*yield*/, this.did.init()];
                     case 1:
                         _a.sent();
-                        this.did = new did_1.default(this.namespace);
-                        this.schema = new schema_1.default(this.namespace);
-                        this.vc = new vc_1.default(this.namespace);
-                        this.vp = new vp_1.default(this.namespace);
+                        return [4 /*yield*/, this.schema.init()];
+                    case 2:
+                        _a.sent();
+                        return [4 /*yield*/, this.vc.init()];
+                    case 3:
+                        _a.sent();
                         return [2 /*return*/];
                 }
             });
@@ -80,3 +86,4 @@ module.exports = /** @class */ (function () {
     };
     return HypersignSSISdk;
 }());
+exports.HypersignSSISdk = HypersignSSISdk;
