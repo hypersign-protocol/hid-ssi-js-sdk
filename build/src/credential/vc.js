@@ -128,7 +128,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
         };
         var namespace = params.namespace, offlineSigner = params.offlineSigner, nodeRpcEndpoint = params.nodeRpcEndpoint, nodeRestEndpoint = params.nodeRestEndpoint;
         this.namespace = namespace && namespace != '' ? namespace : '';
-        var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
+        var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
         var nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
         var offlineConstuctorParams = { offlineSigner: offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
         this.credStatusRPC = new credRPC_1.CredentialRPC(offlineConstuctorParams);

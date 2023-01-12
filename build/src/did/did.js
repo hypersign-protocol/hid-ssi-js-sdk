@@ -130,7 +130,7 @@ var HypersignDID = /** @class */ (function () {
             return did;
         };
         var offlineSigner = params.offlineSigner, namespace = params.namespace, nodeRpcEndpoint = params.nodeRpcEndpoint, nodeRestEndpoint = params.nodeRestEndpoint;
-        var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
+        var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
         var nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
         var rpcConstructorParams = {
             offlineSigner: offlineSigner,

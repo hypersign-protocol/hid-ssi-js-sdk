@@ -83,7 +83,7 @@ var HyperSignSchema = /** @class */ (function () {
     function HyperSignSchema(params) {
         if (params === void 0) { params = {}; }
         var namespace = params.namespace, offlineSigner = params.offlineSigner, nodeRpcEndpoint = params.nodeRpcEndpoint, nodeRestEndpoint = params.nodeRestEndpoint;
-        var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
+        var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
         var nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
         this.schemaRpc = new schemaRPC_1.SchemaRpc({ offlineSigner: offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
         this.namespace = namespace && namespace != '' ? namespace : '';

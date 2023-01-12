@@ -50,6 +50,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var chai_1 = require("chai");
 var index_1 = require("../index");
 var config_1 = require("./config");
+var hypersignSSISDK;
 var privateKeyMultibase;
 var publicKeyMultibase;
 var didDocId;
@@ -98,7 +99,7 @@ var issueCredentialBody = {
 };
 beforeEach(function () {
     return __awaiter(this, void 0, void 0, function () {
-        var constructorParams;
+        var constructorParams, vc, vp, did, schema;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, (0, config_1.createWallet)(config_1.mnemonic)];
@@ -110,19 +111,26 @@ beforeEach(function () {
                         nodeRpcEndpoint: config_1.hidNodeEp.rpc,
                         namespace: config_1.hidNodeEp.namespace,
                     };
-                    hypersignDID = new index_1.HypersignDID(constructorParams);
-                    return [4 /*yield*/, hypersignDID.init()];
-                case 2:
-                    _a.sent();
+                    // hypersignDID = new HypersignDID(constructorParams);
+                    // await hypersignDID.init();
                     hypersignSchema = new index_1.HypersignSchema(constructorParams);
                     return [4 /*yield*/, hypersignSchema.init()];
-                case 3:
+                case 2:
                     _a.sent();
                     hypersignVC = new index_1.HypersignVerifiableCredential(constructorParams);
                     return [4 /*yield*/, hypersignVC.init()];
+                case 3:
+                    _a.sent();
+                    // hypersignVP = new HypersignVerifiablePresentation();
+                    hypersignSSISDK = new index_1.HypersignSSISdk(constructorParams);
+                    return [4 /*yield*/, hypersignSSISDK.init()];
                 case 4:
                     _a.sent();
-                    hypersignVP = new index_1.HypersignVerifiablePresentation();
+                    vc = hypersignSSISDK.vc, vp = hypersignSSISDK.vp, did = hypersignSSISDK.did, schema = hypersignSSISDK.schema;
+                    hypersignDID = did;
+                    hypersignSchema = schema;
+                    hypersignVP = vp;
+                    hypersignVC = vc;
                     return [2 /*return*/];
             }
         });

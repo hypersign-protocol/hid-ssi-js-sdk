@@ -4,7 +4,7 @@ import {
   HypersignSchema,
   HypersignVerifiableCredential,
   HypersignVerifiablePresentation,
-  HypersignSSISdk
+  HypersignSSISdk,
 } from '../index';
 import { createWallet, mnemonic, hidNodeEp } from './config';
 import { IVerifiablePresentation } from '../presentation/IPresentation';
@@ -83,7 +83,7 @@ beforeEach(async function () {
 
   const { vc, vp, did, schema } = hypersignSSISDK;
 
-  hypersignDID  = did;
+  hypersignDID = did;
   hypersignSchema = schema;
   hypersignVP = vp;
   hypersignVC = vc;

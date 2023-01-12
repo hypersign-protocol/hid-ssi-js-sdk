@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HID_MIN_FEE = exports.HID_MIN_GAS = exports.HID_DNOMINATION = exports.HID_DECIMAL = exports.GAS_PRICE = exports.KEY_HEADERS = exports.SCHEMA = exports.VP = exports.VC = exports.DID = exports.CredentialStatusReasonEnums = exports.CredentialStatusEnums = exports.HIDRpcEnums = exports.HYPERSIGN_NETWORK_BANK_BALANCE_PATH = exports.HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH = exports.HYPERSIGN_NETWORK_SCHEMA_PATH = exports.HYPERSIGN_NETWORK_DID_PATH = exports.HID_COSMOS_MODULE = exports.HYPERSIGN_MAINNET_REST = exports.HYPERSIGN_MAINNET_RPC = exports.HYPERSIGN_TESTNET_REST = exports.HYPERSIGN_TESTNET_RPC = exports.compactProof = void 0;
 exports.compactProof = false;
-exports.HYPERSIGN_TESTNET_RPC = 'http://localhost:26657';
-exports.HYPERSIGN_TESTNET_REST = 'http://localhost:1317';
+exports.HYPERSIGN_TESTNET_RPC = 'https://rpc.jagrat.hypersign.id';
+exports.HYPERSIGN_TESTNET_REST = 'https://api.jagrat.hypersign.id';
 exports.HYPERSIGN_MAINNET_RPC = 'http://localhost:26657';
 exports.HYPERSIGN_MAINNET_REST = 'http://localhost:1317';
 exports.HID_COSMOS_MODULE = '/hypersignprotocol.hidnode.ssi';
@@ -36,7 +36,7 @@ exports.DID = {
     CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
     SCHEME: 'did',
     METHOD: 'hid',
-    NAMESPACE: 'devnet',
+    NAMESPACE: 'testnet',
     DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
     VERIFICATION_METHOD_TYPE: 'Ed25519VerificationKey2020',
 };
@@ -44,7 +44,7 @@ Object.freeze(exports.DID);
 exports.VC = {
     SCHEME: "vc",
     METHOD: "hid",
-    NAMESPACE: "devnet",
+    NAMESPACE: "testnet",
     PREFIX: "vc:" + exports.DID.METHOD + ":" + exports.DID.NAMESPACE + ":",
     CREDENTAIL_SCHEMA_VALIDATOR_TYPE: "JsonSchemaValidator2018",
     CREDENTAIL_STATUS_TYPE: "CredentialStatusList2017",
@@ -61,13 +61,13 @@ exports.VP = {
     PREFIX: 'vp:',
     SCHEME: 'vp',
     METHOD: 'hid',
-    NAMESPACE: 'devnet',
+    NAMESPACE: 'testnet',
 };
 Object.freeze(exports.VP);
 exports.SCHEMA = {
     SCHEME: 'sch',
     METHOD: 'hid',
-    NAMESPACE: 'devnet',
+    NAMESPACE: 'testnet',
     SCHEMA_JSON: 'http://json-schema.org/draft-07/schema',
     SCHEMA_TYPE: 'https://w3c-ccg.github.io/vc-json-schemas/v1/schema/1.0/schema.json',
     SIGNATURE_TYPE: "Ed25519Signature2020",

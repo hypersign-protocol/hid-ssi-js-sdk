@@ -35,12 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var chai_1 = require("chai");
-var did_1 = __importDefault(require("../did/did"));
+var index_1 = require("../index");
 var config_1 = require("./config");
 var privateKeyMultibase;
 var publicKeyMultibase;
@@ -54,20 +51,23 @@ var transactionHash;
 var signedDocument;
 var challenge = '1231231231';
 var domain = 'www.adbv.com';
+var hypersignSSISDK;
 //add mnemonic of wallet that have balance
 beforeEach(function () {
     return __awaiter(this, void 0, void 0, function () {
+        var params;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, (0, config_1.createWallet)(config_1.mnemonic)];
                 case 1:
                     offlineSigner = _a.sent();
-                    hypersignDID = new did_1.default({
+                    params = {
                         offlineSigner: offlineSigner,
                         nodeRestEndpoint: config_1.hidNodeEp.rest,
                         nodeRpcEndpoint: config_1.hidNodeEp.rpc,
                         namespace: config_1.hidNodeEp.namespace,
-                    });
+                    };
+                    hypersignDID = new index_1.HypersignDID(params);
                     return [4 /*yield*/, hypersignDID.init()];
                 case 2:
                     _a.sent();
@@ -149,6 +149,53 @@ describe('#generate() to generate did', function () {
                         methodSpecificId = 'e157620d69d003e12d935c37b8c21baa78d24898398829b39d943d253c006332';
                         return [4 /*yield*/, hypersignDID.generate({ publicKeyMultibase: publicKeyMultibase, methodSpecificId: methodSpecificId })];
                     case 1:
+                        didDocument = _a.sent();
+                        didDocId = didDocument['id'];
+                        (0, chai_1.expect)(didDocument).to.be.a('object');
+                        (0, chai_1.expect)(didDocId).to.be.equal('did:hid:testnet:' + methodSpecificId);
+                        (0, chai_1.should)().exist(didDocument['@context']);
+                        (0, chai_1.should)().exist(didDocument['id']);
+                        (0, chai_1.should)().exist(didDocument['controller']);
+                        (0, chai_1.should)().exist(didDocument['alsoKnownAs']);
+                        (0, chai_1.should)().exist(didDocument['verificationMethod']);
+                        (0, chai_1.expect)(didDocument['verificationMethod'] &&
+                            didDocument['authentication'] &&
+                            didDocument['assertionMethod'] &&
+                            didDocument['keyAgreement'] &&
+                            didDocument['capabilityInvocation'] &&
+                            didDocument['capabilityDelegation'] &&
+                            didDocument['service']).to.be.a('array');
+                        (0, chai_1.should)().exist(didDocument['authentication']);
+                        (0, chai_1.should)().exist(didDocument['assertionMethod']);
+                        (0, chai_1.should)().exist(didDocument['keyAgreement']);
+                        (0, chai_1.should)().exist(didDocument['capabilityInvocation']);
+                        (0, chai_1.should)().exist(didDocument['capabilityDelegation']);
+                        (0, chai_1.should)().exist(didDocument['service']);
+                        return [2 /*return*/];
+                }
+            });
+        });
+    });
+    it('should be able to generate didDocument with custom id using HypersignSSISDk instance', function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var methodSpecificId, params, didDocument, didDocId;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        methodSpecificId = 'e157620d69d003e12d935c37b8c21baa78d24898398829b39d943d253c006332';
+                        params = {
+                            offlineSigner: offlineSigner,
+                            nodeRestEndpoint: config_1.hidNodeEp.rest,
+                            nodeRpcEndpoint: config_1.hidNodeEp.rpc,
+                            namespace: config_1.hidNodeEp.namespace,
+                        };
+                        hypersignSSISDK = new index_1.HypersignSSISdk(params);
+                        return [4 /*yield*/, hypersignSSISDK.init()];
+                    case 1:
+                        _a.sent();
+                        hypersignDID = hypersignSSISDK.did;
+                        return [4 /*yield*/, hypersignDID.generate({ publicKeyMultibase: publicKeyMultibase, methodSpecificId: methodSpecificId })];
+                    case 2:
                         didDocument = _a.sent();
                         didDocId = didDocument['id'];
                         (0, chai_1.expect)(didDocument).to.be.a('object');
@@ -367,7 +414,7 @@ describe('#resolve() did after updating did document', function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        hypersignDID = new did_1.default();
+                        hypersignDID = new index_1.HypersignDID();
                         params = {
                             did: didDocId,
                             ed25519verificationkey2020: true,

@@ -70,7 +70,7 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
         if (params === void 0) { params = {}; }
         var namespace = params.namespace, nodeRpcEndpoint = params.nodeRpcEndpoint, nodeRestEndpoint = params.nodeRestEndpoint;
         this.namespace = namespace && namespace != '' ? namespace : '';
-        var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'TEST';
+        var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
         var nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
         var offlineConstuctorParams = { nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
         this.vc = new vc_1.default(offlineConstuctorParams);
