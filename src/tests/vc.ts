@@ -1,5 +1,5 @@
 import { expect, should } from 'chai';
-import { HypersignSSISdk, HypersignDID, HypersignSchema, HypersignVerifiableCredential } from '../index';
+import { HypersignDID, HypersignSchema, HypersignVerifiableCredential } from '../index';
 import { createWallet, mnemonic, hidNodeEp } from './config';
 import { ICredentialStatus, IVerifiableCredential } from '../credential/ICredential';
 
@@ -15,7 +15,6 @@ let schemaSignature;
 const challenge = '1231231231';
 const domain = 'www.adbv.com';
 let offlineSigner;
-let hsSdk;
 let credentialId;
 let credentialDetail;
 let hypersignDID;
@@ -67,9 +66,6 @@ beforeEach(async function () {
 
   hypersignVC = new HypersignVerifiableCredential(constructorParams);
   await hypersignVC.init();
-
-  hsSdk = new HypersignSSISdk(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest, hidNodeEp.namespace);
-  await hsSdk.init();
 });
 
 // Generate public and private key pair
@@ -785,3 +781,4 @@ describe('Verifiable Credential Status Opearations', () => {
     });
   });
 });
+
