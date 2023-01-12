@@ -72,6 +72,9 @@ const hypersignVC = new HypersignVerifiableCredential({
 const hypersignVC = new HypersignVerifiableCredential({
     offlineSigner
 })
+
+// OR Depending on offchain-onchain activities
+const hypersignVC = new HypersignVerifiableCredential()
 ```
 
 Read about `OfflineSigner` [here](https://docs.hypersign.id/developers/hid-ssi-sdk/offlinesigner)
@@ -84,7 +87,7 @@ await hypersignVC.init();
 
 ### `generate()`
 
-Generates a new credential document of type [IVerifiableCredential]()
+Generates a new credential document of type [IVerifiableCredential]().
 
 **API Definition**
 
