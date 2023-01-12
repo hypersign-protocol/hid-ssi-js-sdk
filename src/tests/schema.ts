@@ -1,7 +1,7 @@
 import { expect, should } from 'chai';
 import { HypersignSSISdk, HypersignDID, HypersignSchema } from '../index';
 import { createWallet, mnemonic, hidNodeEp } from './config';
-import { Schema, SchemaProof, SchemaDocument } from '../generated/ssi/schema';
+import { Schema, SchemaProof, SchemaDocument } from '../../libs/generated/ssi/schema';
 import { cosmjsSalt } from '@cosmjs/amino/build/wallet';
 
 let hsSdk;

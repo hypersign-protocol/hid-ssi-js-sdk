@@ -331,10 +331,10 @@ describe('Verifiable Presentation Operataions', () => {
       tempPresentationBody.verifiableCredentials[0] = credentialDetail;
       tempPresentationBody.holderDid = didDocId;
 
-      console.log(JSON.stringify(tempPresentationBody, null, 2));
+      // console.log(JSON.stringify(tempPresentationBody, null, 2));
 
       unsignedverifiablePresentation = await hypersignVP.generate(tempPresentationBody);
-      console.log(JSON.stringify(unsignedverifiablePresentation, null, 2));
+      // console.log(JSON.stringify(unsignedverifiablePresentation, null, 2));
       should().exist(unsignedverifiablePresentation['@context']);
       should().exist(unsignedverifiablePresentation['type']);
       expect(unsignedverifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
@@ -420,7 +420,7 @@ describe('Verifiable Presentation Operataions', () => {
       tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
       signedVerifiablePresentation = await hypersignVP.sign(tempSignPresentationBody);
 
-      console.log(JSON.stringify(signedVerifiablePresentation, null, 2));
+      // console.log(JSON.stringify(signedVerifiablePresentation, null, 2));
 
       should().exist(signedVerifiablePresentation['@context']);
       should().exist(signedVerifiablePresentation['type']);
@@ -511,7 +511,7 @@ describe('Verifiable Presentation Operataions', () => {
       tempverifyPresentationBody.challenge = didDocId;
 
       const verifiedPresentationDetail = await hypersignVP.verify(tempverifyPresentationBody);
-      console.log(JSON.stringify(verifiedPresentationDetail, null, 2));
+      // console.log(JSON.stringify(verifiedPresentationDetail, null, 2));
 
       should().exist(verifiedPresentationDetail.verified);
       expect(verifiedPresentationDetail.verified).to.be.equal(true);

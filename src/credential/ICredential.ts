@@ -4,7 +4,7 @@
  * Author: Hypermine Core Team
  */
 
-import { CredentialStatus, CredentialProof, Credential } from '../generated/ssi/credential';
+import { CredentialStatus, CredentialProof, Credential } from '../../libs/generated/ssi/credential';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 
 // interface ICredStatus {

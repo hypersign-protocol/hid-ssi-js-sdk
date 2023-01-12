@@ -316,8 +316,8 @@ describe('Verifiable Credential Opearations', () => {
       tempCredentialBody.fields = { name: 'varsha' };
 
       credentialDetail = await hypersignVC.generate(tempCredentialBody);
-      console.log('New Credential --------------------------------');
-      console.log(JSON.stringify(credentialDetail, null, 2));
+      // console.log('New Credential --------------------------------');
+      // console.log(JSON.stringify(credentialDetail, null, 2));
 
       expect(credentialDetail).to.be.a('object');
       should().exist(credentialDetail['@context']);
@@ -415,7 +415,7 @@ describe('Verifiable Credential Opearations', () => {
       tempIssueCredentialBody.issuerDid = didDocId;
       tempIssueCredentialBody.verificationMethodId = verificationMethodId;
       tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
-      console.log(JSON.stringify(tempIssueCredentialBody, null, 2));
+      // console.log(JSON.stringify(tempIssueCredentialBody, null, 2));
       const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);
 
       const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
@@ -425,8 +425,8 @@ describe('Verifiable Credential Opearations', () => {
       credenStatus = credentialStatus;
       credentialId = signedVC.id;
 
-      console.log('Signed Credential --------------------------------');
-      console.log(JSON.stringify(signedVC, null, 2));
+      // console.log('Signed Credential --------------------------------');
+      // console.log(JSON.stringify(signedVC, null, 2));
 
       credentialStatusId = signedCredential['credentialStatus'].id;
 
@@ -496,12 +496,12 @@ describe('Verifiable Credential Opearations', () => {
       credentialStatus2 = credentialStatus;
       credentialStatusProof2 = credentialStatusProof;
 
-      console.log({
-        signedCredential,
-        credentialStatusRegistrationResult,
-        credentialStatus2,
-        credentialStatusProof2,
-      });
+      // console.log({
+      //   signedCredential,
+      //   credentialStatusRegistrationResult,
+      //   credentialStatus2,
+      //   credentialStatusProof2,
+      // });
 
       expect(signedCredential).to.be.a('object');
       expect(credentialStatus).to.be.a('object');
@@ -518,11 +518,11 @@ describe('Verifiable Credential Opearations', () => {
         verificationMethodId,
       };
 
-      console.log('Signed vc --------------------------------');
-      console.log(JSON.stringify(params.credential, null, 2));
+      // console.log('Signed vc --------------------------------');
+      // console.log(JSON.stringify(params.credential, null, 2));
       const verificationResult = await hypersignVC.verify(params);
-      console.log('Credential Verifification result --------------------------------');
-      console.log(JSON.stringify(verificationResult, null, 2));
+      // console.log('Credential Verifification result --------------------------------');
+      // console.log(JSON.stringify(verificationResult, null, 2));
       expect(verificationResult).to.be.a('object');
       should().exist(verificationResult.verified);
       expect(verificationResult.verified).to.be.equal(true);
@@ -613,9 +613,9 @@ describe('Verifiable Credential Status Opearations', () => {
     });
 
     it('should be able to check credential status', async function () {
-      console.log('Credential ID ' + credentialId);
+      // console.log('Credential ID ' + credentialId);
       const credentialStatus = await hypersignVC.checkCredentialStatus({ credentialId: credentialId });
-      console.log(JSON.stringify(credentialStatus, null, 2));
+      // console.log(JSON.stringify(credentialStatus, null, 2));
       expect(credentialStatus).to.be.a('object');
       should().exist(credentialStatus.verified);
       expect(credentialStatus.verified).to.be.equal(true);
@@ -632,7 +632,7 @@ describe('Verifiable Credential Status Opearations', () => {
     });
     it('should be able to resolve credential', async function () {
       credentialStatus = await hypersignVC.resolveCredentialStatus({ credentialId });
-      console.log(JSON.stringify(credentialStatus, null, 2));
+      // console.log(JSON.stringify(credentialStatus, null, 2));
       expect(credentialStatus).to.be.a('object');
       should().exist(credentialStatus.issuer);
       should().exist(credentialStatus.issuanceDate);
@@ -720,7 +720,7 @@ describe('Verifiable Credential Status Opearations', () => {
         statusReason: 'Suspending this credential for some time',
       };
       const updatedCredResult = await hypersignVC.updateCredentialStatus(params);
-      console.log(updatedCredResult);
+      // console.log(updatedCredResult);
       expect(updatedCredResult).to.be.a('object');
       expect(updatedCredResult.code).to.be.equal(0);
     });
@@ -766,15 +766,15 @@ describe('Verifiable Credential Status Opearations', () => {
         });
     });
     it('should be able to register credential on blockchain', async function () {
-      console.log({
-        credentialStatus2,
-      });
+      // console.log({
+      //   credentialStatus2,
+      // });
       const registerCredDetail = await hypersignVC.registerCredentialStatus({
         credentialStatus: credentialStatus2,
         credentialStatusProof: credentialStatusProof2,
       });
 
-      console.log(JSON.stringify(registerCredDetail, null, 2));
+      // console.log(JSON.stringify(registerCredDetail, null, 2));
       expect(registerCredDetail).to.be.a('object');
       should().exist(registerCredDetail.code);
       should().exist(registerCredDetail.transactionHash);

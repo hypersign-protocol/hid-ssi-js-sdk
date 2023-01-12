@@ -8,7 +8,7 @@ import vc from 'vc-js';
 import jsonSigs from 'jsonld-signatures';
 import { documentLoader } from 'jsonld';
 import HypersignDID from '../did/did';
-import { Did, VerificationMethod } from '../generated/ssi/did';
+import { Did, VerificationMethod } from '../../libs/generated/ssi/did';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import Utils from '../utils';

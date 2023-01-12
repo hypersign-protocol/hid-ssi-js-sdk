@@ -11,7 +11,7 @@ const { AuthenticationProofPurpose } = jsonSigs.purposes;
 import { DIDRpc } from './didRPC';
 import Utils from '../utils';
 const ed25519 = require('@stablelib/ed25519');
-import { Did, VerificationMethod, Service } from '../generated/ssi/did';
+import { Did, VerificationMethod, Service } from '../../libs/generated/ssi/did';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import { IParams, IDID, IDid, IDIDResolve, IDIDRpc, IController, IDidDocument, ISignedDIDDocument } from './IDID';

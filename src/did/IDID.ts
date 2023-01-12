@@ -4,7 +4,7 @@
  * Author: Hypermine Core Team
  */
 
-import { Did as IDidProto, Metadata, VerificationMethod, Service } from '../generated/ssi/did';
+import { Did as IDidProto, Metadata, VerificationMethod, Service } from '../../libs/generated/ssi/did';
 export interface IPublicKey {
   '@context': string;
   id: string;

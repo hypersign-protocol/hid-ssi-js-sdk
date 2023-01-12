@@ -5,12 +5,12 @@
  */
 
 import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH } from '../constants';
-import * as generatedProto from '../generated/ssi/tx';
+import * as generatedProto from '../../libs/generated/ssi/tx';
 import { SigningStargateClient, DeliverTxResponse } from '@cosmjs/stargate';
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
 import { ICredentialRPC } from './ICredential';
-import { CredentialStatus, CredentialProof, Credential } from '../generated/ssi/credential';
+import { CredentialStatus, CredentialProof, Credential } from '../../libs/generated/ssi/credential';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 
 export class CredentialRPC implements ICredentialRPC {

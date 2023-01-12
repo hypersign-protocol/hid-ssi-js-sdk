@@ -5,8 +5,8 @@
  */
 
 import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_DID_PATH } from '../constants';
-import * as generatedProto from '../generated/ssi/tx';
-import { Did as IDidProto, SignInfo } from '../generated/ssi/did';
+import * as generatedProto from '../../libs/generated/ssi/tx';
+import { Did as IDidProto, SignInfo } from '../../libs/generated/ssi/did';
 import { SigningStargateClient } from '@cosmjs/stargate';
 
 import axios from 'axios';

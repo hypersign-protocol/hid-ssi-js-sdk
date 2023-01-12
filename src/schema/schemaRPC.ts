@@ -5,12 +5,12 @@
  */
 
 import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_SCHEMA_PATH } from '../constants';
-import * as generatedProto from '../generated/ssi/tx';
+import * as generatedProto from '../../libs/generated/ssi/tx';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
-import { Schema, SchemaProof } from '../generated/ssi/schema';
-import { SignInfo } from '../generated/ssi/did';
+import { Schema, SchemaProof } from '../../libs/generated/ssi/schema';
+import { SignInfo } from '../../libs/generated/ssi/did';
 import { SigningStargateClient } from '@cosmjs/stargate';
 
 export interface ISchemaRPC {

@@ -4,7 +4,7 @@
  * Author: Hypermine Core Team
  */
 
-import { Schema as ISchemaProto, Schema, SchemaDocument } from '../generated/ssi/schema';
+import { Schema as ISchemaProto, Schema, SchemaDocument } from '../../libs/generated/ssi/schema';
 export interface ISchemaFields {
   type: string;
   format?: string;
