@@ -33,7 +33,7 @@ export interface IPresentationMethods {
   sign(params: {
     presentation: IVerifiablePresentation;
     holderDid: string;
-    privateKey: string;
+    privateKeyMultibase: string;
     challenge: string;
     verificationMethodId: string;
   }): Promise<object>;

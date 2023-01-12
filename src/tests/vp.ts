@@ -6,6 +6,7 @@ import {
   HypersignVerifiablePresentation,
 } from '../index';
 import { createWallet, mnemonic, hidNodeEp } from './config';
+import { IVerifiablePresentation } from '../presentation/IPresentation';
 import { ICredentialStatus, IVerifiableCredential } from '../credential/ICredential';
 
 let privateKeyMultibase;
@@ -30,9 +31,9 @@ let credentialStatusId;
 let signedVC: IVerifiableCredential;
 let credenStatus: ICredentialStatus;
 let hypersignVP;
-let unsignedverifiablePresentation;
+let unsignedverifiablePresentation: IVerifiablePresentation;
 let verifiableCredentialPresentationId;
-let signedVerifiablePresentation;
+let signedVerifiablePresentation: IVerifiablePresentation;
 const credentialBody = {
   schemaId: '',
   subjectDid: '',
@@ -350,15 +351,74 @@ describe('Verifiable Presentation Operataions', () => {
       presentation: unsignedverifiablePresentation,
       holderDid: didDocId,
       verificationMethodId,
-      privateKey: privateKeyMultibase,
+      privateKeyMultibase: privateKeyMultibase,
       challenge,
     };
+
+
+    it('should not be able to sign presentation as either holderDid or holderDidDocSigned is required but passed both', async function () {
+      const tempSignPresentationBody = { ...signPresentationBody };
+      tempSignPresentationBody.presentation = unsignedverifiablePresentation;
+      tempSignPresentationBody.holderDid = didDocId;
+      tempSignPresentationBody.verificationMethodId = verificationMethodId;
+      tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
+      tempSignPresentationBody['holderDidDocSigned'] = signedDocument;
+      return hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
+      });
+    });
+    it('should not be able to sign presentation as privateKeyMultibase in null or empty', async function () {
+      const tempSignPresentationBody = { ...signPresentationBody };
+      tempSignPresentationBody.privateKeyMultibase = '';
+      return hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.privateKeyMultibase is required for signing a presentation');
+      });
+    });
+    // it('should not be able to sign presentation as either holderDid or holderDidDocSigned is required but passed both', async function () {
+    //   const tempSignPresentationBody = { ...signPresentationBody };
+    //   tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
+    //   tempSignPresentationBody.presentation = {} as IVerifiablePresentation;
+  
+    //   return hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
+    //     expect(function () {
+    //       throw err;
+    //     }).to.throw(Error, 'HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+    //   });
+    // });
+    it('should not be able to sign presentation as challenge is not passed', async function () {
+      const tempSignPresentationBody = { ...signPresentationBody };
+      tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
+      tempSignPresentationBody.presentation = unsignedverifiablePresentation;
+      tempSignPresentationBody.challenge = '';
+      return hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+      });
+    });
+    it('should not be able to sign presentation as verificationMethodId is not passed', async function () {
+      const tempSignPresentationBody = { ...signPresentationBody };
+      tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
+      tempSignPresentationBody.presentation = unsignedverifiablePresentation;
+      tempSignPresentationBody.challenge = challenge;
+      tempSignPresentationBody.verificationMethodId = '';
+      return hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+      });
+    });
+
     it('should be able a sign presentation document', async () => {
       const tempSignPresentationBody = { ...signPresentationBody };
       tempSignPresentationBody.presentation = unsignedverifiablePresentation;
       tempSignPresentationBody.holderDid = didDocId;
       tempSignPresentationBody.verificationMethodId = verificationMethodId;
-      tempSignPresentationBody.privateKey = privateKeyMultibase;
+      tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
       signedVerifiablePresentation = await hypersignVP.sign(tempSignPresentationBody);
 
       console.log(JSON.stringify(signedVerifiablePresentation, null, 2));
@@ -381,6 +441,68 @@ describe('Verifiable Presentation Operataions', () => {
       challenge,
       issuerDid: didDocId,
     };
+
+    it('should not be able to verify presentation as either holderDid or holderDidDocSigned is required but passed both', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.signedPresentation = signedVerifiablePresentation;
+      tempverifyPresentationBody.holderDid = didDocId;
+      tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
+      tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
+      tempverifyPresentationBody.privateKey = privateKeyMultibase;
+      tempverifyPresentationBody['holderDidDocSigned'] = signedDocument;
+      return hypersignVP.verify(tempverifyPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
+      });
+    });
+    it('should not be able to verify presentation as issuerDid is null or empty', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.issuerDid = '';
+      return hypersignVP.verify(tempverifyPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.issuerDid is required for verifying a presentation');
+      });
+    });
+    it('should not be able to verify presentation as challenge is null or empty', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.issuerDid = didDocId;
+      tempverifyPresentationBody.challenge = '';
+  
+      return hypersignVP.verify(tempverifyPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.challenge is required for verifying a presentation');
+      });
+    });
+    it('should not be able to verify presentation as holderVerificationMethodId is null or empty', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.issuerDid = didDocId;
+      tempverifyPresentationBody.challenge = challenge;
+      tempverifyPresentationBody.holderVerificationMethodId = '';
+  
+      return hypersignVP.verify(tempverifyPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.holderVerificationMethodId is required for verifying a presentation');
+      });
+    });
+    it('should not be able to verify presentation as issuerVerificationMethodId is null or empty', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.issuerDid = didDocId;
+      tempverifyPresentationBody.challenge = challenge;
+      tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
+      tempverifyPresentationBody.issuerVerificationMethodId = '';
+  
+      return hypersignVP.verify(tempverifyPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.issuerVerificationMethodId is required for verifying a presentation');
+      });
+    });
+
+
     it('should be able a verify sgned presentation document', async () => {
       const tempverifyPresentationBody = { ...verifyPresentationBody };
       tempverifyPresentationBody.signedPresentation = signedVerifiablePresentation;
@@ -389,8 +511,6 @@ describe('Verifiable Presentation Operataions', () => {
       tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
       tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
       tempverifyPresentationBody.challenge = didDocId;
-
-      console.log(JSON.stringify(tempverifyPresentationBody, null, 2));
 
       const verifiedPresentationDetail = await hypersignVP.verify(tempverifyPresentationBody);
       console.log(JSON.stringify(verifiedPresentationDetail, null, 2));

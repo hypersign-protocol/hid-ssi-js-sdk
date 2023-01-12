@@ -1,3 +1,5 @@
+# 
+
 ## `generate()` 
 
 **API Definition**
@@ -97,6 +99,7 @@ const unsignedverifiablePresentation = await hypersignVP.generate(params);
 
 ## `sign()` 
 
+Signs a new presentation document and returns presentation document with proofs
 
 **API Definition**
 
@@ -106,9 +109,9 @@ sign(params: {
     holderDid?: string;
     holderDidDocSigned?: JSON;
     verificationMethodId: string; // verificationMethodId of holder for assertion
-    privateKey: string;
+    privateKeyMultibase: string;
     challenge: string;
-  }): Promise<object> 
+  }): Promise<IVerifiablePresentation> 
 ```
 
 **Usage**
@@ -119,7 +122,7 @@ const params = {
           presentation: unsignedverifiablePresentation,
           holderDid: didDocId,
           verificationMethodId,
-          privateKey: privateKeyMultibase,
+          privateKeyMultibase,
           challenge,
     }
 const signedVerifiablePresentation = await hypersignVP.sign(params);
@@ -215,8 +218,8 @@ const params = {
     signedPresentation : signedVerifiablePresentation,
     issuerDid : didDocId,
     holderDid : didDocId,
-    holderVerificationMethodId,
-    issuerVerificationMethodId,
+    holderVerificationMethodId: verificationMethodId,
+    issuerVerificationMethodId: verificationMethodId,
     challenge: '123-123-12-22'
 }
 const verifiedPresentationDetail = await hypersignVP.verify(params);

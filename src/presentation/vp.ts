@@ -13,7 +13,7 @@ import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import Utils from '../utils';
 import HypersignVerifiableCredential from '../credential/vc';
-import { IVerifiableCredential, ICredentialMethods } from '../credential/ICredential';
+import { IVerifiableCredential } from '../credential/ICredential';
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 import { VP, DID } from '../constants';
 import { IPresentationMethods, IVerifiablePresentation } from './IPresentation';
@@ -102,11 +102,11 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
    * Signs a new presentation document
    * @params
    *  - params.presentation         : Array of Verifiable Credentials
-   *  - params.holderDid            : DID of the subject
-   *  - params.holderDidDocSigned   : DID of the subject
+   *  - params.holderDid            : *Optional* DID of the subject
+   *  - params.holderDidDocSigned   : *Optional* DID Doc of the subject
    *  - params.verificationMethodId : verificationMethodId of holder
-   *  - params.privateKey           :
-   *  - params.challenge            :
+   *  - params.privateKeyMultibase  : Private key associated with the verification method
+   *  - params.challenge            : Any random challenge
    * @returns {Promise<object>}
    */
   async sign(params: {
@@ -114,14 +114,14 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     holderDid?: string;
     holderDidDocSigned?: JSON;
     verificationMethodId: string;
-    privateKey: string;
+    privateKeyMultibase: string;
     challenge: string;
-  }): Promise<object> {
+  }): Promise<IVerifiablePresentation> {
     if (params.holderDid && params.holderDidDocSigned) {
       throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
     }
-    if (!params.privateKey) {
-      throw new Error('HID-SSI-SDK:: params.privateKey is required for signinng a presentation');
+    if (!params.privateKeyMultibase) {
+      throw new Error('HID-SSI-SDK:: params.privateKeyMultibase is required for signing a presentation');
     }
 
     if (!params.presentation) {
@@ -168,7 +168,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
 
     const keyPair = await Ed25519VerificationKey2020.from({
-      privateKeyMultibase: params.privateKey,
+      privateKeyMultibase: params.privateKeyMultibase,
       ...publicKeyVerMethod,
     });
 
@@ -189,10 +189,16 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
 
   // https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L392
   /**
-   * Verifies signed presentation documen
+   * Verifies signed presentation document
    * @params
-   *  - params.verifiableCredentials: Array of Verifiable Credentials
-   *  - params.holderDid            : DID of the subject
+   *  - params.signedPresentation         : Signed presentation document
+   *  - params.holderDid                  : DID of the subject
+   *  - params.holderDidDocSigned         : DIDdocument of the subject
+   *  - params.holderVerificationMethodId : verificationMethodId of holder
+   *  - params.issuerDid                  : DID of the issuer
+   *  - params.issuerVerificationMethodId : Optional DIDDoc of the issuer
+   *  - params.domain                     : Optional domain
+   *  - params.challenge                  : Random challenge
    * @returns {Promise<object>}
    */
   async verify(params: {
@@ -229,6 +235,10 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       throw new Error(
         'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
       );
+    }
+
+    if(!params.signedPresentation.proof){
+      throw new Error('HID-SSI-SDK:: params.signedPresentation must be signed');
     }
 
     ///---------------------------------------
