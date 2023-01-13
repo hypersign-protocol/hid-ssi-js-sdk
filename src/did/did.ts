@@ -6,7 +6,6 @@
 
 import * as constant from '../constants';
 import jsonSigs from 'jsonld-signatures';
-import { documentLoader } from 'jsonld';
 const { AuthenticationProofPurpose } = jsonSigs.purposes;
 import { DIDRpc } from './didRPC';
 import Utils from '../utils';
@@ -16,6 +15,7 @@ import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import { IParams, IDID, IDid, IDIDResolve, IDIDRpc, IController, IDidDocument, ISignedDIDDocument } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
+import customLoader from '../../libs/w3cache/v1';
 
 class DIDDocument implements Did {
   context: string[];
@@ -179,7 +179,7 @@ export default class HypersignDID implements IDID {
     verificationMethodId: string;
   }): Promise<object> {
     // TODO:  this method MUST also accept signature/proof
-    if (!params.didDocument) {
+    if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
     }
     if (!params.privateKeyMultibase) {
@@ -397,7 +397,7 @@ export default class HypersignDID implements IDID {
         challenge,
         domain,
       }),
-      documentLoader,
+      documentLoader: customLoader,
       compactProof: constant.compactProof,
     })) as ISignedDIDDocument;
 
@@ -479,7 +479,7 @@ export default class HypersignDID implements IDID {
     const result = await jsonSigs.verify(didDoc, {
       suite,
       purpose: purpose,
-      documentLoader,
+      documentLoader: customLoader,
       compactProof: constant.compactProof,
     });
     return result;

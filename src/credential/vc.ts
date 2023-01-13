@@ -6,7 +6,6 @@
 
 import vc from 'vc-js';
 import Utils from '../utils';
-import { documentLoader } from 'jsonld';
 import HypersignSchema from '../schema/schema';
 import { Schema, SchemaProperty } from '../../libs/generated/ssi/schema';
 import HypersignDID from '../did/did';
@@ -21,6 +20,9 @@ import { CredentialStatus, CredentialProof, Credential, Claim } from '../../libs
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import crypto from 'crypto';
+import customLoader from '../../libs/w3cache/v1';
+const documentLoader = customLoader;
+
 
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
   public context: Array<string>;

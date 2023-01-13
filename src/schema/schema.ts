@@ -5,7 +5,6 @@
  */
 
 import { Schema, SchemaDocument, SchemaProof, SchemaProperty } from '../../libs/generated/ssi/schema';
-import { v4 as uuidv4 } from 'uuid';
 import { SchemaRpc } from './schemaRPC';
 import * as constants from '../constants';
 import { ISchemaFields, ISchemaMethods } from './ISchema';

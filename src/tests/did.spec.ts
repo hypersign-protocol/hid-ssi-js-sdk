@@ -155,7 +155,7 @@ describe('#register() this is to register did on the blockchain', function () {
     return hypersignDID.register({ didDocument: {}, privateKeyMultibase, verificationMethodId }).catch(function (err) {
       expect(function () {
         throw err;
-      }).to.throw(Error, "Cannot read property 'length' of undefined");
+      }).to.throw(Error, "HID-SSI-SDK:: Error: params.didDocString is required to register a did");
     });
   });
   it('should not be able to register did document as privateKeyMultibase is null or empty', function () {
