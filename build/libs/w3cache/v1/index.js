@@ -66,7 +66,6 @@ var CONTEXTS = Object.freeze({
 exports.default = (function (url, options) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         if (url in CONTEXTS) {
-            console.log('CustomDocumentLoader url: ' + url);
             return [2 /*return*/, {
                     contextUrl: null,
                     document: CONTEXTS[url],
