@@ -23,7 +23,6 @@ import crypto from 'crypto';
 import customLoader from '../../libs/w3cache/v1';
 const documentLoader = customLoader;
 
-
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
   public context: Array<string>;
   public id: string;

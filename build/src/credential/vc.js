@@ -57,7 +57,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var vc_js_1 = __importDefault(require("vc-js"));
 var utils_1 = __importDefault(require("../utils"));
-var jsonld_1 = require("jsonld");
 var schema_1 = __importDefault(require("../schema/schema"));
 var did_1 = __importDefault(require("../did/did"));
 var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
@@ -67,6 +66,8 @@ var credRPC_1 = require("./credRPC");
 var constants_1 = require("../constants");
 var credential_1 = require("../../libs/generated/ssi/credential");
 var crypto_1 = __importDefault(require("crypto"));
+var v1_1 = __importDefault(require("../../libs/w3cache/v1"));
+var documentLoader = v1_1.default;
 var HypersignVerifiableCredential = /** @class */ (function () {
     function HypersignVerifiableCredential(params) {
         var _this = this;
@@ -464,7 +465,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                         return [4 /*yield*/, vc_js_1.default.issue({
                                 credential: params.credential,
                                 suite: suite,
-                                documentLoader: jsonld_1.documentLoader,
+                                documentLoader: documentLoader,
                             })];
                     case 5:
                         signedVC = _a.sent();
@@ -541,7 +542,7 @@ var HypersignVerifiableCredential = /** @class */ (function () {
                                 credential: params.credential,
                                 controller: assertionController,
                                 suite: suite,
-                                documentLoader: jsonld_1.documentLoader,
+                                documentLoader: documentLoader,
                                 checkStatus: function (options) {
                                     return __awaiter(this, void 0, void 0, function () {
                                         return __generator(this, function (_a) {
