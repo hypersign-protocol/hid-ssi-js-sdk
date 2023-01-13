@@ -23,7 +23,6 @@ const CONTEXTS = Object.freeze({
 
 export default async (url, options) => {
     if(url in CONTEXTS) {
-        console.log('CustomDocumentLoader url: '+url)
         return {
             contextUrl: null, // this is for a context via a link header
             document: CONTEXTS[url], // this is the actual document that was loaded
