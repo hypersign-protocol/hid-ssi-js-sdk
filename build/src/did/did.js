@@ -76,7 +76,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var constant = __importStar(require("../constants"));
 var jsonld_signatures_1 = __importDefault(require("jsonld-signatures"));
-var jsonld_1 = require("jsonld");
 var AuthenticationProofPurpose = jsonld_signatures_1.default.purposes.AuthenticationProofPurpose;
 var didRPC_1 = require("./didRPC");
 var utils_1 = __importDefault(require("../utils"));
@@ -84,6 +83,7 @@ var ed25519 = require('@stablelib/ed25519');
 var did_1 = require("../../libs/generated/ssi/did");
 var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
 var ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
+var v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 var DIDDocument = /** @class */ (function () {
     function DIDDocument(publicKey, id) {
         this.context = [constant.DID.DID_BASE_CONTEXT];
@@ -252,7 +252,7 @@ var HypersignDID = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         // TODO:  this method MUST also accept signature/proof
-                        if (!params.didDocument) {
+                        if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
                             throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
                         }
                         if (!params.privateKeyMultibase) {
@@ -479,7 +479,7 @@ var HypersignDID = /** @class */ (function () {
                                     challenge: challenge,
                                     domain: domain,
                                 }),
-                                documentLoader: jsonld_1.documentLoader,
+                                documentLoader: v1_1.default,
                                 compactProof: constant.compactProof,
                             })];
                     case 8:
@@ -552,7 +552,7 @@ var HypersignDID = /** @class */ (function () {
                         return [4 /*yield*/, jsonld_signatures_1.default.verify(didDoc, {
                                 suite: suite,
                                 purpose: purpose,
-                                documentLoader: jsonld_1.documentLoader,
+                                documentLoader: v1_1.default,
                                 compactProof: constant.compactProof,
                             })];
                     case 2:

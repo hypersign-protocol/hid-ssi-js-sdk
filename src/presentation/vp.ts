@@ -6,7 +6,6 @@
 
 import vc from 'vc-js';
 import jsonSigs from 'jsonld-signatures';
-import { documentLoader } from 'jsonld';
 import HypersignDID from '../did/did';
 import { Did, VerificationMethod } from '../../libs/generated/ssi/did';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
@@ -17,6 +16,8 @@ import { IVerifiableCredential } from '../credential/ICredential';
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 import { VP, DID } from '../constants';
 import { IPresentationMethods, IVerifiablePresentation } from './IPresentation';
+import customLoader from '../../libs/w3cache/v1';
+const documentLoader = customLoader;
 
 export default class HypersignVerifiablePresentation implements IPresentationMethods, IVerifiablePresentation {
   private hsDid: HypersignDID | null;

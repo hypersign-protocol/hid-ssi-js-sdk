@@ -57,7 +57,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var vc_js_1 = __importDefault(require("vc-js"));
 var jsonld_signatures_1 = __importDefault(require("jsonld-signatures"));
-var jsonld_1 = require("jsonld");
 var did_1 = __importDefault(require("../did/did"));
 var ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
 var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
@@ -65,6 +64,8 @@ var utils_1 = __importDefault(require("../utils"));
 var vc_1 = __importDefault(require("../credential/vc"));
 var _a = jsonld_signatures_1.default.purposes, AuthenticationProofPurpose = _a.AuthenticationProofPurpose, AssertionProofPurpose = _a.AssertionProofPurpose;
 var constants_1 = require("../constants");
+var v1_1 = __importDefault(require("../../libs/w3cache/v1"));
+var documentLoader = v1_1.default;
 var HypersignVerifiablePresentation = /** @class */ (function () {
     function HypersignVerifiablePresentation(params) {
         if (params === void 0) { params = {}; }
@@ -193,7 +194,7 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                                 presentation: params.presentation,
                                 suite: suite,
                                 challenge: params.challenge,
-                                documentLoader: jsonld_1.documentLoader,
+                                documentLoader: documentLoader,
                             })];
                     case 5:
                         signedVP = _a.sent();
@@ -331,7 +332,7 @@ var HypersignVerifiablePresentation = /** @class */ (function () {
                                 presentationPurpose: presentationPurpose,
                                 purpose: purpose,
                                 suite: [vpSuite_holder, vcSuite_issuer],
-                                documentLoader: jsonld_1.documentLoader,
+                                documentLoader: documentLoader,
                                 unsignedPresentation: true,
                                 checkStatus: function (options) {
                                     return __awaiter(this, void 0, void 0, function () {
