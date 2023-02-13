@@ -341,7 +341,7 @@ var HypersignDID = /** @class */ (function () {
                     case 2:
                         address = _a.sent();
                         didDoc = didDocStringJson;
-                        return [4 /*yield*/, this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, IDID_1.IClientSpec.eth_personalSign)];
+                        return [4 /*yield*/, this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, 'eth-personalSign')];
                     case 3: return [2 /*return*/, _a.sent()];
                 }
             });
