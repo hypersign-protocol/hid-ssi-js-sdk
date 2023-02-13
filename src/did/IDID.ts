@@ -109,7 +109,7 @@ export interface IDIDRpc {
     didDoc: IDidProto,
     signature: string,
     verificationMethodId: string,
-    clientSpec?: IClientSpec
+    clientSpec?: string
   ): Promise<object>;
   updateDID(didDoc: IDidProto, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
   deactivateDID(did: string, signature: string, verificationMethodId: string, versionId: string): Promise<object>;

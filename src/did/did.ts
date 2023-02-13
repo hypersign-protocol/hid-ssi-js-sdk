@@ -282,9 +282,10 @@ export default class HypersignDID implements IDID {
     console.log('INside sdk', didDocStringJson);
 
     const signature = await params.web3.eth.personal.sign(JSON.stringify(didDocStringJson), params.address);
+    const address = await params.web3.eth.personal.ecRecover(JSON.stringify(didDocStringJson), signature);
     const didDoc: Did = didDocStringJson as Did;
 
-    return await this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, IClientSpec.eth_personalSign);
+    return await this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, 'eth-personalSign');
   }
 
   /**

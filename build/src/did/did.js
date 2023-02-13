@@ -313,7 +313,7 @@ var HypersignDID = /** @class */ (function () {
     };
     HypersignDID.prototype.registerByClientSpec = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var didDocStringJson, signature, didDoc;
+            var didDocStringJson, signature, address, didDoc;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -337,9 +337,12 @@ var HypersignDID = /** @class */ (function () {
                         return [4 /*yield*/, params.web3.eth.personal.sign(JSON.stringify(didDocStringJson), params.address)];
                     case 1:
                         signature = _a.sent();
+                        return [4 /*yield*/, params.web3.eth.personal.ecRecover(JSON.stringify(didDocStringJson), signature)];
+                    case 2:
+                        address = _a.sent();
                         didDoc = didDocStringJson;
                         return [4 /*yield*/, this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, IDID_1.IClientSpec.eth_personalSign)];
-                    case 2: return [2 /*return*/, _a.sent()];
+                    case 3: return [2 /*return*/, _a.sent()];
                 }
             });
         });
