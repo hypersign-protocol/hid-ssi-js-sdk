@@ -276,6 +276,7 @@ export default class HypersignDID implements IDID {
     const signature = await params.web3.eth.personal.sign(didDocStringJson, params.address);
 
     console.log(signature);
+    return signature;
   }
 
   /**

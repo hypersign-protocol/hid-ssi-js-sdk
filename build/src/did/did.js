@@ -334,7 +334,7 @@ var HypersignDID = /** @class */ (function () {
                     case 1:
                         signature = _a.sent();
                         console.log(signature);
-                        return [2 /*return*/];
+                        return [2 /*return*/, signature];
                 }
             });
         });
