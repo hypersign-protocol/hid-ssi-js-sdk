@@ -12,6 +12,12 @@ export interface IPublicKey {
   publicKeyBase58: string;
 }
 
+export enum IKeyType {
+  Ed25519VerificationKey2020 = 'Ed25519VerificationKey2020',
+  EcdsaSecp256k1VerificationKey2019 = 'EcdsaSecp256k1VerificationKey2019',
+  EcdsaSecp256k1RecoveryMethod2020 = 'EcdsaSecp256k1RecoveryMethod2020',
+}
+
 export interface IController {
   '@context': string;
   id: string;

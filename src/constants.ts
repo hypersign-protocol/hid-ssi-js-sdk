@@ -37,6 +37,37 @@ export enum CredentialStatusReasonEnums {
 
 
 
+export const DID_Ed25519VerificationKey2020 = {
+  CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
+  SCHEME: 'did',
+  METHOD: 'hid',
+  NAMESPACE: 'testnet', // this is not used
+  DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
+  VERIFICATION_METHOD_TYPE: 'Ed25519VerificationKey2020',
+};
+
+
+export const DID_EcdsaSecp256k1RecoveryMethod2020 = {
+  CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
+  SCHEME: 'did',
+  METHOD: 'hid',
+  NAMESPACE: 'testnet', // this is not used
+  DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
+  VERIFICATION_METHOD_TYPE: 'EcdsaSecp256k1RecoveryMethod2020',
+};
+
+
+
+export const DID_EcdsaSecp256k1VerificationKey2019 = {
+  CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
+  SCHEME: 'did',
+  METHOD: 'hid',
+  NAMESPACE: 'testnet', // this is not used
+  DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
+  VERIFICATION_METHOD_TYPE: 'EcdsaSecp256k1VerificationKey2019',
+};
+
+
 export const DID = {
   CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
   SCHEME: 'did',
@@ -45,6 +76,7 @@ export const DID = {
   DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
   VERIFICATION_METHOD_TYPE: 'Ed25519VerificationKey2020',
 };
+
 Object.freeze(DID);
 
 export const VC = {

@@ -83,16 +83,17 @@ var ed25519 = require('@stablelib/ed25519');
 var did_1 = require("../../libs/generated/ssi/did");
 var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
 var ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
+var IDID_1 = require("./IDID");
 var v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 var DIDDocument = /** @class */ (function () {
-    function DIDDocument(publicKey, id) {
-        this.context = [constant.DID.DID_BASE_CONTEXT];
+    function DIDDocument(publicKey, id, keyType) {
+        this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
         this.id = id;
         this.controller = [this.id];
         this.alsoKnownAs = [this.id];
         var verificationMethod = {
             id: this.id + '#key-1',
-            type: constant.DID.VERIFICATION_METHOD_TYPE,
+            type: constant['DID_' + keyType].VERIFICATION_METHOD_TYPE,
             controller: this.id,
             publicKeyMultibase: publicKey,
         };
@@ -217,14 +218,20 @@ var HypersignDID = /** @class */ (function () {
      */
     HypersignDID.prototype.generate = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var publicKeyMultibase1, methodSpecificId, didId, newDid;
+            var publicKeyMultibase1, keyType, methodSpecificId, didId, newDid;
             return __generator(this, function (_a) {
-                if (!params.publicKeyMultibase) {
-                    throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
+                if (!params.publicKeyMultibase || params.methodSpecificId) {
+                    throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase or params.methodSpecificId is required to generate new did didoc');
                 }
                 publicKeyMultibase1 = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
                     publicKey: params.publicKeyMultibase,
                 }).publicKeyMultibase;
+                if (!params.keyType) {
+                    keyType = IDID_1.IKeyType.Ed25519VerificationKey2020;
+                }
+                else {
+                    keyType = params.keyType;
+                }
                 methodSpecificId = publicKeyMultibase1;
                 if (params.methodSpecificId) {
                     didId = this._getId(params.methodSpecificId);
@@ -232,7 +239,7 @@ var HypersignDID = /** @class */ (function () {
                 else {
                     didId = this._getId(methodSpecificId);
                 }
-                newDid = new DIDDocument(publicKeyMultibase1, didId);
+                newDid = new DIDDocument(publicKeyMultibase1, didId, keyType);
                 return [2 /*return*/, utils_1.default.jsonToLdConvertor(__assign({}, newDid))];
             });
         });
