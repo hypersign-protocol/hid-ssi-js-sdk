@@ -41,7 +41,12 @@ export class DIDRpc implements IDIDRpc {
     await this.hidClient.init();
   }
 
-  async registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string,clientSpec: IClientSpec): Promise<object> {
+  async registerDID(
+    didDoc: IDidProto,
+    signature: string,
+    verificationMethodId: string,
+    clientSpec: IClientSpec
+  ): Promise<object> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
@@ -58,7 +63,7 @@ export class DIDRpc implements IDIDRpc {
         didDocString: didDoc,
         signatures: [signInfo],
         creator: HIDClient.getHidWalletAddress(),
-        clientSpec:clientSpec?clientSpec:undefined
+        clientSpec: clientSpec ? clientSpec : undefined,
       }),
     };
 

@@ -95,7 +95,7 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
-    DIDRpc.prototype.registerDID = function (didDoc, signature, verificationMethodId) {
+    DIDRpc.prototype.registerDID = function (didDoc, signature, verificationMethodId, clientSpec) {
         return __awaiter(this, void 0, void 0, function () {
             var typeUrl, signInfo, txMessage, fee, hidClient, txResult;
             return __generator(this, function (_a) {
@@ -115,6 +115,7 @@ var DIDRpc = /** @class */ (function () {
                                 didDocString: didDoc,
                                 signatures: [signInfo],
                                 creator: client_1.HIDClient.getHidWalletAddress(),
+                                clientSpec: clientSpec ? clientSpec : undefined,
                             }),
                         };
                         fee = 'auto';

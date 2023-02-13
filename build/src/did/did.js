@@ -313,7 +313,7 @@ var HypersignDID = /** @class */ (function () {
     };
     HypersignDID.prototype.registerByClientSpec = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var didDocStringJson, signature;
+            var didDocStringJson, signature, didDoc;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -322,6 +322,9 @@ var HypersignDID = /** @class */ (function () {
                         }
                         if (!this.didrpc) {
                             throw new Error('HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized');
+                        }
+                        if (!params.verificationMethodId) {
+                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
                         }
                         if (!params.web3) {
                             new Error("'HID-SSI-SDK:: Error: params.web should be passed");
@@ -333,8 +336,9 @@ var HypersignDID = /** @class */ (function () {
                         return [4 /*yield*/, params.web3.eth.personal.sign(didDocStringJson, params.address)];
                     case 1:
                         signature = _a.sent();
-                        console.log(signature);
-                        return [2 /*return*/, signature];
+                        didDoc = didDocStringJson;
+                        return [4 /*yield*/, this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, IDID_1.IClientSpec.eth_personalSign)];
+                    case 2: return [2 /*return*/, _a.sent()];
                 }
             });
         });

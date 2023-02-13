@@ -252,7 +252,12 @@ export default class HypersignDID implements IDID {
     return await this.didrpc.registerDID(didDoc, signature, verificationMethodId);
   }
 
-  public async registerByClientSpec(params: { didDocument: object; address: string;    verificationMethodId: string; web3: Web3 | any }) {
+  public async registerByClientSpec(params: {
+    didDocument: object;
+    address: string;
+    verificationMethodId: string;
+    web3: Web3 | any;
+  }) {
     if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
     }
@@ -277,9 +282,8 @@ export default class HypersignDID implements IDID {
 
     const signature = await params.web3.eth.personal.sign(didDocStringJson, params.address);
     const didDoc: Did = didDocStringJson as Did;
-    
 
-    return await this.didrpc.registerDID(didDoc, signature, params.verificationMethodId,IClientSpec.eth_personalSign)
+    return await this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, IClientSpec.eth_personalSign);
   }
 
   /**
