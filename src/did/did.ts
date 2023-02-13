@@ -283,13 +283,13 @@ export default class HypersignDID implements IDID {
 
     const baseDidDocument = {
       id: params.didDocument.id,
-      controller:params.didDocument.controller,
+      controller: params.didDocument.controller,
       verificationMethod: [
         {
           id: params.didDocument.verificationMethod[0].id,
-          type: "EcdsaSecp256k1RecoveryMethod2020",
+          type: 'EcdsaSecp256k1RecoveryMethod2020',
           controller: params.didDocument.verificationMethod[0].controller,
-          blockchainAccountId: "eip155:"+ 1 + ":" + params.address,
+          blockchainAccountId: 'eip155:' + 1 + ':' + params.address,
         },
       ],
       authentication: [params.didDocument.verificationMethod[0].id],
@@ -303,13 +303,16 @@ export default class HypersignDID implements IDID {
 
     const didDoc: Did = baseDidDocument as Did;
 
-    const tx= await this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, 'eth-personalSign');
-    console.log(tx);
-    
+    // const tx = await this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, 'eth-personalSign');
+    // console.log(tx);
 
-    const tx2 = await this.didrpc.registerDIDC(baseDidDocument,signature,params.verificationMethodId,'eth-personalSign')
+    const tx2 = await this.didrpc.registerDIDC(
+      baseDidDocument,
+      signature,
+      params.verificationMethodId,
+      'eth-personalSign'
+    );
     console.log(tx2);
-    
   }
 
   /**

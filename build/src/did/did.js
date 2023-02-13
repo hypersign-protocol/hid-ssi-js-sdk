@@ -313,7 +313,7 @@ var HypersignDID = /** @class */ (function () {
     };
     HypersignDID.prototype.registerByClientSpec = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var didDocStringJson, signature, address, didDoc;
+            var didDocStringJson, baseDidDocument, signature, address, didDoc, tx, tx2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -334,17 +334,38 @@ var HypersignDID = /** @class */ (function () {
                         }
                         didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
                         console.log('INside sdk', didDocStringJson);
-                        return [4 /*yield*/, params.web3.eth.personal.sign(JSON.stringify(didDocStringJson), params.address)];
+                        baseDidDocument = {
+                            id: params.didDocument.id,
+                            controller: params.didDocument.controller,
+                            verificationMethod: [
+                                {
+                                    id: params.didDocument.verificationMethod[0].id,
+                                    type: 'EcdsaSecp256k1RecoveryMethod2020',
+                                    controller: params.didDocument.verificationMethod[0].controller,
+                                    blockchainAccountId: 'eip155:' + 1 + ':' + params.address,
+                                },
+                            ],
+                            authentication: [params.didDocument.verificationMethod[0].id],
+                            assertionMethod: [params.didDocument.verificationMethod[0].id],
+                        };
+                        return [4 /*yield*/, params.web3.eth.personal.sign(JSON.stringify(baseDidDocument), params.address)];
                     case 1:
                         signature = _a.sent();
-                        return [4 /*yield*/, params.web3.eth.personal.ecRecover(JSON.stringify(didDocStringJson), signature)];
+                        return [4 /*yield*/, params.web3.eth.personal.ecRecover(JSON.stringify(baseDidDocument), signature)];
                     case 2:
                         address = _a.sent();
                         console.log('signature ', signature);
                         console.log('address ', address);
-                        didDoc = didDocStringJson;
+                        didDoc = baseDidDocument;
                         return [4 /*yield*/, this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, 'eth-personalSign')];
-                    case 3: return [2 /*return*/, _a.sent()];
+                    case 3:
+                        tx = _a.sent();
+                        console.log(tx);
+                        return [4 /*yield*/, this.didrpc.registerDIDC(baseDidDocument, signature, params.verificationMethodId, 'eth-personalSign')];
+                    case 4:
+                        tx2 = _a.sent();
+                        console.log(tx2);
+                        return [2 /*return*/];
                 }
             });
         });

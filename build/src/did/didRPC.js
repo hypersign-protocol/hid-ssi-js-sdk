@@ -95,6 +95,40 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
+    DIDRpc.prototype.registerDIDC = function (didDoc, signature, verificationMethodId, clientSpec) {
+        return __awaiter(this, void 0, void 0, function () {
+            var typeUrl, signInfo, txMessage, fee, hidClient, txResult;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!this.hidClient) {
+                            throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
+                        }
+                        typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgCreateDID);
+                        signInfo = {
+                            verification_method_id: verificationMethodId,
+                            signature: signature,
+                        };
+                        txMessage = {
+                            typeUrl: typeUrl,
+                            value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
+                                didDocString: didDoc,
+                                signatures: [signInfo],
+                                creator: client_1.HIDClient.getHidWalletAddress(),
+                                clientSpec: clientSpec ? clientSpec : undefined,
+                            }),
+                        };
+                        console.log('SDK txn log', txMessage);
+                        fee = 'auto';
+                        hidClient = client_1.HIDClient.getHidClient();
+                        return [4 /*yield*/, hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee)];
+                    case 1:
+                        txResult = _a.sent();
+                        return [2 /*return*/, txResult];
+                }
+            });
+        });
+    };
     DIDRpc.prototype.registerDID = function (didDoc, signature, verificationMethodId, clientSpec) {
         return __awaiter(this, void 0, void 0, function () {
             var typeUrl, signInfo, txMessage, fee, hidClient, txResult;

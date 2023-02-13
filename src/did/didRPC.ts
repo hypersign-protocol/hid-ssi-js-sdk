@@ -41,7 +41,6 @@ export class DIDRpc implements IDIDRpc {
     await this.hidClient.init();
   }
 
-
   async registerDIDC(
     didDoc: any,
     signature: string,
