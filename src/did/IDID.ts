@@ -18,6 +18,11 @@ export enum IKeyType {
   EcdsaSecp256k1RecoveryMethod2020 = 'EcdsaSecp256k1RecoveryMethod2020',
 }
 
+export enum IClientSpec {
+  'eth_personalSign' = 'eth-personalSign',
+  'cosmos_ADR036' = 'cosmos-ADR036',
+}
+
 export interface IController {
   '@context': string;
   id: string;
