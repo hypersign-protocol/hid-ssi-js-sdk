@@ -334,7 +334,7 @@ var HypersignDID = /** @class */ (function () {
                         }
                         didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
                         console.log('INside sdk', didDocStringJson);
-                        return [4 /*yield*/, params.web3.eth.personal.sign(didDocStringJson, params.address)];
+                        return [4 /*yield*/, params.web3.eth.personal.sign(JSON.stringify(didDocStringJson), params.address)];
                     case 1:
                         signature = _a.sent();
                         didDoc = didDocStringJson;
