@@ -39,7 +39,7 @@ class DIDDocument implements Did {
   capabilityInvocation: string[];
   capabilityDelegation: string[];
   service: Service[];
-  constructor(publicKey: string,blockchainAccountId:string, id: string, keyType: IKeyType) {    
+  constructor(publicKey: string, blockchainAccountId: string, id: string, keyType: IKeyType) {
     this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
     this.id = id;
     this.controller = [this.id];
@@ -49,7 +49,7 @@ class DIDDocument implements Did {
       type: constant['DID_' + keyType].VERIFICATION_METHOD_TYPE,
       controller: this.id,
       blockchainAccountId: blockchainAccountId,
-      publicKeyMultibase:publicKey,
+      publicKeyMultibase: publicKey,
     };
     this.verificationMethod = [verificationMethod];
     this.authentication = [verificationMethod.id];
@@ -60,7 +60,6 @@ class DIDDocument implements Did {
     // TODO: we should take services object in consntructor
     this.service = [];
   }
-  
 }
 
 /** Class representing HypersignDID */
@@ -158,12 +157,9 @@ export default class HypersignDID implements IDID {
    *  - params.methodSpecificId   : Optional methodSpecificId (min 32 bit alhanumeric) else it will generate new random methodSpecificId
    * @returns {Promise<object>} DidDocument object
    */
-  public async generate(params: {
-    methodSpecificId?: string; publicKeyMultibase: string
-  }): Promise<object> {
+  public async generate(params: { methodSpecificId?: string; publicKeyMultibase: string }): Promise<object> {
     if (!params.publicKeyMultibase) {
-      throw new Error(
-        'HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
+      throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
     }
     const { publicKeyMultibase: publicKeyMultibase1 } = Utils.convertEd25519verificationkey2020toStableLibKeysInto({
       publicKey: params.publicKeyMultibase,
@@ -176,37 +172,34 @@ export default class HypersignDID implements IDID {
     } else {
       didId = this._getId(methodSpecificId);
     }
-    const newDid = new DIDDocument(publicKeyMultibase1,'', didId, IKeyType.Ed25519VerificationKey2020) as IDid;
+    const newDid = new DIDDocument(publicKeyMultibase1, '', didId, IKeyType.Ed25519VerificationKey2020) as IDid;
     return Utils.jsonToLdConvertor({ ...newDid });
   }
 
-
-
   public async create(params: {
-    methodSpecificId: string,
-    blockChainAccountId: string,
-    keyType: IKeyType,
+    methodSpecificId: string;
+    blockChainAccountId: string;
+    keyType: IKeyType;
   }): Promise<object> {
     if (!params.methodSpecificId) {
-      throw new Error('HID-SSI-SDK:: Error: params.methodSpecificId is required to create didoc')
+      throw new Error('HID-SSI-SDK:: Error: params.methodSpecificId is required to create didoc');
     }
 
     if (!params.blockChainAccountId) {
-      throw new Error('HID-SSI-SDK:: Error: params.blockChainAccountId is required to create didoc')
+      throw new Error('HID-SSI-SDK:: Error: params.blockChainAccountId is required to create didoc');
     }
 
     if (!params.keyType) {
-      throw new Error('HID-SSI-SDK:: Error: params.keyType is required to create didoc')
+      throw new Error('HID-SSI-SDK:: Error: params.keyType is required to create didoc');
     }
-    if(!(params.keyType in IKeyType)){
-      throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid')
+    if (!(params.keyType in IKeyType)) {
+      throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid');
     }
-    
+
     const didId = this._getId(params.methodSpecificId);
-    const newDid=new DIDDocument('',params.methodSpecificId,didId,params.keyType)
+    const newDid = new DIDDocument('', params.methodSpecificId, didId, params.keyType);
     return Utils.jsonToLdConvertor({ ...newDid });
   }
-
 
   /**
    * Register a new DID and Document in Hypersign blockchain - an onchain activity
@@ -487,8 +480,8 @@ export default class HypersignDID implements IDID {
     if (!pubkey) {
       throw new Error(
         'HID-SSI-SDK:: Error: could not find verification method for verificationMethodId: ' +
-        verificationMethodId +
-        ' in did document'
+          verificationMethodId +
+          ' in did document'
       );
     }
 

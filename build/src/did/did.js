@@ -86,7 +86,7 @@ var ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
 var IDID_1 = require("./IDID");
 var v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 var DIDDocument = /** @class */ (function () {
-    function DIDDocument(publicKey, id, keyType) {
+    function DIDDocument(publicKey, blockchainAccountId, id, keyType) {
         this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
         this.id = id;
         this.controller = [this.id];
@@ -95,6 +95,7 @@ var DIDDocument = /** @class */ (function () {
             id: this.id + '#key-1',
             type: constant['DID_' + keyType].VERIFICATION_METHOD_TYPE,
             controller: this.id,
+            blockchainAccountId: blockchainAccountId,
             publicKeyMultibase: publicKey,
         };
         this.verificationMethod = [verificationMethod];
@@ -218,20 +219,14 @@ var HypersignDID = /** @class */ (function () {
      */
     HypersignDID.prototype.generate = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var publicKeyMultibase1, keyType, methodSpecificId, didId, newDid;
+            var publicKeyMultibase1, methodSpecificId, didId, newDid;
             return __generator(this, function (_a) {
-                if (!params.publicKeyMultibase || params.methodSpecificId) {
-                    throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase or params.methodSpecificId is required to generate new did didoc');
+                if (!params.publicKeyMultibase) {
+                    throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
                 }
                 publicKeyMultibase1 = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
                     publicKey: params.publicKeyMultibase,
                 }).publicKeyMultibase;
-                if (!params.keyType) {
-                    keyType = IDID_1.IKeyType.Ed25519VerificationKey2020;
-                }
-                else {
-                    keyType = params.keyType;
-                }
                 methodSpecificId = publicKeyMultibase1;
                 if (params.methodSpecificId) {
                     didId = this._getId(params.methodSpecificId);
@@ -239,7 +234,29 @@ var HypersignDID = /** @class */ (function () {
                 else {
                     didId = this._getId(methodSpecificId);
                 }
-                newDid = new DIDDocument(publicKeyMultibase1, didId, keyType);
+                newDid = new DIDDocument(publicKeyMultibase1, '', didId, IDID_1.IKeyType.Ed25519VerificationKey2020);
+                return [2 /*return*/, utils_1.default.jsonToLdConvertor(__assign({}, newDid))];
+            });
+        });
+    };
+    HypersignDID.prototype.create = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var didId, newDid;
+            return __generator(this, function (_a) {
+                if (!params.methodSpecificId) {
+                    throw new Error('HID-SSI-SDK:: Error: params.methodSpecificId is required to create didoc');
+                }
+                if (!params.blockChainAccountId) {
+                    throw new Error('HID-SSI-SDK:: Error: params.blockChainAccountId is required to create didoc');
+                }
+                if (!params.keyType) {
+                    throw new Error('HID-SSI-SDK:: Error: params.keyType is required to create didoc');
+                }
+                if (!(params.keyType in IDID_1.IKeyType)) {
+                    throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid');
+                }
+                didId = this._getId(params.methodSpecificId);
+                newDid = new DIDDocument('', params.methodSpecificId, didId, params.keyType);
                 return [2 /*return*/, utils_1.default.jsonToLdConvertor(__assign({}, newDid))];
             });
         });

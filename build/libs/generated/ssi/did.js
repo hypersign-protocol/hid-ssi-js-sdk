@@ -489,6 +489,7 @@ var baseVerificationMethod = {
     type: "",
     controller: "",
     publicKeyMultibase: "",
+    blockchainAccountId: "",
 };
 exports.VerificationMethod = {
     encode: function (message, writer) {
@@ -504,6 +505,9 @@ exports.VerificationMethod = {
         }
         if (message.publicKeyMultibase !== "") {
             writer.uint32(34).string(message.publicKeyMultibase);
+        }
+        if (message.blockchainAccountId !== "") {
+            writer.uint32(42).string(message.blockchainAccountId);
         }
         return writer;
     },
@@ -525,6 +529,9 @@ exports.VerificationMethod = {
                     break;
                 case 4:
                     message.publicKeyMultibase = reader.string();
+                    break;
+                case 5:
+                    message.blockchainAccountId = reader.string();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -560,6 +567,13 @@ exports.VerificationMethod = {
         else {
             message.publicKeyMultibase = "";
         }
+        if (object.blockchainAccountId !== undefined &&
+            object.blockchainAccountId !== null) {
+            message.blockchainAccountId = String(object.blockchainAccountId);
+        }
+        else {
+            message.blockchainAccountId = "";
+        }
         return message;
     },
     toJSON: function (message) {
@@ -569,6 +583,8 @@ exports.VerificationMethod = {
         message.controller !== undefined && (obj.controller = message.controller);
         message.publicKeyMultibase !== undefined &&
             (obj.publicKeyMultibase = message.publicKeyMultibase);
+        message.blockchainAccountId !== undefined &&
+            (obj.blockchainAccountId = message.blockchainAccountId);
         return obj;
     },
     fromPartial: function (object) {
@@ -597,6 +613,13 @@ exports.VerificationMethod = {
         }
         else {
             message.publicKeyMultibase = "";
+        }
+        if (object.blockchainAccountId !== undefined &&
+            object.blockchainAccountId !== null) {
+            message.blockchainAccountId = object.blockchainAccountId;
+        }
+        else {
+            message.blockchainAccountId = "";
         }
         return message;
     },
