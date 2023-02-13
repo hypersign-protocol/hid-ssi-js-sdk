@@ -340,6 +340,8 @@ var HypersignDID = /** @class */ (function () {
                         return [4 /*yield*/, params.web3.eth.personal.ecRecover(JSON.stringify(didDocStringJson), signature)];
                     case 2:
                         address = _a.sent();
+                        console.log('signature ', signature);
+                        console.log('address ', address);
                         didDoc = didDocStringJson;
                         return [4 /*yield*/, this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, 'eth-personalSign')];
                     case 3: return [2 /*return*/, _a.sent()];
