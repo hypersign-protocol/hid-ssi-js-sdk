@@ -313,7 +313,7 @@ var HypersignDID = /** @class */ (function () {
     };
     HypersignDID.prototype.registerByClientSpec = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var didDocStringJson, baseDidDocument, signature, address, didDoc, tx, tx2;
+            var didDocStringJson, baseDidDocument, signature, address, didDoc, tx2;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -357,12 +357,8 @@ var HypersignDID = /** @class */ (function () {
                         console.log('signature ', signature);
                         console.log('address ', address);
                         didDoc = baseDidDocument;
-                        return [4 /*yield*/, this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, 'eth-personalSign')];
-                    case 3:
-                        tx = _a.sent();
-                        console.log(tx);
                         return [4 /*yield*/, this.didrpc.registerDIDC(baseDidDocument, signature, params.verificationMethodId, 'eth-personalSign')];
-                    case 4:
+                    case 3:
                         tx2 = _a.sent();
                         console.log(tx2);
                         return [2 /*return*/];
