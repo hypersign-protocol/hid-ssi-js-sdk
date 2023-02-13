@@ -11,7 +11,7 @@ import { SigningStargateClient } from '@cosmjs/stargate';
 
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
-import { IDIDResolve, IDIDRpc } from './IDID';
+import { IClientSpec, IDIDResolve, IDIDRpc } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 
 export class DIDRpc implements IDIDRpc {
@@ -41,7 +41,7 @@ export class DIDRpc implements IDIDRpc {
     await this.hidClient.init();
   }
 
-  async registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string): Promise<object> {
+  async registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string,clientSpec: IClientSpec): Promise<object> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
@@ -58,6 +58,7 @@ export class DIDRpc implements IDIDRpc {
         didDocString: didDoc,
         signatures: [signInfo],
         creator: HIDClient.getHidWalletAddress(),
+        clientSpec:clientSpec?clientSpec:undefined
       }),
     };
 

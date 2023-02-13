@@ -105,7 +105,7 @@ export interface IDIDResolve {
 }
 
 export interface IDIDRpc {
-  registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string): Promise<object>;
+  registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string,clientSpec?:IClientSpec): Promise<object>;
   updateDID(didDoc: IDidProto, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
   deactivateDID(did: string, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
   resolveDID(did: string): Promise<IDIDResolve>;
