@@ -267,7 +267,7 @@ var HypersignDID = /** @class */ (function () {
                     throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid');
                 }
                 didId = this._getId(params.methodSpecificId);
-                newDid = new DIDDocument('', params.methodSpecificId, didId, params.keyType);
+                newDid = new DIDDocument('', params.blockChainAccountId, didId, params.keyType);
                 return [2 /*return*/, utils_1.default.jsonToLdConvertor(__assign({}, newDid))];
             });
         });
