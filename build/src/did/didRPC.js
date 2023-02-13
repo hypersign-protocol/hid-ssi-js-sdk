@@ -118,6 +118,7 @@ var DIDRpc = /** @class */ (function () {
                                 clientSpec: clientSpec ? clientSpec : undefined,
                             }),
                         };
+                        console.log('SDK txn log', txMessage);
                         fee = 'auto';
                         hidClient = client_1.HIDClient.getHidClient();
                         return [4 /*yield*/, hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee)];

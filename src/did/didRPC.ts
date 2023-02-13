@@ -67,8 +67,7 @@ export class DIDRpc implements IDIDRpc {
       }),
     };
 
-    console.log("SDK txn log" ,txMessage);
-    
+    console.log('SDK txn log', txMessage);
 
     const fee = 'auto';
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
