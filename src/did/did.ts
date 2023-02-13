@@ -253,7 +253,7 @@ export default class HypersignDID implements IDID {
   }
 
   public async registerByClientSpec(params: {
-    didDocument: object;
+    didDocument: any;
     address: string;
     verificationMethodId: string;
     web3: Web3 | any;
@@ -281,14 +281,35 @@ export default class HypersignDID implements IDID {
     const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
     console.log('INside sdk', didDocStringJson);
 
-    const signature = await params.web3.eth.personal.sign(JSON.stringify(didDocStringJson), params.address);
-    const address = await params.web3.eth.personal.ecRecover(JSON.stringify(didDocStringJson), signature);
+    const baseDidDocument = {
+      id: params.didDocument.id,
+      controller:params.didDocument.controller,
+      verificationMethod: [
+        {
+          id: params.didDocument.verificationMethod[0].id,
+          type: "EcdsaSecp256k1RecoveryMethod2020",
+          controller: params.didDocument.verificationMethod[0].controller,
+          blockchainAccountId: "eip155:"+ 1 + ":" + params.address,
+        },
+      ],
+      authentication: [params.didDocument.verificationMethod[0].id],
+      assertionMethod: [params.didDocument.verificationMethod[0].id],
+    };
+
+    const signature = await params.web3.eth.personal.sign(JSON.stringify(baseDidDocument), params.address);
+    const address = await params.web3.eth.personal.ecRecover(JSON.stringify(baseDidDocument), signature);
     console.log('signature ', signature);
     console.log('address ', address);
 
-    const didDoc: Did = didDocStringJson as Did;
+    const didDoc: Did = baseDidDocument as Did;
 
-    return await this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, 'eth-personalSign');
+    const tx= await this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, 'eth-personalSign');
+    console.log(tx);
+    
+
+    const tx2 = await this.didrpc.registerDIDC(baseDidDocument,signature,params.verificationMethodId,'eth-personalSign')
+    console.log(tx2);
+    
   }
 
   /**

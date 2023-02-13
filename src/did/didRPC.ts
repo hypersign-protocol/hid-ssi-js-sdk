@@ -41,6 +41,41 @@ export class DIDRpc implements IDIDRpc {
     await this.hidClient.init();
   }
 
+
+  async registerDIDC(
+    didDoc: any,
+    signature: string,
+    verificationMethodId: string,
+    clientSpec: IClientSpec
+  ): Promise<object> {
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
+    }
+
+    const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
+    const signInfo: SignInfo = {
+      verification_method_id: verificationMethodId,
+      signature,
+    };
+
+    const txMessage = {
+      typeUrl, // Same as above
+      value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
+        didDocString: didDoc,
+        signatures: [signInfo],
+        creator: HIDClient.getHidWalletAddress(),
+        clientSpec: clientSpec ? clientSpec : undefined,
+      }),
+    };
+
+    console.log('SDK txn log', txMessage);
+
+    const fee = 'auto';
+    const hidClient: SigningStargateClient = HIDClient.getHidClient();
+    const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
+    return txResult;
+  }
+
   async registerDID(
     didDoc: IDidProto,
     signature: string,
