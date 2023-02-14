@@ -327,17 +327,20 @@ var HypersignDID = /** @class */ (function () {
                             throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
                         }
                         if (!params.web3) {
-                            new Error("'HID-SSI-SDK:: Error: params.web should be passed");
+                            throw new Error('HID-SSI-SDK:: Error: params.web should be passed');
                         }
                         if (!params.address) {
-                            new Error("'HID-SSI-SDK:: Error: params.address is required to sign a did");
+                            throw new Error('HID-SSI-SDK:: Error: params.address is required to sign a did');
+                        }
+                        if (!(typeof params.clientSpec in IDID_1.IClientSpec)) {
+                            throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
                         }
                         didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
                         didDoc = didDocStringJson;
                         return [4 /*yield*/, params.web3.eth.personal.sign(JSON.stringify(didDoc), params.address)];
                     case 1:
                         signature = _a.sent();
-                        return [4 /*yield*/, this.didrpc.registerDID(didDoc, signature, params.verificationMethodId)];
+                        return [4 /*yield*/, this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, params.clientSpec)];
                     case 2: return [2 /*return*/, _a.sent()];
                 }
             });

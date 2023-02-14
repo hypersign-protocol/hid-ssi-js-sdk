@@ -272,19 +272,22 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
     }
     if (!params.web3) {
-      new Error("'HID-SSI-SDK:: Error: params.web should be passed");
+      throw new Error('HID-SSI-SDK:: Error: params.web should be passed');
     }
 
     if (!params.address) {
-      new Error("'HID-SSI-SDK:: Error: params.address is required to sign a did");
+      throw new Error('HID-SSI-SDK:: Error: params.address is required to sign a did');
     }
 
+    if (!(typeof params.clientSpec in IClientSpec)) {
+      throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
+    }
     const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
 
     const didDoc: Did = didDocStringJson as Did;
 
     const signature = await params.web3.eth.personal.sign(JSON.stringify(didDoc), params.address);
-    return await this.didrpc.registerDID(didDoc, signature, params.verificationMethodId);
+    return await this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, params.clientSpec);
   }
 
   /**
