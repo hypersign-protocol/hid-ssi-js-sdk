@@ -83,7 +83,6 @@ var ed25519 = require('@stablelib/ed25519');
 var did_1 = require("../../libs/generated/ssi/did");
 var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
 var ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
-var web3_1 = __importDefault(require("web3"));
 var IDID_1 = require("./IDID");
 var v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 var DIDDocument = /** @class */ (function () {
@@ -311,7 +310,7 @@ var HypersignDID = /** @class */ (function () {
             });
         });
     };
-    HypersignDID.prototype.registerByClientSpec = function (params) {
+    HypersignDID.prototype.signAndRegisterByClientSpec = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var didDocStringJson, didDoc, signature;
             return __generator(this, function (_a) {
@@ -319,6 +318,9 @@ var HypersignDID = /** @class */ (function () {
                     case 0:
                         if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
                             throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
+                        }
+                        if (!params.clientSpec) {
+                            throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
                         }
                         if (!this.didrpc) {
                             throw new Error('HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized');
@@ -342,6 +344,83 @@ var HypersignDID = /** @class */ (function () {
                         signature = _a.sent();
                         return [4 /*yield*/, this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, params.clientSpec)];
                     case 2: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
+    HypersignDID.prototype.signByClientSpec = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, didDocStringJson, didDoc, signature;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (typeof this['window'] === 'undefined') {
+                            throw new Error('HID-SSI-SDK:: Error:  Running in non browser mode');
+                        }
+                        if (!params.didDocument) {
+                            throw Error('HID-SSI-SDK:: Error: params.didDocument is required to sign');
+                        }
+                        if (!params.address) {
+                            throw new Error('HID-SSI-SDK:: Error: params.address is required to sign a did');
+                        }
+                        if (!params.clientSpec) {
+                            throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
+                        }
+                        if (!(params.clientSpec in IDID_1.IClientSpec)) {
+                            throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
+                        }
+                        _a = params.clientSpec;
+                        switch (_a) {
+                            case IDID_1.IClientSpec.eth_personalSign: return [3 /*break*/, 1];
+                            case IDID_1.IClientSpec.cosmos_ADR036: return [3 /*break*/, 3];
+                        }
+                        return [3 /*break*/, 4];
+                    case 1:
+                        if (typeof params.chainId !== 'number') {
+                            throw Error('HID-SSI-SDK:: Error: Invalid eth chain id');
+                        }
+                        didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
+                        didDoc = didDocStringJson;
+                        return [4 /*yield*/, params.web3.eth.personal.sign(JSON.stringify(didDoc), params.address)];
+                    case 2:
+                        signature = _b.sent();
+                        return [2 /*return*/, { didDocument: didDoc, signature: signature }];
+                    case 3:
+                        {
+                            throw Error('HID-SSI-SDK:: Error: Not Supported yet');
+                        }
+                        _b.label = 4;
+                    case 4: return [3 /*break*/, 5];
+                    case 5: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    HypersignDID.prototype.registerByClientSpec = function (params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var didDocStringJson, didDoc;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
+                            throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
+                        }
+                        if (!params.clientSpec) {
+                            throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
+                        }
+                        if (!this.didrpc) {
+                            throw new Error('HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized');
+                        }
+                        if (!params.verificationMethodId) {
+                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
+                        }
+                        if (!(typeof params.clientSpec in IDID_1.IClientSpec)) {
+                            throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
+                        }
+                        didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
+                        didDoc = didDocStringJson;
+                        return [4 /*yield*/, this.didrpc.registerDID(didDoc, params.signature, params.verificationMethodId, params.clientSpec)];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -556,40 +635,6 @@ var HypersignDID = /** @class */ (function () {
                         signedDidDocument = (_a.sent());
                         return [2 /*return*/, signedDidDocument];
                 }
-            });
-        });
-    };
-    HypersignDID.prototype.signByClientSpec = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var web3;
-            return __generator(this, function (_a) {
-                if (typeof this['window'] === 'undefined') {
-                    throw new Error('HID-SSI-SDK:: Error:  Running in non browser mode');
-                }
-                if (!params.didDocument) {
-                    throw Error('HID-SSI-SDK:: Error: params.didDocument is required to sign');
-                }
-                if (!params.clientSpec) {
-                    throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
-                }
-                if (!(params.clientSpec in IDID_1.IClientSpec)) {
-                    throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
-                }
-                switch (params.clientSpec) {
-                    case IDID_1.IClientSpec.eth_personalSign: {
-                        if (typeof params.chainId !== 'number') {
-                            throw Error('HID-SSI-SDK:: Error: Invalid eth chain id');
-                        }
-                        web3 = new web3_1.default();
-                        break;
-                    }
-                    case IDID_1.IClientSpec.cosmos_ADR036: {
-                        throw Error('HID-SSI-SDK:: Error: Not Supported yet');
-                    }
-                    default:
-                        break;
-                }
-                return [2 /*return*/];
             });
         });
     };
