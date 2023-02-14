@@ -68,6 +68,12 @@ export const DID_EcdsaSecp256k1VerificationKey2019 = {
 };
 
 
+export enum CAIP_10_PREFIX{
+  "eip155"="eip155",
+"cosmos-ADR036"="cosmos-ADR036"
+}
+
+
 export const DID = {
   CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
   SCHEME: 'did',

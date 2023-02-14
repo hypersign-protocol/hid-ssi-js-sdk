@@ -56,16 +56,28 @@ export class DIDRpc implements IDIDRpc {
       verification_method_id: verificationMethodId,
       signature,
     };
+    let txMessage;
+    if (clientSpec) {
+      txMessage = {
+        typeUrl, // Same as above
+        value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
+          didDocString: didDoc,
+          signatures: [signInfo],
+          creator: HIDClient.getHidWalletAddress(),
+          clientSpec: clientSpec,
+        }),
+      };
+    } else {
+      txMessage = {
+        typeUrl, // Same as above
+        value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
+          didDocString: didDoc,
+          signatures: [signInfo],
+          creator: HIDClient.getHidWalletAddress(),
+        }),
+      };
+    }
 
-    const txMessage = {
-      typeUrl, // Same as above
-      value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
-        didDocString: didDoc,
-        signatures: [signInfo],
-        creator: HIDClient.getHidWalletAddress(),
-        clientSpec: clientSpec ? clientSpec : undefined,
-      }),
-    };
     const fee = 'auto';
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
@@ -76,7 +88,8 @@ export class DIDRpc implements IDIDRpc {
     didDoc: IDidProto,
     signature: string,
     verificationMethodId: string,
-    versionId: string
+    versionId: string,
+    clientSpec?: IClientSpec
   ): Promise<object> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
@@ -89,15 +102,29 @@ export class DIDRpc implements IDIDRpc {
       signature,
     };
 
-    const txMessage = {
-      typeUrl, // Same as above
-      value: generatedProto[HIDRpcEnums.MsgUpdateDID].fromPartial({
-        didDocString: didDoc,
-        signatures: [signInfo],
-        creator: HIDClient.getHidWalletAddress(),
-        version_id: versionId,
-      }),
-    };
+    let txMessage;
+    if (clientSpec) {
+      txMessage = {
+        typeUrl, // Same as above
+        value: generatedProto[HIDRpcEnums.MsgUpdateDID].fromPartial({
+          didDocString: didDoc,
+          signatures: [signInfo],
+          creator: HIDClient.getHidWalletAddress(),
+          version_id: versionId,
+          clientSpec: clientSpec,
+        }),
+      };
+    } else {
+      txMessage = {
+        typeUrl, // Same as above
+        value: generatedProto[HIDRpcEnums.MsgUpdateDID].fromPartial({
+          didDocString: didDoc,
+          signatures: [signInfo],
+          creator: HIDClient.getHidWalletAddress(),
+          version_id: versionId,
+        }),
+      };
+    }
 
     // TODO: need to find a way to make it dynamic
     const fee = 'auto';
@@ -111,7 +138,8 @@ export class DIDRpc implements IDIDRpc {
     did: string,
     signature: string,
     verificationMethodId: string,
-    versionId: string
+    versionId: string,
+    clientSpec?: IClientSpec
   ): Promise<object> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
@@ -122,16 +150,29 @@ export class DIDRpc implements IDIDRpc {
       verification_method_id: verificationMethodId,
       signature,
     };
-
-    const txMessage = {
-      typeUrl, // Same as above
-      value: generatedProto[HIDRpcEnums.MsgDeactivateDID].fromPartial({
-        didId: did,
-        signatures: [signInfo],
-        creator: HIDClient.getHidWalletAddress(),
-        version_id: versionId,
-      }),
-    };
+    let txMessage;
+    if (clientSpec) {
+      txMessage = {
+        typeUrl, // Same as above
+        value: generatedProto[HIDRpcEnums.MsgDeactivateDID].fromPartial({
+          didId: did,
+          signatures: [signInfo],
+          creator: HIDClient.getHidWalletAddress(),
+          version_id: versionId,
+          clientSpec: clientSpec,
+        }),
+      };
+    } else {
+      txMessage = {
+        typeUrl, // Same as above
+        value: generatedProto[HIDRpcEnums.MsgDeactivateDID].fromPartial({
+          didId: did,
+          signatures: [signInfo],
+          creator: HIDClient.getHidWalletAddress(),
+          version_id: versionId,
+        }),
+      };
+    }
 
     // TODO: need to find a way to make it dynamic
     const fee = 'auto';

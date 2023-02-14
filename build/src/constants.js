@@ -1,6 +1,6 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HID_MIN_FEE = exports.HID_MIN_GAS = exports.HID_DNOMINATION = exports.HID_DECIMAL = exports.GAS_PRICE = exports.KEY_HEADERS = exports.SCHEMA = exports.VP = exports.VC = exports.DID = exports.DID_EcdsaSecp256k1VerificationKey2019 = exports.DID_EcdsaSecp256k1RecoveryMethod2020 = exports.DID_Ed25519VerificationKey2020 = exports.CredentialStatusReasonEnums = exports.CredentialStatusEnums = exports.HIDRpcEnums = exports.HYPERSIGN_NETWORK_BANK_BALANCE_PATH = exports.HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH = exports.HYPERSIGN_NETWORK_SCHEMA_PATH = exports.HYPERSIGN_NETWORK_DID_PATH = exports.HID_COSMOS_MODULE = exports.HYPERSIGN_MAINNET_REST = exports.HYPERSIGN_MAINNET_RPC = exports.HYPERSIGN_TESTNET_REST = exports.HYPERSIGN_TESTNET_RPC = exports.compactProof = void 0;
+exports.HID_MIN_FEE = exports.HID_MIN_GAS = exports.HID_DNOMINATION = exports.HID_DECIMAL = exports.GAS_PRICE = exports.KEY_HEADERS = exports.SCHEMA = exports.VP = exports.VC = exports.DID = exports.CAIP_10_PREFIX = exports.DID_EcdsaSecp256k1VerificationKey2019 = exports.DID_EcdsaSecp256k1RecoveryMethod2020 = exports.DID_Ed25519VerificationKey2020 = exports.CredentialStatusReasonEnums = exports.CredentialStatusEnums = exports.HIDRpcEnums = exports.HYPERSIGN_NETWORK_BANK_BALANCE_PATH = exports.HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH = exports.HYPERSIGN_NETWORK_SCHEMA_PATH = exports.HYPERSIGN_NETWORK_DID_PATH = exports.HID_COSMOS_MODULE = exports.HYPERSIGN_MAINNET_REST = exports.HYPERSIGN_MAINNET_RPC = exports.HYPERSIGN_TESTNET_REST = exports.HYPERSIGN_TESTNET_RPC = exports.compactProof = void 0;
 exports.compactProof = false;
 exports.HYPERSIGN_TESTNET_RPC = 'https://rpc.jagrat.hypersign.id';
 exports.HYPERSIGN_TESTNET_REST = 'https://api.jagrat.hypersign.id';
@@ -56,6 +56,11 @@ exports.DID_EcdsaSecp256k1VerificationKey2019 = {
     DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
     VERIFICATION_METHOD_TYPE: 'EcdsaSecp256k1VerificationKey2019',
 };
+var CAIP_10_PREFIX;
+(function (CAIP_10_PREFIX) {
+    CAIP_10_PREFIX["eip155"] = "eip155";
+    CAIP_10_PREFIX["cosmos-ADR036"] = "cosmos-ADR036";
+})(CAIP_10_PREFIX = exports.CAIP_10_PREFIX || (exports.CAIP_10_PREFIX = {}));
 exports.DID = {
     CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
     SCHEME: 'did',

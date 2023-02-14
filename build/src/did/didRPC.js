@@ -109,15 +109,27 @@ var DIDRpc = /** @class */ (function () {
                             verification_method_id: verificationMethodId,
                             signature: signature,
                         };
-                        txMessage = {
-                            typeUrl: typeUrl,
-                            value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
-                                didDocString: didDoc,
-                                signatures: [signInfo],
-                                creator: client_1.HIDClient.getHidWalletAddress(),
-                                clientSpec: clientSpec ? clientSpec : undefined,
-                            }),
-                        };
+                        if (clientSpec) {
+                            txMessage = {
+                                typeUrl: typeUrl,
+                                value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
+                                    didDocString: didDoc,
+                                    signatures: [signInfo],
+                                    creator: client_1.HIDClient.getHidWalletAddress(),
+                                    clientSpec: clientSpec,
+                                }),
+                            };
+                        }
+                        else {
+                            txMessage = {
+                                typeUrl: typeUrl,
+                                value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
+                                    didDocString: didDoc,
+                                    signatures: [signInfo],
+                                    creator: client_1.HIDClient.getHidWalletAddress(),
+                                }),
+                            };
+                        }
                         fee = 'auto';
                         hidClient = client_1.HIDClient.getHidClient();
                         return [4 /*yield*/, hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee)];
@@ -128,7 +140,7 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
-    DIDRpc.prototype.updateDID = function (didDoc, signature, verificationMethodId, versionId) {
+    DIDRpc.prototype.updateDID = function (didDoc, signature, verificationMethodId, versionId, clientSpec) {
         return __awaiter(this, void 0, void 0, function () {
             var typeUrl, signInfo, txMessage, fee, hidClient, txResult;
             return __generator(this, function (_a) {
@@ -142,15 +154,29 @@ var DIDRpc = /** @class */ (function () {
                             verification_method_id: verificationMethodId,
                             signature: signature,
                         };
-                        txMessage = {
-                            typeUrl: typeUrl,
-                            value: generatedProto[constants_1.HIDRpcEnums.MsgUpdateDID].fromPartial({
-                                didDocString: didDoc,
-                                signatures: [signInfo],
-                                creator: client_1.HIDClient.getHidWalletAddress(),
-                                version_id: versionId,
-                            }),
-                        };
+                        if (clientSpec) {
+                            txMessage = {
+                                typeUrl: typeUrl,
+                                value: generatedProto[constants_1.HIDRpcEnums.MsgUpdateDID].fromPartial({
+                                    didDocString: didDoc,
+                                    signatures: [signInfo],
+                                    creator: client_1.HIDClient.getHidWalletAddress(),
+                                    version_id: versionId,
+                                    clientSpec: clientSpec,
+                                }),
+                            };
+                        }
+                        else {
+                            txMessage = {
+                                typeUrl: typeUrl,
+                                value: generatedProto[constants_1.HIDRpcEnums.MsgUpdateDID].fromPartial({
+                                    didDocString: didDoc,
+                                    signatures: [signInfo],
+                                    creator: client_1.HIDClient.getHidWalletAddress(),
+                                    version_id: versionId,
+                                }),
+                            };
+                        }
                         fee = 'auto';
                         hidClient = client_1.HIDClient.getHidClient();
                         return [4 /*yield*/, hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee)];
@@ -161,7 +187,7 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
-    DIDRpc.prototype.deactivateDID = function (did, signature, verificationMethodId, versionId) {
+    DIDRpc.prototype.deactivateDID = function (did, signature, verificationMethodId, versionId, clientSpec) {
         return __awaiter(this, void 0, void 0, function () {
             var typeUrl, signInfo, txMessage, fee, hidClient, txResult;
             return __generator(this, function (_a) {
@@ -175,15 +201,29 @@ var DIDRpc = /** @class */ (function () {
                             verification_method_id: verificationMethodId,
                             signature: signature,
                         };
-                        txMessage = {
-                            typeUrl: typeUrl,
-                            value: generatedProto[constants_1.HIDRpcEnums.MsgDeactivateDID].fromPartial({
-                                didId: did,
-                                signatures: [signInfo],
-                                creator: client_1.HIDClient.getHidWalletAddress(),
-                                version_id: versionId,
-                            }),
-                        };
+                        if (clientSpec) {
+                            txMessage = {
+                                typeUrl: typeUrl,
+                                value: generatedProto[constants_1.HIDRpcEnums.MsgDeactivateDID].fromPartial({
+                                    didId: did,
+                                    signatures: [signInfo],
+                                    creator: client_1.HIDClient.getHidWalletAddress(),
+                                    version_id: versionId,
+                                    clientSpec: clientSpec,
+                                }),
+                            };
+                        }
+                        else {
+                            txMessage = {
+                                typeUrl: typeUrl,
+                                value: generatedProto[constants_1.HIDRpcEnums.MsgDeactivateDID].fromPartial({
+                                    didId: did,
+                                    signatures: [signInfo],
+                                    creator: client_1.HIDClient.getHidWalletAddress(),
+                                    version_id: versionId,
+                                }),
+                            };
+                        }
                         fee = 'auto';
                         hidClient = client_1.HIDClient.getHidClient();
                         return [4 /*yield*/, hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee)];

@@ -14,6 +14,6 @@ var IKeyType;
 })(IKeyType = exports.IKeyType || (exports.IKeyType = {}));
 var IClientSpec;
 (function (IClientSpec) {
-    IClientSpec["eth_personalSign"] = "eth-personalSign";
-    IClientSpec["cosmos_ADR036"] = "cosmos-ADR036";
+    IClientSpec["eth-personalSign"] = "eth-personalSign";
+    IClientSpec["cosmos-ADR036"] = "cosmos-ADR036";
 })(IClientSpec = exports.IClientSpec || (exports.IClientSpec = {}));

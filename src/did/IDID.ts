@@ -19,8 +19,8 @@ export enum IKeyType {
 }
 
 export enum IClientSpec {
-  'eth_personalSign' = 'eth-personalSign',
-  'cosmos_ADR036' = 'cosmos-ADR036',
+  'eth-personalSign' = 'eth-personalSign',
+  'cosmos-ADR036' = 'cosmos-ADR036',
 }
 
 export interface IController {
@@ -111,8 +111,20 @@ export interface IDIDRpc {
     verificationMethodId: string,
     clientSpec?: IClientSpec
   ): Promise<object>;
-  updateDID(didDoc: IDidProto, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
-  deactivateDID(did: string, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
+  updateDID(
+    didDoc: IDidProto | any,
+    signature: string,
+    verificationMethodId: string,
+    versionId: string,
+    clientSpec?: IClientSpec
+  ): Promise<object>;
+  deactivateDID(
+    did: string,
+    signature: string,
+    verificationMethodId: string,
+    versionId: string,
+    clientSpec?: IClientSpec
+  ): Promise<object>;
   resolveDID(did: string): Promise<IDIDResolve>;
   init(): Promise<void>;
 }
