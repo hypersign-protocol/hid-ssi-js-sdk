@@ -44,6 +44,8 @@ export const DID_Ed25519VerificationKey2020 = {
   NAMESPACE: 'testnet', // this is not used
   DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
   VERIFICATION_METHOD_TYPE: 'Ed25519VerificationKey2020',
+  BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary',
+
 };
 
 
@@ -53,6 +55,8 @@ export const DID_EcdsaSecp256k1RecoveryMethod2020 = {
   METHOD: 'hid',
   NAMESPACE: 'testnet', // this is not used
   DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
+  BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary',
+
   VERIFICATION_METHOD_TYPE: 'EcdsaSecp256k1RecoveryMethod2020',
 };
 
@@ -64,6 +68,7 @@ export const DID_EcdsaSecp256k1VerificationKey2019 = {
   METHOD: 'hid',
   NAMESPACE: 'testnet', // this is not used
   DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
+  BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary',
   VERIFICATION_METHOD_TYPE: 'EcdsaSecp256k1VerificationKey2019',
 };
 
@@ -81,6 +86,8 @@ export const DID = {
   NAMESPACE: 'testnet', // this is not used
   DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
   VERIFICATION_METHOD_TYPE: 'Ed25519VerificationKey2020',
+  BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary',
+
 };
 
 Object.freeze(DID);

@@ -46,7 +46,7 @@ class DIDDocument implements Did {
     let vm;
     switch (keyType) {
       case IKeyType.Ed25519VerificationKey2020: {
-        this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
+        this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT,constant['DID_' + keyType].BLOCKCHAINACCOUNTID_CONTEXT];
         this.id = id;
         this.controller = [this.id];
         this.alsoKnownAs = [this.id];
@@ -71,7 +71,7 @@ class DIDDocument implements Did {
         break;
       }
       case IKeyType.EcdsaSecp256k1RecoveryMethod2020: {
-        this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
+        this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT , constant['DID_' + keyType].BLOCKCHAINACCOUNTID_CONTEXT] ; 
         this.id = id;
         this.controller = [this.id];
         this.alsoKnownAs = [this.id];
@@ -705,6 +705,7 @@ export default class HypersignDID implements IDID {
     });
     const didDocumentLd = Utils.jsonToLdConvertor(resolveddoc.didDocument);
     didDocumentLd['@context'].push(constant.VC.CREDENTAIL_SECURITY_SUITE);
+
     const signedDidDocument = (await jsonSigs.sign(didDocumentLd, {
       suite,
       purpose: new AuthenticationProofPurpose({
