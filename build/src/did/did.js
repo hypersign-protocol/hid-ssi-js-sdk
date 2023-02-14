@@ -91,7 +91,10 @@ var DIDDocument = /** @class */ (function () {
         var vm;
         switch (keyType) {
             case IDID_1.IKeyType.Ed25519VerificationKey2020: {
-                this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
+                this.context = [
+                    constant['DID_' + keyType].DID_BASE_CONTEXT,
+                    constant['DID_' + keyType].BLOCKCHAINACCOUNTID_CONTEXT,
+                ];
                 this.id = id;
                 this.controller = [this.id];
                 this.alsoKnownAs = [this.id];
@@ -114,7 +117,10 @@ var DIDDocument = /** @class */ (function () {
                 break;
             }
             case IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020: {
-                this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
+                this.context = [
+                    constant['DID_' + keyType].DID_BASE_CONTEXT,
+                    constant['DID_' + keyType].BLOCKCHAINACCOUNTID_CONTEXT,
+                ];
                 this.id = id;
                 this.controller = [this.id];
                 this.alsoKnownAs = [this.id];
