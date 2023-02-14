@@ -257,6 +257,7 @@ export default class HypersignDID implements IDID {
     address: string;
     verificationMethodId: string;
     web3: Web3 | any;
+    clientSpec: IClientSpec
   }) {
     if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
@@ -279,40 +280,12 @@ export default class HypersignDID implements IDID {
     }
 
     const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
-    console.log('INside sdk', didDocStringJson);
 
-    const baseDidDocument = {
-      id: params.didDocument.id,
-      controller: params.didDocument.controller,
-      verificationMethod: [
-        {
-          id: params.didDocument.verificationMethod[0].id,
-          type: 'EcdsaSecp256k1RecoveryMethod2020',
-          controller: params.didDocument.verificationMethod[0].controller,
-          blockchainAccountId: 'eip155:' + 1 + ':' + params.address,
-        },
-      ],
-      authentication: [params.didDocument.verificationMethod[0].id],
-      assertionMethod: [params.didDocument.verificationMethod[0].id],
-    };
+    const didDoc: Did = didDocStringJson as Did;
 
-    const signature = await params.web3.eth.personal.sign(JSON.stringify(baseDidDocument), params.address);
-    const address = await params.web3.eth.personal.ecRecover(JSON.stringify(baseDidDocument), signature);
-    console.log('signature ', signature);
-    console.log('address ', address);
+    const signature = await params.web3.eth.personal.sign(JSON.stringify(didDoc), params.address);
+    return await this.didrpc.registerDID(didDoc, signature, params.verificationMethodId,);
 
-    const didDoc: Did = baseDidDocument as Did;
-
-    // const tx = await this.didrpc.registerDID(didDoc, signature, params.verificationMethodId, 'eth-personalSign');
-    // console.log(tx);
-
-    const tx2 = await this.didrpc.registerDIDC(
-      baseDidDocument,
-      signature,
-      params.verificationMethodId,
-      'eth-personalSign'
-    );
-    console.log(tx2);
   }
 
   /**
@@ -589,8 +562,8 @@ export default class HypersignDID implements IDID {
     if (!pubkey) {
       throw new Error(
         'HID-SSI-SDK:: Error: could not find verification method for verificationMethodId: ' +
-          verificationMethodId +
-          ' in did document'
+        verificationMethodId +
+        ' in did document'
       );
     }
 
