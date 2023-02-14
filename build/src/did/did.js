@@ -334,7 +334,7 @@ var HypersignDID = /** @class */ (function () {
                         if (!params.address) {
                             throw new Error('HID-SSI-SDK:: Error: params.address is required to sign a did');
                         }
-                        if (!(typeof params.clientSpec in IDID_1.IClientSpec)) {
+                        if (!(params.clientSpec in IDID_1.IClientSpec)) {
                             throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
                         }
                         didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
@@ -414,7 +414,7 @@ var HypersignDID = /** @class */ (function () {
                         if (!params.verificationMethodId) {
                             throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
                         }
-                        if (!(typeof params.clientSpec in IDID_1.IClientSpec)) {
+                        if (!(params.clientSpec in IDID_1.IClientSpec)) {
                             throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
                         }
                         didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
