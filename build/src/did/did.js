@@ -84,7 +84,6 @@ var did_1 = require("../../libs/generated/ssi/did");
 var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
 var ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
 var web3_1 = __importDefault(require("web3"));
-var IdEncoder = require('bnid').IdEncoder;
 var IDID_1 = require("./IDID");
 var v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 var DIDDocument = /** @class */ (function () {
@@ -334,15 +333,6 @@ var HypersignDID = /** @class */ (function () {
         }
         return blockChainAccountId;
     };
-    HypersignDID.prototype._bufToMultibase = function (pubKeyBuf) {
-        // Convert to multibase
-        var encoder = new IdEncoder({
-            encoding: 'base58btc',
-            multibase: true,
-        });
-        var newPubKeyMultibase = encoder.encode(pubKeyBuf);
-        return newPubKeyMultibase;
-    };
     HypersignDID.prototype.createByClientSpec = function (params) {
         return __awaiter(this, void 0, void 0, function () {
             var didDoc, blockChainAccountId, didId, newDid, multibasePublicKey, didId, newDid;
@@ -377,7 +367,7 @@ var HypersignDID = /** @class */ (function () {
                             throw new Error('HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
                                 IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
                         }
-                        multibasePublicKey = this._bufToMultibase(params.publicKey);
+                        multibasePublicKey = utils_1.default._bufToMultibase(params.publicKey);
                         didId = this._getId(params.methodSpecificId);
                         newDid = new DIDDocument(multibasePublicKey, '', didId, params.keyType);
                         didDoc = utils_1.default.jsonToLdConvertor(__assign({}, newDid));

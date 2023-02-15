@@ -42,6 +42,13 @@ export default class Utils {
     return "z" + encode(mbKey); //Buffer.from(mbKey).toString('base64');
   }
   
+
+  public static _bufToMultibase(pubKeyBuf: Uint8Array){
+    return Utils._encodeMbKey(
+      constants.KEY_HEADERS.MULTICODEC_ED25519_PUB_HEADER,
+      pubKeyBuf
+    );
+  }
   
   // Converting 45byte public key to 48 by padding header 
   // Converting 88byte private key to 91 by padding header

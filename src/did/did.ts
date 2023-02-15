@@ -14,7 +14,6 @@ import { Did, VerificationMethod, Service } from '../../libs/generated/ssi/did';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import Web3 from 'web3';
-const { IdEncoder } = require('bnid');
 import {
   IParams,
   IDID,
@@ -281,16 +280,6 @@ export default class HypersignDID implements IDID {
     return blockChainAccountId;
   }
 
-  private _bufToMultibase(pubKeyBuf: Uint8Array) {
-    // Convert to multibase
-    const encoder = new IdEncoder({
-      encoding: 'base58btc',
-      multibase: true,
-    });
-    const newPubKeyMultibase = encoder.encode(pubKeyBuf);
-    return newPubKeyMultibase;
-  }
-
   public async createByClientSpec(params: {
     methodSpecificId: string;
     publicKey?: Uint8Array;
@@ -335,7 +324,7 @@ export default class HypersignDID implements IDID {
               IKeyType.EcdsaSecp256k1VerificationKey2019
           );
         }
-        const multibasePublicKey = this._bufToMultibase(params.publicKey);
+        const multibasePublicKey = Utils._bufToMultibase(params.publicKey);
         const didId = this._getId(params.methodSpecificId);
         const newDid = new DIDDocument(multibasePublicKey, '', didId, params.keyType);
         didDoc = Utils.jsonToLdConvertor({ ...newDid });

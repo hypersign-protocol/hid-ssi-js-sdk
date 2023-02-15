@@ -27,7 +27,6 @@
     "@digitalbazaar/ed25519-verification-key-2020": "^3.3.0",
     "@stablelib/ed25519": "^1.0.2",
     "axios": "^0.19.0",
-    "bnid": "^3.0.0",
     "crypto-ld": "^6.0.0",
     "jsonld": "^3.1.1",
     "jsonld-signatures": "^9.0.0",
