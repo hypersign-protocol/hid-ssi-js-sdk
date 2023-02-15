@@ -125,12 +125,13 @@ var DIDRpc = /** @class */ (function () {
                                     break;
                                 }
                                 case IDID_1.IClientSpec['cosmos-ADR036']: {
+                                    throw new Error('HID-SSI-SDK:: Error: Not supported ' + clientSpec);
                                     txMessage = {
                                         typeUrl: typeUrl,
                                         value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
                                             didDocString: didDoc,
                                             signatures: [signInfo],
-                                            creator: address,
+                                            creator: client_1.HIDClient.getHidWalletAddress(),
                                             clientSpec: clientSpec,
                                         }),
                                     };
@@ -151,7 +152,6 @@ var DIDRpc = /** @class */ (function () {
                                 }),
                             };
                         }
-                        console.log('From SDk  ' + client_1.HIDClient.getHidWalletAddress());
                         fee = 'auto';
                         hidClient = client_1.HIDClient.getHidClient();
                         return [4 /*yield*/, hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee)];

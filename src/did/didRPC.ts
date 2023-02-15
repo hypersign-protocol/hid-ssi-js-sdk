@@ -74,7 +74,7 @@ export class DIDRpc implements IDIDRpc {
         }
         case IClientSpec['cosmos-ADR036']: {
           throw new Error('HID-SSI-SDK:: Error: Not supported ' + clientSpec);
-          
+
           txMessage = {
             typeUrl, // Same as above
             value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({

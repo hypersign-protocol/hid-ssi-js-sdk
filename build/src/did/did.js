@@ -515,7 +515,6 @@ var HypersignDID = /** @class */ (function () {
                             ])];
                     case 5:
                         signRespObj = _b.sent();
-                        console.log({ didDocument: didDoc, signature: signRespObj });
                         return [2 /*return*/, { didDocument: didDoc, signature: signRespObj['signature'] }];
                     case 6: throw Error('HID-SSI-SDK:: Error: Invalid clientSpec');
                 }
