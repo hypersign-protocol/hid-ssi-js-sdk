@@ -11,7 +11,7 @@ import { SigningStargateClient } from '@cosmjs/stargate';
 
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
-import { IClientSpec, IDIDResolve, IDIDRpc } from './IDID';
+import { IClientSpec, IDIDResolve, IDIDRpc, IKeyType } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 
 export class DIDRpc implements IDIDRpc {
@@ -45,7 +45,8 @@ export class DIDRpc implements IDIDRpc {
     didDoc: IDidProto,
     signature: string,
     verificationMethodId: string,
-    clientSpec: IClientSpec
+    clientSpec?: IClientSpec,
+    address?: string
   ): Promise<object> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
@@ -58,15 +59,38 @@ export class DIDRpc implements IDIDRpc {
     };
     let txMessage;
     if (clientSpec) {
-      txMessage = {
-        typeUrl, // Same as above
-        value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
-          didDocString: didDoc,
-          signatures: [signInfo],
-          creator: HIDClient.getHidWalletAddress(),
-          clientSpec: clientSpec,
-        }),
-      };
+      switch (clientSpec) {
+        case IClientSpec['eth-personalSign']: {
+          txMessage = {
+            typeUrl, // Same as above
+            value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
+              didDocString: didDoc,
+              signatures: [signInfo],
+              creator: HIDClient.getHidWalletAddress(),
+              clientSpec: clientSpec,
+            }),
+          };
+          break;
+        }
+        case IClientSpec['cosmos-ADR036']: {
+          throw new Error('HID-SSI-SDK:: Error: Not supported ' + clientSpec);
+          
+          txMessage = {
+            typeUrl, // Same as above
+            value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
+              didDocString: didDoc,
+              signatures: [signInfo],
+              creator: HIDClient.getHidWalletAddress(),
+              clientSpec: clientSpec,
+            }),
+          };
+          break;
+        }
+
+        default: {
+          throw new Error('HID-SSI-SDK:: Error: Not supported ' + clientSpec);
+        }
+      }
     } else {
       txMessage = {
         typeUrl, // Same as above

@@ -1,9 +1,4 @@
 "use strict";
-/**
- * Copyright (c) 2023, Hypermine Pvt. Ltd.
- * All rights reserved.
- * Author: Hypermine Core Team
- */
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -74,6 +69,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
 var constant = __importStar(require("../constants"));
 var jsonld_signatures_1 = __importDefault(require("jsonld-signatures"));
 var AuthenticationProofPurpose = jsonld_signatures_1.default.purposes.AuthenticationProofPurpose;
@@ -145,7 +145,7 @@ var DIDDocument = /** @class */ (function () {
                 this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
                 this.id = id;
                 this.controller = [this.id];
-                this.alsoKnownAs = [this.id];
+                this.alsoKnownAs = [];
                 vm = {
                     id: this.id + '#key-1',
                     type: constant['DID_' + keyType].VERIFICATION_METHOD_TYPE,
@@ -157,17 +157,11 @@ var DIDDocument = /** @class */ (function () {
                 this.verificationMethod = [verificationMethod];
                 this.authentication = [verificationMethod.id];
                 this.assertionMethod = [verificationMethod.id];
-                this.keyAgreement = [verificationMethod.id];
-                this.capabilityInvocation = [verificationMethod.id];
-                this.capabilityDelegation = [verificationMethod.id];
+                this.keyAgreement = [];
+                this.capabilityInvocation = [];
+                this.capabilityDelegation = [];
                 // TODO: we should take services object in consntructor
-                this.service = [
-                    {
-                        id: id + '#linked-domain',
-                        type: 'LinkedDomains',
-                        serviceEndpoint: 'https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/did/' + id,
-                    },
-                ];
+                this.service = [];
                 break;
             }
             default:
@@ -452,6 +446,7 @@ var HypersignDID = /** @class */ (function () {
                                 clientSpec: params.clientSpec,
                                 address: params.address,
                                 web3: params.web3,
+                                chainId: params.chainId,
                             })];
                     case 1:
                         _a = _b.sent(), didDocument = _a.didDocument, signature = _a.signature;
@@ -460,6 +455,7 @@ var HypersignDID = /** @class */ (function () {
                                 signature: signature,
                                 verificationMethodId: params.verificationMethodId,
                                 clientSpec: params.clientSpec,
+                                address: params.address, // only for [cosmos-ADR036]
                             })];
                     case 2: return [2 /*return*/, _b.sent()];
                 }
@@ -468,7 +464,7 @@ var HypersignDID = /** @class */ (function () {
     };
     HypersignDID.prototype.signByClientSpec = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, didDocStringJson, didDoc, signature;
+            var _a, didDocStringJson, didDoc, signature, didDocStringJson, didDoc, didDocBytes, signRespObj;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -492,7 +488,7 @@ var HypersignDID = /** @class */ (function () {
                             case IDID_1.IClientSpec['eth-personalSign']: return [3 /*break*/, 1];
                             case IDID_1.IClientSpec['cosmos-ADR036']: return [3 /*break*/, 3];
                         }
-                        return [3 /*break*/, 4];
+                        return [3 /*break*/, 6];
                     case 1:
                         didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
                         didDoc = didDocStringJson;
@@ -501,11 +497,27 @@ var HypersignDID = /** @class */ (function () {
                         signature = _b.sent();
                         return [2 /*return*/, { didDocument: didDoc, signature: signature }];
                     case 3:
-                        {
-                            throw Error('HID-SSI-SDK:: Error: Not Supported yet');
+                        if (!params.chainId) {
+                            throw new Error('HID-SSI-SDK:: Error:  params.chainId is required to sign for clientSpec ' +
+                                IDID_1.IClientSpec['cosmos-ADR036'] +
+                                ' and keyType ' +
+                                IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
                         }
-                        _b.label = 4;
-                    case 4: throw Error('HID-SSI-SDK:: Error: Invalid clientSpec');
+                        didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
+                        didDoc = didDocStringJson;
+                        return [4 /*yield*/, did_1.Did.encode(didDoc)];
+                    case 4:
+                        didDocBytes = (_b.sent()).finish();
+                        return [4 /*yield*/, params.web3.requestMethod('signArbitrary', [
+                                params.chainId,
+                                params.address,
+                                didDocBytes,
+                            ])];
+                    case 5:
+                        signRespObj = _b.sent();
+                        console.log({ didDocument: didDoc, signature: signRespObj });
+                        return [2 /*return*/, { didDocument: didDoc, signature: signRespObj['signature'] }];
+                    case 6: throw Error('HID-SSI-SDK:: Error: Invalid clientSpec');
                 }
             });
         });
@@ -531,9 +543,14 @@ var HypersignDID = /** @class */ (function () {
                         if (!(params.clientSpec in IDID_1.IClientSpec)) {
                             throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
                         }
+                        if (params.clientSpec === IDID_1.IClientSpec['cosmos-ADR036']) {
+                            if (!params.address) {
+                                throw new Error('HID-SSI-SDK:: Error: params.address is required for ' + IDID_1.IClientSpec['cosmos-ADR036']);
+                            }
+                        }
                         didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
                         didDoc = didDocStringJson;
-                        return [4 /*yield*/, this.didrpc.registerDID(didDoc, params.signature, params.verificationMethodId, params.clientSpec)];
+                        return [4 /*yield*/, this.didrpc.registerDID(didDoc, params.signature, params.verificationMethodId, params.clientSpec, params.address)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });

@@ -3,7 +3,6 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
-
 import * as constant from '../constants';
 import jsonSigs from 'jsonld-signatures';
 const { AuthenticationProofPurpose } = jsonSigs.purposes;
@@ -102,7 +101,7 @@ class DIDDocument implements Did {
         this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
         this.id = id;
         this.controller = [this.id];
-        this.alsoKnownAs = [this.id];
+        this.alsoKnownAs = [];
         vm = {
           id: this.id + '#key-1',
           type: constant['DID_' + keyType].VERIFICATION_METHOD_TYPE,
@@ -114,17 +113,11 @@ class DIDDocument implements Did {
         this.verificationMethod = [verificationMethod];
         this.authentication = [verificationMethod.id];
         this.assertionMethod = [verificationMethod.id];
-        this.keyAgreement = [verificationMethod.id];
-        this.capabilityInvocation = [verificationMethod.id];
-        this.capabilityDelegation = [verificationMethod.id];
+        this.keyAgreement = [];
+        this.capabilityInvocation = [];
+        this.capabilityDelegation = [];
         // TODO: we should take services object in consntructor
-        this.service = [
-          {
-            id: id + '#linked-domain',
-            type: 'LinkedDomains',
-            serviceEndpoint: 'https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/did/' + id,
-          },
-        ];
+        this.service = [];
 
         break;
       }
@@ -382,6 +375,7 @@ export default class HypersignDID implements IDID {
     verificationMethodId: string;
     web3: Web3 | any;
     clientSpec: IClientSpec;
+    chainId?: string; // only for [cosmos-ADR036]
   }) {
     if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
@@ -414,6 +408,7 @@ export default class HypersignDID implements IDID {
       clientSpec: params.clientSpec,
       address: params.address,
       web3: params.web3,
+      chainId: params.chainId,
     });
 
     return await this.registerByClientSpec({
@@ -421,6 +416,7 @@ export default class HypersignDID implements IDID {
       signature,
       verificationMethodId: params.verificationMethodId,
       clientSpec: params.clientSpec,
+      address: params.address, // only for [cosmos-ADR036]
     });
   }
 
@@ -429,6 +425,7 @@ export default class HypersignDID implements IDID {
     clientSpec: IClientSpec;
     address: string;
     web3: Web3 | any;
+    chainId?: string; // only for [cosmos-ADR036]
   }): Promise<{ didDocument: Did; signature: string }> {
     if (this['window'] === 'undefined') {
       throw new Error('HID-SSI-SDK:: Error:  Running in non browser mode');
@@ -457,7 +454,23 @@ export default class HypersignDID implements IDID {
         return { didDocument: didDoc, signature };
       }
       case IClientSpec['cosmos-ADR036']: {
-        throw Error('HID-SSI-SDK:: Error: Not Supported yet');
+        if (!params.chainId) {
+          throw new Error(
+            'HID-SSI-SDK:: Error:  params.chainId is required to sign for clientSpec ' +
+              IClientSpec['cosmos-ADR036'] +
+              ' and keyType ' +
+              IKeyType.EcdsaSecp256k1VerificationKey2019
+          );
+        }
+        const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
+        const didDoc: Did = didDocStringJson as Did;
+        const didDocBytes = (await Did.encode(didDoc)).finish();
+        const signRespObj = await params.web3.requestMethod('signArbitrary', [
+          params.chainId,
+          params.address,
+          didDocBytes,
+        ]);
+        return { didDocument: didDoc, signature: signRespObj['signature'] };
       }
 
       default:
@@ -472,6 +485,7 @@ export default class HypersignDID implements IDID {
     clientSpec: IClientSpec;
     verificationMethodId: string;
     signature: string;
+    address?: string; // only for [cosmos-ADR036]
   }) {
     if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
@@ -491,10 +505,22 @@ export default class HypersignDID implements IDID {
     if (!(params.clientSpec in IClientSpec)) {
       throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
     }
+
+    if (params.clientSpec === IClientSpec['cosmos-ADR036']) {
+      if (!params.address) {
+        throw new Error('HID-SSI-SDK:: Error: params.address is required for ' + IClientSpec['cosmos-ADR036']);
+      }
+    }
     const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
 
     const didDoc: Did = didDocStringJson as Did;
-    return await this.didrpc.registerDID(didDoc, params.signature, params.verificationMethodId, params.clientSpec);
+    return await this.didrpc.registerDID(
+      didDoc,
+      params.signature,
+      params.verificationMethodId,
+      params.clientSpec,
+      params.address
+    );
   }
 
   /**
