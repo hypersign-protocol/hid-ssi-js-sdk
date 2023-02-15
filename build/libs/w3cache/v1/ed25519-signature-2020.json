@@ -25,6 +25,10 @@
                 "publicKeyMultibase": {
                     "@id": "https://w3id.org/security#publicKeyMultibase",
                     "@type": "https://w3id.org/security#multibase"
+                },
+                "blockchainAccountId": {
+                    "@id": "https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld#blockchainAccountId",
+                    "@type": "https://w3id.org/security#blockchainAccountId"
                 }
             }
         },

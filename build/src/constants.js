@@ -39,7 +39,7 @@ exports.DID_Ed25519VerificationKey2020 = {
     NAMESPACE: 'testnet',
     DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
     VERIFICATION_METHOD_TYPE: 'Ed25519VerificationKey2020',
-    BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary',
+    BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
 };
 exports.DID_EcdsaSecp256k1RecoveryMethod2020 = {
     CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
@@ -47,7 +47,7 @@ exports.DID_EcdsaSecp256k1RecoveryMethod2020 = {
     METHOD: 'hid',
     NAMESPACE: 'testnet',
     DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
-    BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary',
+    BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
     VERIFICATION_METHOD_TYPE: 'EcdsaSecp256k1RecoveryMethod2020',
 };
 exports.DID_EcdsaSecp256k1VerificationKey2019 = {
@@ -56,7 +56,7 @@ exports.DID_EcdsaSecp256k1VerificationKey2019 = {
     METHOD: 'hid',
     NAMESPACE: 'testnet',
     DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
-    BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary',
+    BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
     VERIFICATION_METHOD_TYPE: 'EcdsaSecp256k1VerificationKey2019',
 };
 var CAIP_10_PREFIX;
@@ -71,7 +71,7 @@ exports.DID = {
     NAMESPACE: 'testnet',
     DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
     VERIFICATION_METHOD_TYPE: 'Ed25519VerificationKey2020',
-    BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary',
+    BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
 };
 Object.freeze(exports.DID);
 exports.VC = {
