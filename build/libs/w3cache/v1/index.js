@@ -56,6 +56,7 @@ var security_v2_json_1 = __importDefault(require("./security-v2.json"));
 var credentials_json_1 = __importDefault(require("./credentials.json"));
 var jsonld_1 = __importDefault(require("jsonld"));
 var vc_data_integrety_json_1 = __importDefault(require("./vc-data-integrety.json"));
+var lds_ecdsa_secp256k1_recovery2020_json_1 = __importDefault(require("./lds-ecdsa-secp256k1-recovery2020.json"));
 // Ref: https://github.com/digitalbazaar/jsonld.js/#custom-document-loader
 var nodeDocumentLoader = jsonld_1.default.documentLoaders.node();
 var CONTEXTS = Object.freeze({
@@ -63,7 +64,8 @@ var CONTEXTS = Object.freeze({
     "https://w3id.org/security/suites/ed25519-2020/v1": __assign({}, ed25519_signature_2020_json_1.default),
     "https://w3id.org/security/v2": __assign({}, security_v2_json_1.default),
     "https://www.w3.org/2018/credentials/v1": __assign({}, credentials_json_1.default),
-    "https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld": __assign({}, vc_data_integrety_json_1.default)
+    "https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld": __assign({}, vc_data_integrety_json_1.default),
+    "https://w3id.org/security/suites/secp256k1recovery-2020/v2": __assign({}, lds_ecdsa_secp256k1_recovery2020_json_1.default)
 });
 exports.default = (function (url, options) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {

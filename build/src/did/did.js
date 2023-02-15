@@ -84,6 +84,7 @@ var did_1 = require("../../libs/generated/ssi/did");
 var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
 var ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
 var web3_1 = __importDefault(require("web3"));
+var IdEncoder = require('bnid').IdEncoder;
 var IDID_1 = require("./IDID");
 var v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 var DIDDocument = /** @class */ (function () {
@@ -123,6 +124,35 @@ var DIDDocument = /** @class */ (function () {
                     type: constant['DID_' + keyType].VERIFICATION_METHOD_TYPE,
                     controller: this.id,
                     blockchainAccountId: blockchainAccountId,
+                };
+                var verificationMethod = vm;
+                this.verificationMethod = [verificationMethod];
+                this.authentication = [verificationMethod.id];
+                this.assertionMethod = [verificationMethod.id];
+                this.keyAgreement = [verificationMethod.id];
+                this.capabilityInvocation = [verificationMethod.id];
+                this.capabilityDelegation = [verificationMethod.id];
+                // TODO: we should take services object in consntructor
+                this.service = [
+                    {
+                        id: id + '#linked-domain',
+                        type: 'LinkedDomains',
+                        serviceEndpoint: 'https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/did/' + id,
+                    },
+                ];
+                break;
+            }
+            case IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019: {
+                this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
+                this.id = id;
+                this.controller = [this.id];
+                this.alsoKnownAs = [this.id];
+                vm = {
+                    id: this.id + '#key-1',
+                    type: constant['DID_' + keyType].VERIFICATION_METHOD_TYPE,
+                    controller: this.id,
+                    publicKeyMultibase: publicKey,
+                    blockchainAccountId: '',
                 };
                 var verificationMethod = vm;
                 this.verificationMethod = [verificationMethod];
@@ -304,15 +334,24 @@ var HypersignDID = /** @class */ (function () {
         }
         return blockChainAccountId;
     };
-    HypersignDID.prototype.create = function (params) {
+    HypersignDID.prototype._bufToMultibase = function (pubKeyBuf) {
+        // Convert to multibase
+        var encoder = new IdEncoder({
+            encoding: 'base58btc',
+            multibase: true,
+        });
+        var newPubKeyMultibase = encoder.encode(pubKeyBuf);
+        return newPubKeyMultibase;
+    };
+    HypersignDID.prototype.createByClientSpec = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var blockChainAccountId, didId, newDid;
+            var didDoc, blockChainAccountId, didId, newDid, multibasePublicKey, didId, newDid;
             return __generator(this, function (_a) {
                 if (this['window'] === 'undefined') {
                     console.log('HID-SSI-SDK:: Warning:  Running in non browser mode');
                 }
-                if (!params.address) {
-                    throw new Error('HID-SSI-SDK:: Error: params.address is required to create didoc');
+                if (!params.methodSpecificId) {
+                    throw new Error('HID-SSI-SDK:: Error: params.methodSpecificId is required to create didoc');
                 }
                 if (!params.chainId) {
                     throw new Error('HID-SSI-SDK:: Error: params.chainId is required to create didoc');
@@ -323,10 +362,32 @@ var HypersignDID = /** @class */ (function () {
                 if (!(params.keyType in IDID_1.IKeyType)) {
                     throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid');
                 }
-                blockChainAccountId = this._getBlockChainAccountID(params.chainId, params.address);
-                didId = this._getId(params.address);
-                newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType);
-                return [2 /*return*/, utils_1.default.jsonToLdConvertor(__assign({}, newDid))];
+                switch (params.keyType) {
+                    case IDID_1.IKeyType.Ed25519VerificationKey2020:
+                        throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid use object.generate() method');
+                    case IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020: {
+                        blockChainAccountId = this._getBlockChainAccountID(params.chainId, params.methodSpecificId);
+                        didId = this._getId(params.methodSpecificId);
+                        newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType);
+                        didDoc = utils_1.default.jsonToLdConvertor(__assign({}, newDid));
+                        break;
+                    }
+                    case IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019: {
+                        if (!params.publicKey) {
+                            throw new Error('HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
+                                IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
+                        }
+                        multibasePublicKey = this._bufToMultibase(params.publicKey);
+                        didId = this._getId(params.methodSpecificId);
+                        newDid = new DIDDocument(multibasePublicKey, '', didId, params.keyType);
+                        didDoc = utils_1.default.jsonToLdConvertor(__assign({}, newDid));
+                        break;
+                    }
+                    default: {
+                        throw new Error('HID-SSI-SDK:: Error: invalid keytype');
+                    }
+                }
+                return [2 /*return*/, didDoc];
             });
         });
     };

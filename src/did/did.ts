@@ -14,7 +14,7 @@ import { Did, VerificationMethod, Service } from '../../libs/generated/ssi/did';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import Web3 from 'web3';
-
+const { IdEncoder } = require('bnid');
 import {
   IParams,
   IDID,
@@ -99,7 +99,36 @@ class DIDDocument implements Did {
 
         break;
       }
+      case IKeyType.EcdsaSecp256k1VerificationKey2019: {
+        this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
+        this.id = id;
+        this.controller = [this.id];
+        this.alsoKnownAs = [this.id];
+        vm = {
+          id: this.id + '#key-1',
+          type: constant['DID_' + keyType].VERIFICATION_METHOD_TYPE,
+          controller: this.id,
+          publicKeyMultibase: publicKey,
+          blockchainAccountId: '',
+        };
+        const verificationMethod: VerificationMethod = vm;
+        this.verificationMethod = [verificationMethod];
+        this.authentication = [verificationMethod.id];
+        this.assertionMethod = [verificationMethod.id];
+        this.keyAgreement = [verificationMethod.id];
+        this.capabilityInvocation = [verificationMethod.id];
+        this.capabilityDelegation = [verificationMethod.id];
+        // TODO: we should take services object in consntructor
+        this.service = [
+          {
+            id: id + '#linked-domain',
+            type: 'LinkedDomains',
+            serviceEndpoint: 'https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/did/' + id,
+          },
+        ];
 
+        break;
+      }
       default:
         throw new Error('Invalid');
     }
@@ -252,12 +281,27 @@ export default class HypersignDID implements IDID {
     return blockChainAccountId;
   }
 
-  public async create(params: { address: string; chainId: string; keyType: IKeyType }): Promise<object> {
+  private _bufToMultibase(pubKeyBuf: Uint8Array) {
+    // Convert to multibase
+    const encoder = new IdEncoder({
+      encoding: 'base58btc',
+      multibase: true,
+    });
+    const newPubKeyMultibase = encoder.encode(pubKeyBuf);
+    return newPubKeyMultibase;
+  }
+
+  public async createByClientSpec(params: {
+    methodSpecificId: string;
+    publicKey?: Uint8Array;
+    chainId: string;
+    keyType: IKeyType;
+  }): Promise<object> {
     if (this['window'] === 'undefined') {
       console.log('HID-SSI-SDK:: Warning:  Running in non browser mode');
     }
-    if (!params.address) {
-      throw new Error('HID-SSI-SDK:: Error: params.address is required to create didoc');
+    if (!params.methodSpecificId) {
+      throw new Error('HID-SSI-SDK:: Error: params.methodSpecificId is required to create didoc');
     }
 
     if (!params.chainId) {
@@ -271,11 +315,38 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid');
     }
 
-    const blockChainAccountId = this._getBlockChainAccountID(params.chainId, params.address);
+    let didDoc;
+    switch (params.keyType) {
+      case IKeyType.Ed25519VerificationKey2020:
+        throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid use object.generate() method');
+      case IKeyType.EcdsaSecp256k1RecoveryMethod2020: {
+        const blockChainAccountId = this._getBlockChainAccountID(params.chainId, params.methodSpecificId);
 
-    const didId = this._getId(params.address);
-    const newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType);
-    return Utils.jsonToLdConvertor({ ...newDid });
+        const didId = this._getId(params.methodSpecificId);
+        const newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType);
+        didDoc = Utils.jsonToLdConvertor({ ...newDid });
+        break;
+      }
+
+      case IKeyType.EcdsaSecp256k1VerificationKey2019: {
+        if (!params.publicKey) {
+          throw new Error(
+            'HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
+              IKeyType.EcdsaSecp256k1VerificationKey2019
+          );
+        }
+        const multibasePublicKey = this._bufToMultibase(params.publicKey);
+        const didId = this._getId(params.methodSpecificId);
+        const newDid = new DIDDocument(multibasePublicKey, '', didId, params.keyType);
+        didDoc = Utils.jsonToLdConvertor({ ...newDid });
+
+        break;
+      }
+      default: {
+        throw new Error('HID-SSI-SDK:: Error: invalid keytype');
+      }
+    }
+    return didDoc;
   }
 
   /**
@@ -705,6 +776,7 @@ export default class HypersignDID implements IDID {
     });
     const didDocumentLd = Utils.jsonToLdConvertor(resolveddoc.didDocument);
     didDocumentLd['@context'].push(constant.VC.CREDENTAIL_SECURITY_SUITE);
+    // didDocumentLd['@context'].push(constant.VC.CREDENTAIL_ECDSA_SECURITY_SUITE)
 
     const signedDidDocument = (await jsonSigs.sign(didDocumentLd, {
       suite,
