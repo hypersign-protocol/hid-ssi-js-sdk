@@ -44,8 +44,7 @@ export default class Utils {
   
 
   public static _bufToMultibase(pubKeyBuf: Uint8Array){
-    return Utils._encodeMbKey(
-      constants.KEY_HEADERS.MULTICODEC_ED25519_PUB_HEADER,
+    return "z"+encode(
       pubKeyBuf
     );
   }
