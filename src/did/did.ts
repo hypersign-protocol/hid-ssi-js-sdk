@@ -14,7 +14,7 @@ import { Did, VerificationMethod, Service } from '../../libs/generated/ssi/did';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import Web3 from 'web3';
-import { IdEncoder } from '../../libs/bnid';
+const { IdEncoder } = require('bnid');
 import {
   IParams,
   IDID,

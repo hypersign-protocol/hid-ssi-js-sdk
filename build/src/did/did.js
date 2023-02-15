@@ -84,7 +84,7 @@ var did_1 = require("../../libs/generated/ssi/did");
 var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
 var ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
 var web3_1 = __importDefault(require("web3"));
-var bnid_1 = require("../../libs/bnid");
+var IdEncoder = require('bnid').IdEncoder;
 var IDID_1 = require("./IDID");
 var v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 var DIDDocument = /** @class */ (function () {
@@ -336,7 +336,7 @@ var HypersignDID = /** @class */ (function () {
     };
     HypersignDID.prototype._bufToMultibase = function (pubKeyBuf) {
         // Convert to multibase
-        var encoder = new bnid_1.IdEncoder({
+        var encoder = new IdEncoder({
             encoding: 'base58btc',
             multibase: true,
         });
