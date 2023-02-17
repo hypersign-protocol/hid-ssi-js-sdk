@@ -293,6 +293,7 @@ export default class HypersignDID implements IDID {
         const didId = this._getId(params.methodSpecificId);
         const newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType);
         didDoc = Utils.jsonToLdConvertor({ ...newDid });
+        delete didDoc.service;
         break;
       }
 

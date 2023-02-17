@@ -342,6 +342,7 @@ var HypersignDID = /** @class */ (function () {
                         didId = this._getId(params.methodSpecificId);
                         newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType);
                         didDoc = utils_1.default.jsonToLdConvertor(__assign({}, newDid));
+                        delete didDoc.service;
                         break;
                     }
                     case IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019: {
