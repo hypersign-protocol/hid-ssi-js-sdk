@@ -179,6 +179,9 @@ var HypersignDID = /** @class */ (function () {
         var _this = this;
         if (params === void 0) { params = {}; }
         this._getId = function (methodSpecificId) {
+            if (methodSpecificId && methodSpecificId.length < 32) {
+                throw new Error('HID-SSI-SDK:: Error: methodSpecificId should be of minimum size 32');
+            }
             var did = '';
             did =
                 _this.namespace && _this.namespace != ''
