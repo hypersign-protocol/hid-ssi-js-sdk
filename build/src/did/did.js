@@ -132,13 +132,7 @@ var DIDDocument = /** @class */ (function () {
                 this.capabilityInvocation = [verificationMethod.id];
                 this.capabilityDelegation = [verificationMethod.id];
                 // TODO: we should take services object in consntructor
-                this.service = [
-                    {
-                        id: id + '#linked-domain',
-                        type: 'LinkedDomains',
-                        serviceEndpoint: 'https://api.jagrat.hypersign.id/hypersign-protocol/hidnode/ssi/did/' + id,
-                    },
-                ];
+                this.service = [];
                 break;
             }
             case IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019: {
@@ -308,28 +302,19 @@ var HypersignDID = /** @class */ (function () {
      * @returns {Promise<object>} DidDocument object
      */
     HypersignDID.prototype._getBlockChainAccountID = function (chainId, address) {
-        var blockChainAccountId;
-        switch (chainId) {
-            case '0x1': {
-                var web3 = new web3_1.default();
-                var inDecimelChainId = web3.utils.toNumber(chainId);
-                blockChainAccountId = constant.CAIP_10_PREFIX.eip155 + ':' + inDecimelChainId + ':' + address;
-                break;
-            }
-            case '0x89': {
-                var web3 = new web3_1.default();
-                var inDecimelChainId = web3.utils.toNumber(chainId);
-                blockChainAccountId = constant.CAIP_10_PREFIX.eip155 + ':' + inDecimelChainId + ':' + address;
-                break;
-            }
-            default:
-                throw new Error('HID-SSI-SDK:: Error: unsupported chain Id');
+        try {
+            var web3 = new web3_1.default();
+            var inDecimelChainId = web3.utils.hexToNumber(chainId);
+            var blockChainAccountId = constant.CAIP_10_PREFIX.eip155 + ':' + inDecimelChainId + ':' + address;
+            return blockChainAccountId;
         }
-        return blockChainAccountId;
+        catch (error) {
+            throw new Error('HID-SSI-SDK:: Error: unsupported chain Id');
+        }
     };
     HypersignDID.prototype.createByClientSpec = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var didDoc, blockChainAccountId, didId, newDid, multibasePublicKey, didId, newDid;
+            var didDoc, blockChainAccountId, didId, newDid;
             return __generator(this, function (_a) {
                 if (this['window'] === 'undefined') {
                     console.log('HID-SSI-SDK:: Warning:  Running in non browser mode');
@@ -339,6 +324,9 @@ var HypersignDID = /** @class */ (function () {
                 }
                 if (!params.chainId) {
                     throw new Error('HID-SSI-SDK:: Error: params.chainId is required to create didoc');
+                }
+                if (!params.address) {
+                    throw new Error('HID-SSI-SDK:: Error: params.address is required to create didoc');
                 }
                 if (!params.keyType) {
                     throw new Error('HID-SSI-SDK:: Error: params.keyType is required to create didoc');
@@ -350,21 +338,24 @@ var HypersignDID = /** @class */ (function () {
                     case IDID_1.IKeyType.Ed25519VerificationKey2020:
                         throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid use object.generate() method');
                     case IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020: {
-                        blockChainAccountId = this._getBlockChainAccountID(params.chainId, params.methodSpecificId);
+                        blockChainAccountId = this._getBlockChainAccountID(params.chainId, params.address);
                         didId = this._getId(params.methodSpecificId);
                         newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType);
                         didDoc = utils_1.default.jsonToLdConvertor(__assign({}, newDid));
                         break;
                     }
                     case IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019: {
-                        if (!params.publicKey) {
-                            throw new Error('HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
-                                IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
-                        }
-                        multibasePublicKey = utils_1.default._bufToMultibase(params.publicKey);
-                        didId = this._getId(params.methodSpecificId);
-                        newDid = new DIDDocument(multibasePublicKey, '', didId, params.keyType);
-                        didDoc = utils_1.default.jsonToLdConvertor(__assign({}, newDid));
+                        throw new Error('HID-SSI-SDK:: Error: Not  Supported');
+                        // if (!params.publicKey) {
+                        //   throw new Error(
+                        //     'HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
+                        //     IKeyType.EcdsaSecp256k1VerificationKey2019
+                        //   );
+                        // }
+                        // const multibasePublicKey = Utils._bufToMultibase(params.publicKey);
+                        // const didId = this._getId(params.methodSpecificId);
+                        // const newDid = new DIDDocument(multibasePublicKey, '', didId, params.keyType);
+                        // didDoc = Utils.jsonToLdConvertor({ ...newDid });
                         break;
                     }
                     default: {

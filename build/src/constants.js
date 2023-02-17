@@ -62,7 +62,6 @@ exports.DID_EcdsaSecp256k1VerificationKey2019 = {
 var CAIP_10_PREFIX;
 (function (CAIP_10_PREFIX) {
     CAIP_10_PREFIX["eip155"] = "eip155";
-    CAIP_10_PREFIX["cosmos-ADR036"] = "cosmos-ADR036";
 })(CAIP_10_PREFIX = exports.CAIP_10_PREFIX || (exports.CAIP_10_PREFIX = {}));
 exports.DID = {
     CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
