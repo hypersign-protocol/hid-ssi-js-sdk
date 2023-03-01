@@ -24,6 +24,7 @@ import {
   ISignedDIDDocument,
   IKeyType,
   IClientSpec,
+  IVerificationRelationships,
 } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import customLoader from '../../libs/w3cache/v1';
@@ -40,8 +41,18 @@ class DIDDocument implements Did {
   capabilityInvocation: string[];
   capabilityDelegation: string[];
   service: Service[];
-  constructor(publicKey: string, blockchainAccountId: string, id: string, keyType: IKeyType) {
+  constructor(
+    publicKey: string,
+    blockchainAccountId: string,
+    id: string,
+    keyType: IKeyType,
+    verificationRelationships?: IVerificationRelationships[]
+  ) {
     let vm;
+
+    if (verificationRelationships && verificationRelationships.length > 0) {
+      console.log(verificationRelationships);
+    }
     switch (keyType) {
       case IKeyType.Ed25519VerificationKey2020: {
         this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
@@ -58,11 +69,15 @@ class DIDDocument implements Did {
 
         const verificationMethod: VerificationMethod = vm;
         this.verificationMethod = [verificationMethod];
-        this.authentication = [verificationMethod.id];
-        this.assertionMethod = [verificationMethod.id];
-        this.keyAgreement = [verificationMethod.id];
-        this.capabilityInvocation = [verificationMethod.id];
-        this.capabilityDelegation = [verificationMethod.id];
+        this.authentication = [];
+        this.assertionMethod = [];
+        this.keyAgreement = [];
+        this.capabilityInvocation = [];
+        this.capabilityDelegation = [];
+        verificationRelationships?.forEach((value) => {
+          this[value] = [verificationMethod.id];
+        });
+
         // TODO: we should take services object in consntructor
         this.service = [];
 
@@ -81,11 +96,14 @@ class DIDDocument implements Did {
         };
         const verificationMethod: VerificationMethod = vm;
         this.verificationMethod = [verificationMethod];
-        this.authentication = [verificationMethod.id];
-        this.assertionMethod = [verificationMethod.id];
-        this.keyAgreement = [verificationMethod.id];
-        this.capabilityInvocation = [verificationMethod.id];
-        this.capabilityDelegation = [verificationMethod.id];
+        this.authentication = [];
+        this.assertionMethod = [];
+        this.keyAgreement = [];
+        this.capabilityInvocation = [];
+        this.capabilityDelegation = [];
+        verificationRelationships?.forEach((value) => {
+          this[value] = [verificationMethod.id];
+        });
         // TODO: we should take services object in consntructor
         this.service = [];
 
@@ -105,11 +123,14 @@ class DIDDocument implements Did {
         };
         const verificationMethod: VerificationMethod = vm;
         this.verificationMethod = [verificationMethod];
-        this.authentication = [verificationMethod.id];
-        this.assertionMethod = [verificationMethod.id];
+        this.authentication = [];
+        this.assertionMethod = [];
         this.keyAgreement = [];
         this.capabilityInvocation = [];
         this.capabilityDelegation = [];
+        verificationRelationships?.forEach((value) => {
+          this[value] = [verificationMethod.id];
+        });
         // TODO: we should take services object in consntructor
         this.service = [];
 
@@ -219,7 +240,23 @@ export default class HypersignDID implements IDID {
    *  - params.methodSpecificId   : Optional methodSpecificId (min 32 bit alhanumeric) else it will generate new random methodSpecificId
    * @returns {Promise<object>} DidDocument object
    */
-  public async generate(params: { methodSpecificId?: string; publicKeyMultibase: string }): Promise<object> {
+  public async generate(params: {
+    methodSpecificId?: string;
+    publicKeyMultibase: string;
+    verificationRelationships?: IVerificationRelationships[];
+  }): Promise<object> {
+    let verificationRelationships: IVerificationRelationships[] = [
+      IVerificationRelationships.assertionMethod,
+      IVerificationRelationships.authentication,
+      IVerificationRelationships.capabilityDelegation,
+      IVerificationRelationships.capabilityInvocation,
+      IVerificationRelationships.keyAgreement,
+    ];
+    if (params.verificationRelationships && params.verificationRelationships.length > 0) {
+      const set1 = new Set(verificationRelationships);
+      const set2 = new Set(params.verificationRelationships);
+      verificationRelationships = Array.from(set1).filter((value) => set2.has(value));
+    }
     if (!params.publicKeyMultibase) {
       throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
     }
@@ -234,7 +271,14 @@ export default class HypersignDID implements IDID {
     } else {
       didId = this._getId(methodSpecificId);
     }
-    const newDid = new DIDDocument(publicKeyMultibase1, '', didId, IKeyType.Ed25519VerificationKey2020) as IDid;
+
+    const newDid = new DIDDocument(
+      publicKeyMultibase1,
+      '',
+      didId,
+      IKeyType.Ed25519VerificationKey2020,
+      verificationRelationships
+    ) as IDid;
     return Utils.jsonToLdConvertor({ ...newDid });
   }
 
@@ -263,6 +307,7 @@ export default class HypersignDID implements IDID {
     address: string;
     chainId: string;
     keyType: IKeyType;
+    verificationRelationships?: IVerificationRelationships[];
   }): Promise<object> {
     if (this['window'] === 'undefined') {
       console.log('HID-SSI-SDK:: Warning:  Running in non browser mode');
@@ -286,6 +331,19 @@ export default class HypersignDID implements IDID {
     }
 
     let didDoc;
+    let verificationRelationships: IVerificationRelationships[] = [
+      IVerificationRelationships.assertionMethod,
+      IVerificationRelationships.authentication,
+      IVerificationRelationships.capabilityDelegation,
+      IVerificationRelationships.capabilityInvocation,
+      IVerificationRelationships.keyAgreement,
+    ];
+    if (params.verificationRelationships && params.verificationRelationships.length > 0) {
+      const set1 = new Set(verificationRelationships);
+      const set2 = new Set(params.verificationRelationships);
+      verificationRelationships = Array.from(set1).filter((value) => set2.has(value));
+    }
+
     switch (params.keyType) {
       case IKeyType.Ed25519VerificationKey2020:
         throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid use object.generate() method');
@@ -294,7 +352,7 @@ export default class HypersignDID implements IDID {
         const blockChainAccountId = this._getBlockChainAccountID(params.chainId, params.address);
 
         const didId = this._getId(params.methodSpecificId);
-        const newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType);
+        const newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType, verificationRelationships);
         didDoc = Utils.jsonToLdConvertor({ ...newDid });
         delete didDoc.service;
         break;

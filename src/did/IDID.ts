@@ -12,6 +12,14 @@ export interface IPublicKey {
   publicKeyBase58: string;
 }
 
+export enum IVerificationRelationships {
+  authentication = 'authentication',
+  assertionMethod = 'assertionMethod',
+  keyAgreement = 'keyAgreement',
+  capabilityInvocation = 'capabilityInvocation',
+  capabilityDelegation = 'capabilityDelegation',
+}
+
 export enum IKeyType {
   Ed25519VerificationKey2020 = 'Ed25519VerificationKey2020',
   EcdsaSecp256k1VerificationKey2019 = 'EcdsaSecp256k1VerificationKey2019',

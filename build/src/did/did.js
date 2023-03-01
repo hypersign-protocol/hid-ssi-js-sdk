@@ -87,8 +87,12 @@ var web3_1 = __importDefault(require("web3"));
 var IDID_1 = require("./IDID");
 var v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 var DIDDocument = /** @class */ (function () {
-    function DIDDocument(publicKey, blockchainAccountId, id, keyType) {
+    function DIDDocument(publicKey, blockchainAccountId, id, keyType, verificationRelationships) {
+        var _this = this;
         var vm;
+        if (verificationRelationships && verificationRelationships.length > 0) {
+            console.log(verificationRelationships);
+        }
         switch (keyType) {
             case IDID_1.IKeyType.Ed25519VerificationKey2020: {
                 this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
@@ -102,13 +106,16 @@ var DIDDocument = /** @class */ (function () {
                     publicKeyMultibase: publicKey,
                     blockchainAccountId: '',
                 };
-                var verificationMethod = vm;
-                this.verificationMethod = [verificationMethod];
-                this.authentication = [verificationMethod.id];
-                this.assertionMethod = [verificationMethod.id];
-                this.keyAgreement = [verificationMethod.id];
-                this.capabilityInvocation = [verificationMethod.id];
-                this.capabilityDelegation = [verificationMethod.id];
+                var verificationMethod_1 = vm;
+                this.verificationMethod = [verificationMethod_1];
+                this.authentication = [];
+                this.assertionMethod = [];
+                this.keyAgreement = [];
+                this.capabilityInvocation = [];
+                this.capabilityDelegation = [];
+                verificationRelationships === null || verificationRelationships === void 0 ? void 0 : verificationRelationships.forEach(function (value) {
+                    _this[value] = [verificationMethod_1.id];
+                });
                 // TODO: we should take services object in consntructor
                 this.service = [];
                 break;
@@ -124,13 +131,16 @@ var DIDDocument = /** @class */ (function () {
                     controller: this.id,
                     blockchainAccountId: blockchainAccountId,
                 };
-                var verificationMethod = vm;
-                this.verificationMethod = [verificationMethod];
-                this.authentication = [verificationMethod.id];
-                this.assertionMethod = [verificationMethod.id];
-                this.keyAgreement = [verificationMethod.id];
-                this.capabilityInvocation = [verificationMethod.id];
-                this.capabilityDelegation = [verificationMethod.id];
+                var verificationMethod_2 = vm;
+                this.verificationMethod = [verificationMethod_2];
+                this.authentication = [];
+                this.assertionMethod = [];
+                this.keyAgreement = [];
+                this.capabilityInvocation = [];
+                this.capabilityDelegation = [];
+                verificationRelationships === null || verificationRelationships === void 0 ? void 0 : verificationRelationships.forEach(function (value) {
+                    _this[value] = [verificationMethod_2.id];
+                });
                 // TODO: we should take services object in consntructor
                 this.service = [];
                 break;
@@ -147,13 +157,16 @@ var DIDDocument = /** @class */ (function () {
                     publicKeyMultibase: publicKey,
                     blockchainAccountId: '',
                 };
-                var verificationMethod = vm;
-                this.verificationMethod = [verificationMethod];
-                this.authentication = [verificationMethod.id];
-                this.assertionMethod = [verificationMethod.id];
+                var verificationMethod_3 = vm;
+                this.verificationMethod = [verificationMethod_3];
+                this.authentication = [];
+                this.assertionMethod = [];
                 this.keyAgreement = [];
                 this.capabilityInvocation = [];
                 this.capabilityDelegation = [];
+                verificationRelationships === null || verificationRelationships === void 0 ? void 0 : verificationRelationships.forEach(function (value) {
+                    _this[value] = [verificationMethod_3.id];
+                });
                 // TODO: we should take services object in consntructor
                 this.service = [];
                 break;
@@ -277,8 +290,20 @@ var HypersignDID = /** @class */ (function () {
      */
     HypersignDID.prototype.generate = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var publicKeyMultibase1, methodSpecificId, didId, newDid;
+            var verificationRelationships, set1, set2_1, publicKeyMultibase1, methodSpecificId, didId, newDid;
             return __generator(this, function (_a) {
+                verificationRelationships = [
+                    IDID_1.IVerificationRelationships.assertionMethod,
+                    IDID_1.IVerificationRelationships.authentication,
+                    IDID_1.IVerificationRelationships.capabilityDelegation,
+                    IDID_1.IVerificationRelationships.capabilityInvocation,
+                    IDID_1.IVerificationRelationships.keyAgreement,
+                ];
+                if (params.verificationRelationships && params.verificationRelationships.length > 0) {
+                    set1 = new Set(verificationRelationships);
+                    set2_1 = new Set(params.verificationRelationships);
+                    verificationRelationships = Array.from(set1).filter(function (value) { return set2_1.has(value); });
+                }
                 if (!params.publicKeyMultibase) {
                     throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
                 }
@@ -292,7 +317,7 @@ var HypersignDID = /** @class */ (function () {
                 else {
                     didId = this._getId(methodSpecificId);
                 }
-                newDid = new DIDDocument(publicKeyMultibase1, '', didId, IDID_1.IKeyType.Ed25519VerificationKey2020);
+                newDid = new DIDDocument(publicKeyMultibase1, '', didId, IDID_1.IKeyType.Ed25519VerificationKey2020, verificationRelationships);
                 return [2 /*return*/, utils_1.default.jsonToLdConvertor(__assign({}, newDid))];
             });
         });
@@ -317,7 +342,7 @@ var HypersignDID = /** @class */ (function () {
     };
     HypersignDID.prototype.createByClientSpec = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var didDoc, blockChainAccountId, didId, newDid;
+            var didDoc, verificationRelationships, set1, set2_2, blockChainAccountId, didId, newDid;
             return __generator(this, function (_a) {
                 if (this['window'] === 'undefined') {
                     console.log('HID-SSI-SDK:: Warning:  Running in non browser mode');
@@ -337,13 +362,25 @@ var HypersignDID = /** @class */ (function () {
                 if (!(params.keyType in IDID_1.IKeyType)) {
                     throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid');
                 }
+                verificationRelationships = [
+                    IDID_1.IVerificationRelationships.assertionMethod,
+                    IDID_1.IVerificationRelationships.authentication,
+                    IDID_1.IVerificationRelationships.capabilityDelegation,
+                    IDID_1.IVerificationRelationships.capabilityInvocation,
+                    IDID_1.IVerificationRelationships.keyAgreement,
+                ];
+                if (params.verificationRelationships && params.verificationRelationships.length > 0) {
+                    set1 = new Set(verificationRelationships);
+                    set2_2 = new Set(params.verificationRelationships);
+                    verificationRelationships = Array.from(set1).filter(function (value) { return set2_2.has(value); });
+                }
                 switch (params.keyType) {
                     case IDID_1.IKeyType.Ed25519VerificationKey2020:
                         throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid use object.generate() method');
                     case IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020: {
                         blockChainAccountId = this._getBlockChainAccountID(params.chainId, params.address);
                         didId = this._getId(params.methodSpecificId);
-                        newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType);
+                        newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType, verificationRelationships);
                         didDoc = utils_1.default.jsonToLdConvertor(__assign({}, newDid));
                         delete didDoc.service;
                         break;
