@@ -49,10 +49,6 @@ class DIDDocument implements Did {
     verificationRelationships?: IVerificationRelationships[]
   ) {
     let vm;
-
-    if (verificationRelationships && verificationRelationships.length > 0) {
-      console.log(verificationRelationships);
-    }
     switch (keyType) {
       case IKeyType.Ed25519VerificationKey2020: {
         this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
@@ -233,6 +229,24 @@ export default class HypersignDID implements IDID {
     };
   }
 
+  private  _filterVerificationRelationships(verificationRelationships:IVerificationRelationships[]):IVerificationRelationships[]{   
+    let vR: IVerificationRelationships[] = [
+      IVerificationRelationships.assertionMethod,
+      IVerificationRelationships.authentication,
+      IVerificationRelationships.capabilityDelegation,
+      IVerificationRelationships.capabilityInvocation,
+      IVerificationRelationships.keyAgreement,
+    ];
+    if (verificationRelationships && verificationRelationships.length > 0) {
+      const set1 = new Set(vR);
+      const set2 = new Set(verificationRelationships);
+      vR = Array.from(set1).filter((value) => set2.has(value));
+    }
+
+    return vR
+  }
+
+
   /**
    * Generates a new DID Document
    * @params
@@ -245,17 +259,12 @@ export default class HypersignDID implements IDID {
     publicKeyMultibase: string;
     verificationRelationships?: IVerificationRelationships[];
   }): Promise<object> {
-    let verificationRelationships: IVerificationRelationships[] = [
-      IVerificationRelationships.assertionMethod,
-      IVerificationRelationships.authentication,
-      IVerificationRelationships.capabilityDelegation,
-      IVerificationRelationships.capabilityInvocation,
-      IVerificationRelationships.keyAgreement,
-    ];
+    let verificationRelationships: IVerificationRelationships[]=[]
     if (params.verificationRelationships && params.verificationRelationships.length > 0) {
-      const set1 = new Set(verificationRelationships);
-      const set2 = new Set(params.verificationRelationships);
-      verificationRelationships = Array.from(set1).filter((value) => set2.has(value));
+      verificationRelationships=this._filterVerificationRelationships(params.verificationRelationships)
+    }else{
+      verificationRelationships=this._filterVerificationRelationships([])
+
     }
     if (!params.publicKeyMultibase) {
       throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
@@ -331,17 +340,12 @@ export default class HypersignDID implements IDID {
     }
 
     let didDoc;
-    let verificationRelationships: IVerificationRelationships[] = [
-      IVerificationRelationships.assertionMethod,
-      IVerificationRelationships.authentication,
-      IVerificationRelationships.capabilityDelegation,
-      IVerificationRelationships.capabilityInvocation,
-      IVerificationRelationships.keyAgreement,
-    ];
+    let verificationRelationships: IVerificationRelationships[]=[]
     if (params.verificationRelationships && params.verificationRelationships.length > 0) {
-      const set1 = new Set(verificationRelationships);
-      const set2 = new Set(params.verificationRelationships);
-      verificationRelationships = Array.from(set1).filter((value) => set2.has(value));
+      verificationRelationships=this._filterVerificationRelationships(params.verificationRelationships)
+    }else{
+      verificationRelationships=this._filterVerificationRelationships([])
+
     }
 
     switch (params.keyType) {

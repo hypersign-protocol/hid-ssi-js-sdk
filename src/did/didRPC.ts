@@ -208,8 +208,13 @@ export class DIDRpc implements IDIDRpc {
   async resolveDID(did: string): Promise<IDIDResolve> {
     did = did + ':'; // TODO:  we need to sort this out ... need to remove later
     const get_didUrl = `${this.didRestEp}/${did}`;
-    const response = await axios.get(get_didUrl);
-    const didDoc = response.data;
-    return didDoc;
+    let response
+    try {
+     response = await axios.get(get_didUrl);
+     const didDoc = response.data;   
+     return didDoc;
+    } catch (err ) {
+      return {didDocument:null ,didDocumentMetadata:null} as any as IDIDResolve
+    }
   }
 }
