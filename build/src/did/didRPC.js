@@ -258,17 +258,24 @@ var DIDRpc = /** @class */ (function () {
     };
     DIDRpc.prototype.resolveDID = function (did) {
         return __awaiter(this, void 0, void 0, function () {
-            var get_didUrl, response, didDoc;
+            var get_didUrl, response, didDoc, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         did = did + ':'; // TODO:  we need to sort this out ... need to remove later
                         get_didUrl = "".concat(this.didRestEp, "/").concat(did);
-                        return [4 /*yield*/, axios_1.default.get(get_didUrl)];
+                        _a.label = 1;
                     case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios_1.default.get(get_didUrl)];
+                    case 2:
                         response = _a.sent();
                         didDoc = response.data;
                         return [2 /*return*/, didDoc];
+                    case 3:
+                        err_1 = _a.sent();
+                        return [2 /*return*/, { didDocument: null, didDocumentMetadata: null }];
+                    case 4: return [2 /*return*/];
                 }
             });
         });

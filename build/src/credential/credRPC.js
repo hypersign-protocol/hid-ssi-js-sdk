@@ -173,14 +173,17 @@ var CredentialRPC = /** @class */ (function () {
     };
     CredentialRPC.prototype.resolveCredentialStatus = function (credentialId) {
         return __awaiter(this, void 0, void 0, function () {
-            var get_didUrl, response, credStatus;
+            var get_didUrl, response, credStatus, err_1, credStatus;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         credentialId = credentialId + ':'; // TODO:  we need to sort this out ... need to remove later
                         get_didUrl = "".concat(this.credentialRestEP, "/").concat(credentialId);
-                        return [4 /*yield*/, axios_1.default.get(get_didUrl)];
+                        _a.label = 1;
                     case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios_1.default.get(get_didUrl)];
+                    case 2:
                         response = _a.sent();
                         if (!response.data) {
                             throw new Error('Could not resolve credential status of credentialId ' + credentialId);
@@ -190,6 +193,21 @@ var CredentialRPC = /** @class */ (function () {
                             throw new Error('No credential status found. Probably invalid credentialId');
                         }
                         return [2 /*return*/, credStatus];
+                    case 3:
+                        err_1 = _a.sent();
+                        credStatus = {
+                            claim: null,
+                            issuer: '',
+                            issuanceDate: '',
+                            expirationDate: '',
+                            credentialHash: '',
+                            proof: null,
+                        };
+                        if (!credStatus || !credStatus.claim || !credStatus.proof) {
+                            throw new Error('No credential status found. Probably invalid credentialId');
+                        }
+                        return [2 /*return*/, credStatus];
+                    case 4: return [2 /*return*/];
                 }
             });
         });

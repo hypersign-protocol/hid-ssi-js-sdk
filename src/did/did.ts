@@ -229,7 +229,9 @@ export default class HypersignDID implements IDID {
     };
   }
 
-  private  _filterVerificationRelationships(verificationRelationships:IVerificationRelationships[]):IVerificationRelationships[]{   
+  private _filterVerificationRelationships(
+    verificationRelationships: IVerificationRelationships[]
+  ): IVerificationRelationships[] {
     let vR: IVerificationRelationships[] = [
       IVerificationRelationships.assertionMethod,
       IVerificationRelationships.authentication,
@@ -243,9 +245,8 @@ export default class HypersignDID implements IDID {
       vR = Array.from(set1).filter((value) => set2.has(value));
     }
 
-    return vR
+    return vR;
   }
-
 
   /**
    * Generates a new DID Document
@@ -259,12 +260,11 @@ export default class HypersignDID implements IDID {
     publicKeyMultibase: string;
     verificationRelationships?: IVerificationRelationships[];
   }): Promise<object> {
-    let verificationRelationships: IVerificationRelationships[]=[]
+    let verificationRelationships: IVerificationRelationships[] = [];
     if (params.verificationRelationships && params.verificationRelationships.length > 0) {
-      verificationRelationships=this._filterVerificationRelationships(params.verificationRelationships)
-    }else{
-      verificationRelationships=this._filterVerificationRelationships([])
-
+      verificationRelationships = this._filterVerificationRelationships(params.verificationRelationships);
+    } else {
+      verificationRelationships = this._filterVerificationRelationships([]);
     }
     if (!params.publicKeyMultibase) {
       throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
@@ -340,12 +340,11 @@ export default class HypersignDID implements IDID {
     }
 
     let didDoc;
-    let verificationRelationships: IVerificationRelationships[]=[]
+    let verificationRelationships: IVerificationRelationships[] = [];
     if (params.verificationRelationships && params.verificationRelationships.length > 0) {
-      verificationRelationships=this._filterVerificationRelationships(params.verificationRelationships)
-    }else{
-      verificationRelationships=this._filterVerificationRelationships([])
-
+      verificationRelationships = this._filterVerificationRelationships(params.verificationRelationships);
+    } else {
+      verificationRelationships = this._filterVerificationRelationships([]);
     }
 
     switch (params.keyType) {

@@ -45,6 +45,11 @@ exports.hidNodeEp = {
     rest: 'https://api.jagrat.hypersign.id',
     namespace: 'testnet',
 };
+// export const hidNodeEp = {
+//   rpc: 'http://localhost:26657',
+//   rest: 'http://localhost:1317',
+//   namespace: 'testnet',
+// };
 function makeCosmoshubPath(a) {
     return [
         crypto_1.Slip10RawIndex.hardened(44),

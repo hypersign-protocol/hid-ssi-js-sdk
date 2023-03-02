@@ -90,9 +90,6 @@ var DIDDocument = /** @class */ (function () {
     function DIDDocument(publicKey, blockchainAccountId, id, keyType, verificationRelationships) {
         var _this = this;
         var vm;
-        if (verificationRelationships && verificationRelationships.length > 0) {
-            console.log(verificationRelationships);
-        }
         switch (keyType) {
             case IDID_1.IKeyType.Ed25519VerificationKey2020: {
                 this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
@@ -281,6 +278,21 @@ var HypersignDID = /** @class */ (function () {
             });
         });
     };
+    HypersignDID.prototype._filterVerificationRelationships = function (verificationRelationships) {
+        var vR = [
+            IDID_1.IVerificationRelationships.assertionMethod,
+            IDID_1.IVerificationRelationships.authentication,
+            IDID_1.IVerificationRelationships.capabilityDelegation,
+            IDID_1.IVerificationRelationships.capabilityInvocation,
+            IDID_1.IVerificationRelationships.keyAgreement,
+        ];
+        if (verificationRelationships && verificationRelationships.length > 0) {
+            var set1 = new Set(vR);
+            var set2_1 = new Set(verificationRelationships);
+            vR = Array.from(set1).filter(function (value) { return set2_1.has(value); });
+        }
+        return vR;
+    };
     /**
      * Generates a new DID Document
      * @params
@@ -290,19 +302,14 @@ var HypersignDID = /** @class */ (function () {
      */
     HypersignDID.prototype.generate = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var verificationRelationships, set1, set2_1, publicKeyMultibase1, methodSpecificId, didId, newDid;
+            var verificationRelationships, publicKeyMultibase1, methodSpecificId, didId, newDid;
             return __generator(this, function (_a) {
-                verificationRelationships = [
-                    IDID_1.IVerificationRelationships.assertionMethod,
-                    IDID_1.IVerificationRelationships.authentication,
-                    IDID_1.IVerificationRelationships.capabilityDelegation,
-                    IDID_1.IVerificationRelationships.capabilityInvocation,
-                    IDID_1.IVerificationRelationships.keyAgreement,
-                ];
+                verificationRelationships = [];
                 if (params.verificationRelationships && params.verificationRelationships.length > 0) {
-                    set1 = new Set(verificationRelationships);
-                    set2_1 = new Set(params.verificationRelationships);
-                    verificationRelationships = Array.from(set1).filter(function (value) { return set2_1.has(value); });
+                    verificationRelationships = this._filterVerificationRelationships(params.verificationRelationships);
+                }
+                else {
+                    verificationRelationships = this._filterVerificationRelationships([]);
                 }
                 if (!params.publicKeyMultibase) {
                     throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
@@ -342,7 +349,7 @@ var HypersignDID = /** @class */ (function () {
     };
     HypersignDID.prototype.createByClientSpec = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var didDoc, verificationRelationships, set1, set2_2, blockChainAccountId, didId, newDid;
+            var didDoc, verificationRelationships, blockChainAccountId, didId, newDid;
             return __generator(this, function (_a) {
                 if (this['window'] === 'undefined') {
                     console.log('HID-SSI-SDK:: Warning:  Running in non browser mode');
@@ -362,17 +369,12 @@ var HypersignDID = /** @class */ (function () {
                 if (!(params.keyType in IDID_1.IKeyType)) {
                     throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid');
                 }
-                verificationRelationships = [
-                    IDID_1.IVerificationRelationships.assertionMethod,
-                    IDID_1.IVerificationRelationships.authentication,
-                    IDID_1.IVerificationRelationships.capabilityDelegation,
-                    IDID_1.IVerificationRelationships.capabilityInvocation,
-                    IDID_1.IVerificationRelationships.keyAgreement,
-                ];
+                verificationRelationships = [];
                 if (params.verificationRelationships && params.verificationRelationships.length > 0) {
-                    set1 = new Set(verificationRelationships);
-                    set2_2 = new Set(params.verificationRelationships);
-                    verificationRelationships = Array.from(set1).filter(function (value) { return set2_2.has(value); });
+                    verificationRelationships = this._filterVerificationRelationships(params.verificationRelationships);
+                }
+                else {
+                    verificationRelationships = this._filterVerificationRelationships([]);
                 }
                 switch (params.keyType) {
                     case IDID_1.IKeyType.Ed25519VerificationKey2020:
