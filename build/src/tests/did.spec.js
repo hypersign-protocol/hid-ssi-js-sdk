@@ -332,7 +332,7 @@ describe('#update() this is to update didDocument based on didDocId', function (
         return hypersignDID.update(updateBody).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
-            }).to.throw(Error, "Query failed with (18): failed to execute message; message index: 0: Expected ".concat(didDocId, " with version ").concat(versionId, ". Got version ").concat(updateBody.versionId, ": Unexpected DID version: invalid request"));
+            }).to.throw(Error, "Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ".concat(didDocId, " with version ").concat(versionId, ". Got version ").concat(updateBody.versionId, ": Unexpected DID version"));
         });
     });
     it('should be able to update did document', function () {
@@ -465,7 +465,7 @@ describe('#deactivate() this is to deactivate didDocument based on didDocId', fu
         return hypersignDID.deactivate(deactivateBody).catch(function (err) {
             (0, chai_1.expect)(function () {
                 throw err;
-            }).to.throw(Error, "Query failed with (18): failed to execute message; message index: 0: Expected ".concat(didDocId, " with version ").concat(versionId, ". Got version ").concat(deactivateBody.versionId, ": Unexpected DID version: invalid request"));
+            }).to.throw(Error, "Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ".concat(didDocId, " with version ").concat(versionId, ". Got version ").concat(deactivateBody.versionId, ": Unexpected DID version"));
         });
     });
     it('should be able to deactivate did document', function () {
