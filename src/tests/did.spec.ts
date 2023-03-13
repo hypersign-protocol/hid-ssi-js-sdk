@@ -241,7 +241,7 @@ describe('#update() this is to update didDocument based on didDocId', function (
         throw err;
       }).to.throw(
         Error,
-        `Query failed with (18): failed to execute message; message index: 0: Expected ${didDocId} with version ${versionId}. Got version ${updateBody.versionId}: Unexpected DID version: invalid request`
+        `Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ${didDocId} with version ${versionId}. Got version ${updateBody.versionId}: Unexpected DID version`
       );
     });
   });
@@ -339,7 +339,7 @@ describe('#deactivate() this is to deactivate didDocument based on didDocId', fu
         throw err;
       }).to.throw(
         Error,
-        `Query failed with (18): failed to execute message; message index: 0: Expected ${didDocId} with version ${versionId}. Got version ${deactivateBody.versionId}: Unexpected DID version: invalid request`
+        `Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ${didDocId} with version ${versionId}. Got version ${deactivateBody.versionId}: Unexpected DID version`
       );
     });
   });
