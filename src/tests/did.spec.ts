@@ -40,17 +40,17 @@ describe('#generateKeys() method to generate publicKyeMultibase and privateKeyMu
     expect(kp).to.be.a('object');
     should().exist(kp.privateKeyMultibase);
     should().exist(kp.publicKeyMultibase);
-    should().not.exist(kp.id)
+    should().not.exist(kp.id);
   });
 
   it('should return publickeyMultibase and privateKeyMultibase along with controller', async function () {
-    const controller = 'did:hid:testnet:controller'
+    const controller = 'did:hid:testnet:controller';
     const kpnew = await hypersignDID.generateKeys({ controller });
     expect(kpnew).to.be.a('object');
     should().exist(kpnew.privateKeyMultibase);
     should().exist(kpnew.publicKeyMultibase);
-    should().exist(kpnew.id)
-    expect(kpnew.id).to.be.equal(controller)
+    should().exist(kpnew.id);
+    expect(kpnew.id).to.be.equal(controller);
   });
 });
 describe('#generate() to generate did', function () {

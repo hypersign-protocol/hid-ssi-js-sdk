@@ -247,7 +247,7 @@ export default class HypersignDID implements IDID {
   /**
    * Generate a new key pair of type Ed25519VerificationKey2020
    * @params params.seed - Optional, Seed to generate the key pair, if not passed, random seed will be taken
-   * @params params.controller - Optional, controller field 
+   * @params params.controller - Optional, controller field
    * @returns {Promise<object>} The key pair of type Ed25519
    */
   public async generateKeys(params: {
@@ -258,7 +258,7 @@ export default class HypersignDID implements IDID {
     if (params && params.seed && params.controller) {
       const seedBytes = new Uint8Array(Buffer.from(params.seed));
       edKeyPair = await Ed25519VerificationKey2020.generate({ seed: seedBytes, id: params.controller });
-    } else  if(params && params.controller) {
+    } else if (params && params.controller) {
       edKeyPair = await Ed25519VerificationKey2020.generate({ id: params.controller });
     } else {
       edKeyPair = await Ed25519VerificationKey2020.generate();
@@ -707,7 +707,7 @@ export default class HypersignDID implements IDID {
     }
     return didDoc;
   }
-  
+
   // using in API
   public async registerByClientSpec(params: {
     didDocument: object; // Ld document
