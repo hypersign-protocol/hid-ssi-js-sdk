@@ -274,6 +274,7 @@ export default class HypersignDID implements IDID {
    * @params
    *  - params.publicKeyMultibase : public key
    *  - params.methodSpecificId   : Optional methodSpecificId (min 32 bit alhanumeric) else it will generate new random methodSpecificId
+   *  - params.verificationRelationships: Optional, verification relationships where you want to add your verificaiton method ids
    * @returns {Promise<object>} DidDocument object
    */
   public async generate(params: {

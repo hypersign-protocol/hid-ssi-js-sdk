@@ -31,6 +31,10 @@ beforeEach(async function () {
   await hypersignDID.init();
 });
 
+describe('DID Test scenarios', () => {
+
+
+
 //remove seed while creating did so that wallet can generate different did every time
 describe('#generateKeys() method to generate publicKyeMultibase and privateKeyMultiBase', function () {
   it('should return publickeyMultibase and privateKeyMultibase', async function () {
@@ -61,6 +65,7 @@ describe('#generate() to generate did', function () {
       }).to.throw(Error, 'HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
     });
   });
+
   it('should be able to generate didDocument', async function () {
     didDocument = await hypersignDID.generate({ publicKeyMultibase });
     //console.log(didDocument)
@@ -88,6 +93,39 @@ describe('#generate() to generate did', function () {
     should().exist(didDocument['capabilityInvocation']);
     should().exist(didDocument['capabilityDelegation']);
     should().exist(didDocument['service']);
+  });
+
+  it('should be able to generate didDocument with passsed verification relationships (authentication and assertion) only', async function () {
+    didDocument = await hypersignDID.generate({ publicKeyMultibase, verificationRelationships: ['authentication', 'assertionMethod'] });
+    didDocId = didDocument['id'];
+    verificationMethodId = didDocument['verificationMethod'][0].id;
+    expect(didDocument).to.be.a('object');
+    should().exist(didDocument['@context']);
+    should().exist(didDocument['id']);
+    should().exist(didDocument['controller']);
+    should().exist(didDocument['alsoKnownAs']);
+
+    should().exist(didDocument['verificationMethod']);
+    expect(
+        didDocument['verificationMethod'] &&
+        didDocument['authentication'] &&
+        didDocument['assertionMethod'] &&
+        didDocument['keyAgreement'] &&
+        didDocument['capabilityInvocation'] &&
+        didDocument['capabilityDelegation'] &&
+        didDocument['service']
+    ).to.be.a('array');
+
+    should().exist(didDocument['authentication']);
+    should().exist(didDocument['assertionMethod']);
+
+    expect(didDocument['authentication'][0]).to.be.equal(verificationMethodId)
+    expect(didDocument['authentication']).to.be.a('array').of.length(1)
+    expect(didDocument['assertionMethod']).to.be.a('array').of.length(1)
+    expect(didDocument['keyAgreement']).to.be.a('array').of.length(0)
+    expect(didDocument['capabilityInvocation']).to.be.a('array').of.length(0)
+    expect(didDocument['service']).to.be.a('array').of.length(0)
+    expect(didDocument['capabilityDelegation']).to.be.a('array').of.length(0)
   });
 
   it('should be able to generate didDocument with custom id', async function () {
@@ -160,6 +198,7 @@ describe('#generate() to generate did', function () {
     should().exist(didDocument['service']);
   });
 });
+
 describe('#register() this is to register did on the blockchain', function () {
   it('should not able to register did document and throw error as didDocument is not passed or it is empty', function () {
     return hypersignDID.register({ didDocument: {}, privateKeyMultibase, verificationMethodId }).catch(function (err) {
@@ -565,3 +604,5 @@ describe('#verify() method to verify did document', function () {
       });
   });
 });
+
+})
