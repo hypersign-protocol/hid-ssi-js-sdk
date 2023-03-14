@@ -72,7 +72,11 @@ export interface IDID {
     controller?: string;
   }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }>;
 
-  generate(params: { methodSpecificId?: string; publicKeyMultibase: string, verificationRelationships: IVerificationRelationships[] }): Promise<object>;
+  generate(params: {
+    methodSpecificId?: string;
+    publicKeyMultibase: string;
+    verificationRelationships: IVerificationRelationships[];
+  }): Promise<object>;
 
   register(params: { didDocument: object; privateKeyMultibase: string; verificationMethodId: string }): Promise<object>;
 
