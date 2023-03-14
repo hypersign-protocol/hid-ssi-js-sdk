@@ -172,15 +172,6 @@ export default class HypersignDID implements IDID {
     this.namespace = namespace ? namespace : '';
   }
 
-  public async init() {
-    if (!this.didrpc) {
-      throw new Error(
-        'HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
-      );
-    }
-    await this.didrpc.init();
-  }
-
   private async _sign(params: { didDocString: string; privateKeyMultibase: string }): Promise<string> {
     const { privateKeyMultibase: privateKeyMultibaseConverted } =
       Utils.convertEd25519verificationkey2020toStableLibKeysInto({
@@ -207,28 +198,6 @@ export default class HypersignDID implements IDID {
     return did;
   };
 
-  /**
-   * Generate a new key pair of type Ed25519VerificationKey2020
-   * @params params.seed - Seed to generate the key pair
-   * @returns {Promise<object>} The key pair of type Ed25519
-   */
-  public async generateKeys(params: {
-    seed?: string;
-  }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }> {
-    let edKeyPair;
-    if (params && params.seed) {
-      const seedBytes = new Uint8Array(Buffer.from(params.seed));
-      edKeyPair = await Ed25519VerificationKey2020.generate({ seed: seedBytes });
-    } else {
-      edKeyPair = await Ed25519VerificationKey2020.generate();
-    }
-    const exportedKp = await edKeyPair.export({ publicKey: true, privateKey: true });
-    return {
-      privateKeyMultibase: exportedKp.privateKeyMultibase, // 91byte //zbase58
-      publicKeyMultibase: exportedKp.publicKeyMultibase, //48 bytes
-    };
-  }
-
   private _filterVerificationRelationships(
     verificationRelationships: IVerificationRelationships[]
   ): IVerificationRelationships[] {
@@ -246,6 +215,58 @@ export default class HypersignDID implements IDID {
     }
 
     return vR;
+  }
+
+  /**
+   * Creates a new DID Document from wallet address
+   * @params
+   *  - params.blockChainAccountId  :
+   *  - params.methodSpecificId   : methodSpecificId (min 32 bit alhanumeric) else it will generate new random methodSpecificId or may be walletaddress
+   * @returns {Promise<object>} DidDocument object
+   */
+  private _getBlockChainAccountID(chainId: string, address: string) {
+    try {
+      const web3 = new Web3();
+      const inDecimelChainId = web3.utils.hexToNumber(chainId);
+      const blockChainAccountId = constant.CAIP_10_PREFIX.eip155 + ':' + inDecimelChainId + ':' + address;
+      return blockChainAccountId;
+    } catch (error) {
+      throw new Error('HID-SSI-SDK:: Error: unsupported chain Id');
+    }
+  }
+
+  public async init() {
+    if (!this.didrpc) {
+      throw new Error(
+        'HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+    await this.didrpc.init();
+  }
+
+  /**
+   * Generate a new key pair of type Ed25519VerificationKey2020
+   * @params params.seed - Optional, Seed to generate the key pair, if not passed, random seed will be taken
+   * @params params.controller - Optional, controller field 
+   * @returns {Promise<object>} The key pair of type Ed25519
+   */
+  public async generateKeys(params: {
+    seed?: string;
+    controller?: string;
+  }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }> {
+    let edKeyPair;
+    if (params && params.seed && params.controller) {
+      const seedBytes = new Uint8Array(Buffer.from(params.seed));
+      edKeyPair = await Ed25519VerificationKey2020.generate({ seed: seedBytes, id: params.controller });
+    } else  if(params && params.controller) {
+      edKeyPair = await Ed25519VerificationKey2020.generate({ id: params.controller });
+    } else {
+      edKeyPair = await Ed25519VerificationKey2020.generate();
+    }
+    const exportedKp = await edKeyPair.export({ publicKey: true, privateKey: true });
+    return {
+      ...exportedKp,
+    };
   }
 
   /**
@@ -292,98 +313,6 @@ export default class HypersignDID implements IDID {
   }
 
   /**
-   * Creates a new DID Document from wallet address
-   * @params
-   *  - params.blockChainAccountId  :
-   *  - params.methodSpecificId   : methodSpecificId (min 32 bit alhanumeric) else it will generate new random methodSpecificId or may be walletaddress
-   * @returns {Promise<object>} DidDocument object
-   */
-
-  private _getBlockChainAccountID(chainId: string, address: string) {
-    try {
-      const web3 = new Web3();
-      const inDecimelChainId = web3.utils.hexToNumber(chainId);
-      const blockChainAccountId = constant.CAIP_10_PREFIX.eip155 + ':' + inDecimelChainId + ':' + address;
-      return blockChainAccountId;
-    } catch (error) {
-      throw new Error('HID-SSI-SDK:: Error: unsupported chain Id');
-    }
-  }
-
-  public async createByClientSpec(params: {
-    methodSpecificId: string;
-    publicKey?: Uint8Array;
-    address: string;
-    chainId: string;
-    keyType: IKeyType;
-    verificationRelationships?: IVerificationRelationships[];
-  }): Promise<object> {
-    if (this['window'] === 'undefined') {
-      console.log('HID-SSI-SDK:: Warning:  Running in non browser mode');
-    }
-    if (!params.methodSpecificId) {
-      throw new Error('HID-SSI-SDK:: Error: params.methodSpecificId is required to create didoc');
-    }
-
-    if (!params.chainId) {
-      throw new Error('HID-SSI-SDK:: Error: params.chainId is required to create didoc');
-    }
-    if (!params.address) {
-      throw new Error('HID-SSI-SDK:: Error: params.address is required to create didoc');
-    }
-
-    if (!params.keyType) {
-      throw new Error('HID-SSI-SDK:: Error: params.keyType is required to create didoc');
-    }
-    if (!(params.keyType in IKeyType)) {
-      throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid');
-    }
-
-    let didDoc;
-    let verificationRelationships: IVerificationRelationships[] = [];
-    if (params.verificationRelationships && params.verificationRelationships.length > 0) {
-      verificationRelationships = this._filterVerificationRelationships(params.verificationRelationships);
-    } else {
-      verificationRelationships = this._filterVerificationRelationships([]);
-    }
-
-    switch (params.keyType) {
-      case IKeyType.Ed25519VerificationKey2020:
-        throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid use object.generate() method');
-
-      case IKeyType.EcdsaSecp256k1RecoveryMethod2020: {
-        const blockChainAccountId = this._getBlockChainAccountID(params.chainId, params.address);
-
-        const didId = this._getId(params.methodSpecificId);
-        const newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType, verificationRelationships);
-        didDoc = Utils.jsonToLdConvertor({ ...newDid });
-        delete didDoc.service;
-        break;
-      }
-
-      case IKeyType.EcdsaSecp256k1VerificationKey2019: {
-        throw new Error('HID-SSI-SDK:: Error: Not  Supported');
-        // if (!params.publicKey) {
-        //   throw new Error(
-        //     'HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
-        //     IKeyType.EcdsaSecp256k1VerificationKey2019
-        //   );
-        // }
-        // const multibasePublicKey = Utils._bufToMultibase(params.publicKey);
-        // const didId = this._getId(params.methodSpecificId);
-        // const newDid = new DIDDocument(multibasePublicKey, '', didId, params.keyType);
-        // didDoc = Utils.jsonToLdConvertor({ ...newDid });
-
-        break;
-      }
-      default: {
-        throw new Error('HID-SSI-SDK:: Error: invalid keytype');
-      }
-    }
-    return didDoc;
-  }
-
-  /**
    * Register a new DID and Document in Hypersign blockchain - an onchain activity
    * @params
    *  - params.didDocument          : LD did document
@@ -419,160 +348,6 @@ export default class HypersignDID implements IDID {
     const signature: string = await this._sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase });
     const didDoc: Did = didDocStringJson as Did;
     return await this.didrpc.registerDID(didDoc, signature, verificationMethodId);
-  }
-
-  public async signAndRegisterByClientSpec(params: {
-    didDocument: any;
-    address: string;
-    verificationMethodId: string;
-    web3: Web3 | any;
-    clientSpec: IClientSpec;
-    chainId?: string; // only for [cosmos-ADR036]
-  }) {
-    if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
-      throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
-    }
-
-    if (!params.clientSpec) {
-      throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
-    }
-    if (!(params.clientSpec in IClientSpec)) {
-      throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
-    }
-    if (!this.didrpc) {
-      throw new Error(
-        'HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
-      );
-    }
-    if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
-    }
-    if (!params.web3) {
-      throw new Error('HID-SSI-SDK:: Error: params.web should be passed');
-    }
-
-    if (!params.address) {
-      throw new Error('HID-SSI-SDK:: Error: params.address is required to sign a did');
-    }
-
-    const { didDocument, signature } = await this.signByClientSpec({
-      didDocument: params.didDocument,
-      clientSpec: params.clientSpec,
-      address: params.address,
-      web3: params.web3,
-      chainId: params.chainId,
-    });
-
-    return await this.registerByClientSpec({
-      didDocument,
-      signature,
-      verificationMethodId: params.verificationMethodId,
-      clientSpec: params.clientSpec,
-      address: params.address, // only for [cosmos-ADR036]
-    });
-  }
-
-  public async signByClientSpec(params: {
-    didDocument: object;
-    clientSpec: IClientSpec;
-    address: string;
-    web3: Web3 | any;
-    chainId?: string; // only for [cosmos-ADR036]
-  }): Promise<{ didDocument: Did; signature: string }> {
-    if (this['window'] === 'undefined') {
-      throw new Error('HID-SSI-SDK:: Error:  Running in non browser mode');
-    }
-    if (!params.didDocument) {
-      throw Error('HID-SSI-SDK:: Error: params.didDocument is required to sign');
-    }
-
-    if (!params.address) {
-      throw new Error('HID-SSI-SDK:: Error: params.address is required to sign a did');
-    }
-    if (!params.clientSpec) {
-      throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
-    }
-    if (!(params.clientSpec in IClientSpec)) {
-      throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
-    }
-
-    switch (params.clientSpec) {
-      case IClientSpec['eth-personalSign']: {
-        const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
-
-        const didDoc: Did = didDocStringJson as Did;
-
-        const signature = await params.web3.eth.personal.sign(JSON.stringify(didDoc), params.address);
-        return { didDocument: didDoc, signature };
-      }
-      case IClientSpec['cosmos-ADR036']: {
-        if (!params.chainId) {
-          throw new Error(
-            'HID-SSI-SDK:: Error:  params.chainId is required to sign for clientSpec ' +
-              IClientSpec['cosmos-ADR036'] +
-              ' and keyType ' +
-              IKeyType.EcdsaSecp256k1VerificationKey2019
-          );
-        }
-        const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
-        const didDoc: Did = didDocStringJson as Did;
-        const didDocBytes = (await Did.encode(didDoc)).finish();
-        const signRespObj = await params.web3.requestMethod('signArbitrary', [
-          params.chainId,
-          params.address,
-          didDocBytes,
-        ]);
-        return { didDocument: didDoc, signature: signRespObj['signature'] };
-      }
-
-      default:
-        throw Error('HID-SSI-SDK:: Error: Invalid clientSpec');
-
-        break;
-    }
-  }
-
-  public async registerByClientSpec(params: {
-    didDocument: object; // Ld document
-    clientSpec: IClientSpec;
-    verificationMethodId: string;
-    signature: string;
-    address?: string; // only for [cosmos-ADR036]
-  }) {
-    if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
-      throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
-    }
-
-    if (!this.didrpc) {
-      throw new Error(
-        'HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
-      );
-    }
-    if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
-    }
-    if (!params.clientSpec) {
-      throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
-    }
-    if (!(params.clientSpec in IClientSpec)) {
-      throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
-    }
-
-    if (params.clientSpec === IClientSpec['cosmos-ADR036']) {
-      if (!params.address) {
-        throw new Error('HID-SSI-SDK:: Error: params.address is required for ' + IClientSpec['cosmos-ADR036']);
-      }
-    }
-    const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
-
-    const didDoc: Did = didDocStringJson as Did;
-    return await this.didrpc.registerDID(
-      didDoc,
-      params.signature,
-      params.verificationMethodId,
-      params.clientSpec,
-      params.address
-    );
   }
 
   /**
@@ -655,85 +430,6 @@ export default class HypersignDID implements IDID {
     return await this.didrpc.updateDID(didDoc, signature, verificationMethodId, versionId);
   }
 
-  public async updateByClientSpec(params: {
-    didDocument: object;
-    verificationMethodId: string;
-    versionId: string;
-    signature: string;
-    clientSpec: IClientSpec;
-  }): Promise<object> {
-    if (!this.didrpc) {
-      throw new Error(
-        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
-      );
-    }
-    if (!params.didDocument) {
-      throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to update a did');
-    }
-
-    if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update a did');
-    }
-    if (!params.versionId) {
-      throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
-    }
-
-    if (!params.signature) {
-      throw new Error('HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: params.signature is required to update a did');
-    }
-    if (!params.clientSpec) {
-      throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to update');
-    }
-    if (!(params.clientSpec in IClientSpec)) {
-      throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
-    }
-    const { didDocument, verificationMethodId, versionId, signature } = params;
-    return await this.didrpc.updateDID(
-      didDocument as Did,
-      signature,
-      verificationMethodId,
-      versionId,
-      params.clientSpec
-    );
-  }
-
-  public async deactivateByClientSpec(params: {
-    didDocument: object;
-    verificationMethodId: string;
-    versionId: string;
-    signature: string;
-    clientSpec: IClientSpec;
-  }): Promise<object> {
-    if (!this.didrpc) {
-      throw new Error(
-        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
-      );
-    }
-    if (!params.didDocument) {
-      throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to deactivate a did');
-    }
-
-    if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to deactivate a did');
-    }
-    if (!params.versionId) {
-      throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
-    }
-
-    if (!params.signature) {
-      throw new Error('HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: params.signature is required to deactivate a did');
-    }
-    if (!params.clientSpec) {
-      throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to deactivate');
-    }
-    if (!(params.clientSpec in IClientSpec)) {
-      throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
-    }
-    const { didDocument, verificationMethodId, versionId, signature } = params;
-    const didDoc: Did = didDocument as Did;
-    return await this.didrpc.deactivateDID(didDoc.id, signature, verificationMethodId, versionId, params.clientSpec);
-  }
-
   /**
    * Deactivate a DIDDocument in Hypersign blockchain - an onchain activity
    * @params
@@ -743,7 +439,6 @@ export default class HypersignDID implements IDID {
    *  - params.versionId            : Version of the document
    * @returns {Promise<object>} Result of the deactivatee operation
    */
-
   public async deactivate(params: {
     didDocument: object;
     privateKeyMultibase: string;
@@ -937,5 +632,315 @@ export default class HypersignDID implements IDID {
       compactProof: constant.compactProof,
     });
     return result;
+  }
+
+  // using in API
+  public async createByClientSpec(params: {
+    methodSpecificId: string;
+    publicKey?: Uint8Array;
+    address: string;
+    chainId: string;
+    keyType: IKeyType;
+    verificationRelationships?: IVerificationRelationships[];
+  }): Promise<object> {
+    if (this['window'] === 'undefined') {
+      console.log('HID-SSI-SDK:: Warning:  Running in non browser mode');
+    }
+    if (!params.methodSpecificId) {
+      throw new Error('HID-SSI-SDK:: Error: params.methodSpecificId is required to create didoc');
+    }
+
+    if (!params.chainId) {
+      throw new Error('HID-SSI-SDK:: Error: params.chainId is required to create didoc');
+    }
+    if (!params.address) {
+      throw new Error('HID-SSI-SDK:: Error: params.address is required to create didoc');
+    }
+
+    if (!params.keyType) {
+      throw new Error('HID-SSI-SDK:: Error: params.keyType is required to create didoc');
+    }
+    if (!(params.keyType in IKeyType)) {
+      throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid');
+    }
+
+    let didDoc;
+    let verificationRelationships: IVerificationRelationships[] = [];
+    if (params.verificationRelationships && params.verificationRelationships.length > 0) {
+      verificationRelationships = this._filterVerificationRelationships(params.verificationRelationships);
+    } else {
+      verificationRelationships = this._filterVerificationRelationships([]);
+    }
+
+    switch (params.keyType) {
+      case IKeyType.Ed25519VerificationKey2020:
+        throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid use object.generate() method');
+
+      case IKeyType.EcdsaSecp256k1RecoveryMethod2020: {
+        const blockChainAccountId = this._getBlockChainAccountID(params.chainId, params.address);
+
+        const didId = this._getId(params.methodSpecificId);
+        const newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType, verificationRelationships);
+        didDoc = Utils.jsonToLdConvertor({ ...newDid });
+        delete didDoc.service;
+        break;
+      }
+
+      case IKeyType.EcdsaSecp256k1VerificationKey2019: {
+        throw new Error('HID-SSI-SDK:: Error: Not  Supported');
+        // if (!params.publicKey) {
+        //   throw new Error(
+        //     'HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
+        //     IKeyType.EcdsaSecp256k1VerificationKey2019
+        //   );
+        // }
+        // const multibasePublicKey = Utils._bufToMultibase(params.publicKey);
+        // const didId = this._getId(params.methodSpecificId);
+        // const newDid = new DIDDocument(multibasePublicKey, '', didId, params.keyType);
+        // didDoc = Utils.jsonToLdConvertor({ ...newDid });
+
+        break;
+      }
+      default: {
+        throw new Error('HID-SSI-SDK:: Error: invalid keytype');
+      }
+    }
+    return didDoc;
+  }
+  
+  // using in API
+  public async registerByClientSpec(params: {
+    didDocument: object; // Ld document
+    clientSpec: IClientSpec;
+    verificationMethodId: string;
+    signature: string;
+    address?: string; // only for [cosmos-ADR036]
+  }) {
+    if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
+      throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
+    }
+
+    if (!this.didrpc) {
+      throw new Error(
+        'HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
+    }
+    if (!params.clientSpec) {
+      throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
+    }
+    if (!(params.clientSpec in IClientSpec)) {
+      throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
+    }
+
+    if (params.clientSpec === IClientSpec['cosmos-ADR036']) {
+      if (!params.address) {
+        throw new Error('HID-SSI-SDK:: Error: params.address is required for ' + IClientSpec['cosmos-ADR036']);
+      }
+    }
+    const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
+
+    const didDoc: Did = didDocStringJson as Did;
+    return await this.didrpc.registerDID(
+      didDoc,
+      params.signature,
+      params.verificationMethodId,
+      params.clientSpec,
+      params.address
+    );
+  }
+
+  // using in API
+  public async updateByClientSpec(params: {
+    didDocument: object;
+    verificationMethodId: string;
+    versionId: string;
+    signature: string;
+    clientSpec: IClientSpec;
+  }): Promise<object> {
+    if (!this.didrpc) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+    if (!params.didDocument) {
+      throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to update a did');
+    }
+
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update a did');
+    }
+    if (!params.versionId) {
+      throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
+    }
+
+    if (!params.signature) {
+      throw new Error('HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: params.signature is required to update a did');
+    }
+    if (!params.clientSpec) {
+      throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to update');
+    }
+    if (!(params.clientSpec in IClientSpec)) {
+      throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
+    }
+    const { didDocument, verificationMethodId, versionId, signature } = params;
+    return await this.didrpc.updateDID(
+      didDocument as Did,
+      signature,
+      verificationMethodId,
+      versionId,
+      params.clientSpec
+    );
+  }
+
+  // using in API
+  public async deactivateByClientSpec(params: {
+    didDocument: object;
+    verificationMethodId: string;
+    versionId: string;
+    signature: string;
+    clientSpec: IClientSpec;
+  }): Promise<object> {
+    if (!this.didrpc) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+    if (!params.didDocument) {
+      throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to deactivate a did');
+    }
+
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to deactivate a did');
+    }
+    if (!params.versionId) {
+      throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
+    }
+
+    if (!params.signature) {
+      throw new Error('HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: params.signature is required to deactivate a did');
+    }
+    if (!params.clientSpec) {
+      throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to deactivate');
+    }
+    if (!(params.clientSpec in IClientSpec)) {
+      throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
+    }
+    const { didDocument, verificationMethodId, versionId, signature } = params;
+    const didDoc: Did = didDocument as Did;
+    return await this.didrpc.deactivateDID(didDoc.id, signature, verificationMethodId, versionId, params.clientSpec);
+  }
+
+  public async signAndRegisterByClientSpec(params: {
+    didDocument: any;
+    address: string;
+    verificationMethodId: string;
+    web3: Web3 | any;
+    clientSpec: IClientSpec;
+    chainId?: string; // only for [cosmos-ADR036]
+  }) {
+    if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
+      throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
+    }
+
+    if (!params.clientSpec) {
+      throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
+    }
+    if (!(params.clientSpec in IClientSpec)) {
+      throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
+    }
+    if (!this.didrpc) {
+      throw new Error(
+        'HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
+    }
+    if (!params.web3) {
+      throw new Error('HID-SSI-SDK:: Error: params.web should be passed');
+    }
+
+    if (!params.address) {
+      throw new Error('HID-SSI-SDK:: Error: params.address is required to sign a did');
+    }
+
+    const { didDocument, signature } = await this.signByClientSpec({
+      didDocument: params.didDocument,
+      clientSpec: params.clientSpec,
+      address: params.address,
+      web3: params.web3,
+      chainId: params.chainId,
+    });
+
+    return await this.registerByClientSpec({
+      didDocument,
+      signature,
+      verificationMethodId: params.verificationMethodId,
+      clientSpec: params.clientSpec,
+      address: params.address, // only for [cosmos-ADR036]
+    });
+  }
+
+  public async signByClientSpec(params: {
+    didDocument: object;
+    clientSpec: IClientSpec;
+    address: string;
+    web3: Web3 | any;
+    chainId?: string; // only for [cosmos-ADR036]
+  }): Promise<{ didDocument: Did; signature: string }> {
+    if (this['window'] === 'undefined') {
+      throw new Error('HID-SSI-SDK:: Error:  Running in non browser mode');
+    }
+    if (!params.didDocument) {
+      throw Error('HID-SSI-SDK:: Error: params.didDocument is required to sign');
+    }
+
+    if (!params.address) {
+      throw new Error('HID-SSI-SDK:: Error: params.address is required to sign a did');
+    }
+    if (!params.clientSpec) {
+      throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
+    }
+    if (!(params.clientSpec in IClientSpec)) {
+      throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
+    }
+
+    switch (params.clientSpec) {
+      case IClientSpec['eth-personalSign']: {
+        const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
+
+        const didDoc: Did = didDocStringJson as Did;
+
+        const signature = await params.web3.eth.personal.sign(JSON.stringify(didDoc), params.address);
+        return { didDocument: didDoc, signature };
+      }
+      case IClientSpec['cosmos-ADR036']: {
+        if (!params.chainId) {
+          throw new Error(
+            'HID-SSI-SDK:: Error:  params.chainId is required to sign for clientSpec ' +
+              IClientSpec['cosmos-ADR036'] +
+              ' and keyType ' +
+              IKeyType.EcdsaSecp256k1VerificationKey2019
+          );
+        }
+        const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
+        const didDoc: Did = didDocStringJson as Did;
+        const didDocBytes = (await Did.encode(didDoc)).finish();
+        const signRespObj = await params.web3.requestMethod('signArbitrary', [
+          params.chainId,
+          params.address,
+          didDocBytes,
+        ]);
+        return { didDocument: didDoc, signature: signRespObj['signature'] };
+      }
+
+      default:
+        throw Error('HID-SSI-SDK:: Error: Invalid clientSpec');
+
+        break;
+    }
   }
 }
