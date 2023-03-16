@@ -2,18 +2,18 @@ import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { HdPath, Slip10RawIndex } from '@cosmjs/crypto';
 
 export const mnemonic =
-  'zero require alcohol swamp hover punch celery common merge embrace flock dumb unit capital problem future canal improve auto home apple avoid tragic mechanic';
+  'bubble cube family dash certain vault purchase party wash online square guide devote spoil alley talk purse capable act comic tower venue patch flower';
 
-export const hidNodeEp = {
-  rpc: 'https://rpc.jagrat.hypersign.id',
-  rest: 'https://api.jagrat.hypersign.id',
-  namespace: 'testnet',
-};
 // export const hidNodeEp = {
-//   rpc: 'http://localhost:26657',
-//   rest: 'http://localhost:1317',
+//   rpc: 'https://rpc.jagrat.hypersign.id',
+//   rest: 'https://api.jagrat.hypersign.id',
 //   namespace: 'testnet',
 // };
+export const hidNodeEp = {
+  rpc: 'http://localhost:26657',
+  rest: 'http://localhost:1317',
+  namespace: 'testnet',
+};
 export function makeCosmoshubPath(a) {
   return [
     Slip10RawIndex.hardened(44),

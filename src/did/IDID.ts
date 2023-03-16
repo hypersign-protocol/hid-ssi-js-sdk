@@ -4,7 +4,7 @@
  * Author: Hypermine Core Team
  */
 
-import { Did as IDidProto, Metadata, VerificationMethod, Service } from '../../libs/generated/ssi/did';
+import { Did as IDidProto, Metadata, VerificationMethod, Service, SignInfo } from '../../libs/generated/ssi/did';
 export interface IPublicKey {
   '@context': string;
   id: string;
@@ -120,27 +120,14 @@ export interface IDIDResolve {
 }
 
 export interface IDIDRpc {
-  registerDID(
-    didDoc: IDidProto,
-    signature: string,
-    verificationMethodId: string,
-    clientSpec?: IClientSpec,
-    address?: string
-  ): Promise<object>;
+  registerDID(didDoc: IDidProto, signInfos: SignInfo[], clientSpec?: IClientSpec, address?: string): Promise<object>;
   updateDID(
     didDoc: IDidProto | any,
-    signature: string,
-    verificationMethodId: string,
+    signInfos: SignInfo[],
     versionId: string,
     clientSpec?: IClientSpec
   ): Promise<object>;
-  deactivateDID(
-    did: string,
-    signature: string,
-    verificationMethodId: string,
-    versionId: string,
-    clientSpec?: IClientSpec
-  ): Promise<object>;
+  deactivateDID(did: string, signInfos: SignInfo[], versionId: string, clientSpec?: IClientSpec): Promise<object>;
   resolveDID(did: string): Promise<IDIDResolve>;
   init(): Promise<void>;
 }

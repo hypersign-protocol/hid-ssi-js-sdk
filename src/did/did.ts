@@ -9,7 +9,7 @@ const { AuthenticationProofPurpose } = jsonSigs.purposes;
 import { DIDRpc } from './didRPC';
 import Utils from '../utils';
 const ed25519 = require('@stablelib/ed25519');
-import { Did, VerificationMethod, Service } from '../../libs/generated/ssi/did';
+import { Did, VerificationMethod, Service, SignInfo } from '../../libs/generated/ssi/did';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import Web3 from 'web3';
@@ -348,7 +348,13 @@ export default class HypersignDID implements IDID {
     const didDocStringJson = Utils.ldToJsonConvertor(didDocument);
     const signature: string = await this._sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase });
     const didDoc: Did = didDocStringJson as Did;
-    return await this.didrpc.registerDID(didDoc, signature, verificationMethodId);
+    const signInfos: Array<SignInfo> = [
+      {
+        signature,
+        verification_method_id: verificationMethodId,
+      },
+    ];
+    return await this.didrpc.registerDID(didDoc, signInfos);
   }
 
   /**
@@ -428,7 +434,13 @@ export default class HypersignDID implements IDID {
     const didDocStringJson = Utils.ldToJsonConvertor(didDocument);
     const signature = await this._sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase });
     const didDoc: Did = didDocStringJson as Did;
-    return await this.didrpc.updateDID(didDoc, signature, verificationMethodId, versionId);
+    const signInfos: Array<SignInfo> = [
+      {
+        signature,
+        verification_method_id: verificationMethodId,
+      },
+    ];
+    return await this.didrpc.updateDID(didDoc, signInfos, versionId);
   }
 
   /**
@@ -470,7 +482,13 @@ export default class HypersignDID implements IDID {
     const didDocStringJson = Utils.ldToJsonConvertor(didDocument);
     const signature = await this._sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase });
     const didDoc: Did = didDocStringJson as Did;
-    return await this.didrpc.deactivateDID(didDoc.id, signature, verificationMethodId, versionId);
+    const signInfos: Array<SignInfo> = [
+      {
+        signature,
+        verification_method_id: verificationMethodId,
+      },
+    ];
+    return await this.didrpc.deactivateDID(didDoc.id, signInfos, versionId);
   }
 
   /**
@@ -713,8 +731,7 @@ export default class HypersignDID implements IDID {
   public async registerByClientSpec(params: {
     didDocument: object; // Ld document
     clientSpec: IClientSpec;
-    verificationMethodId: string;
-    signature: string;
+    signInfos: SignInfo[];
     address?: string; // only for [cosmos-ADR036]
   }) {
     if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
@@ -726,8 +743,12 @@ export default class HypersignDID implements IDID {
         'HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
       );
     }
-    if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
+    if (!params.signInfos) {
+      throw new Error('HID-SSI-SDK:: Error: params.signInfos is required to register a did');
+    }
+
+    if (params.signInfos.length < 1) {
+      throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
     }
     if (!params.clientSpec) {
       throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
@@ -744,21 +765,14 @@ export default class HypersignDID implements IDID {
     const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
 
     const didDoc: Did = didDocStringJson as Did;
-    return await this.didrpc.registerDID(
-      didDoc,
-      params.signature,
-      params.verificationMethodId,
-      params.clientSpec,
-      params.address
-    );
+    return await this.didrpc.registerDID(didDoc, params.signInfos, params.clientSpec, params.address);
   }
 
   // using in API
   public async updateByClientSpec(params: {
     didDocument: object;
-    verificationMethodId: string;
     versionId: string;
-    signature: string;
+    signInfos: SignInfo[];
     clientSpec: IClientSpec;
   }): Promise<object> {
     if (!this.didrpc) {
@@ -770,38 +784,32 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to update a did');
     }
 
-    if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update a did');
+    if (!params.signInfos) {
+      throw new Error('HID-SSI-SDK:: Error: params.signInfos is required to register a did');
     }
+    if (params.signInfos.length < 1) {
+      throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
+    }
+
     if (!params.versionId) {
       throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
     }
 
-    if (!params.signature) {
-      throw new Error('HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: params.signature is required to update a did');
-    }
     if (!params.clientSpec) {
       throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to update');
     }
     if (!(params.clientSpec in IClientSpec)) {
       throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
     }
-    const { didDocument, verificationMethodId, versionId, signature } = params;
-    return await this.didrpc.updateDID(
-      didDocument as Did,
-      signature,
-      verificationMethodId,
-      versionId,
-      params.clientSpec
-    );
+    const { didDocument, signInfos, versionId } = params;
+    return await this.didrpc.updateDID(didDocument as Did, signInfos, versionId, params.clientSpec);
   }
 
   // using in API
   public async deactivateByClientSpec(params: {
     didDocument: object;
-    verificationMethodId: string;
+    signInfos: SignInfo[];
     versionId: string;
-    signature: string;
     clientSpec: IClientSpec;
   }): Promise<object> {
     if (!this.didrpc) {
@@ -812,26 +820,26 @@ export default class HypersignDID implements IDID {
     if (!params.didDocument) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to deactivate a did');
     }
-
-    if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to deactivate a did');
+    if (!params.signInfos) {
+      throw new Error('HID-SSI-SDK:: Error: params.signInfos is required to register a did');
     }
+    if (params.signInfos.length < 1) {
+      throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
+    }
+
     if (!params.versionId) {
       throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
     }
 
-    if (!params.signature) {
-      throw new Error('HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: params.signature is required to deactivate a did');
-    }
     if (!params.clientSpec) {
       throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to deactivate');
     }
     if (!(params.clientSpec in IClientSpec)) {
       throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
     }
-    const { didDocument, verificationMethodId, versionId, signature } = params;
+    const { didDocument, signInfos, versionId } = params;
     const didDoc: Did = didDocument as Did;
-    return await this.didrpc.deactivateDID(didDoc.id, signature, verificationMethodId, versionId, params.clientSpec);
+    return await this.didrpc.deactivateDID(didDoc.id, signInfos, versionId, params.clientSpec);
   }
 
   public async signAndRegisterByClientSpec(params: {
@@ -876,10 +884,15 @@ export default class HypersignDID implements IDID {
       chainId: params.chainId,
     });
 
+    const signInfos: Array<SignInfo> = [
+      {
+        signature,
+        verification_method_id: params.verificationMethodId,
+      },
+    ];
     return await this.registerByClientSpec({
       didDocument,
-      signature,
-      verificationMethodId: params.verificationMethodId,
+      signInfos,
       clientSpec: params.clientSpec,
       address: params.address, // only for [cosmos-ADR036]
     });

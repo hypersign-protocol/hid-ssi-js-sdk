@@ -96,9 +96,9 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
-    DIDRpc.prototype.registerDID = function (didDoc, signature, verificationMethodId, clientSpec, address) {
+    DIDRpc.prototype.registerDID = function (didDoc, signInfos, clientSpec, address) {
         return __awaiter(this, void 0, void 0, function () {
-            var typeUrl, signInfo, txMessage, fee, hidClient, txResult;
+            var typeUrl, txMessage, fee, hidClient, txResult;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -106,10 +106,6 @@ var DIDRpc = /** @class */ (function () {
                             throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
                         }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgCreateDID);
-                        signInfo = {
-                            verification_method_id: verificationMethodId,
-                            signature: signature,
-                        };
                         if (clientSpec) {
                             switch (clientSpec) {
                                 case IDID_1.IClientSpec['eth-personalSign']: {
@@ -117,7 +113,7 @@ var DIDRpc = /** @class */ (function () {
                                         typeUrl: typeUrl,
                                         value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
                                             didDocString: didDoc,
-                                            signatures: [signInfo],
+                                            signatures: signInfos,
                                             creator: client_1.HIDClient.getHidWalletAddress(),
                                             clientSpec: clientSpec,
                                         }),
@@ -130,7 +126,7 @@ var DIDRpc = /** @class */ (function () {
                                         typeUrl: typeUrl,
                                         value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
                                             didDocString: didDoc,
-                                            signatures: [signInfo],
+                                            signatures: signInfos,
                                             creator: client_1.HIDClient.getHidWalletAddress(),
                                             clientSpec: clientSpec,
                                         }),
@@ -147,7 +143,7 @@ var DIDRpc = /** @class */ (function () {
                                 typeUrl: typeUrl,
                                 value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
                                     didDocString: didDoc,
-                                    signatures: [signInfo],
+                                    signatures: signInfos,
                                     creator: client_1.HIDClient.getHidWalletAddress(),
                                 }),
                             };
@@ -162,9 +158,9 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
-    DIDRpc.prototype.updateDID = function (didDoc, signature, verificationMethodId, versionId, clientSpec) {
+    DIDRpc.prototype.updateDID = function (didDoc, signInfos, versionId, clientSpec) {
         return __awaiter(this, void 0, void 0, function () {
-            var typeUrl, signInfo, txMessage, fee, hidClient, txResult;
+            var typeUrl, txMessage, fee, hidClient, txResult;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -172,16 +168,12 @@ var DIDRpc = /** @class */ (function () {
                             throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
                         }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgUpdateDID);
-                        signInfo = {
-                            verification_method_id: verificationMethodId,
-                            signature: signature,
-                        };
                         if (clientSpec) {
                             txMessage = {
                                 typeUrl: typeUrl,
                                 value: generatedProto[constants_1.HIDRpcEnums.MsgUpdateDID].fromPartial({
                                     didDocString: didDoc,
-                                    signatures: [signInfo],
+                                    signatures: signInfos,
                                     creator: client_1.HIDClient.getHidWalletAddress(),
                                     version_id: versionId,
                                     clientSpec: clientSpec,
@@ -193,7 +185,7 @@ var DIDRpc = /** @class */ (function () {
                                 typeUrl: typeUrl,
                                 value: generatedProto[constants_1.HIDRpcEnums.MsgUpdateDID].fromPartial({
                                     didDocString: didDoc,
-                                    signatures: [signInfo],
+                                    signatures: signInfos,
                                     creator: client_1.HIDClient.getHidWalletAddress(),
                                     version_id: versionId,
                                 }),
@@ -209,9 +201,9 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
-    DIDRpc.prototype.deactivateDID = function (did, signature, verificationMethodId, versionId, clientSpec) {
+    DIDRpc.prototype.deactivateDID = function (did, signInfos, versionId, clientSpec) {
         return __awaiter(this, void 0, void 0, function () {
-            var typeUrl, signInfo, txMessage, fee, hidClient, txResult;
+            var typeUrl, txMessage, fee, hidClient, txResult;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -219,16 +211,12 @@ var DIDRpc = /** @class */ (function () {
                             throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
                         }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgDeactivateDID);
-                        signInfo = {
-                            verification_method_id: verificationMethodId,
-                            signature: signature,
-                        };
                         if (clientSpec) {
                             txMessage = {
                                 typeUrl: typeUrl,
                                 value: generatedProto[constants_1.HIDRpcEnums.MsgDeactivateDID].fromPartial({
                                     didId: did,
-                                    signatures: [signInfo],
+                                    signatures: signInfos,
                                     creator: client_1.HIDClient.getHidWalletAddress(),
                                     version_id: versionId,
                                     clientSpec: clientSpec,
@@ -240,7 +228,7 @@ var DIDRpc = /** @class */ (function () {
                                 typeUrl: typeUrl,
                                 value: generatedProto[constants_1.HIDRpcEnums.MsgDeactivateDID].fromPartial({
                                     didId: did,
-                                    signatures: [signInfo],
+                                    signatures: signInfos,
                                     creator: client_1.HIDClient.getHidWalletAddress(),
                                     version_id: versionId,
                                 }),
