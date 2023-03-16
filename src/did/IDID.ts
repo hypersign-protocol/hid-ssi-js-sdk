@@ -120,14 +120,9 @@ export interface IDIDResolve {
 }
 
 export interface IDIDRpc {
-  registerDID(didDoc: IDidProto, signInfos: SignInfo[], clientSpec?: IClientSpec, address?: string): Promise<object>;
-  updateDID(
-    didDoc: IDidProto | any,
-    signInfos: SignInfo[],
-    versionId: string,
-    clientSpec?: IClientSpec
-  ): Promise<object>;
-  deactivateDID(did: string, signInfos: SignInfo[], versionId: string, clientSpec?: IClientSpec): Promise<object>;
+  registerDID(didDoc: IDidProto, signInfos: SignInfo[], address?: string): Promise<object>;
+  updateDID(didDoc: IDidProto | any, signInfos: SignInfo[], versionId: string): Promise<object>;
+  deactivateDID(did: string, signInfos: SignInfo[], versionId: string): Promise<object>;
   resolveDID(did: string): Promise<IDIDResolve>;
   init(): Promise<void>;
 }

@@ -41,104 +41,43 @@ export class DIDRpc implements IDIDRpc {
     await this.hidClient.init();
   }
 
-  async registerDID(
-    didDoc: IDidProto,
-    signInfos: SignInfo[],
-    clientSpec?: IClientSpec,
-    address?: string
-  ): Promise<object> {
+  async registerDID(didDoc: IDidProto, signInfos: SignInfo[]): Promise<object> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
 
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
 
-    let txMessage;
-    if (clientSpec) {
-      switch (clientSpec) {
-        case IClientSpec['eth-personalSign']: {
-          txMessage = {
-            typeUrl, // Same as above
-            value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
-              didDocString: didDoc,
-              signatures: signInfos,
-              creator: HIDClient.getHidWalletAddress(),
-              clientSpec: clientSpec,
-            }),
-          };
-          break;
-        }
-        case IClientSpec['cosmos-ADR036']: {
-          throw new Error('HID-SSI-SDK:: Error: Not supported ' + clientSpec);
-
-          txMessage = {
-            typeUrl, // Same as above
-            value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
-              didDocString: didDoc,
-              signatures: signInfos,
-              creator: HIDClient.getHidWalletAddress(),
-              clientSpec: clientSpec,
-            }),
-          };
-          break;
-        }
-
-        default: {
-          throw new Error('HID-SSI-SDK:: Error: Not supported ' + clientSpec);
-        }
-      }
-    } else {
-      txMessage = {
-        typeUrl, // Same as above
-        value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
-          didDocString: didDoc,
-          signatures: signInfos,
-          creator: HIDClient.getHidWalletAddress(),
-        }),
-      };
-    }
-
+    const txMessage = {
+      typeUrl, // Same as above
+      value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
+        didDocString: didDoc,
+        signatures: signInfos,
+        creator: HIDClient.getHidWalletAddress(),
+      }),
+    };
     const fee = 'auto';
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
     return txResult;
   }
 
-  async updateDID(
-    didDoc: IDidProto,
-    signInfos: SignInfo[],
-    versionId: string,
-    clientSpec?: IClientSpec
-  ): Promise<object> {
+  async updateDID(didDoc: IDidProto, signInfos: SignInfo[], versionId: string): Promise<object> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
 
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgUpdateDID}`;
 
-    let txMessage;
-    if (clientSpec) {
-      txMessage = {
-        typeUrl, // Same as above
-        value: generatedProto[HIDRpcEnums.MsgUpdateDID].fromPartial({
-          didDocString: didDoc,
-          signatures: signInfos,
-          creator: HIDClient.getHidWalletAddress(),
-          version_id: versionId,
-          clientSpec: clientSpec,
-        }),
-      };
-    } else {
-      txMessage = {
-        typeUrl, // Same as above
-        value: generatedProto[HIDRpcEnums.MsgUpdateDID].fromPartial({
-          didDocString: didDoc,
-          signatures: signInfos,
-          creator: HIDClient.getHidWalletAddress(),
-          version_id: versionId,
-        }),
-      };
-    }
+    const txMessage = {
+      typeUrl, // Same as above
+      value: generatedProto[HIDRpcEnums.MsgUpdateDID].fromPartial({
+        didDocString: didDoc,
+        signatures: signInfos,
+        creator: HIDClient.getHidWalletAddress(),
+        version_id: versionId,
+      }),
+    };
 
     // TODO: need to find a way to make it dynamic
     const fee = 'auto';
@@ -148,41 +87,22 @@ export class DIDRpc implements IDIDRpc {
     return txResult;
   }
 
-  async deactivateDID(
-    did: string,
-    signInfos: SignInfo[],
-    versionId: string,
-    clientSpec?: IClientSpec
-  ): Promise<object> {
+  async deactivateDID(did: string, signInfos: SignInfo[], versionId: string): Promise<object> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
 
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgDeactivateDID}`;
 
-    let txMessage;
-    if (clientSpec) {
-      txMessage = {
-        typeUrl, // Same as above
-        value: generatedProto[HIDRpcEnums.MsgDeactivateDID].fromPartial({
-          didId: did,
-          signatures: signInfos,
-          creator: HIDClient.getHidWalletAddress(),
-          version_id: versionId,
-          clientSpec: clientSpec,
-        }),
-      };
-    } else {
-      txMessage = {
-        typeUrl, // Same as above
-        value: generatedProto[HIDRpcEnums.MsgDeactivateDID].fromPartial({
-          didId: did,
-          signatures: signInfos,
-          creator: HIDClient.getHidWalletAddress(),
-          version_id: versionId,
-        }),
-      };
-    }
+    const txMessage = {
+      typeUrl, // Same as above
+      value: generatedProto[HIDRpcEnums.MsgDeactivateDID].fromPartial({
+        didId: did,
+        signatures: signInfos,
+        creator: HIDClient.getHidWalletAddress(),
+        version_id: versionId,
+      }),
+    };
 
     // TODO: need to find a way to make it dynamic
     const fee = 'auto';

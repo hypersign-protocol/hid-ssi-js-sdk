@@ -2,7 +2,7 @@ import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { HdPath, Slip10RawIndex } from '@cosmjs/crypto';
 
 export const mnemonic =
-  'bubble cube family dash certain vault purchase party wash online square guide devote spoil alley talk purse capable act comic tower venue patch flower';
+  'inch predict slim mirror drum video together vacuum snake galaxy attend smart robot common opinion alien become silly item senior divert remember giant use';
 
 // export const hidNodeEp = {
 //   rpc: 'https://rpc.jagrat.hypersign.id',

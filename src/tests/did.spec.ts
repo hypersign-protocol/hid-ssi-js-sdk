@@ -291,16 +291,19 @@ describe('DID Test scenarios', () => {
     });
     it('should not be able to update did document as versionId pased is incorrect', function () {
       const updateBody = { didDocument, privateKeyMultibase, verificationMethodId, versionId: '1.0.1' };
+      didDocument['alsoKnownAs'].push('Random Data');
       return hypersignDID.update(updateBody).catch(function (err) {
         expect(function () {
           throw err;
         }).to.throw(
           Error,
-          `Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ${didDocId} with version ${versionId}. Got version ${updateBody.versionId}: Unexpected DID version`
+          `Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ${didDocId} with version ${versionId}. Got version ${updateBody.versionId}: unexpected DID version`
         );
       });
     });
     it('should be able to update did document', async function () {
+      didDocument['alsoKnownAs'].push('Some DATA');
+
       const result = await hypersignDID.update({
         didDocument,
         privateKeyMultibase,
@@ -389,12 +392,13 @@ describe('DID Test scenarios', () => {
     });
     it('should not be able to deactivate did document as versionId pased is incorrect', function () {
       const deactivateBody = { didDocument, privateKeyMultibase, verificationMethodId, versionId: '1.0.1' };
+
       return hypersignDID.deactivate(deactivateBody).catch(function (err) {
         expect(function () {
           throw err;
         }).to.throw(
           Error,
-          `Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ${didDocId} with version ${versionId}. Got version ${deactivateBody.versionId}: Unexpected DID version`
+          `Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ${didDocId} with version ${versionId}. Got version ${deactivateBody.versionId}: unexpected DID version`
         );
       });
     });
@@ -568,12 +572,16 @@ describe('DID Test scenarios', () => {
     });
 
     it('should return verification result', async function () {
+      console.log(JSON.stringify(signedDocument, null, 2));
+
       const result = await hypersignDID.verify({
         didDocument: signedDocument,
         verificationMethodId,
         challenge,
         domain,
       });
+      console.log(result);
+
       expect(result).to.be.a('object');
       should().exist(result);
       should().exist(result.verified);

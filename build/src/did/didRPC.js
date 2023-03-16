@@ -68,7 +68,6 @@ var constants_1 = require("../constants");
 var generatedProto = __importStar(require("../../libs/generated/ssi/tx"));
 var axios_1 = __importDefault(require("axios"));
 var client_1 = require("../hid/client");
-var IDID_1 = require("./IDID");
 var DIDRpc = /** @class */ (function () {
     function DIDRpc(_a) {
         var offlineSigner = _a.offlineSigner, nodeRpcEndpoint = _a.nodeRpcEndpoint, nodeRestEndpoint = _a.nodeRestEndpoint;
@@ -96,7 +95,7 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
-    DIDRpc.prototype.registerDID = function (didDoc, signInfos, clientSpec, address) {
+    DIDRpc.prototype.registerDID = function (didDoc, signInfos) {
         return __awaiter(this, void 0, void 0, function () {
             var typeUrl, txMessage, fee, hidClient, txResult;
             return __generator(this, function (_a) {
@@ -106,48 +105,14 @@ var DIDRpc = /** @class */ (function () {
                             throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
                         }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgCreateDID);
-                        if (clientSpec) {
-                            switch (clientSpec) {
-                                case IDID_1.IClientSpec['eth-personalSign']: {
-                                    txMessage = {
-                                        typeUrl: typeUrl,
-                                        value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
-                                            didDocString: didDoc,
-                                            signatures: signInfos,
-                                            creator: client_1.HIDClient.getHidWalletAddress(),
-                                            clientSpec: clientSpec,
-                                        }),
-                                    };
-                                    break;
-                                }
-                                case IDID_1.IClientSpec['cosmos-ADR036']: {
-                                    throw new Error('HID-SSI-SDK:: Error: Not supported ' + clientSpec);
-                                    txMessage = {
-                                        typeUrl: typeUrl,
-                                        value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
-                                            didDocString: didDoc,
-                                            signatures: signInfos,
-                                            creator: client_1.HIDClient.getHidWalletAddress(),
-                                            clientSpec: clientSpec,
-                                        }),
-                                    };
-                                    break;
-                                }
-                                default: {
-                                    throw new Error('HID-SSI-SDK:: Error: Not supported ' + clientSpec);
-                                }
-                            }
-                        }
-                        else {
-                            txMessage = {
-                                typeUrl: typeUrl,
-                                value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
-                                    didDocString: didDoc,
-                                    signatures: signInfos,
-                                    creator: client_1.HIDClient.getHidWalletAddress(),
-                                }),
-                            };
-                        }
+                        txMessage = {
+                            typeUrl: typeUrl,
+                            value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
+                                didDocString: didDoc,
+                                signatures: signInfos,
+                                creator: client_1.HIDClient.getHidWalletAddress(),
+                            }),
+                        };
                         fee = 'auto';
                         hidClient = client_1.HIDClient.getHidClient();
                         return [4 /*yield*/, hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee)];
@@ -158,7 +123,7 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
-    DIDRpc.prototype.updateDID = function (didDoc, signInfos, versionId, clientSpec) {
+    DIDRpc.prototype.updateDID = function (didDoc, signInfos, versionId) {
         return __awaiter(this, void 0, void 0, function () {
             var typeUrl, txMessage, fee, hidClient, txResult;
             return __generator(this, function (_a) {
@@ -168,29 +133,15 @@ var DIDRpc = /** @class */ (function () {
                             throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
                         }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgUpdateDID);
-                        if (clientSpec) {
-                            txMessage = {
-                                typeUrl: typeUrl,
-                                value: generatedProto[constants_1.HIDRpcEnums.MsgUpdateDID].fromPartial({
-                                    didDocString: didDoc,
-                                    signatures: signInfos,
-                                    creator: client_1.HIDClient.getHidWalletAddress(),
-                                    version_id: versionId,
-                                    clientSpec: clientSpec,
-                                }),
-                            };
-                        }
-                        else {
-                            txMessage = {
-                                typeUrl: typeUrl,
-                                value: generatedProto[constants_1.HIDRpcEnums.MsgUpdateDID].fromPartial({
-                                    didDocString: didDoc,
-                                    signatures: signInfos,
-                                    creator: client_1.HIDClient.getHidWalletAddress(),
-                                    version_id: versionId,
-                                }),
-                            };
-                        }
+                        txMessage = {
+                            typeUrl: typeUrl,
+                            value: generatedProto[constants_1.HIDRpcEnums.MsgUpdateDID].fromPartial({
+                                didDocString: didDoc,
+                                signatures: signInfos,
+                                creator: client_1.HIDClient.getHidWalletAddress(),
+                                version_id: versionId,
+                            }),
+                        };
                         fee = 'auto';
                         hidClient = client_1.HIDClient.getHidClient();
                         return [4 /*yield*/, hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee)];
@@ -201,7 +152,7 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
-    DIDRpc.prototype.deactivateDID = function (did, signInfos, versionId, clientSpec) {
+    DIDRpc.prototype.deactivateDID = function (did, signInfos, versionId) {
         return __awaiter(this, void 0, void 0, function () {
             var typeUrl, txMessage, fee, hidClient, txResult;
             return __generator(this, function (_a) {
@@ -211,29 +162,15 @@ var DIDRpc = /** @class */ (function () {
                             throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
                         }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgDeactivateDID);
-                        if (clientSpec) {
-                            txMessage = {
-                                typeUrl: typeUrl,
-                                value: generatedProto[constants_1.HIDRpcEnums.MsgDeactivateDID].fromPartial({
-                                    didId: did,
-                                    signatures: signInfos,
-                                    creator: client_1.HIDClient.getHidWalletAddress(),
-                                    version_id: versionId,
-                                    clientSpec: clientSpec,
-                                }),
-                            };
-                        }
-                        else {
-                            txMessage = {
-                                typeUrl: typeUrl,
-                                value: generatedProto[constants_1.HIDRpcEnums.MsgDeactivateDID].fromPartial({
-                                    didId: did,
-                                    signatures: signInfos,
-                                    creator: client_1.HIDClient.getHidWalletAddress(),
-                                    version_id: versionId,
-                                }),
-                            };
-                        }
+                        txMessage = {
+                            typeUrl: typeUrl,
+                            value: generatedProto[constants_1.HIDRpcEnums.MsgDeactivateDID].fromPartial({
+                                didId: did,
+                                signatures: signInfos,
+                                creator: client_1.HIDClient.getHidWalletAddress(),
+                                version_id: versionId,
+                            }),
+                        };
                         fee = 'auto';
                         hidClient = client_1.HIDClient.getHidClient();
                         return [4 /*yield*/, hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee)];

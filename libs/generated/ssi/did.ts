@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { ClientSpec } from "./clientSpec";
 import { Writer, Reader } from "protobufjs/minimal";
 
 export const protobufPackage = "hypersignprotocol.hidnode.ssi";
@@ -6,7 +7,6 @@ export const protobufPackage = "hypersignprotocol.hidnode.ssi";
 export interface Did {
   context: string[];
   id: string;
-  /** DID Controller Spec: https://www.w3.org/TR/did-core/#did-controller */
   controller: string[];
   alsoKnownAs: string[];
   verificationMethod: VerificationMethod[];
@@ -44,6 +44,7 @@ export interface Service {
 export interface SignInfo {
   verification_method_id: string;
   signature: string;
+  clientSpec: ClientSpec | undefined;
 }
 
 export interface DidDocumentState {
@@ -750,6 +751,9 @@ export const SignInfo = {
     if (message.signature !== "") {
       writer.uint32(18).string(message.signature);
     }
+    if (message.clientSpec !== undefined) {
+      ClientSpec.encode(message.clientSpec, writer.uint32(26).fork()).ldelim();
+    }
     return writer;
   },
 
@@ -765,6 +769,9 @@ export const SignInfo = {
           break;
         case 2:
           message.signature = reader.string();
+          break;
+        case 3:
+          message.clientSpec = ClientSpec.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -789,6 +796,11 @@ export const SignInfo = {
     } else {
       message.signature = "";
     }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = ClientSpec.fromJSON(object.clientSpec);
+    } else {
+      message.clientSpec = undefined;
+    }
     return message;
   },
 
@@ -797,6 +809,10 @@ export const SignInfo = {
     message.verification_method_id !== undefined &&
       (obj.verification_method_id = message.verification_method_id);
     message.signature !== undefined && (obj.signature = message.signature);
+    message.clientSpec !== undefined &&
+      (obj.clientSpec = message.clientSpec
+        ? ClientSpec.toJSON(message.clientSpec)
+        : undefined);
     return obj;
   },
 
@@ -814,6 +830,11 @@ export const SignInfo = {
       message.signature = object.signature;
     } else {
       message.signature = "";
+    }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = ClientSpec.fromPartial(object.clientSpec);
+    } else {
+      message.clientSpec = undefined;
     }
     return message;
   },

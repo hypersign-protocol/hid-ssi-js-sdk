@@ -39,7 +39,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createWallet = exports.makeCosmoshubPath = exports.hidNodeEp = exports.mnemonic = void 0;
 var proto_signing_1 = require("@cosmjs/proto-signing");
 var crypto_1 = require("@cosmjs/crypto");
-exports.mnemonic = 'bubble cube family dash certain vault purchase party wash online square guide devote spoil alley talk purse capable act comic tower venue patch flower';
+exports.mnemonic = 'inch predict slim mirror drum video together vacuum snake galaxy attend smart robot common opinion alien become silly item senior divert remember giant use';
 // export const hidNodeEp = {
 //   rpc: 'https://rpc.jagrat.hypersign.id',
 //   rest: 'https://api.jagrat.hypersign.id',

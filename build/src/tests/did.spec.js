@@ -395,10 +395,11 @@ describe('DID Test scenarios', function () {
         });
         it('should not be able to update did document as versionId pased is incorrect', function () {
             var updateBody = { didDocument: didDocument, privateKeyMultibase: privateKeyMultibase, verificationMethodId: verificationMethodId, versionId: '1.0.1' };
+            didDocument['alsoKnownAs'].push('Random Data');
             return hypersignDID.update(updateBody).catch(function (err) {
                 (0, chai_1.expect)(function () {
                     throw err;
-                }).to.throw(Error, "Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ".concat(didDocId, " with version ").concat(versionId, ". Got version ").concat(updateBody.versionId, ": Unexpected DID version"));
+                }).to.throw(Error, "Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ".concat(didDocId, " with version ").concat(versionId, ". Got version ").concat(updateBody.versionId, ": unexpected DID version"));
             });
         });
         it('should be able to update did document', function () {
@@ -406,12 +407,14 @@ describe('DID Test scenarios', function () {
                 var result;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, hypersignDID.update({
-                                didDocument: didDocument,
-                                privateKeyMultibase: privateKeyMultibase,
-                                verificationMethodId: verificationMethodId,
-                                versionId: versionId,
-                            })];
+                        case 0:
+                            didDocument['alsoKnownAs'].push('Some DATA');
+                            return [4 /*yield*/, hypersignDID.update({
+                                    didDocument: didDocument,
+                                    privateKeyMultibase: privateKeyMultibase,
+                                    verificationMethodId: verificationMethodId,
+                                    versionId: versionId,
+                                })];
                         case 1:
                             result = _a.sent();
                             //console.log(result);
@@ -531,7 +534,7 @@ describe('DID Test scenarios', function () {
             return hypersignDID.deactivate(deactivateBody).catch(function (err) {
                 (0, chai_1.expect)(function () {
                     throw err;
-                }).to.throw(Error, "Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ".concat(didDocId, " with version ").concat(versionId, ". Got version ").concat(deactivateBody.versionId, ": Unexpected DID version"));
+                }).to.throw(Error, "Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ".concat(didDocId, " with version ").concat(versionId, ". Got version ").concat(deactivateBody.versionId, ": unexpected DID version"));
             });
         });
         it('should be able to deactivate did document', function () {
@@ -724,14 +727,17 @@ describe('DID Test scenarios', function () {
                 var result;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0: return [4 /*yield*/, hypersignDID.verify({
-                                didDocument: signedDocument,
-                                verificationMethodId: verificationMethodId,
-                                challenge: challenge,
-                                domain: domain,
-                            })];
+                        case 0:
+                            console.log(JSON.stringify(signedDocument, null, 2));
+                            return [4 /*yield*/, hypersignDID.verify({
+                                    didDocument: signedDocument,
+                                    verificationMethodId: verificationMethodId,
+                                    challenge: challenge,
+                                    domain: domain,
+                                })];
                         case 1:
                             result = _a.sent();
+                            console.log(result);
                             (0, chai_1.expect)(result).to.be.a('object');
                             (0, chai_1.should)().exist(result);
                             (0, chai_1.should)().exist(result.verified);

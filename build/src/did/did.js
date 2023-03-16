@@ -389,6 +389,10 @@ var HypersignDID = /** @class */ (function () {
                             {
                                 signature: signature,
                                 verification_method_id: verificationMethodId,
+                                clientSpec: {
+                                    type: '',
+                                    adr036SignerAddress: '',
+                                },
                             },
                         ];
                         return [4 /*yield*/, this.didrpc.registerDID(didDoc, signInfos)];
@@ -480,6 +484,10 @@ var HypersignDID = /** @class */ (function () {
                             {
                                 signature: signature,
                                 verification_method_id: verificationMethodId,
+                                clientSpec: {
+                                    type: '',
+                                    adr036SignerAddress: '',
+                                },
                             },
                         ];
                         return [4 /*yield*/, this.didrpc.updateDID(didDoc, signInfos, versionId)];
@@ -528,6 +536,10 @@ var HypersignDID = /** @class */ (function () {
                             {
                                 signature: signature,
                                 verification_method_id: verificationMethodId,
+                                clientSpec: {
+                                    type: '',
+                                    adr036SignerAddress: '',
+                                },
                             },
                         ];
                         return [4 /*yield*/, this.didrpc.deactivateDID(didDoc.id, signInfos, versionId)];
@@ -760,10 +772,11 @@ var HypersignDID = /** @class */ (function () {
     };
     // using in API
     HypersignDID.prototype.registerByClientSpec = function (params) {
+        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function () {
-            var didDocStringJson, didDoc;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var i, didDocStringJson, didDoc;
+            return __generator(this, function (_e) {
+                switch (_e.label) {
                     case 0:
                         if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
                             throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
@@ -777,31 +790,44 @@ var HypersignDID = /** @class */ (function () {
                         if (params.signInfos.length < 1) {
                             throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
                         }
-                        if (!params.clientSpec) {
-                            throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
+                        if (!params.signInfos) {
+                            throw new Error('HID-SSI-SDK:: Error: params.signInfos is required to register a did');
                         }
-                        if (!(params.clientSpec in IDID_1.IClientSpec)) {
-                            throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
+                        if (params.signInfos.length < 1) {
+                            throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
                         }
-                        if (params.clientSpec === IDID_1.IClientSpec['cosmos-ADR036']) {
-                            if (!params.address) {
-                                throw new Error('HID-SSI-SDK:: Error: params.address is required for ' + IDID_1.IClientSpec['cosmos-ADR036']);
+                        for (i in params.signInfos) {
+                            if (!params.signInfos[i].verification_method_id) {
+                                throw new Error("HID-SSI-SDK:: Error: params.signInfos[".concat(i, "].verification_method_id is required to register a did"));
+                            }
+                            if (!params.signInfos[i].clientSpec) {
+                                throw new Error("HID-SSI-SDK:: Error: params.signInfos[".concat(i, "].clientSpec is required to register a did"));
+                            }
+                            if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
+                                if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
+                                    ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
+                                    throw new Error("HID-SSI-SDK:: Error: params.signInfos[".concat(i, "].adr036SignerAddress is required to register a did, when clientSpec type is").concat((_d = params.signInfos[i].clientSpec) === null || _d === void 0 ? void 0 : _d.type, " "));
+                                }
+                            }
+                            if (!params.signInfos[i].signature) {
+                                throw new Error("HID-SSI-SDK:: Error: params.signInfos[".concat(i, "].signature is required to register a did"));
                             }
                         }
                         didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
                         didDoc = didDocStringJson;
-                        return [4 /*yield*/, this.didrpc.registerDID(didDoc, params.signInfos, params.clientSpec, params.address)];
-                    case 1: return [2 /*return*/, _a.sent()];
+                        return [4 /*yield*/, this.didrpc.registerDID(didDoc, params.signInfos, params.address)];
+                    case 1: return [2 /*return*/, _e.sent()];
                 }
             });
         });
     };
     // using in API
     HypersignDID.prototype.updateByClientSpec = function (params) {
+        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function () {
-            var didDocument, signInfos, versionId;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var i, didDocument, signInfos, versionId;
+            return __generator(this, function (_e) {
+                switch (_e.label) {
                     case 0:
                         if (!this.didrpc) {
                             throw new Error('HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized');
@@ -815,28 +841,40 @@ var HypersignDID = /** @class */ (function () {
                         if (params.signInfos.length < 1) {
                             throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
                         }
+                        for (i in params.signInfos) {
+                            if (!params.signInfos[i].verification_method_id) {
+                                throw new Error("HID-SSI-SDK:: Error: params.signInfos[".concat(i, "].verification_method_id is required to register a did"));
+                            }
+                            if (!params.signInfos[i].clientSpec) {
+                                throw new Error("HID-SSI-SDK:: Error: params.signInfos[".concat(i, "].clientSpec is required to register a did"));
+                            }
+                            if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
+                                if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
+                                    ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
+                                    throw new Error("HID-SSI-SDK:: Error: params.signInfos[".concat(i, "].adr036SignerAddress is required to register a did, when clientSpec type is").concat((_d = params.signInfos[i].clientSpec) === null || _d === void 0 ? void 0 : _d.type, " "));
+                                }
+                            }
+                            if (!params.signInfos[i].signature) {
+                                throw new Error("HID-SSI-SDK:: Error: params.signInfos[".concat(i, "].signature is required to register a did"));
+                            }
+                        }
                         if (!params.versionId) {
                             throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
                         }
-                        if (!params.clientSpec) {
-                            throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to update');
-                        }
-                        if (!(params.clientSpec in IDID_1.IClientSpec)) {
-                            throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
-                        }
                         didDocument = params.didDocument, signInfos = params.signInfos, versionId = params.versionId;
-                        return [4 /*yield*/, this.didrpc.updateDID(didDocument, signInfos, versionId, params.clientSpec)];
-                    case 1: return [2 /*return*/, _a.sent()];
+                        return [4 /*yield*/, this.didrpc.updateDID(didDocument, signInfos, versionId)];
+                    case 1: return [2 /*return*/, _e.sent()];
                 }
             });
         });
     };
     // using in API
     HypersignDID.prototype.deactivateByClientSpec = function (params) {
+        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function () {
-            var didDocument, signInfos, versionId, didDoc;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var i, didDocument, signInfos, versionId, didDoc;
+            return __generator(this, function (_e) {
+                switch (_e.label) {
                     case 0:
                         if (!this.didrpc) {
                             throw new Error('HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized');
@@ -850,131 +888,30 @@ var HypersignDID = /** @class */ (function () {
                         if (params.signInfos.length < 1) {
                             throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
                         }
+                        for (i in params.signInfos) {
+                            if (!params.signInfos[i].verification_method_id) {
+                                throw new Error("HID-SSI-SDK:: Error: params.signInfos[".concat(i, "].verification_method_id is required to register a did"));
+                            }
+                            if (!params.signInfos[i].clientSpec) {
+                                throw new Error("HID-SSI-SDK:: Error: params.signInfos[".concat(i, "].clientSpec is required to register a did"));
+                            }
+                            if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
+                                if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
+                                    ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
+                                    throw new Error("HID-SSI-SDK:: Error: params.signInfos[".concat(i, "].adr036SignerAddress is required to register a did, when clientSpec type is").concat((_d = params.signInfos[i].clientSpec) === null || _d === void 0 ? void 0 : _d.type, " "));
+                                }
+                            }
+                            if (!params.signInfos[i].signature) {
+                                throw new Error("HID-SSI-SDK:: Error: params.signInfos[".concat(i, "].signature is required to register a did"));
+                            }
+                        }
                         if (!params.versionId) {
                             throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
                         }
-                        if (!params.clientSpec) {
-                            throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to deactivate');
-                        }
-                        if (!(params.clientSpec in IDID_1.IClientSpec)) {
-                            throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
-                        }
                         didDocument = params.didDocument, signInfos = params.signInfos, versionId = params.versionId;
                         didDoc = didDocument;
-                        return [4 /*yield*/, this.didrpc.deactivateDID(didDoc.id, signInfos, versionId, params.clientSpec)];
-                    case 1: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
-    };
-    HypersignDID.prototype.signAndRegisterByClientSpec = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, didDocument, signature, signInfos;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
-                            throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
-                        }
-                        if (!params.clientSpec) {
-                            throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
-                        }
-                        if (!(params.clientSpec in IDID_1.IClientSpec)) {
-                            throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
-                        }
-                        if (!this.didrpc) {
-                            throw new Error('HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized');
-                        }
-                        if (!params.verificationMethodId) {
-                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
-                        }
-                        if (!params.web3) {
-                            throw new Error('HID-SSI-SDK:: Error: params.web should be passed');
-                        }
-                        if (!params.address) {
-                            throw new Error('HID-SSI-SDK:: Error: params.address is required to sign a did');
-                        }
-                        return [4 /*yield*/, this.signByClientSpec({
-                                didDocument: params.didDocument,
-                                clientSpec: params.clientSpec,
-                                address: params.address,
-                                web3: params.web3,
-                                chainId: params.chainId,
-                            })];
-                    case 1:
-                        _a = _b.sent(), didDocument = _a.didDocument, signature = _a.signature;
-                        signInfos = [
-                            {
-                                signature: signature,
-                                verification_method_id: params.verificationMethodId,
-                            },
-                        ];
-                        return [4 /*yield*/, this.registerByClientSpec({
-                                didDocument: didDocument,
-                                signInfos: signInfos,
-                                clientSpec: params.clientSpec,
-                                address: params.address, // only for [cosmos-ADR036]
-                            })];
-                    case 2: return [2 /*return*/, _b.sent()];
-                }
-            });
-        });
-    };
-    HypersignDID.prototype.signByClientSpec = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, didDocStringJson, didDoc, signature, didDocStringJson, didDoc, didDocBytes, signRespObj;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        if (this['window'] === 'undefined') {
-                            throw new Error('HID-SSI-SDK:: Error:  Running in non browser mode');
-                        }
-                        if (!params.didDocument) {
-                            throw Error('HID-SSI-SDK:: Error: params.didDocument is required to sign');
-                        }
-                        if (!params.address) {
-                            throw new Error('HID-SSI-SDK:: Error: params.address is required to sign a did');
-                        }
-                        if (!params.clientSpec) {
-                            throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
-                        }
-                        if (!(params.clientSpec in IDID_1.IClientSpec)) {
-                            throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
-                        }
-                        _a = params.clientSpec;
-                        switch (_a) {
-                            case IDID_1.IClientSpec['eth-personalSign']: return [3 /*break*/, 1];
-                            case IDID_1.IClientSpec['cosmos-ADR036']: return [3 /*break*/, 3];
-                        }
-                        return [3 /*break*/, 6];
-                    case 1:
-                        didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
-                        didDoc = didDocStringJson;
-                        return [4 /*yield*/, params.web3.eth.personal.sign(JSON.stringify(didDoc), params.address)];
-                    case 2:
-                        signature = _b.sent();
-                        return [2 /*return*/, { didDocument: didDoc, signature: signature }];
-                    case 3:
-                        if (!params.chainId) {
-                            throw new Error('HID-SSI-SDK:: Error:  params.chainId is required to sign for clientSpec ' +
-                                IDID_1.IClientSpec['cosmos-ADR036'] +
-                                ' and keyType ' +
-                                IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
-                        }
-                        didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
-                        didDoc = didDocStringJson;
-                        return [4 /*yield*/, did_1.Did.encode(didDoc)];
-                    case 4:
-                        didDocBytes = (_b.sent()).finish();
-                        return [4 /*yield*/, params.web3.requestMethod('signArbitrary', [
-                                params.chainId,
-                                params.address,
-                                didDocBytes,
-                            ])];
-                    case 5:
-                        signRespObj = _b.sent();
-                        return [2 /*return*/, { didDocument: didDoc, signature: signRespObj['signature'] }];
-                    case 6: throw Error('HID-SSI-SDK:: Error: Invalid clientSpec');
+                        return [4 /*yield*/, this.didrpc.deactivateDID(didDoc.id, signInfos, versionId)];
+                    case 1: return [2 /*return*/, _e.sent()];
                 }
             });
         });

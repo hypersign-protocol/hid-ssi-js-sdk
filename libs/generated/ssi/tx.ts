@@ -3,6 +3,7 @@ import { Reader, util, configure, Writer } from "protobufjs/minimal";
 import * as Long from "long";
 import { Did, SignInfo } from "./did";
 import { SchemaDocument, SchemaProof } from "./schema";
+import { ClientSpec } from "./clientSpec";
 import { CredentialStatus, CredentialProof } from "./credential";
 
 export const protobufPackage = "hypersignprotocol.hidnode.ssi";
@@ -11,7 +12,6 @@ export interface MsgCreateDID {
   didDocString: Did | undefined;
   signatures: SignInfo[];
   creator: string;
-  clientSpec: string;
 }
 
 export interface MsgCreateDIDResponse {
@@ -23,7 +23,6 @@ export interface MsgUpdateDID {
   version_id: string;
   signatures: SignInfo[];
   creator: string;
-  clientSpec: string;
 }
 
 export interface MsgUpdateDIDResponse {
@@ -34,7 +33,7 @@ export interface MsgCreateSchema {
   creator: string;
   schemaDoc: SchemaDocument | undefined;
   schemaProof: SchemaProof | undefined;
-  clientSpec: string;
+  clientSpec: ClientSpec | undefined;
 }
 
 export interface MsgCreateSchemaResponse {
@@ -46,7 +45,6 @@ export interface MsgDeactivateDID {
   didId: string;
   version_id: string;
   signatures: SignInfo[];
-  clientSpec: string;
 }
 
 export interface MsgDeactivateDIDResponse {
@@ -57,14 +55,14 @@ export interface MsgRegisterCredentialStatus {
   creator: string;
   credentialStatus: CredentialStatus | undefined;
   proof: CredentialProof | undefined;
-  clientSpec: string;
+  clientSpec: ClientSpec | undefined;
 }
 
 export interface MsgRegisterCredentialStatusResponse {
   id: number;
 }
 
-const baseMsgCreateDID: object = { creator: "", clientSpec: "" };
+const baseMsgCreateDID: object = { creator: "" };
 
 export const MsgCreateDID = {
   encode(message: MsgCreateDID, writer: Writer = Writer.create()): Writer {
@@ -76,9 +74,6 @@ export const MsgCreateDID = {
     }
     if (message.creator !== "") {
       writer.uint32(26).string(message.creator);
-    }
-    if (message.clientSpec !== "") {
-      writer.uint32(34).string(message.clientSpec);
     }
     return writer;
   },
@@ -99,9 +94,6 @@ export const MsgCreateDID = {
           break;
         case 3:
           message.creator = reader.string();
-          break;
-        case 4:
-          message.clientSpec = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -129,11 +121,6 @@ export const MsgCreateDID = {
     } else {
       message.creator = "";
     }
-    if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = String(object.clientSpec);
-    } else {
-      message.clientSpec = "";
-    }
     return message;
   },
 
@@ -151,7 +138,6 @@ export const MsgCreateDID = {
       obj.signatures = [];
     }
     message.creator !== undefined && (obj.creator = message.creator);
-    message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
     return obj;
   },
 
@@ -172,11 +158,6 @@ export const MsgCreateDID = {
       message.creator = object.creator;
     } else {
       message.creator = "";
-    }
-    if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = object.clientSpec;
-    } else {
-      message.clientSpec = "";
     }
     return message;
   },
@@ -240,11 +221,7 @@ export const MsgCreateDIDResponse = {
   },
 };
 
-const baseMsgUpdateDID: object = {
-  version_id: "",
-  creator: "",
-  clientSpec: "",
-};
+const baseMsgUpdateDID: object = { version_id: "", creator: "" };
 
 export const MsgUpdateDID = {
   encode(message: MsgUpdateDID, writer: Writer = Writer.create()): Writer {
@@ -259,9 +236,6 @@ export const MsgUpdateDID = {
     }
     if (message.creator !== "") {
       writer.uint32(34).string(message.creator);
-    }
-    if (message.clientSpec !== "") {
-      writer.uint32(42).string(message.clientSpec);
     }
     return writer;
   },
@@ -285,9 +259,6 @@ export const MsgUpdateDID = {
           break;
         case 4:
           message.creator = reader.string();
-          break;
-        case 5:
-          message.clientSpec = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -320,11 +291,6 @@ export const MsgUpdateDID = {
     } else {
       message.creator = "";
     }
-    if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = String(object.clientSpec);
-    } else {
-      message.clientSpec = "";
-    }
     return message;
   },
 
@@ -343,7 +309,6 @@ export const MsgUpdateDID = {
       obj.signatures = [];
     }
     message.creator !== undefined && (obj.creator = message.creator);
-    message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
     return obj;
   },
 
@@ -369,11 +334,6 @@ export const MsgUpdateDID = {
       message.creator = object.creator;
     } else {
       message.creator = "";
-    }
-    if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = object.clientSpec;
-    } else {
-      message.clientSpec = "";
     }
     return message;
   },
@@ -437,7 +397,7 @@ export const MsgUpdateDIDResponse = {
   },
 };
 
-const baseMsgCreateSchema: object = { creator: "", clientSpec: "" };
+const baseMsgCreateSchema: object = { creator: "" };
 
 export const MsgCreateSchema = {
   encode(message: MsgCreateSchema, writer: Writer = Writer.create()): Writer {
@@ -456,8 +416,8 @@ export const MsgCreateSchema = {
         writer.uint32(26).fork()
       ).ldelim();
     }
-    if (message.clientSpec !== "") {
-      writer.uint32(34).string(message.clientSpec);
+    if (message.clientSpec !== undefined) {
+      ClientSpec.encode(message.clientSpec, writer.uint32(34).fork()).ldelim();
     }
     return writer;
   },
@@ -479,7 +439,7 @@ export const MsgCreateSchema = {
           message.schemaProof = SchemaProof.decode(reader, reader.uint32());
           break;
         case 4:
-          message.clientSpec = reader.string();
+          message.clientSpec = ClientSpec.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -507,9 +467,9 @@ export const MsgCreateSchema = {
       message.schemaProof = undefined;
     }
     if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = String(object.clientSpec);
+      message.clientSpec = ClientSpec.fromJSON(object.clientSpec);
     } else {
-      message.clientSpec = "";
+      message.clientSpec = undefined;
     }
     return message;
   },
@@ -525,7 +485,10 @@ export const MsgCreateSchema = {
       (obj.schemaProof = message.schemaProof
         ? SchemaProof.toJSON(message.schemaProof)
         : undefined);
-    message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
+    message.clientSpec !== undefined &&
+      (obj.clientSpec = message.clientSpec
+        ? ClientSpec.toJSON(message.clientSpec)
+        : undefined);
     return obj;
   },
 
@@ -547,9 +510,9 @@ export const MsgCreateSchema = {
       message.schemaProof = undefined;
     }
     if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = object.clientSpec;
+      message.clientSpec = ClientSpec.fromPartial(object.clientSpec);
     } else {
-      message.clientSpec = "";
+      message.clientSpec = undefined;
     }
     return message;
   },
@@ -621,12 +584,7 @@ export const MsgCreateSchemaResponse = {
   },
 };
 
-const baseMsgDeactivateDID: object = {
-  creator: "",
-  didId: "",
-  version_id: "",
-  clientSpec: "",
-};
+const baseMsgDeactivateDID: object = { creator: "", didId: "", version_id: "" };
 
 export const MsgDeactivateDID = {
   encode(message: MsgDeactivateDID, writer: Writer = Writer.create()): Writer {
@@ -641,9 +599,6 @@ export const MsgDeactivateDID = {
     }
     for (const v of message.signatures) {
       SignInfo.encode(v!, writer.uint32(34).fork()).ldelim();
-    }
-    if (message.clientSpec !== "") {
-      writer.uint32(42).string(message.clientSpec);
     }
     return writer;
   },
@@ -667,9 +622,6 @@ export const MsgDeactivateDID = {
           break;
         case 4:
           message.signatures.push(SignInfo.decode(reader, reader.uint32()));
-          break;
-        case 5:
-          message.clientSpec = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -702,11 +654,6 @@ export const MsgDeactivateDID = {
         message.signatures.push(SignInfo.fromJSON(e));
       }
     }
-    if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = String(object.clientSpec);
-    } else {
-      message.clientSpec = "";
-    }
     return message;
   },
 
@@ -722,7 +669,6 @@ export const MsgDeactivateDID = {
     } else {
       obj.signatures = [];
     }
-    message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
     return obj;
   },
 
@@ -748,11 +694,6 @@ export const MsgDeactivateDID = {
       for (const e of object.signatures) {
         message.signatures.push(SignInfo.fromPartial(e));
       }
-    }
-    if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = object.clientSpec;
-    } else {
-      message.clientSpec = "";
     }
     return message;
   },
@@ -827,7 +768,7 @@ export const MsgDeactivateDIDResponse = {
   },
 };
 
-const baseMsgRegisterCredentialStatus: object = { creator: "", clientSpec: "" };
+const baseMsgRegisterCredentialStatus: object = { creator: "" };
 
 export const MsgRegisterCredentialStatus = {
   encode(
@@ -846,8 +787,8 @@ export const MsgRegisterCredentialStatus = {
     if (message.proof !== undefined) {
       CredentialProof.encode(message.proof, writer.uint32(26).fork()).ldelim();
     }
-    if (message.clientSpec !== "") {
-      writer.uint32(34).string(message.clientSpec);
+    if (message.clientSpec !== undefined) {
+      ClientSpec.encode(message.clientSpec, writer.uint32(34).fork()).ldelim();
     }
     return writer;
   },
@@ -877,7 +818,7 @@ export const MsgRegisterCredentialStatus = {
           message.proof = CredentialProof.decode(reader, reader.uint32());
           break;
         case 4:
-          message.clientSpec = reader.string();
+          message.clientSpec = ClientSpec.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -912,9 +853,9 @@ export const MsgRegisterCredentialStatus = {
       message.proof = undefined;
     }
     if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = String(object.clientSpec);
+      message.clientSpec = ClientSpec.fromJSON(object.clientSpec);
     } else {
-      message.clientSpec = "";
+      message.clientSpec = undefined;
     }
     return message;
   },
@@ -930,7 +871,10 @@ export const MsgRegisterCredentialStatus = {
       (obj.proof = message.proof
         ? CredentialProof.toJSON(message.proof)
         : undefined);
-    message.clientSpec !== undefined && (obj.clientSpec = message.clientSpec);
+    message.clientSpec !== undefined &&
+      (obj.clientSpec = message.clientSpec
+        ? ClientSpec.toJSON(message.clientSpec)
+        : undefined);
     return obj;
   },
 
@@ -961,9 +905,9 @@ export const MsgRegisterCredentialStatus = {
       message.proof = undefined;
     }
     if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = object.clientSpec;
+      message.clientSpec = ClientSpec.fromPartial(object.clientSpec);
     } else {
-      message.clientSpec = "";
+      message.clientSpec = undefined;
     }
     return message;
   },
@@ -1044,7 +988,6 @@ export interface Msg {
   UpdateDID(request: MsgUpdateDID): Promise<MsgUpdateDIDResponse>;
   CreateSchema(request: MsgCreateSchema): Promise<MsgCreateSchemaResponse>;
   DeactivateDID(request: MsgDeactivateDID): Promise<MsgDeactivateDIDResponse>;
-  /** this line is used by starport scaffolding # proto/tx/rpc */
   RegisterCredentialStatus(
     request: MsgRegisterCredentialStatus
   ): Promise<MsgRegisterCredentialStatusResponse>;
