@@ -354,7 +354,7 @@ export default class HypersignDID implements IDID {
       {
         signature,
         verification_method_id: verificationMethodId,
-        clientSpec: undefined
+        clientSpec: undefined,
       },
     ];
     return await this.didrpc.registerDID(didDoc, signInfos);
@@ -441,7 +441,7 @@ export default class HypersignDID implements IDID {
       {
         signature,
         verification_method_id: verificationMethodId,
-        clientSpec: undefined
+        clientSpec: undefined,
       },
     ];
     return await this.didrpc.updateDID(didDoc, signInfos, versionId);
@@ -490,7 +490,7 @@ export default class HypersignDID implements IDID {
       {
         signature,
         verification_method_id: verificationMethodId,
-        clientSpec: undefined
+        clientSpec: undefined,
       },
     ];
     return await this.didrpc.deactivateDID(didDoc.id, signInfos, versionId);
