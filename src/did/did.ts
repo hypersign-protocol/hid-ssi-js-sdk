@@ -262,6 +262,9 @@ export default class HypersignDID implements IDID {
       edKeyPair = await Ed25519VerificationKey2020.generate({ seed: seedBytes, id: params.controller });
     } else if (params && params.controller) {
       edKeyPair = await Ed25519VerificationKey2020.generate({ id: params.controller });
+    } else if (params && params.seed) {
+      const seedBytes = new Uint8Array(Buffer.from(params.seed));
+      edKeyPair = await Ed25519VerificationKey2020.generate({ seed: seedBytes });
     } else {
       edKeyPair = await Ed25519VerificationKey2020.generate();
     }
@@ -617,8 +620,8 @@ export default class HypersignDID implements IDID {
     if (!pubkey) {
       throw new Error(
         'HID-SSI-SDK:: Error: could not find verification method for verificationMethodId: ' +
-          verificationMethodId +
-          ' in did document'
+        verificationMethodId +
+        ' in did document'
       );
     }
 
@@ -1002,9 +1005,9 @@ export default class HypersignDID implements IDID {
         if (!params.chainId) {
           throw new Error(
             'HID-SSI-SDK:: Error:  params.chainId is required to sign for clientSpec ' +
-              IClientSpec['cosmos-ADR036'] +
-              ' and keyType ' +
-              IKeyType.EcdsaSecp256k1VerificationKey2019
+            IClientSpec['cosmos-ADR036'] +
+            ' and keyType ' +
+            IKeyType.EcdsaSecp256k1VerificationKey2019
           );
         }
         const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
