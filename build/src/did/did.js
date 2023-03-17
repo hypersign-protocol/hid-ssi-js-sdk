@@ -389,10 +389,7 @@ var HypersignDID = /** @class */ (function () {
                             {
                                 signature: signature,
                                 verification_method_id: verificationMethodId,
-                                clientSpec: {
-                                    type: '',
-                                    adr036SignerAddress: '',
-                                },
+                                clientSpec: undefined,
                             },
                         ];
                         return [4 /*yield*/, this.didrpc.registerDID(didDoc, signInfos)];
@@ -484,10 +481,7 @@ var HypersignDID = /** @class */ (function () {
                             {
                                 signature: signature,
                                 verification_method_id: verificationMethodId,
-                                clientSpec: {
-                                    type: '',
-                                    adr036SignerAddress: '',
-                                },
+                                clientSpec: undefined,
                             },
                         ];
                         return [4 /*yield*/, this.didrpc.updateDID(didDoc, signInfos, versionId)];
@@ -536,10 +530,7 @@ var HypersignDID = /** @class */ (function () {
                             {
                                 signature: signature,
                                 verification_method_id: verificationMethodId,
-                                clientSpec: {
-                                    type: '',
-                                    adr036SignerAddress: '',
-                                },
+                                clientSpec: undefined,
                             },
                         ];
                         return [4 /*yield*/, this.didrpc.deactivateDID(didDoc.id, signInfos, versionId)];
