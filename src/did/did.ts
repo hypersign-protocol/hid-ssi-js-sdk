@@ -262,6 +262,9 @@ export default class HypersignDID implements IDID {
       edKeyPair = await Ed25519VerificationKey2020.generate({ seed: seedBytes, id: params.controller });
     } else if (params && params.controller) {
       edKeyPair = await Ed25519VerificationKey2020.generate({ id: params.controller });
+    } else if (params && params.seed) {
+      const seedBytes = new Uint8Array(Buffer.from(params.seed));
+      edKeyPair = await Ed25519VerificationKey2020.generate({ seed: seedBytes });
     } else {
       edKeyPair = await Ed25519VerificationKey2020.generate();
     }

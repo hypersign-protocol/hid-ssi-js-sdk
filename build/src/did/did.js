@@ -287,7 +287,7 @@ var HypersignDID = /** @class */ (function () {
      */
     HypersignDID.prototype.generateKeys = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var edKeyPair, seedBytes, exportedKp;
+            var edKeyPair, seedBytes, seedBytes, exportedKp;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -296,19 +296,26 @@ var HypersignDID = /** @class */ (function () {
                         return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate({ seed: seedBytes, id: params.controller })];
                     case 1:
                         edKeyPair = _a.sent();
-                        return [3 /*break*/, 6];
+                        return [3 /*break*/, 8];
                     case 2:
                         if (!(params && params.controller)) return [3 /*break*/, 4];
                         return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate({ id: params.controller })];
                     case 3:
                         edKeyPair = _a.sent();
-                        return [3 /*break*/, 6];
-                    case 4: return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate()];
+                        return [3 /*break*/, 8];
+                    case 4:
+                        if (!(params && params.seed)) return [3 /*break*/, 6];
+                        seedBytes = new Uint8Array(Buffer.from(params.seed));
+                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate({ seed: seedBytes })];
                     case 5:
                         edKeyPair = _a.sent();
-                        _a.label = 6;
-                    case 6: return [4 /*yield*/, edKeyPair.export({ publicKey: true, privateKey: true })];
+                        return [3 /*break*/, 8];
+                    case 6: return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate()];
                     case 7:
+                        edKeyPair = _a.sent();
+                        _a.label = 8;
+                    case 8: return [4 /*yield*/, edKeyPair.export({ publicKey: true, privateKey: true })];
+                    case 9:
                         exportedKp = _a.sent();
                         return [2 /*return*/, __assign({}, exportedKp)];
                 }
