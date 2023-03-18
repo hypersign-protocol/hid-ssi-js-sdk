@@ -117,7 +117,7 @@ class DIDDocument implements Did {
           type: constant['DID_' + keyType].VERIFICATION_METHOD_TYPE,
           controller: this.id,
           publicKeyMultibase: publicKey,
-          blockchainAccountId: '',
+          blockchainAccountId: blockchainAccountId,
         };
         const verificationMethod: VerificationMethod = vm;
         this.verificationMethod = [verificationMethod];
