@@ -152,7 +152,7 @@ var DIDDocument = /** @class */ (function () {
                     type: constant['DID_' + keyType].VERIFICATION_METHOD_TYPE,
                     controller: this.id,
                     publicKeyMultibase: publicKey,
-                    blockchainAccountId: '',
+                    blockchainAccountId: blockchainAccountId,
                 };
                 var verificationMethod_3 = vm;
                 this.verificationMethod = [verificationMethod_3];
