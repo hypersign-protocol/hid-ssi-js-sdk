@@ -708,7 +708,7 @@ var HypersignDID = /** @class */ (function () {
     // using in API
     HypersignDID.prototype.createByClientSpec = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var didDoc, verificationRelationships, blockChainAccountId, didId, newDid;
+            var didDoc, verificationRelationships, blockChainAccountId, didId, newDid, multibasePublicKey, didId, blockChainAccountId, newDid;
             return __generator(this, function (_a) {
                 if (this['window'] === 'undefined') {
                     console.log('HID-SSI-SDK:: Warning:  Running in non browser mode');
@@ -747,17 +747,15 @@ var HypersignDID = /** @class */ (function () {
                         break;
                     }
                     case IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019: {
-                        throw new Error('HID-SSI-SDK:: Error: Not  Supported');
-                        // if (!params.publicKey) {
-                        //   throw new Error(
-                        //     'HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
-                        //     IKeyType.EcdsaSecp256k1VerificationKey2019
-                        //   );
-                        // }
-                        // const multibasePublicKey = Utils._bufToMultibase(params.publicKey);
-                        // const didId = this._getId(params.methodSpecificId);
-                        // const newDid = new DIDDocument(multibasePublicKey, '', didId, params.keyType);
-                        // didDoc = Utils.jsonToLdConvertor({ ...newDid });
+                        if (!params.publicKey) {
+                            throw new Error('HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
+                                IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
+                        }
+                        multibasePublicKey = utils_1.default._bufToMultibase(params.publicKey);
+                        didId = this._getId(params.methodSpecificId);
+                        blockChainAccountId = 'cosmos:' + params.chainId + ':' + params.address;
+                        newDid = new DIDDocument(multibasePublicKey, blockChainAccountId, didId, params.keyType);
+                        didDoc = utils_1.default.jsonToLdConvertor(__assign({}, newDid));
                         break;
                     }
                     default: {

@@ -717,12 +717,12 @@ export default class HypersignDID implements IDID {
         if (!params.publicKey) {
           throw new Error(
             'HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
-            IKeyType.EcdsaSecp256k1VerificationKey2019
+              IKeyType.EcdsaSecp256k1VerificationKey2019
           );
         }
         const multibasePublicKey = Utils._bufToMultibase(params.publicKey);
         const didId = this._getId(params.methodSpecificId);
-        const blockChainAccountId='cosmos:'+params.chainId+':'+params.address
+        const blockChainAccountId = 'cosmos:' + params.chainId + ':' + params.address;
         const newDid = new DIDDocument(multibasePublicKey, blockChainAccountId, didId, params.keyType);
         didDoc = Utils.jsonToLdConvertor({ ...newDid });
 
