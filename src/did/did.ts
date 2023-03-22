@@ -660,11 +660,14 @@ export default class HypersignDID implements IDID {
     });
     return result;
   }
-
+  private _isValidMultibaseBase58String = (str) => {
+    const multibaseBase58Regex = /^z([1-9A-HJ-NP-Za-km-z]+)$/;
+    return multibaseBase58Regex.test(str);
+  };
   // using in API
   public async createByClientSpec(params: {
     methodSpecificId: string;
-    publicKey?: Uint8Array;
+    publicKey?: string;
     address: string;
     chainId: string;
     keyType: IKeyType;
@@ -720,7 +723,14 @@ export default class HypersignDID implements IDID {
               IKeyType.EcdsaSecp256k1VerificationKey2019
           );
         }
-        const multibasePublicKey = Utils._bufToMultibase(params.publicKey);
+        if (!this._isValidMultibaseBase58String(params.publicKey)) {
+          throw new Error(
+            'HID-SSI-SDK:: Error: params.publicKey mustbe multibase encoded base58 string for ' +
+              IKeyType.EcdsaSecp256k1VerificationKey2019
+          );
+        }
+
+        const multibasePublicKey = params.publicKey;
         const didId = this._getId(params.methodSpecificId);
         const blockChainAccountId = 'cosmos:' + params.chainId + ':' + params.address;
         const newDid = new DIDDocument(multibasePublicKey, blockChainAccountId, didId, params.keyType);

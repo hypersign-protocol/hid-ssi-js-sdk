@@ -199,6 +199,10 @@ var HypersignDID = /** @class */ (function () {
                     : "".concat(constant.DID.SCHEME, ":").concat(constant.DID.METHOD, ":").concat(methodSpecificId);
             return did;
         };
+        this._isValidMultibaseBase58String = function (str) {
+            var multibaseBase58Regex = /^z([1-9A-HJ-NP-Za-km-z]+)$/;
+            return multibaseBase58Regex.test(str);
+        };
         var offlineSigner = params.offlineSigner, namespace = params.namespace, nodeRpcEndpoint = params.nodeRpcEndpoint, nodeRestEndpoint = params.nodeRestEndpoint;
         var nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
         var nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
@@ -751,7 +755,11 @@ var HypersignDID = /** @class */ (function () {
                             throw new Error('HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
                                 IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
                         }
-                        multibasePublicKey = utils_1.default._bufToMultibase(params.publicKey);
+                        if (!this._isValidMultibaseBase58String(params.publicKey)) {
+                            throw new Error('HID-SSI-SDK:: Error: params.publicKey mustbe multibase encoded base58 string for ' +
+                                IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
+                        }
+                        multibasePublicKey = params.publicKey;
                         didId = this._getId(params.methodSpecificId);
                         blockChainAccountId = 'cosmos:' + params.chainId + ':' + params.address;
                         newDid = new DIDDocument(multibasePublicKey, blockChainAccountId, didId, params.keyType);
