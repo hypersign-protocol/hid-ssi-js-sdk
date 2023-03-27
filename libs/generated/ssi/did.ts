@@ -1,4 +1,5 @@
 /* eslint-disable */
+import { ClientSpec } from "./clientSpec";
 import { Writer, Reader } from "protobufjs/minimal";
 
 export const protobufPackage = "hypersignprotocol.hidnode.ssi";
@@ -6,7 +7,6 @@ export const protobufPackage = "hypersignprotocol.hidnode.ssi";
 export interface Did {
   context: string[];
   id: string;
-  /** DID Controller Spec: https://www.w3.org/TR/did-core/#did-controller */
   controller: string[];
   alsoKnownAs: string[];
   verificationMethod: VerificationMethod[];
@@ -29,7 +29,10 @@ export interface VerificationMethod {
   id: string;
   type: string;
   controller: string;
+  /** If value is provided, `blockchainAccountId` must be empty */
   publicKeyMultibase: string;
+  /** If value is provided, `publicKeyMultibase` must be empty */
+  blockchainAccountId: string;
 }
 
 export interface Service {
@@ -41,6 +44,7 @@ export interface Service {
 export interface SignInfo {
   verification_method_id: string;
   signature: string;
+  clientSpec: ClientSpec | undefined;
 }
 
 export interface DidDocumentState {
@@ -500,6 +504,7 @@ const baseVerificationMethod: object = {
   type: "",
   controller: "",
   publicKeyMultibase: "",
+  blockchainAccountId: "",
 };
 
 export const VerificationMethod = {
@@ -518,6 +523,9 @@ export const VerificationMethod = {
     }
     if (message.publicKeyMultibase !== "") {
       writer.uint32(34).string(message.publicKeyMultibase);
+    }
+    if (message.blockchainAccountId !== "") {
+      writer.uint32(42).string(message.blockchainAccountId);
     }
     return writer;
   },
@@ -540,6 +548,9 @@ export const VerificationMethod = {
           break;
         case 4:
           message.publicKeyMultibase = reader.string();
+          break;
+        case 5:
+          message.blockchainAccountId = reader.string();
           break;
         default:
           reader.skipType(tag & 7);
@@ -574,6 +585,14 @@ export const VerificationMethod = {
     } else {
       message.publicKeyMultibase = "";
     }
+    if (
+      object.blockchainAccountId !== undefined &&
+      object.blockchainAccountId !== null
+    ) {
+      message.blockchainAccountId = String(object.blockchainAccountId);
+    } else {
+      message.blockchainAccountId = "";
+    }
     return message;
   },
 
@@ -584,6 +603,8 @@ export const VerificationMethod = {
     message.controller !== undefined && (obj.controller = message.controller);
     message.publicKeyMultibase !== undefined &&
       (obj.publicKeyMultibase = message.publicKeyMultibase);
+    message.blockchainAccountId !== undefined &&
+      (obj.blockchainAccountId = message.blockchainAccountId);
     return obj;
   },
 
@@ -611,6 +632,14 @@ export const VerificationMethod = {
       message.publicKeyMultibase = object.publicKeyMultibase;
     } else {
       message.publicKeyMultibase = "";
+    }
+    if (
+      object.blockchainAccountId !== undefined &&
+      object.blockchainAccountId !== null
+    ) {
+      message.blockchainAccountId = object.blockchainAccountId;
+    } else {
+      message.blockchainAccountId = "";
     }
     return message;
   },
@@ -722,6 +751,9 @@ export const SignInfo = {
     if (message.signature !== "") {
       writer.uint32(18).string(message.signature);
     }
+    if (message.clientSpec !== undefined) {
+      ClientSpec.encode(message.clientSpec, writer.uint32(26).fork()).ldelim();
+    }
     return writer;
   },
 
@@ -737,6 +769,9 @@ export const SignInfo = {
           break;
         case 2:
           message.signature = reader.string();
+          break;
+        case 3:
+          message.clientSpec = ClientSpec.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -761,6 +796,11 @@ export const SignInfo = {
     } else {
       message.signature = "";
     }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = ClientSpec.fromJSON(object.clientSpec);
+    } else {
+      message.clientSpec = undefined;
+    }
     return message;
   },
 
@@ -769,6 +809,10 @@ export const SignInfo = {
     message.verification_method_id !== undefined &&
       (obj.verification_method_id = message.verification_method_id);
     message.signature !== undefined && (obj.signature = message.signature);
+    message.clientSpec !== undefined &&
+      (obj.clientSpec = message.clientSpec
+        ? ClientSpec.toJSON(message.clientSpec)
+        : undefined);
     return obj;
   },
 
@@ -786,6 +830,11 @@ export const SignInfo = {
       message.signature = object.signature;
     } else {
       message.signature = "";
+    }
+    if (object.clientSpec !== undefined && object.clientSpec !== null) {
+      message.clientSpec = ClientSpec.fromPartial(object.clientSpec);
+    } else {
+      message.clientSpec = undefined;
     }
     return message;
   },

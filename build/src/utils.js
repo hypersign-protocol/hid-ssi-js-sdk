@@ -105,6 +105,9 @@ var Utils = /** @class */ (function () {
         mbKey = mbKey.slice(header.length);
         return "z" + encode(mbKey); //Buffer.from(mbKey).toString('base64');
     };
+    Utils._bufToMultibase = function (pubKeyBuf) {
+        return "z" + encode(pubKeyBuf);
+    };
     // Converting 45byte public key to 48 by padding header 
     // Converting 88byte private key to 91 by padding header
     Utils.convertedStableLibKeysIntoEd25519verificationkey2020 = function (stableLibKp) {

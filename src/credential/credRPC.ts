@@ -119,14 +119,30 @@ export class CredentialRPC implements ICredentialRPC {
   async resolveCredentialStatus(credentialId: string): Promise<Credential> {
     credentialId = credentialId + ':'; // TODO:  we need to sort this out ... need to remove later
     const get_didUrl = `${this.credentialRestEP}/${credentialId}`;
-    const response = await axios.get(get_didUrl);
-    if (!response.data) {
-      throw new Error('Could not resolve credential status of credentialId ' + credentialId);
+    let response;
+    try {
+      response = await axios.get(get_didUrl);
+      if (!response.data) {
+        throw new Error('Could not resolve credential status of credentialId ' + credentialId);
+      }
+      const credStatus: Credential = response.data.credStatus;
+      if (!credStatus || !credStatus.claim || !credStatus.proof) {
+        throw new Error('No credential status found. Probably invalid credentialId');
+      }
+      return credStatus;
+    } catch (err) {
+      const credStatus: Credential = {
+        claim: null,
+        issuer: '',
+        issuanceDate: '',
+        expirationDate: '',
+        credentialHash: '',
+        proof: null,
+      } as any as Credential;
+      if (!credStatus || !credStatus.claim || !credStatus.proof) {
+        throw new Error('No credential status found. Probably invalid credentialId');
+      }
+      return credStatus;
     }
-    const credStatus: Credential = response.data.credStatus;
-    if (!credStatus || !credStatus.claim || !credStatus.proof) {
-      throw new Error('No credential status found. Probably invalid credentialId');
-    }
-    return credStatus;
   }
 }

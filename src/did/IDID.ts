@@ -4,12 +4,31 @@
  * Author: Hypermine Core Team
  */
 
-import { Did as IDidProto, Metadata, VerificationMethod, Service } from '../../libs/generated/ssi/did';
+import { Did as IDidProto, Metadata, VerificationMethod, Service, SignInfo } from '../../libs/generated/ssi/did';
 export interface IPublicKey {
   '@context': string;
   id: string;
   type: string;
   publicKeyBase58: string;
+}
+
+export enum IVerificationRelationships {
+  authentication = 'authentication',
+  assertionMethod = 'assertionMethod',
+  keyAgreement = 'keyAgreement',
+  capabilityInvocation = 'capabilityInvocation',
+  capabilityDelegation = 'capabilityDelegation',
+}
+
+export enum IKeyType {
+  Ed25519VerificationKey2020 = 'Ed25519VerificationKey2020',
+  EcdsaSecp256k1VerificationKey2019 = 'EcdsaSecp256k1VerificationKey2019',
+  EcdsaSecp256k1RecoveryMethod2020 = 'EcdsaSecp256k1RecoveryMethod2020',
+}
+
+export enum IClientSpec {
+  'eth-personalSign' = 'eth-personalSign',
+  'cosmos-ADR036' = 'cosmos-ADR036',
 }
 
 export interface IController {
@@ -48,9 +67,16 @@ export interface ISignedDIDDocument extends IDidProto {
 }
 
 export interface IDID {
-  generateKeys(params: { seed?: string }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }>;
+  generateKeys(params: {
+    seed?: string;
+    controller?: string;
+  }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }>;
 
-  generate(params: { methodSpecificId?: string; publicKeyMultibase: string }): Promise<object>;
+  generate(params: {
+    methodSpecificId?: string;
+    publicKeyMultibase: string;
+    verificationRelationships: IVerificationRelationships[];
+  }): Promise<object>;
 
   register(params: { didDocument: object; privateKeyMultibase: string; verificationMethodId: string }): Promise<object>;
 
@@ -94,9 +120,9 @@ export interface IDIDResolve {
 }
 
 export interface IDIDRpc {
-  registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string): Promise<object>;
-  updateDID(didDoc: IDidProto, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
-  deactivateDID(did: string, signature: string, verificationMethodId: string, versionId: string): Promise<object>;
+  registerDID(didDoc: IDidProto, signInfos: SignInfo[]): Promise<object>;
+  updateDID(didDoc: IDidProto | any, signInfos: SignInfo[], versionId: string): Promise<object>;
+  deactivateDID(did: string, signInfos: SignInfo[], versionId: string): Promise<object>;
   resolveDID(did: string): Promise<IDIDResolve>;
   init(): Promise<void>;
 }

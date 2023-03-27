@@ -37,6 +37,47 @@ export enum CredentialStatusReasonEnums {
 
 
 
+export const DID_Ed25519VerificationKey2020 = {
+  CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
+  SCHEME: 'did',
+  METHOD: 'hid',
+  NAMESPACE: 'testnet', // this is not used
+  DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
+  VERIFICATION_METHOD_TYPE: 'Ed25519VerificationKey2020',
+  BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
+
+};
+
+
+export const DID_EcdsaSecp256k1RecoveryMethod2020 = {
+  CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
+  SCHEME: 'did',
+  METHOD: 'hid',
+  NAMESPACE: 'testnet', // this is not used
+  DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
+  BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
+
+  VERIFICATION_METHOD_TYPE: 'EcdsaSecp256k1RecoveryMethod2020',
+};
+
+
+
+export const DID_EcdsaSecp256k1VerificationKey2019 = {
+  CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
+  SCHEME: 'did',
+  METHOD: 'hid',
+  NAMESPACE: 'testnet', // this is not used
+  DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
+  BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
+  VERIFICATION_METHOD_TYPE: 'EcdsaSecp256k1VerificationKey2019',
+};
+
+
+export enum CAIP_10_PREFIX{
+  "eip155"="eip155",
+}
+
+
 export const DID = {
   CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
   SCHEME: 'did',
@@ -44,7 +85,10 @@ export const DID = {
   NAMESPACE: 'testnet', // this is not used
   DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
   VERIFICATION_METHOD_TYPE: 'Ed25519VerificationKey2020',
+  BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
+
 };
+
 Object.freeze(DID);
 
 export const VC = {
@@ -58,6 +102,7 @@ export const VC = {
     CREDENTAIL_BASE_CONTEXT: "https://www.w3.org/2018/credentials/v1",
     CREDENTAIL_SECURITY_CONTEXT_V2: "https://w3id.org/security/v2",
     CREDENTAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1",
+    CREDENTAIL_ECDSA_SECURITY_SUITE: "https://w3id.org/security/suites/secp256k1recovery-2020/v2",
     PROOF_PURPOSE: "assertion",
     VERIFICATION_METHOD_TYPE: "Ed25519Signature2020",
     CRED_STATUS_TYPES: CredentialStatusEnums ,

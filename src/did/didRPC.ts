@@ -11,7 +11,7 @@ import { SigningStargateClient } from '@cosmjs/stargate';
 
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
-import { IDIDResolve, IDIDRpc } from './IDID';
+import { IClientSpec, IDIDResolve, IDIDRpc, IKeyType } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 
 export class DIDRpc implements IDIDRpc {
@@ -41,54 +41,39 @@ export class DIDRpc implements IDIDRpc {
     await this.hidClient.init();
   }
 
-  async registerDID(didDoc: IDidProto, signature: string, verificationMethodId: string): Promise<object> {
+  async registerDID(didDoc: IDidProto, signInfos: SignInfo[]): Promise<object> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
 
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
-    const signInfo: SignInfo = {
-      verification_method_id: verificationMethodId,
-      signature,
-    };
 
     const txMessage = {
       typeUrl, // Same as above
       value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
         didDocString: didDoc,
-        signatures: [signInfo],
+        signatures: signInfos,
         creator: HIDClient.getHidWalletAddress(),
       }),
     };
-
     const fee = 'auto';
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
     return txResult;
   }
 
-  async updateDID(
-    didDoc: IDidProto,
-    signature: string,
-    verificationMethodId: string,
-    versionId: string
-  ): Promise<object> {
+  async updateDID(didDoc: IDidProto, signInfos: SignInfo[], versionId: string): Promise<object> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
 
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgUpdateDID}`;
 
-    const signInfo: SignInfo = {
-      verification_method_id: verificationMethodId,
-      signature,
-    };
-
     const txMessage = {
       typeUrl, // Same as above
       value: generatedProto[HIDRpcEnums.MsgUpdateDID].fromPartial({
         didDocString: didDoc,
-        signatures: [signInfo],
+        signatures: signInfos,
         creator: HIDClient.getHidWalletAddress(),
         version_id: versionId,
       }),
@@ -102,27 +87,18 @@ export class DIDRpc implements IDIDRpc {
     return txResult;
   }
 
-  async deactivateDID(
-    did: string,
-    signature: string,
-    verificationMethodId: string,
-    versionId: string
-  ): Promise<object> {
+  async deactivateDID(did: string, signInfos: SignInfo[], versionId: string): Promise<object> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
 
     const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgDeactivateDID}`;
-    const signInfo: SignInfo = {
-      verification_method_id: verificationMethodId,
-      signature,
-    };
 
     const txMessage = {
       typeUrl, // Same as above
       value: generatedProto[HIDRpcEnums.MsgDeactivateDID].fromPartial({
         didId: did,
-        signatures: [signInfo],
+        signatures: signInfos,
         creator: HIDClient.getHidWalletAddress(),
         version_id: versionId,
       }),
@@ -138,8 +114,13 @@ export class DIDRpc implements IDIDRpc {
   async resolveDID(did: string): Promise<IDIDResolve> {
     did = did + ':'; // TODO:  we need to sort this out ... need to remove later
     const get_didUrl = `${this.didRestEp}/${did}`;
-    const response = await axios.get(get_didUrl);
-    const didDoc = response.data;
-    return didDoc;
+    let response;
+    try {
+      response = await axios.get(get_didUrl);
+      const didDoc = response.data;
+      return didDoc;
+    } catch (err) {
+      return { didDocument: null, didDocumentMetadata: null } as any as IDIDResolve;
+    }
   }
 }

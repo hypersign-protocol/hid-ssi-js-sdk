@@ -95,9 +95,9 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
-    DIDRpc.prototype.registerDID = function (didDoc, signature, verificationMethodId) {
+    DIDRpc.prototype.registerDID = function (didDoc, signInfos) {
         return __awaiter(this, void 0, void 0, function () {
-            var typeUrl, signInfo, txMessage, fee, hidClient, txResult;
+            var typeUrl, txMessage, fee, hidClient, txResult;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -105,15 +105,11 @@ var DIDRpc = /** @class */ (function () {
                             throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
                         }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgCreateDID);
-                        signInfo = {
-                            verification_method_id: verificationMethodId,
-                            signature: signature,
-                        };
                         txMessage = {
                             typeUrl: typeUrl,
                             value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
                                 didDocString: didDoc,
-                                signatures: [signInfo],
+                                signatures: signInfos,
                                 creator: client_1.HIDClient.getHidWalletAddress(),
                             }),
                         };
@@ -127,9 +123,9 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
-    DIDRpc.prototype.updateDID = function (didDoc, signature, verificationMethodId, versionId) {
+    DIDRpc.prototype.updateDID = function (didDoc, signInfos, versionId) {
         return __awaiter(this, void 0, void 0, function () {
-            var typeUrl, signInfo, txMessage, fee, hidClient, txResult;
+            var typeUrl, txMessage, fee, hidClient, txResult;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -137,15 +133,11 @@ var DIDRpc = /** @class */ (function () {
                             throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
                         }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgUpdateDID);
-                        signInfo = {
-                            verification_method_id: verificationMethodId,
-                            signature: signature,
-                        };
                         txMessage = {
                             typeUrl: typeUrl,
                             value: generatedProto[constants_1.HIDRpcEnums.MsgUpdateDID].fromPartial({
                                 didDocString: didDoc,
-                                signatures: [signInfo],
+                                signatures: signInfos,
                                 creator: client_1.HIDClient.getHidWalletAddress(),
                                 version_id: versionId,
                             }),
@@ -160,9 +152,9 @@ var DIDRpc = /** @class */ (function () {
             });
         });
     };
-    DIDRpc.prototype.deactivateDID = function (did, signature, verificationMethodId, versionId) {
+    DIDRpc.prototype.deactivateDID = function (did, signInfos, versionId) {
         return __awaiter(this, void 0, void 0, function () {
-            var typeUrl, signInfo, txMessage, fee, hidClient, txResult;
+            var typeUrl, txMessage, fee, hidClient, txResult;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -170,15 +162,11 @@ var DIDRpc = /** @class */ (function () {
                             throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
                         }
                         typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums.MsgDeactivateDID);
-                        signInfo = {
-                            verification_method_id: verificationMethodId,
-                            signature: signature,
-                        };
                         txMessage = {
                             typeUrl: typeUrl,
                             value: generatedProto[constants_1.HIDRpcEnums.MsgDeactivateDID].fromPartial({
                                 didId: did,
-                                signatures: [signInfo],
+                                signatures: signInfos,
                                 creator: client_1.HIDClient.getHidWalletAddress(),
                                 version_id: versionId,
                             }),
@@ -195,17 +183,24 @@ var DIDRpc = /** @class */ (function () {
     };
     DIDRpc.prototype.resolveDID = function (did) {
         return __awaiter(this, void 0, void 0, function () {
-            var get_didUrl, response, didDoc;
+            var get_didUrl, response, didDoc, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         did = did + ':'; // TODO:  we need to sort this out ... need to remove later
                         get_didUrl = "".concat(this.didRestEp, "/").concat(did);
-                        return [4 /*yield*/, axios_1.default.get(get_didUrl)];
+                        _a.label = 1;
                     case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, axios_1.default.get(get_didUrl)];
+                    case 2:
                         response = _a.sent();
                         didDoc = response.data;
                         return [2 /*return*/, didDoc];
+                    case 3:
+                        err_1 = _a.sent();
+                        return [2 /*return*/, { didDocument: null, didDocumentMetadata: null }];
+                    case 4: return [2 /*return*/];
                 }
             });
         });

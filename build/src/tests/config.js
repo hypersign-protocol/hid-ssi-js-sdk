@@ -39,12 +39,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createWallet = exports.makeCosmoshubPath = exports.hidNodeEp = exports.mnemonic = void 0;
 var proto_signing_1 = require("@cosmjs/proto-signing");
 var crypto_1 = require("@cosmjs/crypto");
-exports.mnemonic = 'zero require alcohol swamp hover punch celery common merge embrace flock dumb unit capital problem future canal improve auto home apple avoid tragic mechanic';
+exports.mnemonic = 'verify sustain lumber boat demise parade special soft bargain scout spoil there addict move badge rebuild horn achieve hollow acquire glide bundle curious present';
 exports.hidNodeEp = {
     rpc: 'https://rpc.jagrat.hypersign.id',
     rest: 'https://api.jagrat.hypersign.id',
     namespace: 'testnet',
 };
+// export const hidNodeEp = {
+//   rpc: 'http://localhost:26657',
+//   rest: 'http://localhost:1317',
+//   namespace: 'testnet',
+// };
 function makeCosmoshubPath(a) {
     return [
         crypto_1.Slip10RawIndex.hardened(44),

@@ -13,6 +13,7 @@ var __assign = (this && this.__assign) || function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DidDocumentState = exports.SignInfo = exports.Service = exports.VerificationMethod = exports.Metadata = exports.Did = exports.protobufPackage = void 0;
 /* eslint-disable */
+var clientSpec_1 = require("./clientSpec");
 var minimal_1 = require("protobufjs/minimal");
 exports.protobufPackage = "hypersignprotocol.hidnode.ssi";
 var baseDid = {
@@ -489,6 +490,7 @@ var baseVerificationMethod = {
     type: "",
     controller: "",
     publicKeyMultibase: "",
+    blockchainAccountId: "",
 };
 exports.VerificationMethod = {
     encode: function (message, writer) {
@@ -504,6 +506,9 @@ exports.VerificationMethod = {
         }
         if (message.publicKeyMultibase !== "") {
             writer.uint32(34).string(message.publicKeyMultibase);
+        }
+        if (message.blockchainAccountId !== "") {
+            writer.uint32(42).string(message.blockchainAccountId);
         }
         return writer;
     },
@@ -525,6 +530,9 @@ exports.VerificationMethod = {
                     break;
                 case 4:
                     message.publicKeyMultibase = reader.string();
+                    break;
+                case 5:
+                    message.blockchainAccountId = reader.string();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -560,6 +568,13 @@ exports.VerificationMethod = {
         else {
             message.publicKeyMultibase = "";
         }
+        if (object.blockchainAccountId !== undefined &&
+            object.blockchainAccountId !== null) {
+            message.blockchainAccountId = String(object.blockchainAccountId);
+        }
+        else {
+            message.blockchainAccountId = "";
+        }
         return message;
     },
     toJSON: function (message) {
@@ -569,6 +584,8 @@ exports.VerificationMethod = {
         message.controller !== undefined && (obj.controller = message.controller);
         message.publicKeyMultibase !== undefined &&
             (obj.publicKeyMultibase = message.publicKeyMultibase);
+        message.blockchainAccountId !== undefined &&
+            (obj.blockchainAccountId = message.blockchainAccountId);
         return obj;
     },
     fromPartial: function (object) {
@@ -597,6 +614,13 @@ exports.VerificationMethod = {
         }
         else {
             message.publicKeyMultibase = "";
+        }
+        if (object.blockchainAccountId !== undefined &&
+            object.blockchainAccountId !== null) {
+            message.blockchainAccountId = object.blockchainAccountId;
+        }
+        else {
+            message.blockchainAccountId = "";
         }
         return message;
     },
@@ -704,6 +728,9 @@ exports.SignInfo = {
         if (message.signature !== "") {
             writer.uint32(18).string(message.signature);
         }
+        if (message.clientSpec !== undefined) {
+            clientSpec_1.ClientSpec.encode(message.clientSpec, writer.uint32(26).fork()).ldelim();
+        }
         return writer;
     },
     decode: function (input, length) {
@@ -718,6 +745,9 @@ exports.SignInfo = {
                     break;
                 case 2:
                     message.signature = reader.string();
+                    break;
+                case 3:
+                    message.clientSpec = clientSpec_1.ClientSpec.decode(reader, reader.uint32());
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -741,6 +771,12 @@ exports.SignInfo = {
         else {
             message.signature = "";
         }
+        if (object.clientSpec !== undefined && object.clientSpec !== null) {
+            message.clientSpec = clientSpec_1.ClientSpec.fromJSON(object.clientSpec);
+        }
+        else {
+            message.clientSpec = undefined;
+        }
         return message;
     },
     toJSON: function (message) {
@@ -748,6 +784,10 @@ exports.SignInfo = {
         message.verification_method_id !== undefined &&
             (obj.verification_method_id = message.verification_method_id);
         message.signature !== undefined && (obj.signature = message.signature);
+        message.clientSpec !== undefined &&
+            (obj.clientSpec = message.clientSpec
+                ? clientSpec_1.ClientSpec.toJSON(message.clientSpec)
+                : undefined);
         return obj;
     },
     fromPartial: function (object) {
@@ -764,6 +804,12 @@ exports.SignInfo = {
         }
         else {
             message.signature = "";
+        }
+        if (object.clientSpec !== undefined && object.clientSpec !== null) {
+            message.clientSpec = clientSpec_1.ClientSpec.fromPartial(object.clientSpec);
+        }
+        else {
+            message.clientSpec = undefined;
         }
         return message;
     },
