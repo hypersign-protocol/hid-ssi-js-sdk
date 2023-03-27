@@ -1008,7 +1008,15 @@ export default class HypersignDID implements IDID {
 
         const didDoc: Did = didDocStringJson as Did;
 
-        const signature = await params.web3.eth.personal.sign(JSON.stringify(didDoc), params.address);
+        const signature = await params.web3.eth.personal.sign(
+          JSON.stringify(didDoc, (key, value) => {
+            if (value === '' || (Array.isArray(value) && value.length === 0)) {
+              return undefined;
+            }
+            return value;
+          }),
+          params.address
+        );
         return { didDocument: didDoc, signature };
       }
       case IClientSpec['cosmos-ADR036']: {

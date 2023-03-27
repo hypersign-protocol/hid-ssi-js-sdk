@@ -502,7 +502,6 @@ var HypersignVerifiableCredential = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        console.log(params.credential.id);
                         if (!params.credential) {
                             throw new Error('HID-SSI-SDK:: params.credential is required to verify credential');
                         }

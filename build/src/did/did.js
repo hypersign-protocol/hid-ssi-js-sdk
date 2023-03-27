@@ -1006,7 +1006,12 @@ var HypersignDID = /** @class */ (function () {
                     case 1:
                         didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
                         didDoc = didDocStringJson;
-                        return [4 /*yield*/, params.web3.eth.personal.sign(JSON.stringify(didDoc), params.address)];
+                        return [4 /*yield*/, params.web3.eth.personal.sign(JSON.stringify(didDoc, function (key, value) {
+                                if (value === '' || (Array.isArray(value) && value.length === 0)) {
+                                    return undefined;
+                                }
+                                return value;
+                            }), params.address)];
                     case 2:
                         signature = _b.sent();
                         return [2 /*return*/, { didDocument: didDoc, signature: signature }];

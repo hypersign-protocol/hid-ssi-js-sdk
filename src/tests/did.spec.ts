@@ -21,6 +21,7 @@ let hypersignSSISDK;
 
 beforeEach(async function () {
   offlineSigner = await createWallet(mnemonic);
+
   const params = {
     offlineSigner,
     nodeRestEndpoint: hidNodeEp.rest,
