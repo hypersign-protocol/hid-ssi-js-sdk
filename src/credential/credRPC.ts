@@ -4,7 +4,12 @@
  * Author: Hypermine Core Team
  */
 
-import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH } from '../constants';
+import {
+  HIDRpcEnums,
+  HID_COSMOS_MODULE,
+  HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH,
+  HYPERSIGN_TESTNET_REST,
+} from '../constants';
 import * as generatedProto from '../../libs/generated/ssi/tx';
 import { SigningStargateClient, DeliverTxResponse } from '@cosmjs/stargate';
 import axios from 'axios';
@@ -12,6 +17,7 @@ import { HIDClient } from '../hid/client';
 import { ICredentialRPC } from './ICredential';
 import { CredentialStatus, CredentialProof, Credential } from '../../libs/generated/ssi/credential';
 import { OfflineSigner } from '@cosmjs/proto-signing';
+import Utils from '../utils';
 
 export class CredentialRPC implements ICredentialRPC {
   public credentialRestEP: string;
@@ -28,10 +34,13 @@ export class CredentialRPC implements ICredentialRPC {
   }) {
     if (offlineSigner) {
       this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+      this.credentialRestEP = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
     } else {
       this.hidClient = null;
+      this.credentialRestEP = nodeRestEndpoint
+        ? Utils.checkUrl(nodeRestEndpoint) + HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH
+        : Utils.checkUrl(HYPERSIGN_TESTNET_REST) + HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
     }
-    this.credentialRestEP = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
   }
 
   async init() {

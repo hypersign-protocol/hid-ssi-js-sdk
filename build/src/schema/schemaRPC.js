@@ -68,16 +68,20 @@ var constants_1 = require("../constants");
 var generatedProto = __importStar(require("../../libs/generated/ssi/tx"));
 var axios_1 = __importDefault(require("axios"));
 var client_1 = require("../hid/client");
+var utils_1 = __importDefault(require("../utils"));
 var SchemaRpc = /** @class */ (function () {
     function SchemaRpc(_a) {
         var offlineSigner = _a.offlineSigner, nodeRpcEndpoint = _a.nodeRpcEndpoint, nodeRestEndpoint = _a.nodeRestEndpoint;
         if (offlineSigner) {
             this.hidClient = new client_1.HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+            this.schemaRestEp = client_1.HIDClient.hidNodeRestEndpoint + constants_1.HYPERSIGN_NETWORK_SCHEMA_PATH;
         }
         else {
             this.hidClient = null;
+            this.schemaRestEp = nodeRestEndpoint
+                ? utils_1.default.checkUrl(nodeRestEndpoint) + constants_1.HYPERSIGN_NETWORK_SCHEMA_PATH
+                : utils_1.default.checkUrl(constants_1.HYPERSIGN_TESTNET_REST) + constants_1.HYPERSIGN_NETWORK_SCHEMA_PATH;
         }
-        this.schemaRestEp = client_1.HIDClient.hidNodeRestEndpoint + constants_1.HYPERSIGN_NETWORK_SCHEMA_PATH;
     }
     SchemaRpc.prototype.init = function () {
         return __awaiter(this, void 0, void 0, function () {

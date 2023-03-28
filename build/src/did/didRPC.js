@@ -78,7 +78,9 @@ var DIDRpc = /** @class */ (function () {
         }
         else {
             this.hidClient = null;
-            this.didRestEp = utils_1.default.checkUrl(nodeRestEndpoint) + constants_1.HYPERSIGN_NETWORK_DID_PATH;
+            this.didRestEp = nodeRestEndpoint
+                ? utils_1.default.checkUrl(nodeRestEndpoint) + constants_1.HYPERSIGN_NETWORK_DID_PATH
+                : utils_1.default.checkUrl(constants_1.HYPERSIGN_TESTNET_REST) + constants_1.HYPERSIGN_NETWORK_DID_PATH;
         }
     }
     DIDRpc.prototype.init = function () {

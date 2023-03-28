@@ -4,7 +4,7 @@
  * Author: Hypermine Core Team
  */
 
-import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_SCHEMA_PATH } from '../constants';
+import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_SCHEMA_PATH, HYPERSIGN_TESTNET_REST } from '../constants';
 import * as generatedProto from '../../libs/generated/ssi/tx';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import axios from 'axios';
@@ -12,6 +12,7 @@ import { HIDClient } from '../hid/client';
 import { Schema, SchemaProof } from '../../libs/generated/ssi/schema';
 import { SignInfo } from '../../libs/generated/ssi/did';
 import { SigningStargateClient } from '@cosmjs/stargate';
+import Utils from '../utils';
 
 export interface ISchemaRPC {
   createSchema(schema: Schema, proof: SchemaProof): Promise<object>;
@@ -33,10 +34,13 @@ export class SchemaRpc implements ISchemaRPC {
   }) {
     if (offlineSigner) {
       this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+      this.schemaRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_SCHEMA_PATH;
     } else {
       this.hidClient = null;
+      this.schemaRestEp = nodeRestEndpoint
+        ? Utils.checkUrl(nodeRestEndpoint) + HYPERSIGN_NETWORK_SCHEMA_PATH
+        : Utils.checkUrl(HYPERSIGN_TESTNET_REST) + HYPERSIGN_NETWORK_SCHEMA_PATH;
     }
-    this.schemaRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_SCHEMA_PATH;
   }
 
   async init() {

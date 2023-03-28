@@ -4,7 +4,7 @@
  * Author: Hypermine Core Team
  */
 
-import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_DID_PATH } from '../constants';
+import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_DID_PATH, HYPERSIGN_TESTNET_REST } from '../constants';
 import * as generatedProto from '../../libs/generated/ssi/tx';
 import { Did as IDidProto, SignInfo } from '../../libs/generated/ssi/did';
 import { SigningStargateClient } from '@cosmjs/stargate';
@@ -32,7 +32,10 @@ export class DIDRpc implements IDIDRpc {
       this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_PATH;
     } else {
       this.hidClient = null;
-      this.didRestEp = Utils.checkUrl(nodeRestEndpoint) + HYPERSIGN_NETWORK_DID_PATH;
+
+      this.didRestEp = nodeRestEndpoint
+        ? Utils.checkUrl(nodeRestEndpoint) + HYPERSIGN_NETWORK_DID_PATH
+        : Utils.checkUrl(HYPERSIGN_TESTNET_REST) + HYPERSIGN_NETWORK_DID_PATH;
     }
   }
 
