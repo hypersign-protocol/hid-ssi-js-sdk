@@ -68,15 +68,17 @@ var constants_1 = require("../constants");
 var generatedProto = __importStar(require("../../libs/generated/ssi/tx"));
 var axios_1 = __importDefault(require("axios"));
 var client_1 = require("../hid/client");
+var utils_1 = __importDefault(require("../utils"));
 var DIDRpc = /** @class */ (function () {
     function DIDRpc(_a) {
         var offlineSigner = _a.offlineSigner, nodeRpcEndpoint = _a.nodeRpcEndpoint, nodeRestEndpoint = _a.nodeRestEndpoint;
-        this.didRestEp = client_1.HIDClient.hidNodeRestEndpoint + constants_1.HYPERSIGN_NETWORK_DID_PATH;
         if (offlineSigner) {
             this.hidClient = new client_1.HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+            this.didRestEp = client_1.HIDClient.hidNodeRestEndpoint + constants_1.HYPERSIGN_NETWORK_DID_PATH;
         }
         else {
             this.hidClient = null;
+            this.didRestEp = utils_1.default.checkUrl(nodeRestEndpoint) + constants_1.HYPERSIGN_NETWORK_DID_PATH;
         }
     }
     DIDRpc.prototype.init = function () {
