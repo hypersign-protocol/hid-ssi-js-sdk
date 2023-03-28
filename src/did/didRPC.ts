@@ -13,6 +13,7 @@ import axios from 'axios';
 import { HIDClient } from '../hid/client';
 import { IClientSpec, IDIDResolve, IDIDRpc, IKeyType } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
+import Utils from '../utils';
 
 export class DIDRpc implements IDIDRpc {
   private didRestEp: string;
@@ -26,12 +27,15 @@ export class DIDRpc implements IDIDRpc {
     nodeRpcEndpoint: string;
     nodeRestEndpoint: string;
   }) {
-    this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_PATH;
     if (offlineSigner) {
       this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
+      this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_PATH;
+
     } else {
       this.hidClient = null;
+      this.didRestEp=Utils.checkUrl(nodeRestEndpoint)+HYPERSIGN_NETWORK_DID_PATH
     }
+
   }
 
   async init() {
