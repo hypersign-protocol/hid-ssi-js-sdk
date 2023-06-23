@@ -381,7 +381,7 @@ const hypersignDid = new HypersignDID({
 
 #### OfflineSigner 
 
-You may follow this [this code snnipet](https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/src/tests/config.ts) for creating OfflineSigner 
+You may follow this [this code snippet](https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/src/tests/config.ts) for creating OfflineSigner 
 
 ```js
 offlineSigner = await createWallet(mnemonic);
