@@ -236,9 +236,9 @@ const result = await hypersignSchema.resolve({ schemaId: schema['id']});
 ```js
 const hypersignSchema = new HypersignSchema({
     offlineSigner,                    // OPTIONAL signer of type OfflineSigner
-    nodeRestEndpoint: hidNodeEp.rest, // OPTIONAL RPC endpoint of the Hypersign blockchain, Default 'TEST'
-    nodeRpcEndpoint: hidNodeEp.rpc,   // OPTIONAL REST endpoint of the Hypersign blockchain
-    namespace: hidNodeEp.namespace,   // OPTIONAL namespace of did id, Default 'did:hid'
+    nodeRestEndpoint: 'https://api.jagrat.hypersign.id', // OPTIONAL RPC endpoint of the Hypersign blockchain, Default 'TEST'
+    nodeRpcEndpoint: 'https://rpc.jagrat.hypersign.id',   // OPTIONAL REST endpoint of the Hypersign blockchain
+    namespace: 'testnet',   // OPTIONAL namespace of did, Default ''
   });
 
 // OR Just initalize with offlineSigner
