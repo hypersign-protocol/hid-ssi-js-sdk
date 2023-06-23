@@ -39,8 +39,8 @@ import { HypersignSSISdk } from "hs-ssi-sdk";
 const hsSdk = new HypersignSSISdk(
   offlineSigner,
   namespace: 'testnet'
-  nodeRpcEndpoint: "http://localhost:26657",  // RPC
-  nodeRestEndpoint: "http://localhost:1317"   // REST Endpoint
+  nodeRpcEndpoint: "https://rpc.jagrat.hypersign.id",  // RPC
+  nodeRestEndpoint: "https://api.jagrat.hypersign.id"   // REST Endpoint
 );
 // Mandatory method call to initialize offlineSigner
 await hsSdk.init();
