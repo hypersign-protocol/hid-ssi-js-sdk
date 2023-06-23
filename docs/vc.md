@@ -46,13 +46,13 @@ Is a javascript library for verifiable credentials operation (generate, issue et
 ## Install The Package
 
 ```bash
-npm i hid-ssi-sdk --save
+npm i https://github.com/hypersign-protocol/hid-ssi-js-sdk  --save
 ```
 
 ## Import The Package
 
 ```js
-import { HypersignVerifiableCredential } from 'hid-ssi-sdk';
+import { HypersignVerifiableCredential } from 'hs-ssi-sdk';
 ```
 
 ## APIs
@@ -77,7 +77,14 @@ const hypersignVC = new HypersignVerifiableCredential({
 const hypersignVC = new HypersignVerifiableCredential()
 ```
 
-Read about `OfflineSigner` [here](https://docs.hypersign.id/developers/hid-ssi-sdk/offlinesigner)
+#### OfflineSigner 
+
+You may follow this [this code snnipet](https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/src/tests/config.ts) for creating OfflineSigner 
+
+```js
+offlineSigner = await createWallet(mnemonic);
+```
+
 
 **Call `init()` to initalize the offlineSigner**
 
