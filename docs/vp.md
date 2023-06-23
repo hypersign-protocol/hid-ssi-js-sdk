@@ -15,13 +15,13 @@
 ## Install The Package
 
 ```bash
-npm i hid-ssi-sdk --save
+npm i https://github.com/hypersign-protocol/hid-ssi-js-sdk  --save
 ```
 
 ## Import The Package
 
 ```js
-import { HypersignVerifiablePresentation } from 'hid-ssi-sdk';
+import { HypersignVerifiablePresentation } from 'hs-ssi-sdk';
 ```
 
 ## APIs
@@ -39,7 +39,7 @@ const hypersignVP = new HypersignVerifiablePresentation({
 const hypersignVP = new HypersignVerifiablePresentation()
 ```
 
-All operation in presentation are offchain. So need to pass offlinesigner. However, we do need to pass RPC and REST endpoints to query states from blockchain
+All operation in presentation are offchain. So need not to pass offlinesigner. However, we do need to pass RPC and REST endpoints to query states from blockchain
 
 ### `generate()` 
 
