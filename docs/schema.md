@@ -47,7 +47,7 @@ Is a javascript library for Schema related operation (generate, sign, register e
 ## Install The Package
 
 ```bash
-npm i hid-ssi-sdk --save
+npm i https://github.com/hypersign-protocol/hid-ssi-js-sdk  --save
 ```
 
 ## Import The Package
@@ -247,8 +247,13 @@ const hypersignSchema = new HypersignSchema({
 })
 ```
 
+#### OfflineSigner 
 
-Read about `OfflineSigner` [here](https://docs.hypersign.id/developers/hid-ssi-sdk/offlinesigner)
+You may follow this [this code snnipet](https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/src/tests/config.ts) for creating OfflineSigner 
+
+```js
+offlineSigner = await createWallet(mnemonic);
+```
 
 
 **Call `init()` to initalize the offlineSigner**
