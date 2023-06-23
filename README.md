@@ -26,14 +26,14 @@ npm run test-presentation
 ## Install
 
 ```js
-npm i hs-ssi-sdk --save
+npm i github:hypersign-protocol/hid-ssi-js-sdk#develop  --save  
 ```
 
 ## Usage
 
 ```javascript
 // Import SSI SDK
-import { HypersignSsiSDK } from "hs-ssi-sdk";
+import { HypersignSsiSDK } from "hid-ssi-js-sdk";
 
 // Instantiate SSI SDK
 const hsSdk = new HypersignSsiSDK(
