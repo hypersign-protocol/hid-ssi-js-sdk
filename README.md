@@ -27,7 +27,7 @@ npm run test-presentation
 ```js
 npm i https://github.com/hypersign-protocol/hid-ssi-js-sdk  --save
 ```
-**Supported node version ^v16**
+**Supported node version: ^v16**
 
 ## Usage
 
