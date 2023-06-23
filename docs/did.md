@@ -37,14 +37,15 @@ Is a javascript library for DID related operation (generate, sign, verify etc). 
 
 ## Install The Package
 
-```bash
-npm i hid-ssi-sdk --save
+```js
+npm i https://github.com/hypersign-protocol/hid-ssi-js-sdk  --save
 ```
+**Supported node version: ^v16**
 
 ## Import The Package
 
 ```js
-import { HypersignDID } from 'hid-ssi-sdk';
+import { HypersignDID } from 'hs-ssi-sdk';
 ```
 
 ## Offchain APIs
@@ -378,7 +379,14 @@ const hypersignDid = new HypersignDID({
 })
 ```
 
-Read about `OfflineSigner` [here](https://docs.hypersign.id/developers/hid-ssi-sdk/offlinesigner)
+#### OfflineSigner 
+
+You may follow this [this code snnipet](https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/src/tests/config.ts) for creating OfflineSigner 
+
+```js
+offlineSigner = await createWallet(mnemonic);
+```
+
 
 **Call `init()` to initalize the offlineSigner**
 
