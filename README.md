@@ -22,21 +22,21 @@ npm run test-credential
 npm run test-presentation
 ```
 
-
 ## Install
 
 ```js
-npm i github:hypersign-protocol/hid-ssi-js-sdk#develop  --save  
+npm i https://github.com/hypersign-protocol/hid-ssi-js-sdk  --save
 ```
+**Supported node version ^v16**
 
 ## Usage
 
 ```javascript
 // Import SSI SDK
-import { HypersignSsiSDK } from "hid-ssi-js-sdk";
+import { HypersignSSISdk } from "hs-ssi-sdk";
 
 // Instantiate SSI SDK
-const hsSdk = new HypersignSsiSDK(
+const hsSdk = new HypersignSSISdk(
   offlineSigner,
   namespace: 'testnet'
   nodeRpcEndpoint: "http://localhost:26657",  // RPC
@@ -50,6 +50,14 @@ const hypersignDID: HypersignDID = hsSdk.did;
 const hypersignVC: HypersignVerifiableCredential = hsSdk.vc;
 const hypersignVP: HypersignVerifiablePresentation = hsSdk.vp;
 const hypersignSchema: HypersignSchema = hsSdk.schema;
+```
+
+### OfflineSigner 
+
+You may follow this [this code snnipet](https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/src/tests/config.ts) for creating OfflineSigner 
+
+```js
+offlineSigner = await createWallet(mnemonic);
 ```
 
 ## APIs
