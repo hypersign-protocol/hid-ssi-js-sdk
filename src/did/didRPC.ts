@@ -26,12 +26,12 @@ export class DIDRpc implements IDIDRpc {
     nodeRpcEndpoint: string;
     nodeRestEndpoint: string;
   }) {
-    this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_PATH;
     if (offlineSigner) {
       this.hidClient = new HIDClient(offlineSigner, nodeRpcEndpoint, nodeRestEndpoint);
     } else {
       this.hidClient = null;
     }
+    this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_PATH;
   }
 
   async init() {
