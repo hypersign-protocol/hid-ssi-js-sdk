@@ -3,7 +3,7 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
-
+import { purposes } from 'jsonld-signatures';
 import vc from 'vc-js';
 import Utils from '../utils';
 import HypersignSchema from '../schema/schema';
@@ -21,6 +21,8 @@ import { DeliverTxResponse } from '@cosmjs/stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import crypto from 'crypto';
 import customLoader from '../../libs/w3cache/v1';
+import { EthereumEip712Signature2021 } from 'ethereumeip712signature2021suite';
+
 const documentLoader = customLoader;
 
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
@@ -802,5 +804,101 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
     }
     return resp;
+  }
+
+  /**
+   * Issue credentials document with EthereumEip712Signature2021
+ 
+  */
+
+  public async issueByClientSpec(params: {
+    credential: IVerifiableCredential;
+    issuerDid: string;
+    verificationMethodId?: string;
+    web3Obj;
+    registerCredential?: boolean;
+  }) {
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to issue credential');
+    }
+    if (!params.issuerDid) {
+      throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to issue credential');
+    }
+    if (!params.credential) {
+      throw new Error('HID-SSI-SDK:: Error: params.credential is required to issue credential');
+    }
+    if (!this.credStatusRPC) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+    if (!params.web3Obj) {
+      throw new Error('HID-SSI-SDK:: Error: prams.web3Obj should be passed');
+    }
+
+    if (params.registerCredential == undefined) {
+      params.registerCredential = true;
+    }
+    const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
+    if (signerDidDoc === null || signerDidDoc === undefined)
+      throw new Error('HID-SSI-SDK:: Error: Could not resolve issuerDid = ' + params.issuerDid);
+    const publicKeyId = params.verificationMethodId;
+    const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
+      (x) => x.id == publicKeyId
+    ) as VerificationMethod;
+
+    if (!publicKeyVerMethod) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: Could not find verification method for id = ' + params.verificationMethodId
+      );
+    }
+    const EthereumEip712Signature2021obj = new EthereumEip712Signature2021({}, params.web3Obj);
+    const credentialHash = this._sha256Hash(JSON.stringify(params.credential));
+    const credentialStatus: CredentialStatus = {
+      claim: {
+        id: params.credential.id,
+        currentStatus: VC.CRED_STATUS_TYPES.LIVE,
+        statusReason: 'Credential is active',
+      },
+      issuer: params.credential.issuer,
+      issuanceDate: params.credential.issuanceDate,
+      expirationDate: params.credential.expirationDate,
+      credentialHash,
+    };
+    const proof = await EthereumEip712Signature2021obj.createProof({
+      document: params.credential,
+      purpose: new purposes.AssertionProofPurpose(),
+      verificationMethod: params.verificationMethodId,
+      documentLoader,
+    });
+    Credential['proof'] = proof;
+    const signedVC = Credential;
+    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credential.issuer });
+    if (issuerDID === null || issuerDID === undefined)
+      throw new Error('Could not resolve issuerDid = ' + params.credential.issuer);
+    const credIssuerDidDoc: Did = issuerDID as Did;
+    const credIssuerController = credIssuerDidDoc.controller;
+    if (!credIssuerController.includes(params.issuerDid)) {
+      throw new Error(params.issuerDid + ' is not a controller of ' + params.credential.issuer);
+    }
+
+    let credentialStatusRegistrationResult: DeliverTxResponse;
+    if (params.registerCredential) {
+      credentialStatusRegistrationResult = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
+
+      if (!credentialStatusRegistrationResult || credentialStatusRegistrationResult.code != 0) {
+        throw new Error(
+          'HID-SSI-SDK:: Error while issuing the credential error = ' + credentialStatusRegistrationResult.rawLog
+        );
+      }
+
+      return {
+        signedCredential: signedVC,
+        credentialStatus,
+        credentialStatusProof: proof,
+        credentialStatusRegistrationResult,
+      };
+    }
+    return { signedCredential: signedVC, credentialStatus, credentialStatusProof: proof };
   }
 }
