@@ -25,6 +25,20 @@ export interface ICredentialStatus {
   type: string; // CredentialStatusList2017
 }
 
+export interface ICredentialProof {
+  type: string;
+  created: string;
+  proofPurpose: string;
+  verificationMethod: string;
+  jws?: string;
+  proofValue: string;
+  canonicalizationHash: string;
+  eip712Domain: {
+    domain: object;
+    messageSchema: object;
+  };
+}
+
 // https://www.w3.org/TR/vc-data-model/#basic-concepts
 export interface IVerifiableCredential {
   context: Array<string>;
@@ -39,7 +53,7 @@ export interface IVerifiableCredential {
   // Ref: https://www.w3.org/TR/vc-data-model/#status
   credentialStatus: ICredentialStatus;
 
-  proof?: object;
+  proof?: ICredentialProof;
 }
 
 export interface ICredentialMethods {

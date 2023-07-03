@@ -1,21 +1,10 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Schema = exports.SchemaProof = exports.SchemaProperty = exports.SchemaDocument = exports.protobufPackage = void 0;
 /* eslint-disable */
-var minimal_1 = require("protobufjs/minimal");
+const minimal_1 = require("protobufjs/minimal");
 exports.protobufPackage = "hypersignprotocol.hidnode.ssi";
-var baseSchemaDocument = {
+const baseSchemaDocument = {
     type: "",
     modelVersion: "",
     id: "",
@@ -24,8 +13,7 @@ var baseSchemaDocument = {
     authored: "",
 };
 exports.SchemaDocument = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.type !== "") {
             writer.uint32(10).string(message.type);
         }
@@ -49,12 +37,12 @@ exports.SchemaDocument = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseSchemaDocument);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseSchemaDocument);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.type = reader.string();
@@ -84,8 +72,8 @@ exports.SchemaDocument = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseSchemaDocument);
+    fromJSON(object) {
+        const message = Object.assign({}, baseSchemaDocument);
         if (object.type !== undefined && object.type !== null) {
             message.type = String(object.type);
         }
@@ -130,8 +118,8 @@ exports.SchemaDocument = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.type !== undefined && (obj.type = message.type);
         message.modelVersion !== undefined &&
             (obj.modelVersion = message.modelVersion);
@@ -145,8 +133,8 @@ exports.SchemaDocument = {
                 : undefined);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseSchemaDocument);
+    fromPartial(object) {
+        const message = Object.assign({}, baseSchemaDocument);
         if (object.type !== undefined && object.type !== null) {
             message.type = object.type;
         }
@@ -192,7 +180,7 @@ exports.SchemaDocument = {
         return message;
     },
 };
-var baseSchemaProperty = {
+const baseSchemaProperty = {
     schema: "",
     description: "",
     type: "",
@@ -201,8 +189,7 @@ var baseSchemaProperty = {
     additionalProperties: false,
 };
 exports.SchemaProperty = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.schema !== "") {
             writer.uint32(10).string(message.schema);
         }
@@ -215,8 +202,7 @@ exports.SchemaProperty = {
         if (message.properties !== "") {
             writer.uint32(34).string(message.properties);
         }
-        for (var _i = 0, _a = message.required; _i < _a.length; _i++) {
-            var v = _a[_i];
+        for (const v of message.required) {
             writer.uint32(42).string(v);
         }
         if (message.additionalProperties === true) {
@@ -224,13 +210,13 @@ exports.SchemaProperty = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseSchemaProperty);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseSchemaProperty);
         message.required = [];
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.schema = reader.string();
@@ -257,8 +243,8 @@ exports.SchemaProperty = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseSchemaProperty);
+    fromJSON(object) {
+        const message = Object.assign({}, baseSchemaProperty);
         message.required = [];
         if (object.schema !== undefined && object.schema !== null) {
             message.schema = String(object.schema);
@@ -285,8 +271,7 @@ exports.SchemaProperty = {
             message.properties = "";
         }
         if (object.required !== undefined && object.required !== null) {
-            for (var _i = 0, _a = object.required; _i < _a.length; _i++) {
-                var e = _a[_i];
+            for (const e of object.required) {
                 message.required.push(String(e));
             }
         }
@@ -299,15 +284,15 @@ exports.SchemaProperty = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.schema !== undefined && (obj.schema = message.schema);
         message.description !== undefined &&
             (obj.description = message.description);
         message.type !== undefined && (obj.type = message.type);
         message.properties !== undefined && (obj.properties = message.properties);
         if (message.required) {
-            obj.required = message.required.map(function (e) { return e; });
+            obj.required = message.required.map((e) => e);
         }
         else {
             obj.required = [];
@@ -316,8 +301,8 @@ exports.SchemaProperty = {
             (obj.additionalProperties = message.additionalProperties);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseSchemaProperty);
+    fromPartial(object) {
+        const message = Object.assign({}, baseSchemaProperty);
         message.required = [];
         if (object.schema !== undefined && object.schema !== null) {
             message.schema = object.schema;
@@ -344,8 +329,7 @@ exports.SchemaProperty = {
             message.properties = "";
         }
         if (object.required !== undefined && object.required !== null) {
-            for (var _i = 0, _a = object.required; _i < _a.length; _i++) {
-                var e = _a[_i];
+            for (const e of object.required) {
                 message.required.push(e);
             }
         }
@@ -359,7 +343,7 @@ exports.SchemaProperty = {
         return message;
     },
 };
-var baseSchemaProof = {
+const baseSchemaProof = {
     type: "",
     created: "",
     verificationMethod: "",
@@ -367,8 +351,7 @@ var baseSchemaProof = {
     proofValue: "",
 };
 exports.SchemaProof = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.type !== "") {
             writer.uint32(10).string(message.type);
         }
@@ -386,12 +369,12 @@ exports.SchemaProof = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseSchemaProof);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseSchemaProof);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.type = reader.string();
@@ -415,8 +398,8 @@ exports.SchemaProof = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseSchemaProof);
+    fromJSON(object) {
+        const message = Object.assign({}, baseSchemaProof);
         if (object.type !== undefined && object.type !== null) {
             message.type = String(object.type);
         }
@@ -450,8 +433,8 @@ exports.SchemaProof = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.type !== undefined && (obj.type = message.type);
         message.created !== undefined && (obj.created = message.created);
         message.verificationMethod !== undefined &&
@@ -461,8 +444,8 @@ exports.SchemaProof = {
         message.proofValue !== undefined && (obj.proofValue = message.proofValue);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseSchemaProof);
+    fromPartial(object) {
+        const message = Object.assign({}, baseSchemaProof);
         if (object.type !== undefined && object.type !== null) {
             message.type = object.type;
         }
@@ -497,7 +480,7 @@ exports.SchemaProof = {
         return message;
     },
 };
-var baseSchema = {
+const baseSchema = {
     type: "",
     modelVersion: "",
     id: "",
@@ -506,8 +489,7 @@ var baseSchema = {
     authored: "",
 };
 exports.Schema = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.type !== "") {
             writer.uint32(10).string(message.type);
         }
@@ -534,12 +516,12 @@ exports.Schema = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseSchema);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseSchema);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.type = reader.string();
@@ -572,8 +554,8 @@ exports.Schema = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseSchema);
+    fromJSON(object) {
+        const message = Object.assign({}, baseSchema);
         if (object.type !== undefined && object.type !== null) {
             message.type = String(object.type);
         }
@@ -624,8 +606,8 @@ exports.Schema = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.type !== undefined && (obj.type = message.type);
         message.modelVersion !== undefined &&
             (obj.modelVersion = message.modelVersion);
@@ -643,8 +625,8 @@ exports.Schema = {
                 : undefined);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseSchema);
+    fromPartial(object) {
+        const message = Object.assign({}, baseSchema);
         if (object.type !== undefined && object.type !== null) {
             message.type = object.type;
         }

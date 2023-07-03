@@ -1,33 +1,20 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MsgClientImpl = exports.MsgRegisterCredentialStatusResponse = exports.MsgRegisterCredentialStatus = exports.MsgDeactivateDIDResponse = exports.MsgDeactivateDID = exports.MsgCreateSchemaResponse = exports.MsgCreateSchema = exports.MsgUpdateDIDResponse = exports.MsgUpdateDID = exports.MsgCreateDIDResponse = exports.MsgCreateDID = exports.protobufPackage = void 0;
 /* eslint-disable */
-var minimal_1 = require("protobufjs/minimal");
-var did_1 = require("./did");
-var schema_1 = require("./schema");
-var clientSpec_1 = require("./clientSpec");
-var credential_1 = require("./credential");
+const minimal_1 = require("protobufjs/minimal");
+const did_1 = require("./did");
+const schema_1 = require("./schema");
+const clientSpec_1 = require("./clientSpec");
+const credential_1 = require("./credential");
 exports.protobufPackage = "hypersignprotocol.hidnode.ssi";
-var baseMsgCreateDID = { creator: "" };
+const baseMsgCreateDID = { creator: "" };
 exports.MsgCreateDID = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.didDocString !== undefined) {
             did_1.Did.encode(message.didDocString, writer.uint32(10).fork()).ldelim();
         }
-        for (var _i = 0, _a = message.signatures; _i < _a.length; _i++) {
-            var v = _a[_i];
+        for (const v of message.signatures) {
             did_1.SignInfo.encode(v, writer.uint32(18).fork()).ldelim();
         }
         if (message.creator !== "") {
@@ -35,13 +22,13 @@ exports.MsgCreateDID = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseMsgCreateDID);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseMsgCreateDID);
         message.signatures = [];
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.didDocString = did_1.Did.decode(reader, reader.uint32());
@@ -59,8 +46,8 @@ exports.MsgCreateDID = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseMsgCreateDID);
+    fromJSON(object) {
+        const message = Object.assign({}, baseMsgCreateDID);
         message.signatures = [];
         if (object.didDocString !== undefined && object.didDocString !== null) {
             message.didDocString = did_1.Did.fromJSON(object.didDocString);
@@ -69,8 +56,7 @@ exports.MsgCreateDID = {
             message.didDocString = undefined;
         }
         if (object.signatures !== undefined && object.signatures !== null) {
-            for (var _i = 0, _a = object.signatures; _i < _a.length; _i++) {
-                var e = _a[_i];
+            for (const e of object.signatures) {
                 message.signatures.push(did_1.SignInfo.fromJSON(e));
             }
         }
@@ -82,16 +68,14 @@ exports.MsgCreateDID = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.didDocString !== undefined &&
             (obj.didDocString = message.didDocString
                 ? did_1.Did.toJSON(message.didDocString)
                 : undefined);
         if (message.signatures) {
-            obj.signatures = message.signatures.map(function (e) {
-                return e ? did_1.SignInfo.toJSON(e) : undefined;
-            });
+            obj.signatures = message.signatures.map((e) => e ? did_1.SignInfo.toJSON(e) : undefined);
         }
         else {
             obj.signatures = [];
@@ -99,8 +83,8 @@ exports.MsgCreateDID = {
         message.creator !== undefined && (obj.creator = message.creator);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseMsgCreateDID);
+    fromPartial(object) {
+        const message = Object.assign({}, baseMsgCreateDID);
         message.signatures = [];
         if (object.didDocString !== undefined && object.didDocString !== null) {
             message.didDocString = did_1.Did.fromPartial(object.didDocString);
@@ -109,8 +93,7 @@ exports.MsgCreateDID = {
             message.didDocString = undefined;
         }
         if (object.signatures !== undefined && object.signatures !== null) {
-            for (var _i = 0, _a = object.signatures; _i < _a.length; _i++) {
-                var e = _a[_i];
+            for (const e of object.signatures) {
                 message.signatures.push(did_1.SignInfo.fromPartial(e));
             }
         }
@@ -123,21 +106,20 @@ exports.MsgCreateDID = {
         return message;
     },
 };
-var baseMsgCreateDIDResponse = { id: 0 };
+const baseMsgCreateDIDResponse = { id: 0 };
 exports.MsgCreateDIDResponse = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.id !== 0) {
             writer.uint32(8).uint64(message.id);
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseMsgCreateDIDResponse);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseMsgCreateDIDResponse);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.id = longToNumber(reader.uint64());
@@ -149,8 +131,8 @@ exports.MsgCreateDIDResponse = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseMsgCreateDIDResponse);
+    fromJSON(object) {
+        const message = Object.assign({}, baseMsgCreateDIDResponse);
         if (object.id !== undefined && object.id !== null) {
             message.id = Number(object.id);
         }
@@ -159,13 +141,13 @@ exports.MsgCreateDIDResponse = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.id !== undefined && (obj.id = message.id);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseMsgCreateDIDResponse);
+    fromPartial(object) {
+        const message = Object.assign({}, baseMsgCreateDIDResponse);
         if (object.id !== undefined && object.id !== null) {
             message.id = object.id;
         }
@@ -175,18 +157,16 @@ exports.MsgCreateDIDResponse = {
         return message;
     },
 };
-var baseMsgUpdateDID = { version_id: "", creator: "" };
+const baseMsgUpdateDID = { version_id: "", creator: "" };
 exports.MsgUpdateDID = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.didDocString !== undefined) {
             did_1.Did.encode(message.didDocString, writer.uint32(10).fork()).ldelim();
         }
         if (message.version_id !== "") {
             writer.uint32(18).string(message.version_id);
         }
-        for (var _i = 0, _a = message.signatures; _i < _a.length; _i++) {
-            var v = _a[_i];
+        for (const v of message.signatures) {
             did_1.SignInfo.encode(v, writer.uint32(26).fork()).ldelim();
         }
         if (message.creator !== "") {
@@ -194,13 +174,13 @@ exports.MsgUpdateDID = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseMsgUpdateDID);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseMsgUpdateDID);
         message.signatures = [];
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.didDocString = did_1.Did.decode(reader, reader.uint32());
@@ -221,8 +201,8 @@ exports.MsgUpdateDID = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseMsgUpdateDID);
+    fromJSON(object) {
+        const message = Object.assign({}, baseMsgUpdateDID);
         message.signatures = [];
         if (object.didDocString !== undefined && object.didDocString !== null) {
             message.didDocString = did_1.Did.fromJSON(object.didDocString);
@@ -237,8 +217,7 @@ exports.MsgUpdateDID = {
             message.version_id = "";
         }
         if (object.signatures !== undefined && object.signatures !== null) {
-            for (var _i = 0, _a = object.signatures; _i < _a.length; _i++) {
-                var e = _a[_i];
+            for (const e of object.signatures) {
                 message.signatures.push(did_1.SignInfo.fromJSON(e));
             }
         }
@@ -250,17 +229,15 @@ exports.MsgUpdateDID = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.didDocString !== undefined &&
             (obj.didDocString = message.didDocString
                 ? did_1.Did.toJSON(message.didDocString)
                 : undefined);
         message.version_id !== undefined && (obj.version_id = message.version_id);
         if (message.signatures) {
-            obj.signatures = message.signatures.map(function (e) {
-                return e ? did_1.SignInfo.toJSON(e) : undefined;
-            });
+            obj.signatures = message.signatures.map((e) => e ? did_1.SignInfo.toJSON(e) : undefined);
         }
         else {
             obj.signatures = [];
@@ -268,8 +245,8 @@ exports.MsgUpdateDID = {
         message.creator !== undefined && (obj.creator = message.creator);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseMsgUpdateDID);
+    fromPartial(object) {
+        const message = Object.assign({}, baseMsgUpdateDID);
         message.signatures = [];
         if (object.didDocString !== undefined && object.didDocString !== null) {
             message.didDocString = did_1.Did.fromPartial(object.didDocString);
@@ -284,8 +261,7 @@ exports.MsgUpdateDID = {
             message.version_id = "";
         }
         if (object.signatures !== undefined && object.signatures !== null) {
-            for (var _i = 0, _a = object.signatures; _i < _a.length; _i++) {
-                var e = _a[_i];
+            for (const e of object.signatures) {
                 message.signatures.push(did_1.SignInfo.fromPartial(e));
             }
         }
@@ -298,21 +274,20 @@ exports.MsgUpdateDID = {
         return message;
     },
 };
-var baseMsgUpdateDIDResponse = { updateId: "" };
+const baseMsgUpdateDIDResponse = { updateId: "" };
 exports.MsgUpdateDIDResponse = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.updateId !== "") {
             writer.uint32(10).string(message.updateId);
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseMsgUpdateDIDResponse);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseMsgUpdateDIDResponse);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.updateId = reader.string();
@@ -324,8 +299,8 @@ exports.MsgUpdateDIDResponse = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseMsgUpdateDIDResponse);
+    fromJSON(object) {
+        const message = Object.assign({}, baseMsgUpdateDIDResponse);
         if (object.updateId !== undefined && object.updateId !== null) {
             message.updateId = String(object.updateId);
         }
@@ -334,13 +309,13 @@ exports.MsgUpdateDIDResponse = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.updateId !== undefined && (obj.updateId = message.updateId);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseMsgUpdateDIDResponse);
+    fromPartial(object) {
+        const message = Object.assign({}, baseMsgUpdateDIDResponse);
         if (object.updateId !== undefined && object.updateId !== null) {
             message.updateId = object.updateId;
         }
@@ -350,10 +325,9 @@ exports.MsgUpdateDIDResponse = {
         return message;
     },
 };
-var baseMsgCreateSchema = { creator: "" };
+const baseMsgCreateSchema = { creator: "" };
 exports.MsgCreateSchema = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.creator !== "") {
             writer.uint32(10).string(message.creator);
         }
@@ -368,12 +342,12 @@ exports.MsgCreateSchema = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseMsgCreateSchema);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseMsgCreateSchema);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.creator = reader.string();
@@ -394,8 +368,8 @@ exports.MsgCreateSchema = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseMsgCreateSchema);
+    fromJSON(object) {
+        const message = Object.assign({}, baseMsgCreateSchema);
         if (object.creator !== undefined && object.creator !== null) {
             message.creator = String(object.creator);
         }
@@ -422,8 +396,8 @@ exports.MsgCreateSchema = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.creator !== undefined && (obj.creator = message.creator);
         message.schemaDoc !== undefined &&
             (obj.schemaDoc = message.schemaDoc
@@ -439,8 +413,8 @@ exports.MsgCreateSchema = {
                 : undefined);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseMsgCreateSchema);
+    fromPartial(object) {
+        const message = Object.assign({}, baseMsgCreateSchema);
         if (object.creator !== undefined && object.creator !== null) {
             message.creator = object.creator;
         }
@@ -468,21 +442,20 @@ exports.MsgCreateSchema = {
         return message;
     },
 };
-var baseMsgCreateSchemaResponse = { id: 0 };
+const baseMsgCreateSchemaResponse = { id: 0 };
 exports.MsgCreateSchemaResponse = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.id !== 0) {
             writer.uint32(8).uint64(message.id);
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseMsgCreateSchemaResponse);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseMsgCreateSchemaResponse);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.id = longToNumber(reader.uint64());
@@ -494,8 +467,8 @@ exports.MsgCreateSchemaResponse = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseMsgCreateSchemaResponse);
+    fromJSON(object) {
+        const message = Object.assign({}, baseMsgCreateSchemaResponse);
         if (object.id !== undefined && object.id !== null) {
             message.id = Number(object.id);
         }
@@ -504,13 +477,13 @@ exports.MsgCreateSchemaResponse = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.id !== undefined && (obj.id = message.id);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseMsgCreateSchemaResponse);
+    fromPartial(object) {
+        const message = Object.assign({}, baseMsgCreateSchemaResponse);
         if (object.id !== undefined && object.id !== null) {
             message.id = object.id;
         }
@@ -520,10 +493,9 @@ exports.MsgCreateSchemaResponse = {
         return message;
     },
 };
-var baseMsgDeactivateDID = { creator: "", didId: "", version_id: "" };
+const baseMsgDeactivateDID = { creator: "", didId: "", version_id: "" };
 exports.MsgDeactivateDID = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.creator !== "") {
             writer.uint32(10).string(message.creator);
         }
@@ -533,19 +505,18 @@ exports.MsgDeactivateDID = {
         if (message.version_id !== "") {
             writer.uint32(26).string(message.version_id);
         }
-        for (var _i = 0, _a = message.signatures; _i < _a.length; _i++) {
-            var v = _a[_i];
+        for (const v of message.signatures) {
             did_1.SignInfo.encode(v, writer.uint32(34).fork()).ldelim();
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseMsgDeactivateDID);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseMsgDeactivateDID);
         message.signatures = [];
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.creator = reader.string();
@@ -566,8 +537,8 @@ exports.MsgDeactivateDID = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseMsgDeactivateDID);
+    fromJSON(object) {
+        const message = Object.assign({}, baseMsgDeactivateDID);
         message.signatures = [];
         if (object.creator !== undefined && object.creator !== null) {
             message.creator = String(object.creator);
@@ -588,30 +559,27 @@ exports.MsgDeactivateDID = {
             message.version_id = "";
         }
         if (object.signatures !== undefined && object.signatures !== null) {
-            for (var _i = 0, _a = object.signatures; _i < _a.length; _i++) {
-                var e = _a[_i];
+            for (const e of object.signatures) {
                 message.signatures.push(did_1.SignInfo.fromJSON(e));
             }
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.creator !== undefined && (obj.creator = message.creator);
         message.didId !== undefined && (obj.didId = message.didId);
         message.version_id !== undefined && (obj.version_id = message.version_id);
         if (message.signatures) {
-            obj.signatures = message.signatures.map(function (e) {
-                return e ? did_1.SignInfo.toJSON(e) : undefined;
-            });
+            obj.signatures = message.signatures.map((e) => e ? did_1.SignInfo.toJSON(e) : undefined);
         }
         else {
             obj.signatures = [];
         }
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseMsgDeactivateDID);
+    fromPartial(object) {
+        const message = Object.assign({}, baseMsgDeactivateDID);
         message.signatures = [];
         if (object.creator !== undefined && object.creator !== null) {
             message.creator = object.creator;
@@ -632,29 +600,27 @@ exports.MsgDeactivateDID = {
             message.version_id = "";
         }
         if (object.signatures !== undefined && object.signatures !== null) {
-            for (var _i = 0, _a = object.signatures; _i < _a.length; _i++) {
-                var e = _a[_i];
+            for (const e of object.signatures) {
                 message.signatures.push(did_1.SignInfo.fromPartial(e));
             }
         }
         return message;
     },
 };
-var baseMsgDeactivateDIDResponse = { id: 0 };
+const baseMsgDeactivateDIDResponse = { id: 0 };
 exports.MsgDeactivateDIDResponse = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.id !== 0) {
             writer.uint32(8).uint64(message.id);
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseMsgDeactivateDIDResponse);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseMsgDeactivateDIDResponse);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.id = longToNumber(reader.uint64());
@@ -666,8 +632,8 @@ exports.MsgDeactivateDIDResponse = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseMsgDeactivateDIDResponse);
+    fromJSON(object) {
+        const message = Object.assign({}, baseMsgDeactivateDIDResponse);
         if (object.id !== undefined && object.id !== null) {
             message.id = Number(object.id);
         }
@@ -676,13 +642,13 @@ exports.MsgDeactivateDIDResponse = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.id !== undefined && (obj.id = message.id);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseMsgDeactivateDIDResponse);
+    fromPartial(object) {
+        const message = Object.assign({}, baseMsgDeactivateDIDResponse);
         if (object.id !== undefined && object.id !== null) {
             message.id = object.id;
         }
@@ -692,10 +658,9 @@ exports.MsgDeactivateDIDResponse = {
         return message;
     },
 };
-var baseMsgRegisterCredentialStatus = { creator: "" };
+const baseMsgRegisterCredentialStatus = { creator: "" };
 exports.MsgRegisterCredentialStatus = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.creator !== "") {
             writer.uint32(10).string(message.creator);
         }
@@ -710,12 +675,12 @@ exports.MsgRegisterCredentialStatus = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseMsgRegisterCredentialStatus);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseMsgRegisterCredentialStatus);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.creator = reader.string();
@@ -736,8 +701,8 @@ exports.MsgRegisterCredentialStatus = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseMsgRegisterCredentialStatus);
+    fromJSON(object) {
+        const message = Object.assign({}, baseMsgRegisterCredentialStatus);
         if (object.creator !== undefined && object.creator !== null) {
             message.creator = String(object.creator);
         }
@@ -765,8 +730,8 @@ exports.MsgRegisterCredentialStatus = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.creator !== undefined && (obj.creator = message.creator);
         message.credentialStatus !== undefined &&
             (obj.credentialStatus = message.credentialStatus
@@ -782,8 +747,8 @@ exports.MsgRegisterCredentialStatus = {
                 : undefined);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseMsgRegisterCredentialStatus);
+    fromPartial(object) {
+        const message = Object.assign({}, baseMsgRegisterCredentialStatus);
         if (object.creator !== undefined && object.creator !== null) {
             message.creator = object.creator;
         }
@@ -812,21 +777,20 @@ exports.MsgRegisterCredentialStatus = {
         return message;
     },
 };
-var baseMsgRegisterCredentialStatusResponse = { id: 0 };
+const baseMsgRegisterCredentialStatusResponse = { id: 0 };
 exports.MsgRegisterCredentialStatusResponse = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.id !== 0) {
             writer.uint32(8).uint64(message.id);
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseMsgRegisterCredentialStatusResponse);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseMsgRegisterCredentialStatusResponse);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.id = longToNumber(reader.uint64());
@@ -838,8 +802,8 @@ exports.MsgRegisterCredentialStatusResponse = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseMsgRegisterCredentialStatusResponse);
+    fromJSON(object) {
+        const message = Object.assign({}, baseMsgRegisterCredentialStatusResponse);
         if (object.id !== undefined && object.id !== null) {
             message.id = Number(object.id);
         }
@@ -848,13 +812,13 @@ exports.MsgRegisterCredentialStatusResponse = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.id !== undefined && (obj.id = message.id);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseMsgRegisterCredentialStatusResponse);
+    fromPartial(object) {
+        const message = Object.assign({}, baseMsgRegisterCredentialStatusResponse);
         if (object.id !== undefined && object.id !== null) {
             message.id = object.id;
         }
@@ -864,49 +828,38 @@ exports.MsgRegisterCredentialStatusResponse = {
         return message;
     },
 };
-var MsgClientImpl = /** @class */ (function () {
-    function MsgClientImpl(rpc) {
+class MsgClientImpl {
+    constructor(rpc) {
         this.rpc = rpc;
     }
-    MsgClientImpl.prototype.CreateDID = function (request) {
-        var data = exports.MsgCreateDID.encode(request).finish();
-        var promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "CreateDID", data);
-        return promise.then(function (data) {
-            return exports.MsgCreateDIDResponse.decode(new minimal_1.Reader(data));
-        });
-    };
-    MsgClientImpl.prototype.UpdateDID = function (request) {
-        var data = exports.MsgUpdateDID.encode(request).finish();
-        var promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "UpdateDID", data);
-        return promise.then(function (data) {
-            return exports.MsgUpdateDIDResponse.decode(new minimal_1.Reader(data));
-        });
-    };
-    MsgClientImpl.prototype.CreateSchema = function (request) {
-        var data = exports.MsgCreateSchema.encode(request).finish();
-        var promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "CreateSchema", data);
-        return promise.then(function (data) {
-            return exports.MsgCreateSchemaResponse.decode(new minimal_1.Reader(data));
-        });
-    };
-    MsgClientImpl.prototype.DeactivateDID = function (request) {
-        var data = exports.MsgDeactivateDID.encode(request).finish();
-        var promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "DeactivateDID", data);
-        return promise.then(function (data) {
-            return exports.MsgDeactivateDIDResponse.decode(new minimal_1.Reader(data));
-        });
-    };
-    MsgClientImpl.prototype.RegisterCredentialStatus = function (request) {
-        var data = exports.MsgRegisterCredentialStatus.encode(request).finish();
-        var promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "RegisterCredentialStatus", data);
-        return promise.then(function (data) {
-            return exports.MsgRegisterCredentialStatusResponse.decode(new minimal_1.Reader(data));
-        });
-    };
-    return MsgClientImpl;
-}());
+    CreateDID(request) {
+        const data = exports.MsgCreateDID.encode(request).finish();
+        const promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "CreateDID", data);
+        return promise.then((data) => exports.MsgCreateDIDResponse.decode(new minimal_1.Reader(data)));
+    }
+    UpdateDID(request) {
+        const data = exports.MsgUpdateDID.encode(request).finish();
+        const promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "UpdateDID", data);
+        return promise.then((data) => exports.MsgUpdateDIDResponse.decode(new minimal_1.Reader(data)));
+    }
+    CreateSchema(request) {
+        const data = exports.MsgCreateSchema.encode(request).finish();
+        const promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "CreateSchema", data);
+        return promise.then((data) => exports.MsgCreateSchemaResponse.decode(new minimal_1.Reader(data)));
+    }
+    DeactivateDID(request) {
+        const data = exports.MsgDeactivateDID.encode(request).finish();
+        const promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "DeactivateDID", data);
+        return promise.then((data) => exports.MsgDeactivateDIDResponse.decode(new minimal_1.Reader(data)));
+    }
+    RegisterCredentialStatus(request) {
+        const data = exports.MsgRegisterCredentialStatus.encode(request).finish();
+        const promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "RegisterCredentialStatus", data);
+        return promise.then((data) => exports.MsgRegisterCredentialStatusResponse.decode(new minimal_1.Reader(data)));
+    }
+}
 exports.MsgClientImpl = MsgClientImpl;
-var globalThis = (function () {
+var globalThis = (() => {
     if (typeof globalThis !== "undefined")
         return globalThis;
     if (typeof self !== "undefined")

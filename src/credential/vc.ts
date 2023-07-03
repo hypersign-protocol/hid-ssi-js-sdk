@@ -14,7 +14,7 @@ import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 const ed25519 = require('@stablelib/ed25519');
 import { CredentialRPC } from './credRPC';
-import { ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema } from './ICredential';
+import { ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema, ICredentialProof } from './ICredential';
 import { VC, DID } from '../constants';
 import { CredentialStatus, CredentialProof, Credential, Claim } from '../../libs/generated/ssi/credential';
 import { DeliverTxResponse } from '@cosmjs/stargate';
@@ -34,7 +34,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public expirationDate: string;
   public credentialSubject: object;
   public credentialSchema: ISchema;
-  public proof: object;
+  public proof: ICredentialProof;
   public credentialStatus: ICredentialStatus;
   private credStatusRPC: CredentialRPC;
   private namespace: string;
@@ -74,7 +74,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       id: '',
       type: VC.CREDENTAIL_STATUS_TYPE,
     };
-    this.proof = {};
+    this.proof = {} as ICredentialProof;
   }
 
   private async _sign(params: { message: string; privateKeyMultibase: string }): Promise<string> {
@@ -814,7 +814,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public async issueByClientSpec(params: {
     credential: IVerifiableCredential;
     issuerDid: string;
-    verificationMethodId?: string;
+    verificationMethodId: string;
     web3Obj;
     registerCredential?: boolean;
   }) {
@@ -853,26 +853,16 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       );
     }
     const EthereumEip712Signature2021obj = new EthereumEip712Signature2021({}, params.web3Obj);
-    const credentialHash = this._sha256Hash(JSON.stringify(params.credential));
-    const credentialStatus: CredentialStatus = {
-      claim: {
-        id: params.credential.id,
-        currentStatus: VC.CRED_STATUS_TYPES.LIVE,
-        statusReason: 'Credential is active',
-      },
-      issuer: params.credential.issuer,
-      issuanceDate: params.credential.issuanceDate,
-      expirationDate: params.credential.expirationDate,
-      credentialHash,
-    };
+
     const proof = await EthereumEip712Signature2021obj.createProof({
       document: params.credential,
       purpose: new purposes.AssertionProofPurpose(),
       verificationMethod: params.verificationMethodId,
       documentLoader,
     });
-    Credential['proof'] = proof;
-    const signedVC = Credential;
+    params.credential.proof = proof;
+    const signedVC = params.credential;
+
     const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credential.issuer });
     if (issuerDID === null || issuerDID === undefined)
       throw new Error('Could not resolve issuerDid = ' + params.credential.issuer);
@@ -882,23 +872,34 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       throw new Error(params.issuerDid + ' is not a controller of ' + params.credential.issuer);
     }
 
-    let credentialStatusRegistrationResult: DeliverTxResponse;
     if (params.registerCredential) {
-      credentialStatusRegistrationResult = await this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
+      // register credential status
+      const credentialStatus: CredentialStatus = {
+        claim: {
+          id: params.credential.id,
+          currentStatus: VC.CRED_STATUS_TYPES.LIVE,
+          statusReason: 'Credential is live',
+        },
+        issuer: params.credential.issuer,
+        issuanceDate: params.credential.issuanceDate,
+        expirationDate: params.credential.expirationDate,
+        credentialHash: params.credential.proof?.canonicalizationHash as string,
+      };
 
-      if (!credentialStatusRegistrationResult || credentialStatusRegistrationResult.code != 0) {
-        throw new Error(
-          'HID-SSI-SDK:: Error while issuing the credential error = ' + credentialStatusRegistrationResult.rawLog
-        );
-      }
-
-      return {
-        signedCredential: signedVC,
+      const proof: CredentialProof = {
+        type: 'EcdsaSecp256k1RecoverySignature2020',
+        created: this._dateNow(),
+        updated: this._dateNow(),
+        verificationMethod: params.verificationMethodId,
+        proofValue: params.credential.proof?.proofValue as string,
+        proofPurpose: VC.PROOF_PURPOSE,
+      };
+      const resp = await this.registerCredentialStatus({
         credentialStatus,
         credentialStatusProof: proof,
-        credentialStatusRegistrationResult,
-      };
+      });
     }
-    return { signedCredential: signedVC, credentialStatus, credentialStatusProof: proof };
+
+    return { signedCredential: signedVC };
   }
 }

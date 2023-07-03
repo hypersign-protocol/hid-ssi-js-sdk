@@ -20,21 +20,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HIDRpcFactory = void 0;
-var proto_signing_1 = require("@cosmjs/proto-signing");
-var stargate_1 = require("@cosmjs/stargate");
-var generatedProto = __importStar(require("../libs/generated/ssi/tx"));
-var constants_1 = require("./constants");
-var HIDRpcFactory = /** @class */ (function () {
-    function HIDRpcFactory() {
+const proto_signing_1 = require("@cosmjs/proto-signing");
+const stargate_1 = require("@cosmjs/stargate");
+const generatedProto = __importStar(require("../libs/generated/ssi/tx"));
+const constants_1 = require("./constants");
+class HIDRpcFactory {
+    constructor() {
         this.hidRPCRegistery = new proto_signing_1.Registry(stargate_1.defaultRegistryTypes);
     }
-    HIDRpcFactory.prototype.registerRpc = function (rpcName) {
+    registerRpc(rpcName) {
         if (!rpcName || !generatedProto[rpcName]) {
             throw new Error("Invalid rpcName");
         }
-        var typeUrl = "".concat(constants_1.HID_COSMOS_MODULE, ".").concat(constants_1.HIDRpcEnums[rpcName]);
+        const typeUrl = `${constants_1.HID_COSMOS_MODULE}.${constants_1.HIDRpcEnums[rpcName]}`;
         this.hidRPCRegistery.register(typeUrl, generatedProto[rpcName]);
-    };
-    return HIDRpcFactory;
-}());
+    }
+}
 exports.HIDRpcFactory = HIDRpcFactory;

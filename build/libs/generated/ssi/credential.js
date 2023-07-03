@@ -1,24 +1,12 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Credential = exports.CredentialProof = exports.CredentialStatus = exports.Claim = exports.protobufPackage = void 0;
 /* eslint-disable */
-var minimal_1 = require("protobufjs/minimal");
+const minimal_1 = require("protobufjs/minimal");
 exports.protobufPackage = "hypersignprotocol.hidnode.ssi";
-var baseClaim = { id: "", currentStatus: "", statusReason: "" };
+const baseClaim = { id: "", currentStatus: "", statusReason: "" };
 exports.Claim = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.id !== "") {
             writer.uint32(10).string(message.id);
         }
@@ -30,12 +18,12 @@ exports.Claim = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseClaim);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseClaim);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.id = reader.string();
@@ -53,8 +41,8 @@ exports.Claim = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseClaim);
+    fromJSON(object) {
+        const message = Object.assign({}, baseClaim);
         if (object.id !== undefined && object.id !== null) {
             message.id = String(object.id);
         }
@@ -75,8 +63,8 @@ exports.Claim = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.id !== undefined && (obj.id = message.id);
         message.currentStatus !== undefined &&
             (obj.currentStatus = message.currentStatus);
@@ -84,8 +72,8 @@ exports.Claim = {
             (obj.statusReason = message.statusReason);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseClaim);
+    fromPartial(object) {
+        const message = Object.assign({}, baseClaim);
         if (object.id !== undefined && object.id !== null) {
             message.id = object.id;
         }
@@ -107,15 +95,14 @@ exports.Claim = {
         return message;
     },
 };
-var baseCredentialStatus = {
+const baseCredentialStatus = {
     issuer: "",
     issuanceDate: "",
     expirationDate: "",
     credentialHash: "",
 };
 exports.CredentialStatus = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.claim !== undefined) {
             exports.Claim.encode(message.claim, writer.uint32(10).fork()).ldelim();
         }
@@ -133,12 +120,12 @@ exports.CredentialStatus = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseCredentialStatus);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseCredentialStatus);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.claim = exports.Claim.decode(reader, reader.uint32());
@@ -162,8 +149,8 @@ exports.CredentialStatus = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseCredentialStatus);
+    fromJSON(object) {
+        const message = Object.assign({}, baseCredentialStatus);
         if (object.claim !== undefined && object.claim !== null) {
             message.claim = exports.Claim.fromJSON(object.claim);
         }
@@ -196,8 +183,8 @@ exports.CredentialStatus = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.claim !== undefined &&
             (obj.claim = message.claim ? exports.Claim.toJSON(message.claim) : undefined);
         message.issuer !== undefined && (obj.issuer = message.issuer);
@@ -209,8 +196,8 @@ exports.CredentialStatus = {
             (obj.credentialHash = message.credentialHash);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseCredentialStatus);
+    fromPartial(object) {
+        const message = Object.assign({}, baseCredentialStatus);
         if (object.claim !== undefined && object.claim !== null) {
             message.claim = exports.Claim.fromPartial(object.claim);
         }
@@ -244,7 +231,7 @@ exports.CredentialStatus = {
         return message;
     },
 };
-var baseCredentialProof = {
+const baseCredentialProof = {
     type: "",
     created: "",
     updated: "",
@@ -253,8 +240,7 @@ var baseCredentialProof = {
     proofValue: "",
 };
 exports.CredentialProof = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.type !== "") {
             writer.uint32(10).string(message.type);
         }
@@ -275,12 +261,12 @@ exports.CredentialProof = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseCredentialProof);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseCredentialProof);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.type = reader.string();
@@ -307,8 +293,8 @@ exports.CredentialProof = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseCredentialProof);
+    fromJSON(object) {
+        const message = Object.assign({}, baseCredentialProof);
         if (object.type !== undefined && object.type !== null) {
             message.type = String(object.type);
         }
@@ -348,8 +334,8 @@ exports.CredentialProof = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.type !== undefined && (obj.type = message.type);
         message.created !== undefined && (obj.created = message.created);
         message.updated !== undefined && (obj.updated = message.updated);
@@ -360,8 +346,8 @@ exports.CredentialProof = {
         message.proofValue !== undefined && (obj.proofValue = message.proofValue);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseCredentialProof);
+    fromPartial(object) {
+        const message = Object.assign({}, baseCredentialProof);
         if (object.type !== undefined && object.type !== null) {
             message.type = object.type;
         }
@@ -402,15 +388,14 @@ exports.CredentialProof = {
         return message;
     },
 };
-var baseCredential = {
+const baseCredential = {
     issuer: "",
     issuanceDate: "",
     expirationDate: "",
     credentialHash: "",
 };
 exports.Credential = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.claim !== undefined) {
             exports.Claim.encode(message.claim, writer.uint32(10).fork()).ldelim();
         }
@@ -431,12 +416,12 @@ exports.Credential = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseCredential);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseCredential);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.claim = exports.Claim.decode(reader, reader.uint32());
@@ -463,8 +448,8 @@ exports.Credential = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseCredential);
+    fromJSON(object) {
+        const message = Object.assign({}, baseCredential);
         if (object.claim !== undefined && object.claim !== null) {
             message.claim = exports.Claim.fromJSON(object.claim);
         }
@@ -503,8 +488,8 @@ exports.Credential = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.claim !== undefined &&
             (obj.claim = message.claim ? exports.Claim.toJSON(message.claim) : undefined);
         message.issuer !== undefined && (obj.issuer = message.issuer);
@@ -520,8 +505,8 @@ exports.Credential = {
                 : undefined);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseCredential);
+    fromPartial(object) {
+        const message = Object.assign({}, baseCredential);
         if (object.claim !== undefined && object.claim !== null) {
             message.claim = exports.Claim.fromPartial(object.claim);
         }

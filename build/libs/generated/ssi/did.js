@@ -1,22 +1,11 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DidDocumentState = exports.SignInfo = exports.Service = exports.VerificationMethod = exports.Metadata = exports.Did = exports.protobufPackage = void 0;
 /* eslint-disable */
-var clientSpec_1 = require("./clientSpec");
-var minimal_1 = require("protobufjs/minimal");
+const clientSpec_1 = require("./clientSpec");
+const minimal_1 = require("protobufjs/minimal");
 exports.protobufPackage = "hypersignprotocol.hidnode.ssi";
-var baseDid = {
+const baseDid = {
     context: "",
     id: "",
     controller: "",
@@ -28,57 +17,46 @@ var baseDid = {
     capabilityDelegation: "",
 };
 exports.Did = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
-        for (var _i = 0, _a = message.context; _i < _a.length; _i++) {
-            var v = _a[_i];
+    encode(message, writer = minimal_1.Writer.create()) {
+        for (const v of message.context) {
             writer.uint32(10).string(v);
         }
         if (message.id !== "") {
             writer.uint32(18).string(message.id);
         }
-        for (var _b = 0, _c = message.controller; _b < _c.length; _b++) {
-            var v = _c[_b];
+        for (const v of message.controller) {
             writer.uint32(26).string(v);
         }
-        for (var _d = 0, _e = message.alsoKnownAs; _d < _e.length; _d++) {
-            var v = _e[_d];
+        for (const v of message.alsoKnownAs) {
             writer.uint32(34).string(v);
         }
-        for (var _f = 0, _g = message.verificationMethod; _f < _g.length; _f++) {
-            var v = _g[_f];
+        for (const v of message.verificationMethod) {
             exports.VerificationMethod.encode(v, writer.uint32(42).fork()).ldelim();
         }
-        for (var _h = 0, _j = message.authentication; _h < _j.length; _h++) {
-            var v = _j[_h];
+        for (const v of message.authentication) {
             writer.uint32(50).string(v);
         }
-        for (var _k = 0, _l = message.assertionMethod; _k < _l.length; _k++) {
-            var v = _l[_k];
+        for (const v of message.assertionMethod) {
             writer.uint32(58).string(v);
         }
-        for (var _m = 0, _o = message.keyAgreement; _m < _o.length; _m++) {
-            var v = _o[_m];
+        for (const v of message.keyAgreement) {
             writer.uint32(66).string(v);
         }
-        for (var _p = 0, _q = message.capabilityInvocation; _p < _q.length; _p++) {
-            var v = _q[_p];
+        for (const v of message.capabilityInvocation) {
             writer.uint32(74).string(v);
         }
-        for (var _r = 0, _s = message.capabilityDelegation; _r < _s.length; _r++) {
-            var v = _s[_r];
+        for (const v of message.capabilityDelegation) {
             writer.uint32(82).string(v);
         }
-        for (var _t = 0, _u = message.service; _t < _u.length; _t++) {
-            var v = _u[_t];
+        for (const v of message.service) {
             exports.Service.encode(v, writer.uint32(90).fork()).ldelim();
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseDid);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseDid);
         message.context = [];
         message.controller = [];
         message.alsoKnownAs = [];
@@ -90,7 +68,7 @@ exports.Did = {
         message.capabilityDelegation = [];
         message.service = [];
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.context.push(reader.string());
@@ -132,8 +110,8 @@ exports.Did = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseDid);
+    fromJSON(object) {
+        const message = Object.assign({}, baseDid);
         message.context = [];
         message.controller = [];
         message.alsoKnownAs = [];
@@ -145,8 +123,7 @@ exports.Did = {
         message.capabilityDelegation = [];
         message.service = [];
         if (object.context !== undefined && object.context !== null) {
-            for (var _i = 0, _a = object.context; _i < _a.length; _i++) {
-                var e = _a[_i];
+            for (const e of object.context) {
                 message.context.push(String(e));
             }
         }
@@ -157,136 +134,123 @@ exports.Did = {
             message.id = "";
         }
         if (object.controller !== undefined && object.controller !== null) {
-            for (var _b = 0, _c = object.controller; _b < _c.length; _b++) {
-                var e = _c[_b];
+            for (const e of object.controller) {
                 message.controller.push(String(e));
             }
         }
         if (object.alsoKnownAs !== undefined && object.alsoKnownAs !== null) {
-            for (var _d = 0, _e = object.alsoKnownAs; _d < _e.length; _d++) {
-                var e = _e[_d];
+            for (const e of object.alsoKnownAs) {
                 message.alsoKnownAs.push(String(e));
             }
         }
         if (object.verificationMethod !== undefined &&
             object.verificationMethod !== null) {
-            for (var _f = 0, _g = object.verificationMethod; _f < _g.length; _f++) {
-                var e = _g[_f];
+            for (const e of object.verificationMethod) {
                 message.verificationMethod.push(exports.VerificationMethod.fromJSON(e));
             }
         }
         if (object.authentication !== undefined && object.authentication !== null) {
-            for (var _h = 0, _j = object.authentication; _h < _j.length; _h++) {
-                var e = _j[_h];
+            for (const e of object.authentication) {
                 message.authentication.push(String(e));
             }
         }
         if (object.assertionMethod !== undefined &&
             object.assertionMethod !== null) {
-            for (var _k = 0, _l = object.assertionMethod; _k < _l.length; _k++) {
-                var e = _l[_k];
+            for (const e of object.assertionMethod) {
                 message.assertionMethod.push(String(e));
             }
         }
         if (object.keyAgreement !== undefined && object.keyAgreement !== null) {
-            for (var _m = 0, _o = object.keyAgreement; _m < _o.length; _m++) {
-                var e = _o[_m];
+            for (const e of object.keyAgreement) {
                 message.keyAgreement.push(String(e));
             }
         }
         if (object.capabilityInvocation !== undefined &&
             object.capabilityInvocation !== null) {
-            for (var _p = 0, _q = object.capabilityInvocation; _p < _q.length; _p++) {
-                var e = _q[_p];
+            for (const e of object.capabilityInvocation) {
                 message.capabilityInvocation.push(String(e));
             }
         }
         if (object.capabilityDelegation !== undefined &&
             object.capabilityDelegation !== null) {
-            for (var _r = 0, _s = object.capabilityDelegation; _r < _s.length; _r++) {
-                var e = _s[_r];
+            for (const e of object.capabilityDelegation) {
                 message.capabilityDelegation.push(String(e));
             }
         }
         if (object.service !== undefined && object.service !== null) {
-            for (var _t = 0, _u = object.service; _t < _u.length; _t++) {
-                var e = _u[_t];
+            for (const e of object.service) {
                 message.service.push(exports.Service.fromJSON(e));
             }
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         if (message.context) {
-            obj.context = message.context.map(function (e) { return e; });
+            obj.context = message.context.map((e) => e);
         }
         else {
             obj.context = [];
         }
         message.id !== undefined && (obj.id = message.id);
         if (message.controller) {
-            obj.controller = message.controller.map(function (e) { return e; });
+            obj.controller = message.controller.map((e) => e);
         }
         else {
             obj.controller = [];
         }
         if (message.alsoKnownAs) {
-            obj.alsoKnownAs = message.alsoKnownAs.map(function (e) { return e; });
+            obj.alsoKnownAs = message.alsoKnownAs.map((e) => e);
         }
         else {
             obj.alsoKnownAs = [];
         }
         if (message.verificationMethod) {
-            obj.verificationMethod = message.verificationMethod.map(function (e) {
-                return e ? exports.VerificationMethod.toJSON(e) : undefined;
-            });
+            obj.verificationMethod = message.verificationMethod.map((e) => e ? exports.VerificationMethod.toJSON(e) : undefined);
         }
         else {
             obj.verificationMethod = [];
         }
         if (message.authentication) {
-            obj.authentication = message.authentication.map(function (e) { return e; });
+            obj.authentication = message.authentication.map((e) => e);
         }
         else {
             obj.authentication = [];
         }
         if (message.assertionMethod) {
-            obj.assertionMethod = message.assertionMethod.map(function (e) { return e; });
+            obj.assertionMethod = message.assertionMethod.map((e) => e);
         }
         else {
             obj.assertionMethod = [];
         }
         if (message.keyAgreement) {
-            obj.keyAgreement = message.keyAgreement.map(function (e) { return e; });
+            obj.keyAgreement = message.keyAgreement.map((e) => e);
         }
         else {
             obj.keyAgreement = [];
         }
         if (message.capabilityInvocation) {
-            obj.capabilityInvocation = message.capabilityInvocation.map(function (e) { return e; });
+            obj.capabilityInvocation = message.capabilityInvocation.map((e) => e);
         }
         else {
             obj.capabilityInvocation = [];
         }
         if (message.capabilityDelegation) {
-            obj.capabilityDelegation = message.capabilityDelegation.map(function (e) { return e; });
+            obj.capabilityDelegation = message.capabilityDelegation.map((e) => e);
         }
         else {
             obj.capabilityDelegation = [];
         }
         if (message.service) {
-            obj.service = message.service.map(function (e) {
-                return e ? exports.Service.toJSON(e) : undefined;
-            });
+            obj.service = message.service.map((e) => e ? exports.Service.toJSON(e) : undefined);
         }
         else {
             obj.service = [];
         }
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseDid);
+    fromPartial(object) {
+        const message = Object.assign({}, baseDid);
         message.context = [];
         message.controller = [];
         message.alsoKnownAs = [];
@@ -298,8 +262,7 @@ exports.Did = {
         message.capabilityDelegation = [];
         message.service = [];
         if (object.context !== undefined && object.context !== null) {
-            for (var _i = 0, _a = object.context; _i < _a.length; _i++) {
-                var e = _a[_i];
+            for (const e of object.context) {
                 message.context.push(e);
             }
         }
@@ -310,75 +273,65 @@ exports.Did = {
             message.id = "";
         }
         if (object.controller !== undefined && object.controller !== null) {
-            for (var _b = 0, _c = object.controller; _b < _c.length; _b++) {
-                var e = _c[_b];
+            for (const e of object.controller) {
                 message.controller.push(e);
             }
         }
         if (object.alsoKnownAs !== undefined && object.alsoKnownAs !== null) {
-            for (var _d = 0, _e = object.alsoKnownAs; _d < _e.length; _d++) {
-                var e = _e[_d];
+            for (const e of object.alsoKnownAs) {
                 message.alsoKnownAs.push(e);
             }
         }
         if (object.verificationMethod !== undefined &&
             object.verificationMethod !== null) {
-            for (var _f = 0, _g = object.verificationMethod; _f < _g.length; _f++) {
-                var e = _g[_f];
+            for (const e of object.verificationMethod) {
                 message.verificationMethod.push(exports.VerificationMethod.fromPartial(e));
             }
         }
         if (object.authentication !== undefined && object.authentication !== null) {
-            for (var _h = 0, _j = object.authentication; _h < _j.length; _h++) {
-                var e = _j[_h];
+            for (const e of object.authentication) {
                 message.authentication.push(e);
             }
         }
         if (object.assertionMethod !== undefined &&
             object.assertionMethod !== null) {
-            for (var _k = 0, _l = object.assertionMethod; _k < _l.length; _k++) {
-                var e = _l[_k];
+            for (const e of object.assertionMethod) {
                 message.assertionMethod.push(e);
             }
         }
         if (object.keyAgreement !== undefined && object.keyAgreement !== null) {
-            for (var _m = 0, _o = object.keyAgreement; _m < _o.length; _m++) {
-                var e = _o[_m];
+            for (const e of object.keyAgreement) {
                 message.keyAgreement.push(e);
             }
         }
         if (object.capabilityInvocation !== undefined &&
             object.capabilityInvocation !== null) {
-            for (var _p = 0, _q = object.capabilityInvocation; _p < _q.length; _p++) {
-                var e = _q[_p];
+            for (const e of object.capabilityInvocation) {
                 message.capabilityInvocation.push(e);
             }
         }
         if (object.capabilityDelegation !== undefined &&
             object.capabilityDelegation !== null) {
-            for (var _r = 0, _s = object.capabilityDelegation; _r < _s.length; _r++) {
-                var e = _s[_r];
+            for (const e of object.capabilityDelegation) {
                 message.capabilityDelegation.push(e);
             }
         }
         if (object.service !== undefined && object.service !== null) {
-            for (var _t = 0, _u = object.service; _t < _u.length; _t++) {
-                var e = _u[_t];
+            for (const e of object.service) {
                 message.service.push(exports.Service.fromPartial(e));
             }
         }
         return message;
     },
 };
-var baseMetadata = {
+const baseMetadata = {
     created: "",
     updated: "",
     deactivated: false,
     versionId: "",
 };
 exports.Metadata = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.created !== "") {
             writer.uint32(10).string(message.created);
         }
@@ -393,12 +346,12 @@ exports.Metadata = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseMetadata);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseMetadata);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.created = reader.string();
@@ -419,8 +372,8 @@ exports.Metadata = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseMetadata);
+    fromJSON(object) {
+        const message = Object.assign({}, baseMetadata);
         if (object.created !== undefined && object.created !== null) {
             message.created = String(object.created);
         }
@@ -447,8 +400,8 @@ exports.Metadata = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.created !== undefined && (obj.created = message.created);
         message.updated !== undefined && (obj.updated = message.updated);
         message.deactivated !== undefined &&
@@ -456,8 +409,8 @@ exports.Metadata = {
         message.versionId !== undefined && (obj.versionId = message.versionId);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseMetadata);
+    fromPartial(object) {
+        const message = Object.assign({}, baseMetadata);
         if (object.created !== undefined && object.created !== null) {
             message.created = object.created;
         }
@@ -485,7 +438,7 @@ exports.Metadata = {
         return message;
     },
 };
-var baseVerificationMethod = {
+const baseVerificationMethod = {
     id: "",
     type: "",
     controller: "",
@@ -493,8 +446,7 @@ var baseVerificationMethod = {
     blockchainAccountId: "",
 };
 exports.VerificationMethod = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.id !== "") {
             writer.uint32(10).string(message.id);
         }
@@ -512,12 +464,12 @@ exports.VerificationMethod = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseVerificationMethod);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseVerificationMethod);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.id = reader.string();
@@ -541,8 +493,8 @@ exports.VerificationMethod = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseVerificationMethod);
+    fromJSON(object) {
+        const message = Object.assign({}, baseVerificationMethod);
         if (object.id !== undefined && object.id !== null) {
             message.id = String(object.id);
         }
@@ -577,8 +529,8 @@ exports.VerificationMethod = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.id !== undefined && (obj.id = message.id);
         message.type !== undefined && (obj.type = message.type);
         message.controller !== undefined && (obj.controller = message.controller);
@@ -588,8 +540,8 @@ exports.VerificationMethod = {
             (obj.blockchainAccountId = message.blockchainAccountId);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseVerificationMethod);
+    fromPartial(object) {
+        const message = Object.assign({}, baseVerificationMethod);
         if (object.id !== undefined && object.id !== null) {
             message.id = object.id;
         }
@@ -625,10 +577,9 @@ exports.VerificationMethod = {
         return message;
     },
 };
-var baseService = { id: "", type: "", serviceEndpoint: "" };
+const baseService = { id: "", type: "", serviceEndpoint: "" };
 exports.Service = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.id !== "") {
             writer.uint32(10).string(message.id);
         }
@@ -640,12 +591,12 @@ exports.Service = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseService);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseService);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.id = reader.string();
@@ -663,8 +614,8 @@ exports.Service = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseService);
+    fromJSON(object) {
+        const message = Object.assign({}, baseService);
         if (object.id !== undefined && object.id !== null) {
             message.id = String(object.id);
         }
@@ -686,16 +637,16 @@ exports.Service = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.id !== undefined && (obj.id = message.id);
         message.type !== undefined && (obj.type = message.type);
         message.serviceEndpoint !== undefined &&
             (obj.serviceEndpoint = message.serviceEndpoint);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseService);
+    fromPartial(object) {
+        const message = Object.assign({}, baseService);
         if (object.id !== undefined && object.id !== null) {
             message.id = object.id;
         }
@@ -718,10 +669,9 @@ exports.Service = {
         return message;
     },
 };
-var baseSignInfo = { verification_method_id: "", signature: "" };
+const baseSignInfo = { verification_method_id: "", signature: "" };
 exports.SignInfo = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.verification_method_id !== "") {
             writer.uint32(10).string(message.verification_method_id);
         }
@@ -733,12 +683,12 @@ exports.SignInfo = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseSignInfo);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseSignInfo);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.verification_method_id = reader.string();
@@ -756,8 +706,8 @@ exports.SignInfo = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseSignInfo);
+    fromJSON(object) {
+        const message = Object.assign({}, baseSignInfo);
         if (object.verification_method_id !== undefined &&
             object.verification_method_id !== null) {
             message.verification_method_id = String(object.verification_method_id);
@@ -779,8 +729,8 @@ exports.SignInfo = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.verification_method_id !== undefined &&
             (obj.verification_method_id = message.verification_method_id);
         message.signature !== undefined && (obj.signature = message.signature);
@@ -790,8 +740,8 @@ exports.SignInfo = {
                 : undefined);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseSignInfo);
+    fromPartial(object) {
+        const message = Object.assign({}, baseSignInfo);
         if (object.verification_method_id !== undefined &&
             object.verification_method_id !== null) {
             message.verification_method_id = object.verification_method_id;
@@ -814,10 +764,9 @@ exports.SignInfo = {
         return message;
     },
 };
-var baseDidDocumentState = {};
+const baseDidDocumentState = {};
 exports.DidDocumentState = {
-    encode: function (message, writer) {
-        if (writer === void 0) { writer = minimal_1.Writer.create(); }
+    encode(message, writer = minimal_1.Writer.create()) {
         if (message.didDocument !== undefined) {
             exports.Did.encode(message.didDocument, writer.uint32(10).fork()).ldelim();
         }
@@ -826,12 +775,12 @@ exports.DidDocumentState = {
         }
         return writer;
     },
-    decode: function (input, length) {
-        var reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        var end = length === undefined ? reader.len : reader.pos + length;
-        var message = __assign({}, baseDidDocumentState);
+    decode(input, length) {
+        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = Object.assign({}, baseDidDocumentState);
         while (reader.pos < end) {
-            var tag = reader.uint32();
+            const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
                     message.didDocument = exports.Did.decode(reader, reader.uint32());
@@ -846,8 +795,8 @@ exports.DidDocumentState = {
         }
         return message;
     },
-    fromJSON: function (object) {
-        var message = __assign({}, baseDidDocumentState);
+    fromJSON(object) {
+        const message = Object.assign({}, baseDidDocumentState);
         if (object.didDocument !== undefined && object.didDocument !== null) {
             message.didDocument = exports.Did.fromJSON(object.didDocument);
         }
@@ -863,8 +812,8 @@ exports.DidDocumentState = {
         }
         return message;
     },
-    toJSON: function (message) {
-        var obj = {};
+    toJSON(message) {
+        const obj = {};
         message.didDocument !== undefined &&
             (obj.didDocument = message.didDocument
                 ? exports.Did.toJSON(message.didDocument)
@@ -875,8 +824,8 @@ exports.DidDocumentState = {
                 : undefined);
         return obj;
     },
-    fromPartial: function (object) {
-        var message = __assign({}, baseDidDocumentState);
+    fromPartial(object) {
+        const message = Object.assign({}, baseDidDocumentState);
         if (object.didDocument !== undefined && object.didDocument !== null) {
             message.didDocument = exports.Did.fromPartial(object.didDocument);
         }
