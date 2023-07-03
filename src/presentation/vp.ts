@@ -17,6 +17,9 @@ const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 import { VP, DID } from '../constants';
 import { IPresentationMethods, IVerifiablePresentation } from './IPresentation';
 import customLoader from '../../libs/w3cache/v1';
+import { purposes } from 'jsonld-signatures';
+import { EthereumEip712Signature2021 } from 'ethereumeip712signature2021suite';
+
 const documentLoader = customLoader;
 
 export default class HypersignVerifiablePresentation implements IPresentationMethods, IVerifiablePresentation {
@@ -347,5 +350,54 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     });
 
     return result;
+  }
+
+  async signByClientSpec(params: {
+    presentation: IVerifiablePresentation;
+    holderDid?: string;
+    holderDidDocSigned?: JSON;
+    verificationMethodId: string;
+    web3Obj;
+    challenge: string;
+  }): Promise<IVerifiablePresentation> {
+    if (params.holderDid && params.holderDidDocSigned) {
+      throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
+    }
+    if (!params.presentation) {
+      throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+    }
+
+    if (!params.challenge) {
+      throw new Error('HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+    }
+
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+    }
+
+    if (!this.hsDid) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+    let resolvedDidDoc;
+    if (params.holderDid) {
+      resolvedDidDoc = await this.hsDid.resolve({ did: params.holderDid });
+    } else if (params.holderDidDocSigned) {
+      resolvedDidDoc = {};
+      resolvedDidDoc.didDocument = params.holderDidDocSigned;
+    } else {
+      throw new Error('Either holderDid or holderDidDocSigned should be provided');
+    }
+    const EthereumEip712Signature2021obj = new EthereumEip712Signature2021({}, params.web3Obj);
+    const proof = await EthereumEip712Signature2021obj.createProof({
+      document: params.presentation,
+      purpose: new purposes.AssertionProofPurpose(),
+      verificationMethod: params.verificationMethodId,
+      documentLoader,
+    });
+    params.presentation.proof = proof;
+    const signedVP = params.presentation;
+    return signedVP;
   }
 }
