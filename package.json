@@ -30,6 +30,7 @@
     "axios": "^0.19.0",
     "crypto-ld": "^6.0.0",
     "ethereumeip712signature2021suite": "git+https://github.com/hypersign-protocol/EthereumEip712Signature2021Suite.git",
+    "jcs": "github:hypersign-protocol/JCS",
     "jsonld": "^3.1.1",
     "jsonld-signatures": "^9.3.1",
     "node-fetch": "^2.6.1",

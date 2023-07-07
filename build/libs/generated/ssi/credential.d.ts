@@ -30,34 +30,34 @@ export interface Credential {
 }
 export declare const Claim: {
     encode(message: Claim, writer?: Writer): Writer;
-    decode(input: Reader | Uint8Array, length?: number | undefined): Claim;
+    decode(input: Reader | Uint8Array, length?: number): Claim;
     fromJSON(object: any): Claim;
     toJSON(message: Claim): unknown;
     fromPartial(object: DeepPartial<Claim>): Claim;
 };
 export declare const CredentialStatus: {
     encode(message: CredentialStatus, writer?: Writer): Writer;
-    decode(input: Reader | Uint8Array, length?: number | undefined): CredentialStatus;
+    decode(input: Reader | Uint8Array, length?: number): CredentialStatus;
     fromJSON(object: any): CredentialStatus;
     toJSON(message: CredentialStatus): unknown;
     fromPartial(object: DeepPartial<CredentialStatus>): CredentialStatus;
 };
 export declare const CredentialProof: {
     encode(message: CredentialProof, writer?: Writer): Writer;
-    decode(input: Reader | Uint8Array, length?: number | undefined): CredentialProof;
+    decode(input: Reader | Uint8Array, length?: number): CredentialProof;
     fromJSON(object: any): CredentialProof;
     toJSON(message: CredentialProof): unknown;
     fromPartial(object: DeepPartial<CredentialProof>): CredentialProof;
 };
 export declare const Credential: {
     encode(message: Credential, writer?: Writer): Writer;
-    decode(input: Reader | Uint8Array, length?: number | undefined): Credential;
+    decode(input: Reader | Uint8Array, length?: number): Credential;
     fromJSON(object: any): Credential;
     toJSON(message: Credential): unknown;
     fromPartial(object: DeepPartial<Credential>): Credential;
 };
-declare type Builtin = Date | Function | Uint8Array | string | number | undefined;
-export declare type DeepPartial<T> = T extends Builtin ? T : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>> : T extends {} ? {
+type Builtin = Date | Function | Uint8Array | string | number | undefined;
+export type DeepPartial<T> = T extends Builtin ? T : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>> : T extends {} ? {
     [K in keyof T]?: DeepPartial<T[K]>;
 } : Partial<T>;
 export {};

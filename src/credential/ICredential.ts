@@ -3,6 +3,7 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
+import { TypedDataField } from '@ethersproject/abstract-signer';
 
 import { CredentialStatus, CredentialProof, Credential } from '../../libs/generated/ssi/credential';
 import { DeliverTxResponse } from '@cosmjs/stargate';
@@ -33,9 +34,9 @@ export interface ICredentialProof {
   jws?: string;
   proofValue: string;
   canonicalizationHash: string;
-  eip712Domain: {
+  eip712: {
     domain: object;
-    messageSchema: object;
+    types: Record<string, TypedDataField[]> | string;
   };
 }
 

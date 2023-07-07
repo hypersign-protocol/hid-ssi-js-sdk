@@ -22,6 +22,7 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 import crypto from 'crypto';
 import customLoader from '../../libs/w3cache/v1';
 import { EthereumEip712Signature2021 } from 'ethereumeip712signature2021suite';
+import { IClientSpec } from '../did/IDID';
 
 const documentLoader = customLoader;
 
@@ -815,8 +816,11 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     credential: IVerifiableCredential;
     issuerDid: string;
     verificationMethodId: string;
+    type?: string;
     web3Obj;
     registerCredential?: boolean;
+    domain?: string;
+    clientSpec?: IClientSpec;
   }) {
     if (!params.verificationMethodId) {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to issue credential');
@@ -835,7 +839,9 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     if (!params.web3Obj) {
       throw new Error('HID-SSI-SDK:: Error: prams.web3Obj should be passed');
     }
-
+    if (params.type == undefined) {
+      params.type = 'Document';
+    }
     if (params.registerCredential == undefined) {
       params.registerCredential = true;
     }
@@ -858,6 +864,9 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       document: params.credential,
       purpose: new purposes.AssertionProofPurpose(),
       verificationMethod: params.verificationMethodId,
+      primaryType: params.type,
+      date: new Date().toISOString(),
+      domain: params.domain ? { name: params.domain } : undefined,
       documentLoader,
     });
     params.credential.proof = proof;
@@ -874,30 +883,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     if (params.registerCredential) {
       // register credential status
-      const credentialStatus: CredentialStatus = {
-        claim: {
-          id: params.credential.id,
-          currentStatus: VC.CRED_STATUS_TYPES.LIVE,
-          statusReason: 'Credential is live',
-        },
-        issuer: params.credential.issuer,
-        issuanceDate: params.credential.issuanceDate,
-        expirationDate: params.credential.expirationDate,
-        credentialHash: params.credential.proof?.canonicalizationHash as string,
-      };
-
-      const proof: CredentialProof = {
-        type: 'EcdsaSecp256k1RecoverySignature2020',
-        created: this._dateNow(),
-        updated: this._dateNow(),
-        verificationMethod: params.verificationMethodId,
-        proofValue: params.credential.proof?.proofValue as string,
-        proofPurpose: VC.PROOF_PURPOSE,
-      };
-      const resp = await this.registerCredentialStatus({
-        credentialStatus,
-        credentialStatusProof: proof,
-      });
+      return new Error('HID-SSI-SDK:: Error: registerCredential is not implemented');
     }
 
     return { signedCredential: signedVC };
@@ -938,8 +924,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     const verificationResult = await EthereumEip712Signature2021obj.verifyProof({
       proof: proof,
       document: params.credential,
-      types: 'Documents',
-      domain: proof.eip712Domain.domain,
+      types: proof.eip712.types,
+      domain: proof.eip712.domain,
       purpose: new purposes.AssertionProofPurpose(),
       documentLoader,
     });

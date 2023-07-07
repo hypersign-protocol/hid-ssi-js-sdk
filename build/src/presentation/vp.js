@@ -17,6 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const jcs_1 = require("jcs");
 const vc_js_1 = __importDefault(require("vc-js"));
 const jsonld_signatures_1 = __importDefault(require("jsonld-signatures"));
 const did_1 = __importDefault(require("../did/did"));
@@ -27,6 +28,8 @@ const vc_1 = __importDefault(require("../credential/vc"));
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonld_signatures_1.default.purposes;
 const constants_1 = require("../constants");
 const v1_1 = __importDefault(require("../../libs/w3cache/v1"));
+const jsonld_signatures_2 = require("jsonld-signatures");
+const ethereumeip712signature2021suite_1 = require("ethereumeip712signature2021suite");
 const documentLoader = v1_1.default;
 class HypersignVerifiablePresentation {
     constructor(params = {}) {
@@ -268,6 +271,51 @@ class HypersignVerifiablePresentation {
                 },
             });
             return result;
+        });
+    }
+    signByClientSpec(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!params.holderDid) {
+                throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
+            }
+            if (!params.presentation) {
+                throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+            }
+            if (!params.challenge) {
+                throw new Error('HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+            }
+            if (!params.verificationMethodId) {
+                throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+            }
+            if (!this.hsDid) {
+                throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
+            }
+            let resolvedDidDoc;
+            if (params.holderDid) {
+                resolvedDidDoc = yield this.hsDid.resolve({ did: params.holderDid });
+            }
+            else {
+                throw new Error('holderDid should be provided');
+            }
+            const vcs = [];
+            params.presentation.verifiableCredential.forEach((vc) => {
+                return vcs.push(jcs_1.JCS.cannonicalize(vc));
+            });
+            params.presentation.verifiableCredential = Array();
+            params.presentation.verifiableCredential = vcs;
+            const EthereumEip712Signature2021obj = new ethereumeip712signature2021suite_1.EthereumEip712Signature2021({}, params.web3Obj);
+            const proof = yield EthereumEip712Signature2021obj.createProof({
+                document: params.presentation,
+                primaryType: 'VerifiablePresentation',
+                purpose: new jsonld_signatures_2.purposes.AssertionProofPurpose(),
+                verificationMethod: params.verificationMethodId,
+                date: new Date().toISOString(),
+                documentLoader,
+                domain: params.domain ? { name: params.domain } : undefined,
+            });
+            params.presentation.proof = proof;
+            const signedVP = params.presentation;
+            return signedVP;
         });
     }
 }

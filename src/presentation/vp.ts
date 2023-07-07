@@ -4,6 +4,7 @@
  * Author: Hypermine Core Team
  */
 
+import { JCS } from 'jcs';
 import vc from 'vc-js';
 import jsonSigs from 'jsonld-signatures';
 import HypersignDID from '../did/did';
@@ -355,12 +356,13 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
   async signByClientSpec(params: {
     presentation: IVerifiablePresentation;
     holderDid?: string;
-    holderDidDocSigned?: JSON;
     verificationMethodId: string;
+
     web3Obj;
+    domain?: string;
     challenge: string;
   }): Promise<IVerifiablePresentation> {
-    if (params.holderDid && params.holderDidDocSigned) {
+    if (!params.holderDid) {
       throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
     }
     if (!params.presentation) {
@@ -383,18 +385,24 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     let resolvedDidDoc;
     if (params.holderDid) {
       resolvedDidDoc = await this.hsDid.resolve({ did: params.holderDid });
-    } else if (params.holderDidDocSigned) {
-      resolvedDidDoc = {};
-      resolvedDidDoc.didDocument = params.holderDidDocSigned;
     } else {
-      throw new Error('Either holderDid or holderDidDocSigned should be provided');
+      throw new Error('holderDid should be provided');
     }
+    const vcs: Array<string> = [];
+    params.presentation.verifiableCredential.forEach((vc) => {
+      return vcs.push(JCS.cannonicalize(vc));
+    });
+    params.presentation.verifiableCredential = Array<string>();
+    params.presentation.verifiableCredential = vcs;
     const EthereumEip712Signature2021obj = new EthereumEip712Signature2021({}, params.web3Obj);
     const proof = await EthereumEip712Signature2021obj.createProof({
       document: params.presentation,
+      primaryType: 'VerifiablePresentation',
       purpose: new purposes.AssertionProofPurpose(),
       verificationMethod: params.verificationMethodId,
+      date: new Date().toISOString(),
       documentLoader,
+      domain: params.domain ? { name: params.domain } : undefined,
     });
     params.presentation.proof = proof;
     const signedVP = params.presentation;

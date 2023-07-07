@@ -2,6 +2,7 @@ import { ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema, 
 import { CredentialStatus, CredentialProof } from '../../libs/generated/ssi/credential';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
+import { IClientSpec } from '../did/IDID';
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
     context: Array<string>;
     id: string;
@@ -145,10 +146,19 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         credential: IVerifiableCredential;
         issuerDid: string;
         verificationMethodId: string;
+        type?: string;
         web3Obj: any;
         registerCredential?: boolean;
-    }): Promise<{
+        domain?: string;
+        clientSpec?: IClientSpec;
+    }): Promise<Error | {
         signedCredential: IVerifiableCredential;
     }>;
+    verifyByClientSpec(params: {
+        credential: IVerifiableCredential;
+        issuerDid: string;
+        verificationMethodId: string;
+        web3Obj: any;
+    }): Promise<object>;
 }
 //# sourceMappingURL=vc.d.ts.map

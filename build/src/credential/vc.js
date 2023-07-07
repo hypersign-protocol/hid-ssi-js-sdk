@@ -638,7 +638,6 @@ class HypersignVerifiableCredential {
    
     */
     issueByClientSpec(params) {
-        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             if (!params.verificationMethodId) {
                 throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to issue credential');
@@ -654,6 +653,9 @@ class HypersignVerifiableCredential {
             }
             if (!params.web3Obj) {
                 throw new Error('HID-SSI-SDK:: Error: prams.web3Obj should be passed');
+            }
+            if (params.type == undefined) {
+                params.type = 'Document';
             }
             if (params.registerCredential == undefined) {
                 params.registerCredential = true;
@@ -671,6 +673,9 @@ class HypersignVerifiableCredential {
                 document: params.credential,
                 purpose: new jsonld_signatures_1.purposes.AssertionProofPurpose(),
                 verificationMethod: params.verificationMethodId,
+                primaryType: params.type,
+                date: new Date().toISOString(),
+                domain: params.domain ? { name: params.domain } : undefined,
                 documentLoader,
             });
             params.credential.proof = proof;
@@ -685,31 +690,43 @@ class HypersignVerifiableCredential {
             }
             if (params.registerCredential) {
                 // register credential status
-                const credentialStatus = {
-                    claim: {
-                        id: params.credential.id,
-                        currentStatus: constants_1.VC.CRED_STATUS_TYPES.LIVE,
-                        statusReason: 'Credential is live',
-                    },
-                    issuer: params.credential.issuer,
-                    issuanceDate: params.credential.issuanceDate,
-                    expirationDate: params.credential.expirationDate,
-                    credentialHash: (_a = params.credential.proof) === null || _a === void 0 ? void 0 : _a.canonicalizationHash,
-                };
-                const proof = {
-                    type: 'EcdsaSecp256k1RecoverySignature2020',
-                    created: this._dateNow(),
-                    updated: this._dateNow(),
-                    verificationMethod: params.verificationMethodId,
-                    proofValue: (_b = params.credential.proof) === null || _b === void 0 ? void 0 : _b.proofValue,
-                    proofPurpose: constants_1.VC.PROOF_PURPOSE,
-                };
-                const resp = yield this.registerCredentialStatus({
-                    credentialStatus,
-                    credentialStatusProof: proof,
-                });
+                return new Error('HID-SSI-SDK:: Error: registerCredential is not implemented');
             }
             return { signedCredential: signedVC };
+        });
+    }
+    // verify credentila issued by client spec
+    verifyByClientSpec(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!params.credential) {
+                throw new Error('HID-SSI-SDK:: params.credential is required to verify credential');
+            }
+            if (!params.credential.proof) {
+                throw new Error('HID-SSI-SDK:: params.credential.proof is required to verify credential');
+            }
+            if (!params.verificationMethodId) {
+                throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify credential');
+            }
+            if (!params.issuerDid) {
+                throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
+            }
+            if (!params.web3Obj) {
+                throw new Error('HID-SSI-SDK:: Error: prams.web3Obj should be passed');
+            }
+            const { didDocument } = yield this.hsDid.resolve({ did: params.issuerDid });
+            if (didDocument === null || didDocument === undefined)
+                throw new Error('HID-SSI-SDK:: Error: Could not resolve issuerDid = ' + params.issuerDid);
+            const EthereumEip712Signature2021obj = new ethereumeip712signature2021suite_1.EthereumEip712Signature2021({}, params.web3Obj);
+            const { proof } = params.credential;
+            const verificationResult = yield EthereumEip712Signature2021obj.verifyProof({
+                proof: proof,
+                document: params.credential,
+                types: proof.eip712.types,
+                domain: proof.eip712.domain,
+                purpose: new jsonld_signatures_1.purposes.AssertionProofPurpose(),
+                documentLoader,
+            });
+            return verificationResult;
         });
     }
 }
