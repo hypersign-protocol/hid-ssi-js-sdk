@@ -3,7 +3,7 @@
  * - Supporting Multiple Credentials while creating presentation
  */
 
-const HypersignSsiSDK = require("../../../build/src")
+const {HypersignVerifiableCredential} = require("../../../build/src")
 const { createWallet, mnemonic, hidNodeEp, writeDataInFile } = require("../../config")
 const { privateKeyMultibase } = require('../../mock/public/keys.json')
 const issuerDidDoc = require('../../mock/public/did.json')
@@ -16,7 +16,9 @@ async function test2() {
   const subjectDid = issuerDidDoc.id;;
 
   const offlineSigner = await createWallet(mnemonic);
-  const hsSdk = new HypersignSsiSDK(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest, hidNodeEp.namespace);
+  const hsSdk = new HypersignVerifiableCredential({
+    offlineSigner, nodeRpcEndpoint:'https://rpc.jagrat.hypersign.id', nodeRestEndpoint:'https://api.jagrat.hypersign.id', namespace: 'testnet'
+  });
   await hsSdk.init()
 
   const expirationDate = new Date('12/11/2027');
@@ -155,7 +157,7 @@ async function test2() {
   }
 
   console.log('Genenrate VC ==========')
-  const creadential=await hsSdk.vc.getCredential({
+  const creadential=await hsSdk.generate({
       schemaContext: context,
       type: ['Patient'],
       subjectDid,
@@ -167,11 +169,11 @@ async function test2() {
   console.log(JSON.stringify(creadential, null, 2));
   
   console.log('Issue VC ==========')
-  const issueCread=await hsSdk.vc.issueCredential({
+  const issueCread=await hsSdk.issue({
     credential: creadential,
     issuerDid,
     verificationMethodId:issuerDidDoc.assertionMethod[0] ,
-    privateKey: privateKeyMultibase
+    privateKeyMultibase: privateKeyMultibase
   })
   const filePath = path.join(__dirname, '../../mock/vc-with-schema-org.json')
   console.log(filePath);
@@ -179,7 +181,8 @@ async function test2() {
   console.log(JSON.stringify(issueCread, null, 2));
   
   console.log('Verify VC ==========')
-  const verifiableCreadStatus = await hsSdk.vc.verifyCredential({ credential: issueCread, issuerDid ,verificationMethodId:issuerDidDoc.assertionMethod[0] })
+  const verifiableCreadStatus = await hsSdk.verify({ credential: issueCread.signedCredential,
+  issuerDid,verificationMethodId:issueCread.signedCredential.proof.verificationMethod })
   console.log(verifiableCreadStatus);
 
   console.log('Generate VP ==========')

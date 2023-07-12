@@ -209,7 +209,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
    * @returns {Promise<IVerifiableCredential>} Result a credential document
    */
   public async generate(params: {
-    schemaId: string;
+    schemaId?: string;
     subjectDid?: string;
     subjectDidDocSigned?: JSON;
     schemaContext?: Array<string>;

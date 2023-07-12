@@ -53,7 +53,9 @@ class CredentialRPC {
         else {
             this.hidClient = null;
         }
-        this.credentialRestEP = client_1.HIDClient.hidNodeRestEndpoint + constants_1.HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
+        this.credentialRestEP =
+            (client_1.HIDClient.hidNodeRestEndpoint ? client_1.HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) +
+                constants_1.HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
