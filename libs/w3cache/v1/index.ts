@@ -41,9 +41,7 @@ export default async (url, options) => {
             documentUrl: url // this is the actual context URL after redirects
         };
     }
-    // call the default documentLoader
-    console.log(await nodeDocumentLoader(url));
-    
+    // call the default documentLoader    
     return nodeDocumentLoader(url);
 };
 

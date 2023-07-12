@@ -1,6 +1,6 @@
 import { Did, SignInfo } from '../../libs/generated/ssi/did';
 import Web3 from 'web3';
-import { IDID, IDIDResolve, ISignedDIDDocument, IKeyType, IClientSpec, IVerificationRelationships } from './IDID';
+import { IDID, IDIDResolve, ISignedDIDDocument, IClientSpec, IVerificationRelationships } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 /** Class representing HypersignDID */
 export default class HypersignDID implements IDID {
@@ -154,7 +154,7 @@ export default class HypersignDID implements IDID {
         publicKey?: string;
         address: string;
         chainId: string;
-        keyType: IKeyType;
+        clientSpec: IClientSpec;
         verificationRelationships?: IVerificationRelationships[];
     }): Promise<object>;
     registerByClientSpec(params: {

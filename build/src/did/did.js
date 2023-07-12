@@ -594,11 +594,11 @@ class HypersignDID {
             if (!params.address) {
                 throw new Error('HID-SSI-SDK:: Error: params.address is required to create didoc');
             }
-            if (!params.keyType) {
-                throw new Error('HID-SSI-SDK:: Error: params.keyType is required to create didoc');
+            if (!params.clientSpec) {
+                throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to create didoc');
             }
-            if (!(params.keyType in IDID_1.IKeyType)) {
-                throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid');
+            if (!(params.clientSpec in IDID_1.IClientSpec)) {
+                throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
             }
             let didDoc;
             let verificationRelationships = [];
@@ -608,18 +608,16 @@ class HypersignDID {
             else {
                 verificationRelationships = this._filterVerificationRelationships([]);
             }
-            switch (params.keyType) {
-                case IDID_1.IKeyType.Ed25519VerificationKey2020:
-                    throw new Error('HID-SSI-SDK:: Error: params.keyType is invalid use object.generate() method');
-                case IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020: {
+            switch (params.clientSpec) {
+                case IDID_1.IClientSpec['eth-personalSign']: {
                     const blockChainAccountId = this._getBlockChainAccountID(params.chainId, params.address);
                     const didId = this._getId(params.methodSpecificId);
-                    const newDid = new DIDDocument('', blockChainAccountId, didId, params.keyType, verificationRelationships);
+                    const newDid = new DIDDocument('', blockChainAccountId, didId, IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020, verificationRelationships);
                     didDoc = utils_1.default.jsonToLdConvertor(Object.assign({}, newDid));
                     delete didDoc.service;
                     break;
                 }
-                case IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019: {
+                case IDID_1.IClientSpec['cosmos-ADR036']: {
                     if (!params.publicKey) {
                         throw new Error('HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
                             IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
@@ -631,12 +629,12 @@ class HypersignDID {
                     const multibasePublicKey = params.publicKey;
                     const didId = this._getId(params.methodSpecificId);
                     const blockChainAccountId = 'cosmos:' + params.chainId + ':' + params.address;
-                    const newDid = new DIDDocument(multibasePublicKey, blockChainAccountId, didId, params.keyType);
+                    const newDid = new DIDDocument(multibasePublicKey, blockChainAccountId, didId, IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
                     didDoc = utils_1.default.jsonToLdConvertor(Object.assign({}, newDid));
                     break;
                 }
                 default: {
-                    throw new Error('HID-SSI-SDK:: Error: invalid keytype');
+                    throw new Error('HID-SSI-SDK:: Error: params.clientSpec is invalid use object.generate() method');
                 }
             }
             return didDoc;

@@ -39,7 +39,6 @@ exports.default = (url, options) => __awaiter(void 0, void 0, void 0, function* 
             documentUrl: url // this is the actual context URL after redirects
         };
     }
-    // call the default documentLoader
-    console.log(yield nodeDocumentLoader(url));
+    // call the default documentLoader    
     return nodeDocumentLoader(url);
 });
