@@ -3,6 +3,7 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
+import { TypedDataField } from '@ethersproject/abstract-signer';
 
 import { CredentialStatus, CredentialProof, Credential } from '../../libs/generated/ssi/credential';
 import { DeliverTxResponse } from '@cosmjs/stargate';
@@ -25,6 +26,20 @@ export interface ICredentialStatus {
   type: string; // CredentialStatusList2017
 }
 
+export interface ICredentialProof {
+  type: string;
+  created: string;
+  proofPurpose: string;
+  verificationMethod: string;
+  jws?: string;
+  proofValue: string;
+  canonicalizationHash: string;
+  eip712: {
+    domain: object;
+    types: Record<string, TypedDataField[]> | string;
+  };
+}
+
 // https://www.w3.org/TR/vc-data-model/#basic-concepts
 export interface IVerifiableCredential {
   context: Array<string>;
@@ -39,7 +54,7 @@ export interface IVerifiableCredential {
   // Ref: https://www.w3.org/TR/vc-data-model/#status
   credentialStatus: ICredentialStatus;
 
-  proof?: object;
+  proof?: ICredentialProof;
 }
 
 export interface ICredentialMethods {

@@ -31,7 +31,8 @@ export class DIDRpc implements IDIDRpc {
     } else {
       this.hidClient = null;
     }
-    this.didRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_DID_PATH;
+    this.didRestEp =
+      (HIDClient.hidNodeRestEndpoint ? HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) + HYPERSIGN_NETWORK_DID_PATH;
   }
 
   async init() {

@@ -3,7 +3,7 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
-
+import { purposes } from 'jsonld-signatures';
 import vc from 'vc-js';
 import Utils from '../utils';
 import HypersignSchema from '../schema/schema';
@@ -14,13 +14,16 @@ import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 const ed25519 = require('@stablelib/ed25519');
 import { CredentialRPC } from './credRPC';
-import { ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema } from './ICredential';
+import { ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema, ICredentialProof } from './ICredential';
 import { VC, DID } from '../constants';
 import { CredentialStatus, CredentialProof, Credential, Claim } from '../../libs/generated/ssi/credential';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import crypto from 'crypto';
 import customLoader from '../../libs/w3cache/v1';
+import { EthereumEip712Signature2021 } from 'ethereumeip712signature2021suite';
+import { IClientSpec } from '../did/IDID';
+
 const documentLoader = customLoader;
 
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
@@ -32,7 +35,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public expirationDate: string;
   public credentialSubject: object;
   public credentialSchema: ISchema;
-  public proof: object;
+  public proof: ICredentialProof;
   public credentialStatus: ICredentialStatus;
   private credStatusRPC: CredentialRPC;
   private namespace: string;
@@ -72,7 +75,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       id: '',
       type: VC.CREDENTAIL_STATUS_TYPE,
     };
-    this.proof = {};
+    this.proof = {} as ICredentialProof;
   }
 
   private async _sign(params: { message: string; privateKeyMultibase: string }): Promise<string> {
@@ -206,7 +209,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
    * @returns {Promise<IVerifiableCredential>} Result a credential document
    */
   public async generate(params: {
-    schemaId: string;
+    schemaId?: string;
     subjectDid?: string;
     subjectDidDocSigned?: JSON;
     schemaContext?: Array<string>;
@@ -802,5 +805,130 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
     }
     return resp;
+  }
+
+  /**
+   * Issue credentials document with EthereumEip712Signature2021
+ 
+  */
+
+  public async issueByClientSpec(params: {
+    credential: IVerifiableCredential;
+    issuerDid: string;
+    verificationMethodId: string;
+    type?: string;
+    web3Obj;
+    registerCredential?: boolean;
+    domain?: string;
+    clientSpec?: IClientSpec;
+  }) {
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to issue credential');
+    }
+    if (!params.issuerDid) {
+      throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to issue credential');
+    }
+    if (!params.credential) {
+      throw new Error('HID-SSI-SDK:: Error: params.credential is required to issue credential');
+    }
+    if (!this.credStatusRPC) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+      );
+    }
+    if (!params.web3Obj) {
+      throw new Error('HID-SSI-SDK:: Error: prams.web3Obj should be passed');
+    }
+    if (params.type == undefined) {
+      params.type = 'Document';
+    }
+    if (params.registerCredential == undefined) {
+      params.registerCredential = true;
+    }
+    const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
+    if (signerDidDoc === null || signerDidDoc === undefined)
+      throw new Error('HID-SSI-SDK:: Error: Could not resolve issuerDid = ' + params.issuerDid);
+    const publicKeyId = params.verificationMethodId;
+    const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
+      (x) => x.id == publicKeyId
+    ) as VerificationMethod;
+
+    if (!publicKeyVerMethod) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: Could not find verification method for id = ' + params.verificationMethodId
+      );
+    }
+    const EthereumEip712Signature2021obj = new EthereumEip712Signature2021({}, params.web3Obj);
+
+    const proof = await EthereumEip712Signature2021obj.createProof({
+      document: params.credential,
+      purpose: new purposes.AssertionProofPurpose(),
+      verificationMethod: params.verificationMethodId,
+      primaryType: params.type,
+      date: new Date().toISOString(),
+      domain: params.domain ? { name: params.domain } : undefined,
+      documentLoader,
+    });
+    params.credential.proof = proof;
+    const signedVC = params.credential;
+
+    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credential.issuer });
+    if (issuerDID === null || issuerDID === undefined)
+      throw new Error('Could not resolve issuerDid = ' + params.credential.issuer);
+    const credIssuerDidDoc: Did = issuerDID as Did;
+    const credIssuerController = credIssuerDidDoc.controller;
+    if (!credIssuerController.includes(params.issuerDid)) {
+      throw new Error(params.issuerDid + ' is not a controller of ' + params.credential.issuer);
+    }
+
+    if (params.registerCredential) {
+      // register credential status
+      return new Error('HID-SSI-SDK:: Error: registerCredential is not implemented');
+    }
+
+    return { signedCredential: signedVC };
+  }
+
+  // verify credentila issued by client spec
+
+  public async verifyByClientSpec(params: {
+    credential: IVerifiableCredential;
+    issuerDid: string;
+    verificationMethodId: string;
+    web3Obj;
+  }): Promise<object> {
+    if (!params.credential) {
+      throw new Error('HID-SSI-SDK:: params.credential is required to verify credential');
+    }
+
+    if (!params.credential.proof) {
+      throw new Error('HID-SSI-SDK:: params.credential.proof is required to verify credential');
+    }
+
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify credential');
+    }
+
+    if (!params.issuerDid) {
+      throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
+    }
+
+    if (!params.web3Obj) {
+      throw new Error('HID-SSI-SDK:: Error: prams.web3Obj should be passed');
+    }
+    const { didDocument } = await this.hsDid.resolve({ did: params.issuerDid });
+    if (didDocument === null || didDocument === undefined)
+      throw new Error('HID-SSI-SDK:: Error: Could not resolve issuerDid = ' + params.issuerDid);
+    const EthereumEip712Signature2021obj = new EthereumEip712Signature2021({}, params.web3Obj);
+    const { proof } = params.credential;
+    const verificationResult = await EthereumEip712Signature2021obj.verifyProof({
+      proof: proof,
+      document: params.credential,
+      types: proof.eip712.types,
+      domain: proof.eip712.domain,
+      purpose: new purposes.AssertionProofPurpose(),
+      documentLoader,
+    });
+    return verificationResult;
   }
 }
