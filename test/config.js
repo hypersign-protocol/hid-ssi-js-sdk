@@ -59,7 +59,7 @@ const props = {
     "phoneNumber": ""
 }
 
-export const hidNodeEp = {
+ const hidNodeEp = {
     rpc: 'https://rpc.jagrat.hypersign.id',
     rest: 'https://api.jagrat.hypersign.id',
     namespace: 'testnet',

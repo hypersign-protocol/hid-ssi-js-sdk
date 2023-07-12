@@ -73,5 +73,29 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
         holderVerificationMethodId: string;
         issuerVerificationMethodId: string;
     }): Promise<object>;
+    signByClientSpec(params: {
+        presentation: IVerifiablePresentation;
+        holderDid?: string;
+        verificationMethodId: string;
+        web3Obj: any;
+        domain?: string;
+        challenge?: string;
+    }): Promise<IVerifiablePresentation>;
+    verifyByClientSpec(params: {
+        signedPresentation: IVerifiablePresentation;
+        challenge?: string;
+        domain?: string;
+        issuerDid: string;
+        holderDid?: string;
+        holderDidDocSigned?: JSON;
+        holderVerificationMethodId: string;
+        issuerVerificationMethodId: string;
+        web3Obj: any;
+    }): Promise<{
+        verified: boolean;
+        credentialResults: any[];
+        presentationResult: {};
+        error: unknown;
+    }>;
 }
 //# sourceMappingURL=vp.d.ts.map

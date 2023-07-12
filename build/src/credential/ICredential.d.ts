@@ -3,6 +3,7 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
+import { TypedDataField } from '@ethersproject/abstract-signer';
 import { CredentialStatus, CredentialProof, Credential } from '../../libs/generated/ssi/credential';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 export interface ISchema {
@@ -12,6 +13,19 @@ export interface ISchema {
 export interface ICredentialStatus {
     id: string;
     type: string;
+}
+export interface ICredentialProof {
+    type: string;
+    created: string;
+    proofPurpose: string;
+    verificationMethod: string;
+    jws?: string;
+    proofValue: string;
+    canonicalizationHash: string;
+    eip712: {
+        domain: object;
+        types: Record<string, TypedDataField[]> | string;
+    };
 }
 export interface IVerifiableCredential {
     context: Array<string>;
@@ -23,7 +37,7 @@ export interface IVerifiableCredential {
     credentialSubject: object;
     credentialSchema: ISchema;
     credentialStatus: ICredentialStatus;
-    proof?: object;
+    proof?: ICredentialProof;
 }
 export interface ICredentialMethods {
     generate(params: {

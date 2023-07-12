@@ -31,7 +31,9 @@ export class CredentialRPC implements ICredentialRPC {
     } else {
       this.hidClient = null;
     }
-    this.credentialRestEP = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
+    this.credentialRestEP =
+      (HIDClient.hidNodeRestEndpoint ? HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) +
+      HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
   }
 
   async init() {

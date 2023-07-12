@@ -1,12 +1,8 @@
-/**
- * Copyright (c) 2023, Hypermine Pvt. Ltd.
- * All rights reserved.
- * Author: Hypermine Core Team
- */
-import { ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema } from './ICredential';
+import { ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema, ICredentialProof } from './ICredential';
 import { CredentialStatus, CredentialProof } from '../../libs/generated/ssi/credential';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
+import { IClientSpec } from '../did/IDID';
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
     context: Array<string>;
     id: string;
@@ -16,7 +12,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     expirationDate: string;
     credentialSubject: object;
     credentialSchema: ISchema;
-    proof: object;
+    proof: ICredentialProof;
     credentialStatus: ICredentialStatus;
     private credStatusRPC;
     private namespace;
@@ -52,7 +48,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
      * @returns {Promise<IVerifiableCredential>} Result a credential document
      */
     generate(params: {
-        schemaId: string;
+        schemaId?: string;
         subjectDid?: string;
         subjectDidDocSigned?: JSON;
         schemaContext?: Array<string>;
@@ -142,5 +138,27 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         value: import("../../libs/generated/ssi/tx").MsgRegisterCredentialStatus;
     }>;
     registerCredentialStatusTxnBulk(txnMessage: []): Promise<DeliverTxResponse>;
+    /**
+     * Issue credentials document with EthereumEip712Signature2021
+   
+    */
+    issueByClientSpec(params: {
+        credential: IVerifiableCredential;
+        issuerDid: string;
+        verificationMethodId: string;
+        type?: string;
+        web3Obj: any;
+        registerCredential?: boolean;
+        domain?: string;
+        clientSpec?: IClientSpec;
+    }): Promise<Error | {
+        signedCredential: IVerifiableCredential;
+    }>;
+    verifyByClientSpec(params: {
+        credential: IVerifiableCredential;
+        issuerDid: string;
+        verificationMethodId: string;
+        web3Obj: any;
+    }): Promise<object>;
 }
 //# sourceMappingURL=vc.d.ts.map

@@ -5,6 +5,7 @@ import credentials from './credentials.json'
 import jsonld from 'jsonld';
 import dataintegrety from './vc-data-integrety.json'
 import ecdsasecp2020 from './lds-ecdsa-secp256k1-recovery2020.json'
+import schema_org from './schema_org.json'
 // Ref: https://github.com/digitalbazaar/jsonld.js/#custom-document-loader
 const nodeDocumentLoader = jsonld.documentLoaders.node();
 const CONTEXTS = Object.freeze({
@@ -25,7 +26,11 @@ const CONTEXTS = Object.freeze({
     },
     "https://w3id.org/security/suites/secp256k1recovery-2020/v2": {
         ...ecdsasecp2020
+    },
+    "https://schema.org": {
+        ...schema_org
     }
+ 
 })
 
 export default async (url, options) => {
@@ -36,7 +41,7 @@ export default async (url, options) => {
             documentUrl: url // this is the actual context URL after redirects
         };
     }
-    // call the default documentLoader
+    // call the default documentLoader    
     return nodeDocumentLoader(url);
 };
 

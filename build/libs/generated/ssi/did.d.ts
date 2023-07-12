@@ -45,48 +45,48 @@ export interface DidDocumentState {
 }
 export declare const Did: {
     encode(message: Did, writer?: Writer): Writer;
-    decode(input: Reader | Uint8Array, length?: number | undefined): Did;
+    decode(input: Reader | Uint8Array, length?: number): Did;
     fromJSON(object: any): Did;
     toJSON(message: Did): unknown;
     fromPartial(object: DeepPartial<Did>): Did;
 };
 export declare const Metadata: {
     encode(message: Metadata, writer?: Writer): Writer;
-    decode(input: Reader | Uint8Array, length?: number | undefined): Metadata;
+    decode(input: Reader | Uint8Array, length?: number): Metadata;
     fromJSON(object: any): Metadata;
     toJSON(message: Metadata): unknown;
     fromPartial(object: DeepPartial<Metadata>): Metadata;
 };
 export declare const VerificationMethod: {
     encode(message: VerificationMethod, writer?: Writer): Writer;
-    decode(input: Reader | Uint8Array, length?: number | undefined): VerificationMethod;
+    decode(input: Reader | Uint8Array, length?: number): VerificationMethod;
     fromJSON(object: any): VerificationMethod;
     toJSON(message: VerificationMethod): unknown;
     fromPartial(object: DeepPartial<VerificationMethod>): VerificationMethod;
 };
 export declare const Service: {
     encode(message: Service, writer?: Writer): Writer;
-    decode(input: Reader | Uint8Array, length?: number | undefined): Service;
+    decode(input: Reader | Uint8Array, length?: number): Service;
     fromJSON(object: any): Service;
     toJSON(message: Service): unknown;
     fromPartial(object: DeepPartial<Service>): Service;
 };
 export declare const SignInfo: {
     encode(message: SignInfo, writer?: Writer): Writer;
-    decode(input: Reader | Uint8Array, length?: number | undefined): SignInfo;
+    decode(input: Reader | Uint8Array, length?: number): SignInfo;
     fromJSON(object: any): SignInfo;
     toJSON(message: SignInfo): unknown;
     fromPartial(object: DeepPartial<SignInfo>): SignInfo;
 };
 export declare const DidDocumentState: {
     encode(message: DidDocumentState, writer?: Writer): Writer;
-    decode(input: Reader | Uint8Array, length?: number | undefined): DidDocumentState;
+    decode(input: Reader | Uint8Array, length?: number): DidDocumentState;
     fromJSON(object: any): DidDocumentState;
     toJSON(message: DidDocumentState): unknown;
     fromPartial(object: DeepPartial<DidDocumentState>): DidDocumentState;
 };
-declare type Builtin = Date | Function | Uint8Array | string | number | undefined;
-export declare type DeepPartial<T> = T extends Builtin ? T : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>> : T extends {} ? {
+type Builtin = Date | Function | Uint8Array | string | number | undefined;
+export type DeepPartial<T> = T extends Builtin ? T : T extends Array<infer U> ? Array<DeepPartial<U>> : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>> : T extends {} ? {
     [K in keyof T]?: DeepPartial<T[K]>;
 } : Partial<T>;
 export {};
