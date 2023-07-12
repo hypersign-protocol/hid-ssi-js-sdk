@@ -32,6 +32,7 @@ const CONTEXTS = Object.freeze({
     "https://schema.org": Object.assign({}, schema_org_json_1.default)
 });
 exports.default = (url, options) => __awaiter(void 0, void 0, void 0, function* () {
+
     if (url in CONTEXTS) {
         return {
             contextUrl: null,
@@ -39,6 +40,6 @@ exports.default = (url, options) => __awaiter(void 0, void 0, void 0, function* 
             documentUrl: url // this is the actual context URL after redirects
         };
     }
-    // call the default documentLoader    
+    // call the default documentLoader
     return nodeDocumentLoader(url);
 });
