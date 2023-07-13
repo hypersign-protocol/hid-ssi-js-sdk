@@ -36,7 +36,7 @@
     "node-fetch": "^2.6.1",
     "protobufjs": "^6.11.2",
     "uuid": "^8.3.0",
-    "vc-js": "https://github.com/hypersign-protocol/vc-js",
+    "vc-js": "github:hypersign-protocol/vc-js",
     "web3": "^1.6.0"
   },
   "devDependencies": {

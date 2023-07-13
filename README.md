@@ -1,4 +1,4 @@
-# Hypersign Self Soverign Identity (SSI) SDK
+# Hypersign Self Soverign Identity (SSI) SDK  ![Build](https://github.com/hypersign-protocol/hid-ssi-js-sdk/workflows/Build/badge.svg)
 
 This SDK is an implementation of proposed [DID](https://www.w3.org/TR/did-core/) framework by the [W3C Credential Community Group](https://w3c-ccg.github.io/).  
 
