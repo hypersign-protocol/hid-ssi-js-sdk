@@ -372,7 +372,7 @@ const hypersignDID = new HypersignDID({ namespace });
 
 #### `createByClientSpec()`
 
-Generates a new DID Document using wallet
+Generates a new DID Document using clientSpec
 
 **API Definition**
 
@@ -426,7 +426,7 @@ const didDocument = await hypersignDID.createByClientSpec(params);
 
 #### `signByClientSpec()`
 
-Sign a DID Document and generate proof
+Sign a DID Document and generate proof using clientSpec
 
 **API Definition**
 
