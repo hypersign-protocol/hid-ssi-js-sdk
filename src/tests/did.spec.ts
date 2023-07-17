@@ -1,7 +1,7 @@
 import { expect, should } from 'chai';
 import { HypersignDID, HypersignSSISdk } from '../index';
 import { IPublicKey, IController, IDID } from '../did/IDID';
-
+import Web3 from 'web3';
 import { createWallet, mnemonic, hidNodeEp } from './config';
 let privateKeyMultibase;
 let publicKeyMultibase;
@@ -16,6 +16,9 @@ let signedDocument;
 const challenge = '1231231231';
 const domain = 'www.adbv.com';
 let hypersignSSISDK;
+const MMWalletAddress = '0x7967C85D989c41cA245f1Bb54c97D42173B135E0';
+let didDocumentByClientspec;
+//const web3 = new Web3('https://mainnet.infura.io/v3/');
 
 //add mnemonic of wallet that have balance
 
@@ -66,7 +69,6 @@ describe('DID Test scenarios', () => {
 
     it('should be able to generate didDocument', async function () {
       didDocument = await hypersignDID.generate({ publicKeyMultibase });
-      //console.log(didDocument)
       didDocId = didDocument['id'];
       verificationMethodId = didDocument['verificationMethod'][0].id;
       expect(didDocument).to.be.a('object');
@@ -230,7 +232,6 @@ describe('DID Test scenarios', () => {
     });
     it('should be able to register didDocument in the blockchain', async function () {
       const result = await hypersignDID.register({ didDocument, privateKeyMultibase, verificationMethodId });
-      //console.log(result)
       transactionHash = result.transactionHash;
       should().exist(result.code);
       should().exist(result.height);
@@ -254,7 +255,6 @@ describe('DID Test scenarios', () => {
         did: didDocId,
       };
       const result = await hypersignDID.resolve(params);
-      //console.log(result);
       expect(result).to.be.a('object');
       expect(result.didDocument.id).to.be.equal(didDocId);
       expect(result.didDocumentMetadata).to.be.a('object');
@@ -311,7 +311,6 @@ describe('DID Test scenarios', () => {
         verificationMethodId,
         versionId,
       });
-      //console.log(result);
 
       should().exist(result.code);
       should().exist(result.height);
@@ -410,7 +409,6 @@ describe('DID Test scenarios', () => {
         verificationMethodId,
         versionId,
       });
-      //console.log(JSON.stringify(result));
 
       should().exist(result.code);
       should().exist(result.height);
@@ -535,7 +533,6 @@ describe('DID Test scenarios', () => {
         controller,
       };
       signedDocument = await hypersignDID.sign(params);
-      //console.log(JSON.stringify(signedDocument))
       expect(signedDocument).to.be.a('object');
       should().exist(signedDocument['@context']);
       should().exist(signedDocument['id']);
@@ -573,16 +570,12 @@ describe('DID Test scenarios', () => {
     });
 
     it('should return verification result', async function () {
-      console.log(JSON.stringify(signedDocument, null, 2));
-
       const result = await hypersignDID.verify({
         didDocument: signedDocument,
         verificationMethodId,
         challenge,
         domain,
       });
-      console.log(result);
-
       expect(result).to.be.a('object');
       should().exist(result);
       should().exist(result.verified);
@@ -617,6 +610,55 @@ describe('DID Test scenarios', () => {
             throw err;
           }).to.throw(Error, 'HID-SSI-SDK:: Error: params.didDocument.proof is not present in the signed did document');
         });
+    });
+  });
+
+  describe('#createByClientSpec() this is to generate did using clientSpec', function () {
+    const params = {
+      methodSpecificId: MMWalletAddress,
+      address: MMWalletAddress,
+      chainId: '0x1',
+      clientSpec: 'eth-personalSign',
+    };
+    it('should not be able to create did using clientSpec as methodSpecificId is null or empty', async () => {
+      const tempParams = { ...params };
+      tempParams.methodSpecificId = '';
+      return hypersignDID.createByClientSpec({ params: tempParams }).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: Error: params.methodSpecificId is required to create didoc');
+      });
+    });
+    it('Should not be able to create did using clientSpec as address is null or empty', async () => {
+      const tempParams = { ...params };
+      tempParams.methodSpecificId = '';
+      return hypersignDID.createByClientSpec({ params: tempParams }).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: Error: params.methodSpecificId is required to create didoc');
+      });
+    });
+    it('should be able to create did using clientSpec', async () => {
+      didDocumentByClientspec = await hypersignDID.createByClientSpec(params);
+      expect(didDocumentByClientspec).to.be.a('object');
+      should().exist(didDocumentByClientspec['@context']);
+      should().exist(didDocumentByClientspec['id']);
+      should().exist(didDocumentByClientspec['controller']);
+      should().exist(didDocumentByClientspec['alsoKnownAs']);
+      should().exist(didDocumentByClientspec['verificationMethod']);
+      expect(
+        didDocumentByClientspec['verificationMethod'] &&
+          didDocumentByClientspec['authentication'] &&
+          didDocumentByClientspec['assertionMethod'] &&
+          didDocumentByClientspec['keyAgreement'] &&
+          didDocumentByClientspec['capabilityInvocation'] &&
+          didDocumentByClientspec['capabilityDelegation']
+      ).to.be.a('array');
+      should().exist(didDocumentByClientspec['authentication']);
+      should().exist(didDocumentByClientspec['assertionMethod']);
+      should().exist(didDocumentByClientspec['keyAgreement']);
+      should().exist(didDocumentByClientspec['capabilityInvocation']);
+      should().exist(didDocumentByClientspec['capabilityDelegation']);
     });
   });
 });
