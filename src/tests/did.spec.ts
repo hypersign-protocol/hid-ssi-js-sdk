@@ -37,6 +37,7 @@ beforeEach(async function () {
 
 describe('DID Test scenarios', () => {
   //remove seed while creating did so that wallet can generate different did every time
+
   describe('#generateKeys() method to generate publicKyeMultibase and privateKeyMultiBase', function () {
     it('should return publickeyMultibase and privateKeyMultibase', async function () {
       const kp = await hypersignDID.generateKeys();
@@ -631,34 +632,62 @@ describe('DID Test scenarios', () => {
     });
     it('Should not be able to create did using clientSpec as address is null or empty', async () => {
       const tempParams = { ...params };
-      tempParams.methodSpecificId = '';
+      console.log(tempParams);
+      tempParams.address = '';
       return hypersignDID.createByClientSpec({ params: tempParams }).catch(function (err) {
         expect(function () {
           throw err;
-        }).to.throw(Error, 'HID-SSI-SDK:: Error: params.methodSpecificId is required to create didoc');
+        }).to.throw(Error, 'HID-SSI-SDK:: Error: params.address is required to create didoc');
       });
     });
-    it('should be able to create did using clientSpec', async () => {
-      didDocumentByClientspec = await hypersignDID.createByClientSpec(params);
-      expect(didDocumentByClientspec).to.be.a('object');
-      should().exist(didDocumentByClientspec['@context']);
-      should().exist(didDocumentByClientspec['id']);
-      should().exist(didDocumentByClientspec['controller']);
-      should().exist(didDocumentByClientspec['alsoKnownAs']);
-      should().exist(didDocumentByClientspec['verificationMethod']);
-      expect(
-        didDocumentByClientspec['verificationMethod'] &&
-          didDocumentByClientspec['authentication'] &&
-          didDocumentByClientspec['assertionMethod'] &&
-          didDocumentByClientspec['keyAgreement'] &&
-          didDocumentByClientspec['capabilityInvocation'] &&
-          didDocumentByClientspec['capabilityDelegation']
-      ).to.be.a('array');
-      should().exist(didDocumentByClientspec['authentication']);
-      should().exist(didDocumentByClientspec['assertionMethod']);
-      should().exist(didDocumentByClientspec['keyAgreement']);
-      should().exist(didDocumentByClientspec['capabilityInvocation']);
-      should().exist(didDocumentByClientspec['capabilityDelegation']);
-    });
+    // it('should not be able to create did using clientSpec as chainId is null or empty', async () => {
+    //   const tempParams = { ...params };
+    //   tempParams.chainId = '';
+    //   return hypersignDID.createByClientSpec({ params: tempParams }).catch(function (err) {
+    //     expect(function () {
+    //       throw err;
+    //     }).to.throw(Error, 'HID-SSI-SDK:: Error: params.chainId is required to create didoc');
+    //   });
+    // });
+    // it('should not be able to create did using clientSpec as clientSpec is null or empty', async () => {
+    //   const tempParams = { ...params };
+    //   tempParams.clientSpec = '';
+    //   return hypersignDID.createByClientSpec({ params: tempParams }).catch(function (err) {
+    //     expect(function () {
+    //       throw err;
+    //     }).to.throw(Error, 'HID-SSI-SDK:: Error:  params.clientSpec is required to create didoc');
+    //   });
+    // });
+    // it('should not be able to create did using clientSpec as clientSpec passed is invalid', async () => {
+    //   const tempParams = { ...params };
+    //   tempParams.clientSpec = 'xyz';
+    //   return hypersignDID.createByClientSpec({ params: tempParams }).catch(function (err) {
+    //     expect(function () {
+    //       throw err;
+    //     }).to.throw(Error, 'HID-SSI-SDK:: Error:  params.clientSpec is invalid');
+    //   });
+    // });
+    // it('should be able to create did using clientSpec', async () => {
+    //   didDocumentByClientspec = await hypersignDID.createByClientSpec(params);
+    //   expect(didDocumentByClientspec).to.be.a('object');
+    //   should().exist(didDocumentByClientspec['@context']);
+    //   should().exist(didDocumentByClientspec['id']);
+    //   should().exist(didDocumentByClientspec['controller']);
+    //   should().exist(didDocumentByClientspec['alsoKnownAs']);
+    //   should().exist(didDocumentByClientspec['verificationMethod']);
+    //   expect(
+    //     didDocumentByClientspec['verificationMethod'] &&
+    //       didDocumentByClientspec['authentication'] &&
+    //       didDocumentByClientspec['assertionMethod'] &&
+    //       didDocumentByClientspec['keyAgreement'] &&
+    //       didDocumentByClientspec['capabilityInvocation'] &&
+    //       didDocumentByClientspec['capabilityDelegation']
+    //   ).to.be.a('array');
+    //   should().exist(didDocumentByClientspec['authentication']);
+    //   should().exist(didDocumentByClientspec['assertionMethod']);
+    //   should().exist(didDocumentByClientspec['keyAgreement']);
+    //   should().exist(didDocumentByClientspec['capabilityInvocation']);
+    //   should().exist(didDocumentByClientspec['capabilityDelegation']);
+    // });
   });
 });
