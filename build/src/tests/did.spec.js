@@ -25,6 +25,9 @@ let signedDocument;
 const challenge = '1231231231';
 const domain = 'www.adbv.com';
 let hypersignSSISDK;
+const MMWalletAddress = '0x7967C85D989c41cA245f1Bb54c97D42173B135E0';
+let didDocumentByClientspec;
+//const web3 = new Web3('https://mainnet.infura.io/v3/');
 //add mnemonic of wallet that have balance
 beforeEach(function () {
     return __awaiter(this, void 0, void 0, function* () {
@@ -76,7 +79,6 @@ describe('DID Test scenarios', () => {
         it('should be able to generate didDocument', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 didDocument = yield hypersignDID.generate({ publicKeyMultibase });
-                //console.log(didDocument)
                 didDocId = didDocument['id'];
                 verificationMethodId = didDocument['verificationMethod'][0].id;
                 (0, chai_1.expect)(didDocument).to.be.a('object');
@@ -227,7 +229,6 @@ describe('DID Test scenarios', () => {
         it('should be able to register didDocument in the blockchain', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 const result = yield hypersignDID.register({ didDocument, privateKeyMultibase, verificationMethodId });
-                //console.log(result)
                 transactionHash = result.transactionHash;
                 (0, chai_1.should)().exist(result.code);
                 (0, chai_1.should)().exist(result.height);
@@ -252,7 +253,6 @@ describe('DID Test scenarios', () => {
                     did: didDocId,
                 };
                 const result = yield hypersignDID.resolve(params);
-                //console.log(result);
                 (0, chai_1.expect)(result).to.be.a('object');
                 (0, chai_1.expect)(result.didDocument.id).to.be.equal(didDocId);
                 (0, chai_1.expect)(result.didDocumentMetadata).to.be.a('object');
@@ -306,7 +306,6 @@ describe('DID Test scenarios', () => {
                     verificationMethodId,
                     versionId,
                 });
-                //console.log(result);
                 (0, chai_1.should)().exist(result.code);
                 (0, chai_1.should)().exist(result.height);
                 (0, chai_1.should)().exist(result.rawLog);
@@ -404,7 +403,6 @@ describe('DID Test scenarios', () => {
                     verificationMethodId,
                     versionId,
                 });
-                //console.log(JSON.stringify(result));
                 (0, chai_1.should)().exist(result.code);
                 (0, chai_1.should)().exist(result.height);
                 (0, chai_1.should)().exist(result.rawLog);
@@ -527,7 +525,6 @@ describe('DID Test scenarios', () => {
                     controller,
                 };
                 signedDocument = yield hypersignDID.sign(params);
-                //console.log(JSON.stringify(signedDocument))
                 (0, chai_1.expect)(signedDocument).to.be.a('object');
                 (0, chai_1.should)().exist(signedDocument['@context']);
                 (0, chai_1.should)().exist(signedDocument['id']);
@@ -566,14 +563,12 @@ describe('DID Test scenarios', () => {
         });
         it('should return verification result', function () {
             return __awaiter(this, void 0, void 0, function* () {
-                console.log(JSON.stringify(signedDocument, null, 2));
                 const result = yield hypersignDID.verify({
                     didDocument: signedDocument,
                     verificationMethodId,
                     challenge,
                     domain,
                 });
-                console.log(result);
                 (0, chai_1.expect)(result).to.be.a('object');
                 (0, chai_1.should)().exist(result);
                 (0, chai_1.should)().exist(result.verified);
@@ -605,5 +600,106 @@ describe('DID Test scenarios', () => {
                 }).to.throw(Error, 'HID-SSI-SDK:: Error: params.didDocument.proof is not present in the signed did document');
             });
         });
+    });
+    describe('#createByClientSpec() this is to generate did using clientSpec', function () {
+        const param = {
+            methodSpecificId: MMWalletAddress,
+            address: MMWalletAddress,
+            chainId: '0x1',
+            clientSpec: 'eth-personalSign',
+        };
+        it('should not be able to create did using clientSpec as methodSpecificId is null or empty', () => __awaiter(this, void 0, void 0, function* () {
+            const tempParams = Object.assign({}, param);
+            tempParams.methodSpecificId = '';
+            const params = tempParams;
+            return hypersignDID.createByClientSpec(params).catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.methodSpecificId is required to create didoc');
+            });
+        }));
+        it('Should not be able to create did using clientSpec as address is null or empty', () => __awaiter(this, void 0, void 0, function* () {
+            const tempParams = Object.assign({}, param);
+            tempParams.address = '';
+            const params = tempParams;
+            return hypersignDID.createByClientSpec(params).catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.address is required to create didoc');
+            });
+        }));
+        it('should not be able to create did using clientSpec as chainId is null or empty', () => __awaiter(this, void 0, void 0, function* () {
+            const tempParams = Object.assign({}, param);
+            tempParams.chainId = '';
+            const params = tempParams;
+            return hypersignDID.createByClientSpec(params).catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.chainId is required to create didoc');
+            });
+        }));
+        it('should not be able to create did using clientSpec as clientSpec is null or empty', () => __awaiter(this, void 0, void 0, function* () {
+            const tempParams = Object.assign({}, param);
+            tempParams.clientSpec = '';
+            const params = tempParams;
+            return hypersignDID.createByClientSpec(params).catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, 'HID-SSI-SDK:: Error:  params.clientSpec is required to create didoc');
+            });
+        }));
+        it('should not be able to create did using clientSpec as clientSpec passed is invalid', () => __awaiter(this, void 0, void 0, function* () {
+            const tempParams = Object.assign({}, param);
+            tempParams.clientSpec = 'xyz';
+            const params = tempParams;
+            return hypersignDID.createByClientSpec(params).catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, 'HID-SSI-SDK:: Error:  params.clientSpec is invalid');
+            });
+        }));
+        it('should not be able to create did using clientSpec as clientSpec is of type "cosmos-ADR036" but publicKey is not passed ', () => __awaiter(this, void 0, void 0, function* () {
+            const tempParams = Object.assign({}, param);
+            tempParams.clientSpec = 'cosmos-ADR036';
+            const params = tempParams;
+            return hypersignDID.createByClientSpec(params).catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.publicKey is required to create didoc for EcdsaSecp256k1VerificationKey2019');
+            });
+        }));
+        it('should not be able to create did using clientSpec as clientSpec is of type "cosmos-ADR036" and invalid public key is passed', () => __awaiter(this, void 0, void 0, function* () {
+            const tempParams = Object.assign({}, param);
+            tempParams.clientSpec = 'cosmos-ADR036';
+            tempParams['publicKey'] = 'xyzt';
+            const params = tempParams;
+            return hypersignDID.createByClientSpec(params).catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.publicKey mustbe multibase encoded base58 string for EcdsaSecp256k1VerificationKey2019');
+            });
+        }));
+        it('should be able to create did using clientSpec', () => __awaiter(this, void 0, void 0, function* () {
+            const tempParams = Object.assign({}, param);
+            const params = tempParams;
+            didDocumentByClientspec = yield hypersignDID.createByClientSpec(params);
+            (0, chai_1.expect)(didDocumentByClientspec).to.be.a('object');
+            (0, chai_1.should)().exist(didDocumentByClientspec['@context']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['id']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['controller']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['alsoKnownAs']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['verificationMethod']);
+            (0, chai_1.expect)(didDocumentByClientspec['verificationMethod'] &&
+                didDocumentByClientspec['authentication'] &&
+                didDocumentByClientspec['assertionMethod'] &&
+                didDocumentByClientspec['keyAgreement'] &&
+                didDocumentByClientspec['capabilityInvocation'] &&
+                didDocumentByClientspec['capabilityDelegation']).to.be.a('array');
+            (0, chai_1.should)().exist(didDocumentByClientspec['authentication']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['assertionMethod']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['keyAgreement']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['capabilityInvocation']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['capabilityDelegation']);
+        }));
     });
 });
