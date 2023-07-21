@@ -1,0 +1,1 @@
+{"version":3,"file":"IAuth.d.ts","sourceRoot":"","sources":["../../../../src/ssiApi/apiAuth/IAuth.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,KAAK;IAClB,mBAAmB,IAAG,OAAO,CAAC,cAAc,CAAC,CAAA;CAChD;AAED,MAAM,WAAW,cAAc;IAC3B,YAAY,EAAC,MAAM,CAAC;IACnB,SAAS,EAAC,MAAM,CAAC;IACjB,SAAS,EAAC,MAAM,CAAC;CACrB"}

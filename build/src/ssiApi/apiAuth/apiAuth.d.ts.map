@@ -1,0 +1,1 @@
+{"version":3,"file":"apiAuth.d.ts","sourceRoot":"","sources":["../../../../src/ssiApi/apiAuth/apiAuth.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,cAAc,EAAE,MAAM,SAAS,CAAC;AACzC,qBAAa,OAAO;IAChB,OAAO,CAAC,MAAM,CAAS;gBACX,MAAM,KAAA;IAMZ,mBAAmB,IAAI,OAAO,CAAC,cAAc,CAAC;CAkBvD"}
