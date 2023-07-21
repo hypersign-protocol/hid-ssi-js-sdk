@@ -20,6 +20,7 @@ const jsonld_1 = __importDefault(require("jsonld"));
 const vc_data_integrety_json_1 = __importDefault(require("./vc-data-integrety.json"));
 const lds_ecdsa_secp256k1_recovery2020_json_1 = __importDefault(require("./lds-ecdsa-secp256k1-recovery2020.json"));
 const schema_org_json_1 = __importDefault(require("./schema_org.json"));
+const X25519KeyAgreementKeyEIP5630_json_1 = __importDefault(require("./X25519KeyAgreementKeyEIP5630.json"));
 // Ref: https://github.com/digitalbazaar/jsonld.js/#custom-document-loader
 const nodeDocumentLoader = jsonld_1.default.documentLoaders.node();
 const CONTEXTS = Object.freeze({
@@ -29,7 +30,8 @@ const CONTEXTS = Object.freeze({
     "https://www.w3.org/2018/credentials/v1": Object.assign({}, credentials_json_1.default),
     "https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld": Object.assign({}, vc_data_integrety_json_1.default),
     "https://w3id.org/security/suites/secp256k1recovery-2020/v2": Object.assign({}, lds_ecdsa_secp256k1_recovery2020_json_1.default),
-    "https://schema.org": Object.assign({}, schema_org_json_1.default)
+    "https://schema.org": Object.assign({}, schema_org_json_1.default),
+    "https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/libs/w3cache/v1/X25519KeyAgreementKeyEIP5630.json": Object.assign({}, X25519KeyAgreementKeyEIP5630_json_1.default)
 });
 exports.default = (url, options) => __awaiter(void 0, void 0, void 0, function* () {
     if (url in CONTEXTS) {

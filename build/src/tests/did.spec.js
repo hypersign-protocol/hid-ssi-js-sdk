@@ -45,7 +45,19 @@ const bip39 = __importStar(require("bip39"));
 let privateKeyMultibase;
 let publicKeyMultibase;
 let verificationMethodId;
+let privateKeyMultibase2;
+let privateKeyMultibase3;
+let versionId2;
+let versionId3;
 let didDocument;
+let didDoc_new1;
+let didDoc_new2;
+let didDocId2;
+let didDoc3;
+let didDoc4;
+let didDocId3;
+let publicKeyMultibase2;
+let publicKeyMultibase3;
 let didDocId;
 let offlineSigner;
 let versionId;
@@ -53,6 +65,10 @@ let hypersignDID;
 let hypersignDid;
 let transactionHash;
 let signedDocument;
+let signedDocument3;
+let formedDidDoc;
+let didDocToSignANdRegister;
+let signedDicDoc2;
 const challenge = '1231231231';
 const domain = 'www.adbv.com';
 let hypersignSSISDK;
@@ -1332,6 +1348,382 @@ describe('DID Test scenarios', () => {
             });
         }));
     });
+    describe('Test case for recent change in keyAgreement of didDocument', function () {
+        describe('#generate() to generate did', function () {
+            it('should be able to generate did with all methods', () => __awaiter(this, void 0, void 0, function* () {
+                didDoc3 = yield hypersignDID.generate({ publicKeyMultibase });
+                (0, chai_1.expect)(didDoc3).to.be.a('object');
+                (0, chai_1.should)().exist(didDoc3['@context']);
+                (0, chai_1.should)().exist(didDoc3['id']);
+                (0, chai_1.should)().exist(didDoc3['controller']);
+                (0, chai_1.should)().exist(didDoc3['alsoKnownAs']);
+                (0, chai_1.should)().exist(didDoc3['verificationMethod']);
+                (0, chai_1.expect)(didDoc3['verificationMethod'] &&
+                    didDoc3['authentication'] &&
+                    didDoc3['assertionMethod'] &&
+                    didDoc3['keyAgreement'] &&
+                    didDoc3['capabilityInvocation'] &&
+                    didDoc3['capabilityDelegation'] &&
+                    didDoc3['service']).to.be.a('array');
+            }));
+            it('Should be able to generate a did with verification relationships', () => __awaiter(this, void 0, void 0, function* () {
+                didDoc_new1 = yield hypersignDID.generate({
+                    publicKeyMultibase,
+                    methodSpecificId: publicKeyMultibase,
+                    verificationRelationships: [
+                        'authentication',
+                        'assertionMethod',
+                        'capabilityInvocation',
+                        'capabilityDelegation',
+                    ],
+                });
+                didDocId2 = didDoc_new1.id;
+                (0, chai_1.expect)(didDoc_new1).to.be.a('object');
+                (0, chai_1.should)().exist(didDoc_new1['@context']);
+                (0, chai_1.should)().exist(didDoc_new1['id']);
+                (0, chai_1.should)().exist(didDoc_new1['controller']);
+                (0, chai_1.should)().exist(didDoc_new1['alsoKnownAs']);
+                (0, chai_1.should)().exist(didDoc_new1['verificationMethod']);
+                (0, chai_1.expect)(didDoc_new1['verificationMethod'] &&
+                    didDoc_new1['authentication'] &&
+                    didDoc_new1['assertionMethod'] &&
+                    didDoc_new1['keyAgreement'] &&
+                    didDoc_new1['capabilityInvocation'] &&
+                    didDoc_new1['capabilityDelegation'] &&
+                    didDoc_new1['service']).to.be.a('array');
+                (0, chai_1.should)().exist(didDoc_new1['authentication']);
+                (0, chai_1.should)().exist(didDoc_new1['assertionMethod']);
+                (0, chai_1.expect)(didDoc_new1['authentication']).to.be.a('array').of.length(1);
+                (0, chai_1.expect)(didDoc_new1['assertionMethod']).to.be.a('array').of.length(1);
+                (0, chai_1.expect)(didDoc_new1['keyAgreement']).to.be.a('array').of.length(0);
+                (0, chai_1.expect)(didDoc_new1['capabilityInvocation']).to.be.a('array').of.length(1);
+                (0, chai_1.expect)(didDoc_new1['service']).to.be.a('array').of.length(0);
+                (0, chai_1.expect)(didDoc_new1['capabilityDelegation']).to.be.a('array').of.length(1);
+            }));
+            it('Should be able to generate a did with keyAgreement as verification relationship method', () => __awaiter(this, void 0, void 0, function* () {
+                let kp = yield hypersignDID.generateKeys();
+                publicKeyMultibase2 = kp.publicKeyMultibase;
+                privateKeyMultibase2 = kp.privateKeyMultibase;
+                didDoc_new2 = yield hypersignDID.generate({
+                    publicKeyMultibase: kp.publicKeyMultibase,
+                    methodSpecificId: kp.publicKeyMultibase,
+                    verificationRelationships: ['keyAgreement'],
+                });
+                didDocId3 = didDoc_new2.id;
+                kp = yield hypersignDID.generateKeys();
+                publicKeyMultibase3 = kp.publicKeyMultibase;
+                privateKeyMultibase3 = kp.privateKeyMultibase;
+                didDoc4 = yield hypersignDID.generate({
+                    publicKeyMultibase: publicKeyMultibase3,
+                    verificationRelationships: [
+                        'authentication',
+                        'assertionMethod',
+                        'capabilityInvocation',
+                        'capabilityDelegation',
+                    ],
+                });
+                (0, chai_1.expect)(didDoc_new2).to.be.a('object');
+                (0, chai_1.should)().exist(didDoc_new2['@context']);
+                (0, chai_1.should)().exist(didDoc_new2['id']);
+                (0, chai_1.should)().exist(didDoc_new2['controller']);
+                (0, chai_1.should)().exist(didDoc_new2['alsoKnownAs']);
+                (0, chai_1.should)().exist(didDoc_new2['verificationMethod']);
+                (0, chai_1.expect)(didDoc_new2['verificationMethod'] &&
+                    didDoc_new2['authentication'] &&
+                    didDoc_new2['assertionMethod'] &&
+                    didDoc_new2['keyAgreement'] &&
+                    didDoc_new2['capabilityInvocation'] &&
+                    didDoc_new2['capabilityDelegation'] &&
+                    didDoc_new2['service']).to.be.a('array');
+                (0, chai_1.should)().exist(didDoc_new2['authentication']);
+                (0, chai_1.should)().exist(didDoc_new2['assertionMethod']);
+                (0, chai_1.expect)(didDoc_new2['authentication']).to.be.a('array').of.length(0);
+                (0, chai_1.expect)(didDoc_new2['assertionMethod']).to.be.a('array').of.length(0);
+                (0, chai_1.expect)(didDoc_new2['keyAgreement']).to.be.a('array').of.length(1);
+                (0, chai_1.expect)(didDoc_new2['capabilityInvocation']).to.be.a('array').of.length(0);
+                (0, chai_1.expect)(didDoc_new2['service']).to.be.a('array').of.length(0);
+                (0, chai_1.expect)(didDoc_new2['capabilityDelegation']).to.be.a('array').of.length(0);
+            }));
+        });
+        describe('#sign() sign a generated didDocument', function () {
+            it('should not be able to sign a didDocument as keytype is of type X25519KeyAgreementKey2020 and both publicKeyMultibase and blockchainAccountId', () => __awaiter(this, void 0, void 0, function* () {
+                formedDidDoc = yield formDidDoc(didDoc_new1, didDocId3);
+                const params = {
+                    didDocument: formedDidDoc,
+                    privateKeyMultibase,
+                    challenge: '12341234',
+                    domain: domain,
+                    did: '',
+                    verificationMethodId: didDoc_new1.verificationMethod[0].id,
+                };
+                return hypersignDID.sign(params).catch(function (err) {
+                    (0, chai_1.expect)(function () {
+                        throw err;
+                    }).to.throw(Error);
+                });
+            }));
+            it('should be able to sign a didDocument with key agreement type X25519KeyAgreementKey2020', () => __awaiter(this, void 0, void 0, function* () {
+                delete formedDidDoc.verificationMethod[1].blockchainAccountId;
+                const params = {
+                    didDocument: formedDidDoc,
+                    privateKeyMultibase,
+                    challenge: '12341234',
+                    domain: domain,
+                    did: '',
+                    verificationMethodId: didDoc_new1.verificationMethod[0].id,
+                };
+                signedDicDoc2 = yield hypersignDID.sign(params);
+                (0, chai_1.expect)(signedDicDoc2).to.be.a('object');
+                (0, chai_1.should)().exist(signedDicDoc2['@context']);
+                (0, chai_1.should)().exist(signedDicDoc2['id']);
+                (0, chai_1.should)().exist(signedDicDoc2['controller']);
+                (0, chai_1.should)().exist(signedDicDoc2['alsoKnownAs']);
+                (0, chai_1.should)().exist(signedDicDoc2['verificationMethod']);
+                (0, chai_1.should)().exist(signedDicDoc2['authentication']);
+                (0, chai_1.should)().exist(signedDicDoc2['assertionMethod']);
+                (0, chai_1.should)().exist(signedDicDoc2['keyAgreement']);
+                (0, chai_1.should)().exist(signedDicDoc2['capabilityInvocation']);
+                (0, chai_1.should)().exist(signedDicDoc2['capabilityDelegation']);
+                (0, chai_1.should)().exist(signedDicDoc2['service']);
+                (0, chai_1.should)().exist(signedDicDoc2['proof']);
+                (0, chai_1.should)().exist(signedDicDoc2['proof']['type']);
+                (0, chai_1.should)().exist(signedDicDoc2['proof']['verificationMethod']);
+                (0, chai_1.should)().exist(signedDicDoc2['proof']['proofPurpose']);
+                (0, chai_1.expect)(signedDicDoc2['proof']['proofPurpose']).to.equal('authentication');
+                (0, chai_1.should)().exist(signedDicDoc2['proof']['proofValue']);
+            }));
+            it('should be able to sign a didDocument with key agreement type X25519KeyAgreementKeyEIP5630', () => __awaiter(this, void 0, void 0, function* () {
+                didDocToSignANdRegister = yield formDidDoc(didDoc4, didDocId3);
+                delete didDocToSignANdRegister.verificationMethod[1].blockchainAccountId;
+                didDocToSignANdRegister['@context'].push('https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/libs/w3cache/v1/X25519KeyAgreementKeyEIP5630.json');
+                didDocToSignANdRegister.verificationMethod[1].type = 'X25519KeyAgreementKeyEIP5630';
+                const params = {
+                    didDocument: didDocToSignANdRegister,
+                    privateKeyMultibase: privateKeyMultibase3,
+                    challenge: '12341234',
+                    domain: domain,
+                    did: '',
+                    verificationMethodId: didDoc4.verificationMethod[0].id,
+                };
+                signedDocument3 = yield hypersignDID.sign(params);
+                (0, chai_1.expect)(signedDocument3).to.be.a('object');
+                (0, chai_1.should)().exist(signedDocument3['@context']);
+                (0, chai_1.should)().exist(signedDocument3['id']);
+                (0, chai_1.should)().exist(signedDocument3['controller']);
+                (0, chai_1.should)().exist(signedDocument3['alsoKnownAs']);
+                (0, chai_1.should)().exist(signedDocument3['verificationMethod']);
+                (0, chai_1.should)().exist(signedDocument3['authentication']);
+                (0, chai_1.should)().exist(signedDocument3['assertionMethod']);
+                (0, chai_1.should)().exist(signedDocument3['keyAgreement']);
+                (0, chai_1.should)().exist(signedDocument3['capabilityInvocation']);
+                (0, chai_1.should)().exist(signedDocument3['capabilityDelegation']);
+                (0, chai_1.should)().exist(signedDocument3['service']);
+                (0, chai_1.should)().exist(signedDocument3['proof']);
+                (0, chai_1.should)().exist(signedDocument3['proof']['type']);
+                (0, chai_1.should)().exist(signedDocument3['proof']['verificationMethod']);
+                (0, chai_1.should)().exist(signedDocument3['proof']['proofPurpose']);
+                (0, chai_1.expect)(signedDocument3['proof']['proofPurpose']).to.equal('authentication');
+                (0, chai_1.should)().exist(signedDocument3['proof']['proofValue']);
+            }));
+        });
+        describe('#register() register a didDocument on chain', function () {
+            it('Should not be able to register did on chain as vmId used in authentication is also used in keyAgreement', () => __awaiter(this, void 0, void 0, function* () {
+                return hypersignDID
+                    .register({
+                    didDocument: didDoc3,
+                    privateKeyMultibase,
+                    verificationMethodId: didDoc3.verificationMethod[0].id,
+                })
+                    .catch(function (err) {
+                    (0, chai_1.expect)(function () {
+                        throw err;
+                    }).to.throw(Error);
+                });
+            }));
+            it('Should not be able to register did on chain as blockchainAccountId is not passed in verificationMethod of keyagreement type', () => __awaiter(this, void 0, void 0, function* () {
+                return hypersignDID
+                    .register({
+                    didDocument: formedDidDoc,
+                    privateKeyMultibase,
+                    verificationMethodId: didDoc3.verificationMethod[0].id,
+                })
+                    .catch(function (err) {
+                    (0, chai_1.expect)(function () {
+                        throw err;
+                    }).to.throw(Error, 'The "string" argument must be of type string or an instance of Buffer or ArrayBuffer. Received undefined');
+                });
+            }));
+            it('Should not be able to register did on chain as vmId used in keyAgreement is also used in authenticationn', () => __awaiter(this, void 0, void 0, function* () {
+                const tempFormedDidDoc = JSON.parse(JSON.stringify(formedDidDoc));
+                tempFormedDidDoc.authentication.pop();
+                tempFormedDidDoc.authentication.push(didDoc_new2.verificationMethod[0].id);
+                tempFormedDidDoc.verificationMethod[1]['blockchainAccountId'] = '';
+                return hypersignDID
+                    .register({
+                    didDocument: tempFormedDidDoc,
+                    privateKeyMultibase,
+                    verificationMethodId: didDoc3.verificationMethod[0].id,
+                })
+                    .catch(function (err) {
+                    (0, chai_1.expect)(function () {
+                        throw err;
+                    }).to.throw(Error, `Query failed with (6): rpc error: code = Unknown desc = verification method id ${didDoc_new2.verificationMethod[0].id} is of type ${formedDidDoc.verificationMethod[1].type} which is not allowed in 'authentication' attribute With gas wanted: '0' and gas used: '13332' : unknown request`);
+                });
+            }));
+            it('Should not be able to register did on chain as vmId used in authentication is also used in verificationMethod with key type X25519KeyAgreementKey2020', () => __awaiter(this, void 0, void 0, function* () {
+                const tempFormedDidDoc = JSON.parse(JSON.stringify(formedDidDoc));
+                tempFormedDidDoc.authentication.pop();
+                tempFormedDidDoc.authentication.push(didDoc_new1.verificationMethod[0].id);
+                tempFormedDidDoc.verificationMethod[1]['id'] = didDoc_new1.verificationMethod[0].id;
+                tempFormedDidDoc.verificationMethod[1]['blockchainAccountId'] = '';
+                return hypersignDID
+                    .register({
+                    didDocument: tempFormedDidDoc,
+                    privateKeyMultibase,
+                    verificationMethodId: didDoc3.verificationMethod[0].id,
+                })
+                    .catch(function (err) {
+                    (0, chai_1.expect)(function () {
+                        throw err;
+                    }).to.throw(Error, `Query failed with (6): rpc error: code = Unknown desc = duplicate verification method Id found: ${didDoc_new1.verificationMethod[0].id}  With gas wanted: '0' and gas used: '19998' : unknown request`);
+                });
+            }));
+            it('Should be able to register did on chain with keyAgreement type X25519KeyAgreementKey2020', () => __awaiter(this, void 0, void 0, function* () {
+                formedDidDoc.verificationMethod[1]['blockchainAccountId'] = '';
+                const registeredDid = yield hypersignDID.register({
+                    didDocument: formedDidDoc,
+                    privateKeyMultibase,
+                    verificationMethodId: didDoc_new1.verificationMethod[0].id,
+                });
+                (0, chai_1.should)().exist(registeredDid.code);
+                (0, chai_1.should)().exist(registeredDid.height);
+                (0, chai_1.should)().exist(registeredDid.rawLog);
+                (0, chai_1.should)().exist(registeredDid.transactionHash);
+                (0, chai_1.should)().exist(registeredDid.gasUsed);
+                (0, chai_1.should)().exist(registeredDid.gasWanted);
+            }));
+            it('Should be able to register did on chain with keyAgreement type X25519KeyAgreementKeyEIP5630', () => __awaiter(this, void 0, void 0, function* () {
+                didDocToSignANdRegister.verificationMethod[1]['blockchainAccountId'] = '';
+                const registeredDid = yield hypersignDID.register({
+                    didDocument: didDocToSignANdRegister,
+                    privateKeyMultibase: privateKeyMultibase3,
+                    verificationMethodId: didDoc4.verificationMethod[0].id,
+                });
+                (0, chai_1.should)().exist(registeredDid.code);
+                (0, chai_1.should)().exist(registeredDid.height);
+                (0, chai_1.should)().exist(registeredDid.rawLog);
+                (0, chai_1.should)().exist(registeredDid.transactionHash);
+                (0, chai_1.should)().exist(registeredDid.gasUsed);
+                (0, chai_1.should)().exist(registeredDid.gasWanted);
+            }));
+        });
+        describe('#resolve() resolve registerd did', function () {
+            it('should be able to resolve a didDOcument with keyagreement X25519KeyAgreementKey2020', () => __awaiter(this, void 0, void 0, function* () {
+                const params = {
+                    did: formedDidDoc.id,
+                };
+                const result = yield hypersignDID.resolve(params);
+                versionId2 = result.didDocumentMetadata.versionId;
+                (0, chai_1.expect)(result).to.be.a('object');
+                (0, chai_1.expect)(result.didDocument.id).to.be.equal(formedDidDoc.id);
+                (0, chai_1.expect)(result.didDocumentMetadata).to.be.a('object');
+            }));
+            it('should be able to resolve a didDOcument with keyagreement X25519KeyAgreementKeyEIP5630', () => __awaiter(this, void 0, void 0, function* () {
+                const params = {
+                    did: didDocToSignANdRegister.id,
+                };
+                const result = yield hypersignDID.resolve(params);
+                versionId3 = result.didDocumentMetadata.versionId;
+                (0, chai_1.expect)(result).to.be.a('object');
+                (0, chai_1.expect)(result.didDocument.id).to.be.equal(didDocToSignANdRegister.id);
+                (0, chai_1.expect)(result.didDocumentMetadata).to.be.a('object');
+            }));
+        });
+        describe('#update() update didDocument that has verificationMethod with X25519KeyAgreementKey2020', function () {
+            it('should not be able update a did document as signature passed to update it generated using privateKey of X25519KeyAgreementKey2020 which is not valid', () => __awaiter(this, void 0, void 0, function* () {
+                const verificationMethodId = formedDidDoc.verificationMethod[0].id;
+                formedDidDoc.alsoKnownAs.push('Random data');
+                return hypersignDID
+                    .update({
+                    didDocument: formedDidDoc,
+                    privateKeyMultibase: privateKeyMultibase2,
+                    verificationMethodId,
+                    versionId: versionId2,
+                })
+                    .catch(function (err) {
+                    (0, chai_1.expect)(function () {
+                        throw err;
+                    }).to.throw(Error);
+                });
+            }));
+            it('should not be able update a did document as signature passed to update it generated using privateKey of X25519KeyAgreementKeyEIP5630 which is not valid', () => __awaiter(this, void 0, void 0, function* () {
+                const verificationMethodId = didDocToSignANdRegister.verificationMethod[0].id;
+                didDocToSignANdRegister.alsoKnownAs.push('Random data');
+                return hypersignDID
+                    .update({
+                    didDocument: didDocToSignANdRegister,
+                    privateKeyMultibase: privateKeyMultibase2,
+                    verificationMethodId,
+                    versionId: versionId3,
+                })
+                    .catch(function (err) {
+                    (0, chai_1.expect)(function () {
+                        throw err;
+                    }).to.throw(Error);
+                });
+            }));
+        });
+        describe('#deactivate() deactivate didDocument that has verificationMethod with X25519KeyAgreementKey2020', function () {
+            it('should not be able deactivate a did document as signature passed to update it generated using privateKey of X25519KeyAgreementKey2020 which is not valid', () => __awaiter(this, void 0, void 0, function* () {
+                const verificationMethodId = formedDidDoc.verificationMethod[0].id;
+                formedDidDoc.alsoKnownAs.push('Random data');
+                return hypersignDID
+                    .deactivate({
+                    didDocument: formedDidDoc,
+                    privateKeyMultibase: privateKeyMultibase2,
+                    verificationMethodId,
+                    versionId: versionId2,
+                })
+                    .catch(function (err) {
+                    (0, chai_1.expect)(function () {
+                        throw err;
+                    }).to.throw(Error);
+                });
+            }));
+            it('should not be able deactivate a did document as signature passed to update it generated using privateKey of X25519KeyAgreementKeyEIP5630 which is not valid', () => __awaiter(this, void 0, void 0, function* () {
+                const verificationMethodId = didDocToSignANdRegister.verificationMethod[0].id;
+                didDocToSignANdRegister.alsoKnownAs.push('Random data');
+                return hypersignDID
+                    .deactivate({
+                    didDocument: didDocToSignANdRegister,
+                    privateKeyMultibase: privateKeyMultibase2,
+                    verificationMethodId,
+                    versionId: versionId3,
+                })
+                    .catch(function (err) {
+                    (0, chai_1.expect)(function () {
+                        throw err;
+                    }).to.throw(Error);
+                });
+            }));
+        });
+    });
 });
+function formDidDoc(didDocument, did) {
+    return __awaiter(this, void 0, void 0, function* () {
+        didDocument['@context'].push('https://digitalbazaar.github.io/x25519-key-agreement-2020-context/contexts/x25519-key-agreement-2020-v1.jsonld');
+        const verificationMethod2 = {
+            id: did + '#key-1',
+            type: 'X25519KeyAgreementKey2020',
+            controller: didDocument.id,
+            publicKeyMultibase: publicKeyMultibase2,
+            blockchainAccountId: '',
+        };
+        didDocument.verificationMethod.push(verificationMethod2);
+        didDocument.keyAgreement.push(`${did}#key-1`);
+        return didDocument;
+    });
+}
 // error in deactivate it should be to deactivae a did but mentioned is register a did
 // some validation is missing for web3, clientSpec type in some cases
+//The property "blockchainAccountId" in the input was not defined in the context.
