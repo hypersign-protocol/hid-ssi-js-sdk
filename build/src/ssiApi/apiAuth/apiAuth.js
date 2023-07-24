@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ApiAuth = void 0;
 const node_fetch_1 = __importDefault(require("node-fetch"));
+const api_constant_1 = require("../api-constant");
 class ApiAuth {
     constructor(apiKey) {
         if (!apiKey || apiKey.trim() === "") {
@@ -23,21 +24,19 @@ class ApiAuth {
     }
     generateAccessToken() {
         return __awaiter(this, void 0, void 0, function* () {
-            const studioApiUrl = "https://api.entity.hypersign.id/api/v1/app/oauth";
+            const studioApiUrl = `${api_constant_1.APIENDPOINT.STUDIO_API_BASE_URL}${api_constant_1.APIENDPOINT.AUTH}`;
             const headers = {
                 "X-Api-Secret-Key": this.apiKey,
-                "Origin": "https://entity.hypersign.id"
             };
             const requestOptions = {
                 method: "POST",
                 headers,
             };
             const response = yield (0, node_fetch_1.default)(studioApiUrl, requestOptions);
-            if (!response.ok) {
-                // what error to send not getting error message from api
-                throw new Error('HID-SSI_SDK:: Error: Unauthorized');
-            }
             const authToken = yield response.json();
+            if (!response.ok) {
+                throw new Error(`HID-SSI-SDK:: Error: ${authToken.message}`);
+            }
             return authToken;
         });
     }

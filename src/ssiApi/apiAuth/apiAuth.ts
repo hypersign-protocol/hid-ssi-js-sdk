@@ -1,5 +1,6 @@
 import fetch from "node-fetch"
 import { IgenerateToken } from "./IAuth";
+import {APIENDPOINT} from "../api-constant"
 export class ApiAuth {
     private apiKey: string;
     constructor(apiKey) {
@@ -9,21 +10,21 @@ export class ApiAuth {
         this.apiKey = apiKey
     }
     async generateAccessToken(): Promise<IgenerateToken> {
-        const studioApiUrl = "https://api.entity.hypersign.id/api/v1/app/oauth"
-        const headers = {
-            "X-Api-Secret-Key": this.apiKey,
-            "Origin": "https://entity.hypersign.id"
-        }
-        const requestOptions = {
-            method: "POST",
-            headers,
-        }
-        const response = await fetch(studioApiUrl, requestOptions)
-        if (!response.ok) {
-            // what error to send not getting error message from api
-            throw new Error('HID-SSI_SDK:: Error: Unauthorized')
-        }
-        const authToken = await response.json()
-        return authToken
+            const studioApiUrl = `${APIENDPOINT.STUDIO_API_BASE_URL}${APIENDPOINT.AUTH}`
+            const headers = {
+                "X-Api-Secret-Key": this.apiKey,
+            }
+            const requestOptions = {
+                method: "POST",
+                headers,
+            }
+            const response = await fetch(studioApiUrl, requestOptions)
+            const authToken = await response.json()
+            if (!response.ok) {
+                throw new Error(`HID-SSI-SDK:: Error: ${authToken.message}`)
+            }
+            return authToken
+       
+       
     }
 }
