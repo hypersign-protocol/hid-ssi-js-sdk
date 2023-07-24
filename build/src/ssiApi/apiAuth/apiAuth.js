@@ -17,8 +17,8 @@ const node_fetch_1 = __importDefault(require("node-fetch"));
 const api_constant_1 = require("../api-constant");
 class ApiAuth {
     constructor(apiKey) {
-        if (!apiKey || apiKey.trim() === "") {
-            throw new Error("HID-SSI_SDK:: Error: Please Provide apiKey");
+        if (!apiKey || apiKey.trim() === '') {
+            throw new Error('HID-SSI_SDK:: Error: Please Provide apiKey');
         }
         this.apiKey = apiKey;
     }
@@ -26,10 +26,10 @@ class ApiAuth {
         return __awaiter(this, void 0, void 0, function* () {
             const studioApiUrl = `${api_constant_1.APIENDPOINT.STUDIO_API_BASE_URL}${api_constant_1.APIENDPOINT.AUTH}`;
             const headers = {
-                "X-Api-Secret-Key": this.apiKey,
+                'X-Api-Secret-Key': this.apiKey,
             };
             const requestOptions = {
-                method: "POST",
+                method: 'POST',
                 headers,
             };
             const response = yield (0, node_fetch_1.default)(studioApiUrl, requestOptions);

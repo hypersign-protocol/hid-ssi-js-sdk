@@ -1,4 +1,4 @@
-import { IgenerateToken } from "./IAuth";
+import { IgenerateToken } from './IAuth';
 export declare class ApiAuth {
     private apiKey;
     constructor(apiKey: any);
