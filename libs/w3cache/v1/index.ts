@@ -8,6 +8,7 @@ import ecdsasecp2020 from './lds-ecdsa-secp256k1-recovery2020.json'
 import schema_org from './schema_org.json'
 // Ref: https://github.com/digitalbazaar/jsonld.js/#custom-document-loader
 const nodeDocumentLoader = jsonld.documentLoaders.node();
+import wellknown from './did-wellknown.json'
 const CONTEXTS = Object.freeze({
     "https://www.w3.org/ns/did/v1": {
         ...did
@@ -29,9 +30,11 @@ const CONTEXTS = Object.freeze({
     },
     "https://schema.org": {
         ...schema_org
+    },
+    "https://identity.foundation/.well-known/did-configuration/v1": {
+        ...wellknown
     }
- 
-})
+});
 
 export default async (url, options) => {
     if (url in CONTEXTS) {
