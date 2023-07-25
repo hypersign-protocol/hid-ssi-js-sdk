@@ -33,7 +33,7 @@
     "jcs": "https://github.com/hypersign-protocol/JCS",
     "jsonld": "^8.2.0",
     "node-fetch": "^2.6.1",
-    "protobufjs": "^6.11.2",
+    "protobufjs": "^7.2.4",
     "uuid": "^8.3.0",
     "vc-js": "https://github.com/hypersign-protocol/vc-js",
     "web3": "^1.6.0"
