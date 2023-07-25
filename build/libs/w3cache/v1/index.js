@@ -21,7 +21,13 @@ const vc_data_integrety_json_1 = __importDefault(require("./vc-data-integrety.js
 const lds_ecdsa_secp256k1_recovery2020_json_1 = __importDefault(require("./lds-ecdsa-secp256k1-recovery2020.json"));
 const schema_org_json_1 = __importDefault(require("./schema_org.json"));
 // Ref: https://github.com/digitalbazaar/jsonld.js/#custom-document-loader
-const nodeDocumentLoader = jsonld_1.default.documentLoaders.node();
+let nodeDocumentLoader;
+if (typeof window === 'undefined') {
+    nodeDocumentLoader = jsonld_1.default.documentLoaders.node();
+}
+else {
+    nodeDocumentLoader = jsonld_1.default.documentLoaders.xhr();
+}
 const did_wellknown_json_1 = __importDefault(require("./did-wellknown.json"));
 const CONTEXTS = Object.freeze({
     "https://www.w3.org/ns/did/v1": Object.assign({}, did_json_1.default),
