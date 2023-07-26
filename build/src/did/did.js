@@ -57,10 +57,7 @@ class DIDDocument {
         let vm;
         switch (keyType) {
             case IDID_1.IKeyType.Ed25519VerificationKey2020: {
-                this.context = [
-                    constant['DID_' + keyType].DID_BASE_CONTEXT,
-                    constant['DID_' + keyType].DID_KEYAGREEMENT_CONTEXT,
-                ];
+                this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
                 this.id = id;
                 this.controller = [this.id];
                 this.alsoKnownAs = [this.id];
@@ -86,10 +83,7 @@ class DIDDocument {
                 break;
             }
             case IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020: {
-                this.context = [
-                    constant['DID_' + keyType].DID_BASE_CONTEXT,
-                    constant['DID_' + keyType].DID_KEYAGREEMENT_CONTEXT,
-                ];
+                this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
                 this.id = id;
                 this.controller = [this.id];
                 this.alsoKnownAs = [this.id];
@@ -892,7 +886,7 @@ class HypersignDID {
                 throw new Error('HID-SSI-SDK:: Error: params.type is required to addVerificationMethod');
             }
             const { type } = params;
-            if (!(type in IDID_1.IKeyType) && !(type in IDID_1.IKeyAgreementKeyType)) {
+            if (!(type in IDID_1.IKeyType)) {
                 throw new Error('HID-SSI-SDK:: Error: params.type is invalid');
             }
             try {
@@ -933,8 +927,8 @@ class HypersignDID {
                 throw new Error(`HID-SSI-SDK:: Error: params.blockchainAccountId and params.publicKeyMultibase is required for keyType ${params.type}`);
             }
             if ((type === IDID_1.IKeyType.Ed25519VerificationKey2020 ||
-                type === IDID_1.IKeyAgreementKeyType.X25519KeyAgreementKey2020 ||
-                type === IDID_1.IKeyAgreementKeyType.X25519KeyAgreementKeyEIP5630) &&
+                type === IDID_1.IKeyType.X25519KeyAgreementKey2020 ||
+                type === IDID_1.IKeyType.X25519KeyAgreementKeyEIP5630) &&
                 !params.publicKeyMultibase) {
                 throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to addVerificationMethod');
             }
@@ -956,7 +950,8 @@ class HypersignDID {
             }
             verificationMethod['blockchainAccountId'] = (_c = params === null || params === void 0 ? void 0 : params.blockchainAccountId) !== null && _c !== void 0 ? _c : '';
             didDocument.verificationMethod.push(verificationMethod);
-            if (verificationMethod['type'] in IDID_1.IKeyAgreementKeyType) {
+            if (verificationMethod['type'] === IDID_1.IKeyType.X25519KeyAgreementKey2020 ||
+                verificationMethod['type'] === IDID_1.IKeyType.X25519KeyAgreementKeyEIP5630) {
                 didDocument.keyAgreement.push(verificationMethod['id']);
             }
             else {
@@ -964,6 +959,12 @@ class HypersignDID {
                 didDocument.assertionMethod.push(verificationMethod['id']);
                 didDocument.capabilityDelegation.push(verificationMethod['id']);
                 didDocument.capabilityInvocation.push(verificationMethod['id']);
+            }
+            if (verificationMethod['type'] === IDID_1.IKeyType.X25519KeyAgreementKey2020) {
+                didDocument['@context'].push(constant['DID_' + IDID_1.IKeyType.Ed25519VerificationKey2020].DID_KEYAGREEMENT_CONTEXT);
+            }
+            if (verificationMethod['type'] === IDID_1.IKeyType.X25519KeyAgreementKeyEIP5630) {
+                didDocument['@context'].push(constant['DID_' + IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020].DID_KEYAGREEMENT_CONTEXT);
             }
             return didDocument;
         });
