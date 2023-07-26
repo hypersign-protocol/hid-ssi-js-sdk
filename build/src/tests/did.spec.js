@@ -358,8 +358,7 @@ describe('DID Test scenarios', () => {
         it('should be able to add verification method in didDocument', () => __awaiter(this, void 0, void 0, function* () {
             const params = {
                 didDocument: didDocument,
-                type: 'X25519KeyAgreementKey2020',
-                // id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+                type: IDID_1.IKeyType.X25519KeyAgreementKey2020,
                 publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
             };
             const didDoc = JSON.parse(JSON.stringify(didDocument));
@@ -380,6 +379,32 @@ describe('DID Test scenarios', () => {
             (0, chai_1.should)().exist(updatedDidDoc['authentication']);
             (0, chai_1.should)().exist(updatedDidDoc['assertionMethod']);
             (0, chai_1.expect)(updatedDidDoc.verificationMethod.length).to.be.greaterThan(didDoc.verificationMethod.length);
+        }));
+        it('should be able to add verification method in didDocument without offlinesigner', () => __awaiter(this, void 0, void 0, function* () {
+            const hypersignDid = new index_1.HypersignDID({ namespace: 'testnet' });
+            const didDoc = JSON.parse(JSON.stringify(didDocument));
+            const params = {
+                didDocument: didDoc,
+                type: IDID_1.IKeyType.X25519KeyAgreementKey2020,
+                publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
+            };
+            const testDidDoc = yield hypersignDid.addVerificationMethod(params);
+            (0, chai_1.expect)(testDidDoc).to.be.a('object');
+            (0, chai_1.should)().exist(testDidDoc['@context']);
+            (0, chai_1.should)().exist(testDidDoc['id']);
+            (0, chai_1.should)().exist(testDidDoc['controller']);
+            (0, chai_1.should)().exist(testDidDoc['alsoKnownAs']);
+            (0, chai_1.should)().exist(testDidDoc['verificationMethod']);
+            (0, chai_1.expect)(testDidDoc['verificationMethod'] &&
+                testDidDoc['authentication'] &&
+                testDidDoc['assertionMethod'] &&
+                testDidDoc['keyAgreement'] &&
+                testDidDoc['capabilityInvocation'] &&
+                testDidDoc['capabilityDelegation'] &&
+                testDidDoc['service']).to.be.a('array');
+            (0, chai_1.should)().exist(testDidDoc['authentication']);
+            (0, chai_1.should)().exist(testDidDoc['assertionMethod']);
+            // expect(testDidDoc.verificationMethod.length).to.be.greaterThan(didDoc.verificationMethod.length);
         }));
     });
     describe('#register() this is to register did on the blockchain', function () {
