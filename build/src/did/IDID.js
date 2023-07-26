@@ -5,7 +5,7 @@
  * Author: Hypermine Core Team
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IClientSpec = exports.IKeyType = exports.IVerificationRelationships = void 0;
+exports.IKeyAgreementKeyType = exports.IClientSpec = exports.IKeyType = exports.IVerificationRelationships = void 0;
 var IVerificationRelationships;
 (function (IVerificationRelationships) {
     IVerificationRelationships["authentication"] = "authentication";
@@ -25,3 +25,8 @@ var IClientSpec;
     IClientSpec["eth-personalSign"] = "eth-personalSign";
     IClientSpec["cosmos-ADR036"] = "cosmos-ADR036";
 })(IClientSpec = exports.IClientSpec || (exports.IClientSpec = {}));
+var IKeyAgreementKeyType;
+(function (IKeyAgreementKeyType) {
+    IKeyAgreementKeyType["X25519KeyAgreementKey2020"] = "X25519KeyAgreementKey2020";
+    IKeyAgreementKeyType["X25519KeyAgreementKeyEIP5630"] = "X25519KeyAgreementKeyEIP5630";
+})(IKeyAgreementKeyType = exports.IKeyAgreementKeyType || (exports.IKeyAgreementKeyType = {}));

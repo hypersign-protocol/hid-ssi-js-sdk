@@ -38,6 +38,7 @@ exports.DID_Ed25519VerificationKey2020 = {
     METHOD: 'hid',
     NAMESPACE: 'testnet',
     DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
+    DID_KEYAGREEMENT_CONTEXT: "https://digitalbazaar.github.io/x25519-key-agreement-2020-context/contexts/x25519-key-agreement-2020-v1.jsonld",
     VERIFICATION_METHOD_TYPE: 'Ed25519VerificationKey2020',
     BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
 };
@@ -47,6 +48,7 @@ exports.DID_EcdsaSecp256k1RecoveryMethod2020 = {
     METHOD: 'hid',
     NAMESPACE: 'testnet',
     DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
+    DID_KEYAGREEMENT_CONTEXT: "https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/libs/w3cache/v1/X25519KeyAgreementKeyEIP5630.json",
     BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
     VERIFICATION_METHOD_TYPE: 'EcdsaSecp256k1RecoveryMethod2020',
 };

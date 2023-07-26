@@ -26,6 +26,10 @@ export declare enum IClientSpec {
     'eth-personalSign' = "eth-personalSign",
     'cosmos-ADR036' = "cosmos-ADR036"
 }
+export declare enum IKeyAgreementKeyType {
+    'X25519KeyAgreementKey2020' = "X25519KeyAgreementKey2020",
+    'X25519KeyAgreementKeyEIP5630' = "X25519KeyAgreementKeyEIP5630"
+}
 export interface IController {
     '@context': string;
     id: string;

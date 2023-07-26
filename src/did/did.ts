@@ -25,6 +25,7 @@ import {
   IKeyType,
   IClientSpec,
   IVerificationRelationships,
+  IKeyAgreementKeyType,
 } from './IDID';
 
 import { ClientSpec } from '../../libs/generated/ssi/clientSpec';
@@ -53,7 +54,10 @@ class DIDDocument implements Did {
     let vm;
     switch (keyType) {
       case IKeyType.Ed25519VerificationKey2020: {
-        this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
+        this.context = [
+          constant['DID_' + keyType].DID_BASE_CONTEXT,
+          constant['DID_' + keyType].DID_KEYAGREEMENT_CONTEXT,
+        ];
         this.id = id;
         this.controller = [this.id];
         this.alsoKnownAs = [this.id];
@@ -82,7 +86,10 @@ class DIDDocument implements Did {
         break;
       }
       case IKeyType.EcdsaSecp256k1RecoveryMethod2020: {
-        this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
+        this.context = [
+          constant['DID_' + keyType].DID_BASE_CONTEXT,
+          constant['DID_' + keyType].DID_KEYAGREEMENT_CONTEXT,
+        ];
         this.id = id;
         this.controller = [this.id];
         this.alsoKnownAs = [this.id];
@@ -208,7 +215,6 @@ export default class HypersignDID implements IDID {
       IVerificationRelationships.authentication,
       IVerificationRelationships.capabilityDelegation,
       IVerificationRelationships.capabilityInvocation,
-      IVerificationRelationships.keyAgreement,
     ];
     if (verificationRelationships && verificationRelationships.length > 0) {
       const set1 = new Set(vR);
@@ -289,6 +295,9 @@ export default class HypersignDID implements IDID {
   }): Promise<object> {
     let verificationRelationships: IVerificationRelationships[] = [];
     if (params.verificationRelationships && params.verificationRelationships.length > 0) {
+      if (params.verificationRelationships.includes(IVerificationRelationships.keyAgreement)) {
+        throw new Error('HID-SSI-SDK:: Error: keyAgreement is not allowed in verificationRelationships');
+      }
       verificationRelationships = this._filterVerificationRelationships(params.verificationRelationships);
     } else {
       verificationRelationships = this._filterVerificationRelationships([]);
@@ -696,6 +705,9 @@ export default class HypersignDID implements IDID {
     let didDoc;
     let verificationRelationships: IVerificationRelationships[] = [];
     if (params.verificationRelationships && params.verificationRelationships.length > 0) {
+      if (params.verificationRelationships.includes(IVerificationRelationships.keyAgreement)) {
+        throw new Error('HID-SSI-SDK:: Error: keyAgreement is not allowed in verificationRelationships');
+      }
       verificationRelationships = this._filterVerificationRelationships(params.verificationRelationships);
     } else {
       verificationRelationships = this._filterVerificationRelationships([]);
@@ -1050,5 +1062,106 @@ export default class HypersignDID implements IDID {
 
         break;
     }
+  }
+
+  public async addVerificationMethod(params: {
+    did?: string;
+    didDocument?: Did;
+    type: IKeyType | IKeyAgreementKeyType;
+    id?: string; // verificationMethodId
+    controller?: string;
+    publicKeyMultibase?: string;
+    blockchainAccountId?: string;
+  }): Promise<Did> {
+    let resolvedDidDoc;
+
+    if (!params.did && (!params.didDocument || Object.keys(params.didDocument).length === 0)) {
+      throw new Error('HID-SSI_SDK:: Error: params.did or params.didDocument is required to addVerificationMethod');
+    }
+    if (!params.type) {
+      throw new Error('HID-SSI-SDK:: Error: params.type is required to addVerificationMethod');
+    }
+    const { type } = params;
+    if (!(type in IKeyType) && !(type in IKeyAgreementKeyType)) {
+      throw new Error('HID-SSI-SDK:: Error: params.type is invalid');
+    }
+    try {
+      if (params.did) {
+        if (!this.didrpc) {
+          throw new Error(
+            'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+          );
+        }
+        resolvedDidDoc = await this.didrpc.resolveDID(params.did);
+        if (!resolvedDidDoc.didDocument) {
+          if (!params.didDocument) {
+            throw new Error('HID-SSI_SDK:: Error: can not able to resolve did please send didDocument');
+          }
+        }
+      } else if (params.didDocument) {
+        resolvedDidDoc = {};
+        resolvedDidDoc.didDocument = params.didDocument;
+      } else {
+        throw new Error('HID-SSI-SDK:: Error: params.did or params.didDocument is required to addVerificationMethod');
+      }
+    } catch (e) {
+      throw new Error(`HID-SSI-SDK:: Error: could not resolve did ${params.did}`);
+    }
+    if (
+      type === IKeyType.EcdsaSecp256k1RecoveryMethod2020 &&
+      (!params.blockchainAccountId || params.blockchainAccountId.trim() === '')
+    ) {
+      throw new Error(`HID-SSI-SDK:: Error: params.blockchainAccountId is required for keyType ${params.type}`);
+    }
+    if (type === IKeyType.EcdsaSecp256k1RecoveryMethod2020 && (!params.id || params.id.trim() === '')) {
+      throw new Error(`HID-SSI-SDK:: Error: params.id is required for keyType ${params.type}`);
+    }
+    if (
+      type === IKeyType.EcdsaSecp256k1VerificationKey2019 &&
+      (!params.blockchainAccountId ||
+        params.blockchainAccountId.trim() === '' ||
+        !params.publicKeyMultibase ||
+        params.publicKeyMultibase.trim() === '')
+    ) {
+      throw new Error(
+        `HID-SSI-SDK:: Error: params.blockchainAccountId and params.publicKeyMultibase is required for keyType ${params.type}`
+      );
+    }
+
+    if (
+      (type === IKeyType.Ed25519VerificationKey2020 ||
+        type === IKeyAgreementKeyType.X25519KeyAgreementKey2020 ||
+        type === IKeyAgreementKeyType.X25519KeyAgreementKeyEIP5630) &&
+      !params.publicKeyMultibase
+    ) {
+      throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to addVerificationMethod');
+    }
+    const verificationMethod = {};
+    const { didDocument } = resolvedDidDoc;
+    if (params.id) {
+      const checkIfVmIdExists = didDocument.verificationMethod.some((vm) => vm.id === params.id);
+      if (checkIfVmIdExists) {
+        throw new Error(`HID-SSI-SDK:: Error: verificationMethod ${params.id} already exists`);
+      }
+    }
+    const VMLength = didDocument.verificationMethod.length;
+    verificationMethod['id'] = params?.id ?? `${didDocument.id}#key-${VMLength + 1}`;
+    //verificationMethod['id'] = params?.id ?? `${didDocument.id}#${params.publicKeyMultibase}`;
+    verificationMethod['type'] = type;
+    verificationMethod['controller'] = didDocument.id;
+    if (type !== IKeyType.EcdsaSecp256k1RecoveryMethod2020) {
+      verificationMethod['publicKeyMultibase'] = params?.publicKeyMultibase ?? '';
+    }
+    verificationMethod['blockchainAccountId'] = params?.blockchainAccountId ?? '';
+    didDocument.verificationMethod.push(verificationMethod);
+    if (verificationMethod['type'] in IKeyAgreementKeyType) {
+      didDocument.keyAgreement.push(verificationMethod['id']);
+    } else {
+      didDocument.authentication.push(verificationMethod['id']);
+      didDocument.assertionMethod.push(verificationMethod['id']);
+      didDocument.capabilityDelegation.push(verificationMethod['id']);
+      didDocument.capabilityInvocation.push(verificationMethod['id']);
+    }
+    return didDocument;
   }
 }

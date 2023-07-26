@@ -31,6 +31,10 @@ export enum IClientSpec {
   'cosmos-ADR036' = 'cosmos-ADR036',
 }
 
+export enum IKeyAgreementKeyType {
+  'X25519KeyAgreementKey2020' = 'X25519KeyAgreementKey2020',
+  'X25519KeyAgreementKeyEIP5630' = 'X25519KeyAgreementKeyEIP5630',
+}
 export interface IController {
   '@context': string;
   id: string;
