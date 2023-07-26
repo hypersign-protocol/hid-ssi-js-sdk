@@ -377,8 +377,7 @@ describe('DID Test scenarios', () => {
     it('should be able to add verification method in didDocument', async () => {
       const params = {
         didDocument: didDocument,
-        type: 'X25519KeyAgreementKey2020',
-        // id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        type: IKeyType.X25519KeyAgreementKey2020,
         publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
       };
       const didDoc = JSON.parse(JSON.stringify(didDocument));
@@ -402,6 +401,35 @@ describe('DID Test scenarios', () => {
       should().exist(updatedDidDoc['authentication']);
       should().exist(updatedDidDoc['assertionMethod']);
       expect(updatedDidDoc.verificationMethod.length).to.be.greaterThan(didDoc.verificationMethod.length);
+    });
+    it('should be able to add verification method in didDocument without offlinesigner', async () => {
+      const hypersignDid = new HypersignDID({ namespace: 'testnet' });
+      const didDoc = JSON.parse(JSON.stringify(didDocument));
+      const params = {
+        didDocument: didDoc,
+        type: IKeyType.X25519KeyAgreementKey2020,
+        publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
+      };
+
+      const testDidDoc = await hypersignDid.addVerificationMethod(params);
+      expect(testDidDoc).to.be.a('object');
+      should().exist(testDidDoc['@context']);
+      should().exist(testDidDoc['id']);
+      should().exist(testDidDoc['controller']);
+      should().exist(testDidDoc['alsoKnownAs']);
+      should().exist(testDidDoc['verificationMethod']);
+      expect(
+        testDidDoc['verificationMethod'] &&
+          testDidDoc['authentication'] &&
+          testDidDoc['assertionMethod'] &&
+          testDidDoc['keyAgreement'] &&
+          testDidDoc['capabilityInvocation'] &&
+          testDidDoc['capabilityDelegation'] &&
+          testDidDoc['service']
+      ).to.be.a('array');
+      should().exist(testDidDoc['authentication']);
+      should().exist(testDidDoc['assertionMethod']);
+      // expect(testDidDoc.verificationMethod.length).to.be.greaterThan(didDoc.verificationMethod.length);
     });
   });
   describe('#register() this is to register did on the blockchain', function () {
