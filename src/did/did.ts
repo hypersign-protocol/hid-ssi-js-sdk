@@ -25,13 +25,11 @@ import {
   IKeyType,
   IClientSpec,
   IVerificationRelationships,
-  IKeyAgreementKeyType,
 } from './IDID';
 
 import { ClientSpec } from '../../libs/generated/ssi/clientSpec';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import customLoader from '../../libs/w3cache/v1';
-
 class DIDDocument implements Did {
   context: string[];
   id: string;
@@ -54,10 +52,7 @@ class DIDDocument implements Did {
     let vm;
     switch (keyType) {
       case IKeyType.Ed25519VerificationKey2020: {
-        this.context = [
-          constant['DID_' + keyType].DID_BASE_CONTEXT,
-          constant['DID_' + keyType].DID_KEYAGREEMENT_CONTEXT,
-        ];
+        this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
         this.id = id;
         this.controller = [this.id];
         this.alsoKnownAs = [this.id];
@@ -86,10 +81,7 @@ class DIDDocument implements Did {
         break;
       }
       case IKeyType.EcdsaSecp256k1RecoveryMethod2020: {
-        this.context = [
-          constant['DID_' + keyType].DID_BASE_CONTEXT,
-          constant['DID_' + keyType].DID_KEYAGREEMENT_CONTEXT,
-        ];
+        this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
         this.id = id;
         this.controller = [this.id];
         this.alsoKnownAs = [this.id];
@@ -1067,7 +1059,7 @@ export default class HypersignDID implements IDID {
   public async addVerificationMethod(params: {
     did?: string;
     didDocument?: Did;
-    type: IKeyType | IKeyAgreementKeyType;
+    type: IKeyType;
     id?: string; // verificationMethodId
     controller?: string;
     publicKeyMultibase?: string;
@@ -1082,7 +1074,7 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.type is required to addVerificationMethod');
     }
     const { type } = params;
-    if (!(type in IKeyType) && !(type in IKeyAgreementKeyType)) {
+    if (!(type in IKeyType)) {
       throw new Error('HID-SSI-SDK:: Error: params.type is invalid');
     }
     try {
@@ -1130,13 +1122,13 @@ export default class HypersignDID implements IDID {
 
     if (
       (type === IKeyType.Ed25519VerificationKey2020 ||
-        type === IKeyAgreementKeyType.X25519KeyAgreementKey2020 ||
-        type === IKeyAgreementKeyType.X25519KeyAgreementKeyEIP5630) &&
+        type === IKeyType.X25519KeyAgreementKey2020 ||
+        type === IKeyType.X25519KeyAgreementKeyEIP5630) &&
       !params.publicKeyMultibase
     ) {
       throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to addVerificationMethod');
     }
-    const verificationMethod = {};
+    const verificationMethod = {} as VerificationMethod;
     const { didDocument } = resolvedDidDoc;
     if (params.id) {
       const checkIfVmIdExists = didDocument.verificationMethod.some((vm) => vm.id === params.id);
@@ -1144,6 +1136,7 @@ export default class HypersignDID implements IDID {
         throw new Error(`HID-SSI-SDK:: Error: verificationMethod ${params.id} already exists`);
       }
     }
+
     const VMLength = didDocument.verificationMethod.length;
     verificationMethod['id'] = params?.id ?? `${didDocument.id}#key-${VMLength + 1}`;
     //verificationMethod['id'] = params?.id ?? `${didDocument.id}#${params.publicKeyMultibase}`;
@@ -1154,13 +1147,24 @@ export default class HypersignDID implements IDID {
     }
     verificationMethod['blockchainAccountId'] = params?.blockchainAccountId ?? '';
     didDocument.verificationMethod.push(verificationMethod);
-    if (verificationMethod['type'] in IKeyAgreementKeyType) {
+    if (
+      verificationMethod['type'] === IKeyType.X25519KeyAgreementKey2020 ||
+      verificationMethod['type'] === IKeyType.X25519KeyAgreementKeyEIP5630
+    ) {
       didDocument.keyAgreement.push(verificationMethod['id']);
     } else {
       didDocument.authentication.push(verificationMethod['id']);
       didDocument.assertionMethod.push(verificationMethod['id']);
       didDocument.capabilityDelegation.push(verificationMethod['id']);
       didDocument.capabilityInvocation.push(verificationMethod['id']);
+    }
+    if (verificationMethod['type'] === IKeyType.X25519KeyAgreementKey2020) {
+      didDocument['@context'].push(constant['DID_' + IKeyType.Ed25519VerificationKey2020].DID_KEYAGREEMENT_CONTEXT);
+    }
+    if (verificationMethod['type'] === IKeyType.X25519KeyAgreementKeyEIP5630) {
+      didDocument['@context'].push(
+        constant['DID_' + IKeyType.EcdsaSecp256k1RecoveryMethod2020].DID_KEYAGREEMENT_CONTEXT
+      );
     }
     return didDocument;
   }

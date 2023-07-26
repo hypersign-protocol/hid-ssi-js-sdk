@@ -5,7 +5,7 @@
  * Author: Hypermine Core Team
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IKeyAgreementKeyType = exports.IClientSpec = exports.IKeyType = exports.IVerificationRelationships = void 0;
+exports.IClientSpec = exports.IKeyType = exports.IVerificationRelationships = void 0;
 var IVerificationRelationships;
 (function (IVerificationRelationships) {
     IVerificationRelationships["authentication"] = "authentication";
@@ -19,14 +19,11 @@ var IKeyType;
     IKeyType["Ed25519VerificationKey2020"] = "Ed25519VerificationKey2020";
     IKeyType["EcdsaSecp256k1VerificationKey2019"] = "EcdsaSecp256k1VerificationKey2019";
     IKeyType["EcdsaSecp256k1RecoveryMethod2020"] = "EcdsaSecp256k1RecoveryMethod2020";
+    IKeyType["X25519KeyAgreementKey2020"] = "X25519KeyAgreementKey2020";
+    IKeyType["X25519KeyAgreementKeyEIP5630"] = "X25519KeyAgreementKeyEIP5630";
 })(IKeyType = exports.IKeyType || (exports.IKeyType = {}));
 var IClientSpec;
 (function (IClientSpec) {
     IClientSpec["eth-personalSign"] = "eth-personalSign";
     IClientSpec["cosmos-ADR036"] = "cosmos-ADR036";
 })(IClientSpec = exports.IClientSpec || (exports.IClientSpec = {}));
-var IKeyAgreementKeyType;
-(function (IKeyAgreementKeyType) {
-    IKeyAgreementKeyType["X25519KeyAgreementKey2020"] = "X25519KeyAgreementKey2020";
-    IKeyAgreementKeyType["X25519KeyAgreementKeyEIP5630"] = "X25519KeyAgreementKeyEIP5630";
-})(IKeyAgreementKeyType = exports.IKeyAgreementKeyType || (exports.IKeyAgreementKeyType = {}));
