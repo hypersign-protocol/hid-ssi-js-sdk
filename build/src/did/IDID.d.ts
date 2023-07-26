@@ -20,7 +20,9 @@ export declare enum IVerificationRelationships {
 export declare enum IKeyType {
     Ed25519VerificationKey2020 = "Ed25519VerificationKey2020",
     EcdsaSecp256k1VerificationKey2019 = "EcdsaSecp256k1VerificationKey2019",
-    EcdsaSecp256k1RecoveryMethod2020 = "EcdsaSecp256k1RecoveryMethod2020"
+    EcdsaSecp256k1RecoveryMethod2020 = "EcdsaSecp256k1RecoveryMethod2020",
+    X25519KeyAgreementKey2020 = "X25519KeyAgreementKey2020",
+    X25519KeyAgreementKeyEIP5630 = "X25519KeyAgreementKeyEIP5630"
 }
 export declare enum IClientSpec {
     'eth-personalSign' = "eth-personalSign",

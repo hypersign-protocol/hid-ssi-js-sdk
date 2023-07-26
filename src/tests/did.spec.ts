@@ -1,6 +1,6 @@
 import { expect, should } from 'chai';
 import { HypersignDID, HypersignSSISdk } from '../index';
-import { IPublicKey, IController, IDID } from '../did/IDID';
+import { IPublicKey, IController, IDID, IKeyType } from '../did/IDID';
 
 import { createWallet, mnemonic, hidNodeEp } from './config';
 let privateKeyMultibase;
@@ -16,6 +16,8 @@ let signedDocument;
 const challenge = '1231231231';
 const domain = 'www.adbv.com';
 let hypersignSSISDK;
+let pubKey;
+let didDocToReg;
 
 //add mnemonic of wallet that have balance
 
@@ -66,7 +68,6 @@ describe('DID Test scenarios', () => {
 
     it('should be able to generate didDocument', async function () {
       didDocument = await hypersignDID.generate({ publicKeyMultibase });
-      //console.log(didDocument)
       didDocId = didDocument['id'];
       verificationMethodId = didDocument['verificationMethod'][0].id;
       expect(didDocument).to.be.a('object');
@@ -74,7 +75,6 @@ describe('DID Test scenarios', () => {
       should().exist(didDocument['id']);
       should().exist(didDocument['controller']);
       should().exist(didDocument['alsoKnownAs']);
-
       should().exist(didDocument['verificationMethod']);
       expect(
         didDocument['verificationMethod'] &&
@@ -128,7 +128,33 @@ describe('DID Test scenarios', () => {
       expect(didDocument['service']).to.be.a('array').of.length(0);
       expect(didDocument['capabilityDelegation']).to.be.a('array').of.length(0);
     });
-
+    it('should be able to generate didDocument with different kp', async function () {
+      const kp = await hypersignDID.generateKeys();
+      const privateKeyMultibase = kp.privateKeyMultibase;
+      pubKey = kp.publicKeyMultibase;
+      didDocToReg = await hypersignDID.generate({ publicKeyMultibase: pubKey });
+      expect(didDocument).to.be.a('object');
+      should().exist(didDocument['@context']);
+      should().exist(didDocument['id']);
+      should().exist(didDocument['controller']);
+      should().exist(didDocument['alsoKnownAs']);
+      should().exist(didDocument['verificationMethod']);
+      expect(
+        didDocument['verificationMethod'] &&
+          didDocument['authentication'] &&
+          didDocument['assertionMethod'] &&
+          didDocument['keyAgreement'] &&
+          didDocument['capabilityInvocation'] &&
+          didDocument['capabilityDelegation'] &&
+          didDocument['service']
+      ).to.be.a('array');
+      should().exist(didDocument['authentication']);
+      should().exist(didDocument['assertionMethod']);
+      should().exist(didDocument['keyAgreement']);
+      should().exist(didDocument['capabilityInvocation']);
+      should().exist(didDocument['capabilityDelegation']);
+      should().exist(didDocument['service']);
+    });
     it('should be able to generate didDocument with custom id', async function () {
       const methodSpecificId = 'e157620d69d003e12d935c37b8c21baa78d24898398829b39d943d253c006332';
       const didDocument = await hypersignDID.generate({ publicKeyMultibase, methodSpecificId });
@@ -199,7 +225,185 @@ describe('DID Test scenarios', () => {
       should().exist(didDocument['service']);
     });
   });
+  describe('#addVerificationMethod() to add verificationMethod in didDocument', function () {
+    it('should not be able to add verificationMethod as neither did nor didDoc is passed', async () => {
+      const params = {
+        didDocument: {},
+        type: 'X25519KeyAgreementKey2020',
+        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
+      };
+      return hypersignDID.addVerificationMethod(params).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(
+          Error,
+          'HID-SSI_SDK:: Error: params.did or params.didDocument is required to addVerificationMethod'
+        );
+      });
+    });
+    it('should not be able to add verificationMethod as type is not passed', async () => {
+      const params = {
+        didDocument,
+        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
+      };
+      return hypersignDID.addVerificationMethod(params).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: Error: params.type is required to addVerificationMethod');
+      });
+    });
+    it('should not be able to add verificationMethod as type passed is invalid', async () => {
+      const params = {
+        didDocument,
+        type: 'dsyifx',
+        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
+      };
+      return hypersignDID.addVerificationMethod(params).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: Error: params.type is invalid');
+      });
+    });
 
+    it('should not be able to add verificationMethod as params.did is passed but yet not registerd', async () => {
+      const params = {
+        did: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY',
+        type: IKeyType.Ed25519VerificationKey2020,
+        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
+      };
+      const hypersignDid = new HypersignDID({ namespace: 'testnet' });
+      return hypersignDid.addVerificationMethod(params).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, `HID-SSI-SDK:: Error: could not resolve did ${params.did}`);
+      });
+    });
+    it('should not be able to add verificationMethod in didDocument as type is EcdsaSecp256k1RecoveryMethod2020 but blockchainAccountId is not passed', async () => {
+      const params = {
+        didDocument,
+        type: 'EcdsaSecp256k1RecoveryMethod2020',
+        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
+      };
+      return hypersignDID.addVerificationMethod(params).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, `HID-SSI-SDK:: Error: params.blockchainAccountId is required for keyType ${params.type}`);
+      });
+    });
+
+    it('should not be able to add verificationMethod in didDocument as type is EcdsaSecp256k1RecoveryMethod2020 but params.id is not passed', async () => {
+      const params = {
+        didDocument,
+        type: 'EcdsaSecp256k1RecoveryMethod2020',
+        publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
+        blockchainAccountId: 'eip155:1:23fer44374u3rmhvf47ri35ty',
+      };
+      return hypersignDID.addVerificationMethod(params).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, `HID-SSI-SDK:: Error: params.id is required for keyType ${params.type}`);
+      });
+    });
+
+    it('should not be able to add verificationMethod in didDocument as type is EcdsaSecp256k1VerificationKey2019 but neither params.blockchainAccountId nor params.publicKeyMultibase is passed', async () => {
+      const params = {
+        didDocument,
+        type: 'EcdsaSecp256k1VerificationKey2019',
+        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+      };
+      return hypersignDID.addVerificationMethod(params).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(
+          Error,
+          `HID-SSI-SDK:: Error: params.blockchainAccountId and params.publicKeyMultibase is required for keyType ${params.type}`
+        );
+      });
+    });
+
+    it('should not be able to add verificationMethod in didDocument as type is EcdsaSecp256k1VerificationKey2019 params.publicKeyMultibase is not passed', async () => {
+      const params = {
+        didDocument,
+        type: 'EcdsaSecp256k1VerificationKey2019',
+        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        blockchainAccountId: 'eip155:1:23fer44374u3rmhvf47ri35ty',
+      };
+      return hypersignDID.addVerificationMethod(params).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(
+          Error,
+          `HID-SSI-SDK:: Error: params.blockchainAccountId and params.publicKeyMultibase is required for keyType ${params.type}`
+        );
+      });
+    });
+
+    it('should not be able to add verificationMethod in didDocument as type is EcdsaSecp256k1VerificationKey2019 params.blockchainAccountId is not passed', async () => {
+      const params = {
+        didDocument,
+        type: 'EcdsaSecp256k1VerificationKey2019',
+        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        blockchainAccountId: 'eip155:1:23fer44374u3rmhvf47ri35ty',
+      };
+      return hypersignDID.addVerificationMethod(params).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(
+          Error,
+          `HID-SSI-SDK:: Error: params.blockchainAccountId and params.publicKeyMultibase is required for keyType ${params.type}`
+        );
+      });
+    });
+
+    it('Should not be able to add verification method to didDocument as it is already exists', async () => {
+      const params = {
+        didDocument: didDocument,
+        type: 'X25519KeyAgreementKey2020',
+        id: `${didDocument.verificationMethod[0].id}`,
+        publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
+      };
+      return hypersignDID.addVerificationMethod(params).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, `HID-SSI-SDK:: Error: verificationMethod ${params.id} already exists`);
+      });
+    });
+
+    it('should be able to add verification method in didDocument', async () => {
+      const params = {
+        didDocument: didDocument,
+        type: 'X25519KeyAgreementKey2020',
+        // id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
+      };
+      const didDoc = JSON.parse(JSON.stringify(didDocument));
+
+      const updatedDidDoc = await hypersignDID.addVerificationMethod(params);
+      expect(updatedDidDoc).to.be.a('object');
+      should().exist(updatedDidDoc['@context']);
+      should().exist(updatedDidDoc['id']);
+      should().exist(updatedDidDoc['controller']);
+      should().exist(updatedDidDoc['alsoKnownAs']);
+      should().exist(updatedDidDoc['verificationMethod']);
+      expect(
+        updatedDidDoc['verificationMethod'] &&
+          updatedDidDoc['authentication'] &&
+          updatedDidDoc['assertionMethod'] &&
+          updatedDidDoc['keyAgreement'] &&
+          updatedDidDoc['capabilityInvocation'] &&
+          updatedDidDoc['capabilityDelegation'] &&
+          updatedDidDoc['service']
+      ).to.be.a('array');
+      should().exist(updatedDidDoc['authentication']);
+      should().exist(updatedDidDoc['assertionMethod']);
+      expect(updatedDidDoc.verificationMethod.length).to.be.greaterThan(didDoc.verificationMethod.length);
+    });
+  });
   describe('#register() this is to register did on the blockchain', function () {
     it('should not able to register did document and throw error as didDocument is not passed or it is empty', function () {
       return hypersignDID
@@ -230,7 +434,6 @@ describe('DID Test scenarios', () => {
     });
     it('should be able to register didDocument in the blockchain', async function () {
       const result = await hypersignDID.register({ didDocument, privateKeyMultibase, verificationMethodId });
-      //console.log(result)
       transactionHash = result.transactionHash;
       should().exist(result.code);
       should().exist(result.height);
@@ -254,7 +457,6 @@ describe('DID Test scenarios', () => {
         did: didDocId,
       };
       const result = await hypersignDID.resolve(params);
-      //console.log(result);
       expect(result).to.be.a('object');
       expect(result.didDocument.id).to.be.equal(didDocId);
       expect(result.didDocumentMetadata).to.be.a('object');
@@ -304,15 +506,12 @@ describe('DID Test scenarios', () => {
     });
     it('should be able to update did document', async function () {
       didDocument['alsoKnownAs'].push('Some DATA');
-
       const result = await hypersignDID.update({
         didDocument,
         privateKeyMultibase,
         verificationMethodId,
         versionId,
       });
-      //console.log(result);
-
       should().exist(result.code);
       should().exist(result.height);
       should().exist(result.rawLog);
@@ -410,8 +609,6 @@ describe('DID Test scenarios', () => {
         verificationMethodId,
         versionId,
       });
-      //console.log(JSON.stringify(result));
-
       should().exist(result.code);
       should().exist(result.height);
       should().exist(result.rawLog);
@@ -535,7 +732,6 @@ describe('DID Test scenarios', () => {
         controller,
       };
       signedDocument = await hypersignDID.sign(params);
-      //console.log(JSON.stringify(signedDocument))
       expect(signedDocument).to.be.a('object');
       should().exist(signedDocument['@context']);
       should().exist(signedDocument['id']);
@@ -573,16 +769,12 @@ describe('DID Test scenarios', () => {
     });
 
     it('should return verification result', async function () {
-      console.log(JSON.stringify(signedDocument, null, 2));
-
       const result = await hypersignDID.verify({
         didDocument: signedDocument,
         verificationMethodId,
         challenge,
         domain,
       });
-      console.log(result);
-
       expect(result).to.be.a('object');
       should().exist(result);
       should().exist(result.verified);
