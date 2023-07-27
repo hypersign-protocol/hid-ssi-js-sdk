@@ -17,7 +17,9 @@ const challenge = '1231231231';
 const domain = 'www.adbv.com';
 let hypersignSSISDK;
 let pubKey;
+let privKey;
 let didDocToReg;
+let DIdDOcWithMultiplVM;
 
 //add mnemonic of wallet that have balance
 
@@ -130,7 +132,7 @@ describe('DID Test scenarios', () => {
     });
     it('should be able to generate didDocument with different kp', async function () {
       const kp = await hypersignDID.generateKeys();
-      const privateKeyMultibase = kp.privateKeyMultibase;
+      privKey = kp.privateKeyMultibase;
       pubKey = kp.publicKeyMultibase;
       didDocToReg = await hypersignDID.generate({ publicKeyMultibase: pubKey });
       expect(didDocument).to.be.a('object');
@@ -377,7 +379,7 @@ describe('DID Test scenarios', () => {
     it('should be able to add verification method in didDocument', async () => {
       const params = {
         didDocument: didDocument,
-        type: IKeyType.X25519KeyAgreementKey2020,
+        type: 'X25519KeyAgreementKey2020',
         publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
       };
       const didDoc = JSON.parse(JSON.stringify(didDocument));
@@ -429,7 +431,35 @@ describe('DID Test scenarios', () => {
       ).to.be.a('array');
       should().exist(testDidDoc['authentication']);
       should().exist(testDidDoc['assertionMethod']);
-      // expect(testDidDoc.verificationMethod.length).to.be.greaterThan(didDoc.verificationMethod.length);
+    });
+    it('should be able to add verification method in didDocument with key type Ed25519VerificationKey2020', async () => {
+      const params = {
+        didDocument: didDocToReg,
+        type: 'Ed25519VerificationKey2020',
+        id: didDocument.verificationMethod[0].id,
+        publicKeyMultibase: publicKeyMultibase,
+      };
+      const didDoc = JSON.parse(JSON.stringify(didDocToReg));
+
+      DIdDOcWithMultiplVM = await hypersignDID.addVerificationMethod(params);
+      expect(DIdDOcWithMultiplVM).to.be.a('object');
+      should().exist(DIdDOcWithMultiplVM['@context']);
+      should().exist(DIdDOcWithMultiplVM['id']);
+      should().exist(DIdDOcWithMultiplVM['controller']);
+      should().exist(DIdDOcWithMultiplVM['alsoKnownAs']);
+      should().exist(DIdDOcWithMultiplVM['verificationMethod']);
+      expect(
+        DIdDOcWithMultiplVM['verificationMethod'] &&
+          DIdDOcWithMultiplVM['authentication'] &&
+          DIdDOcWithMultiplVM['assertionMethod'] &&
+          DIdDOcWithMultiplVM['keyAgreement'] &&
+          DIdDOcWithMultiplVM['capabilityInvocation'] &&
+          DIdDOcWithMultiplVM['capabilityDelegation'] &&
+          DIdDOcWithMultiplVM['service']
+      ).to.be.a('array');
+      should().exist(DIdDOcWithMultiplVM['authentication']);
+      should().exist(DIdDOcWithMultiplVM['assertionMethod']);
+      expect(DIdDOcWithMultiplVM.verificationMethod.length).to.be.greaterThan(didDoc.verificationMethod.length);
     });
   });
   describe('#register() this is to register did on the blockchain', function () {
@@ -460,8 +490,100 @@ describe('DID Test scenarios', () => {
           }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
         });
     });
-    it('should be able to register didDocument in the blockchain', async function () {
-      const result = await hypersignDID.register({ didDocument, privateKeyMultibase, verificationMethodId });
+    it('should not be able to register a did document as neither privateKeyMultibase nor verificationMethodId is passed and signData passed is empty array', async () => {
+      return hypersignDID.register({ didDocument, signData: [] }).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
+      });
+    });
+    it('should not be able to register a did document as verificationMethodId is not passed inside signData', async () => {
+      return hypersignDID.register({ didDocument, signData: [{ privateKeyMultibase: privKey }] }).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(
+          Error,
+          'HID-SSI-SDK:: Error: params.signData[0].verificationMethodId is required to register a did'
+        );
+      });
+    });
+    it('should not be able to register a did document as privateKeyMultibase is not passed inside signData', async () => {
+      return hypersignDID
+        .register({
+          didDocument,
+          signData: [
+            {
+              verificationMethodId: DIdDOcWithMultiplVM.verificationMethod[0].id,
+            },
+          ],
+        })
+        .catch(function (err) {
+          expect(function () {
+            throw err;
+          }).to.throw(
+            Error,
+            'HID-SSI-SDK:: Error: params.signData[0].privateKeyMultibase is required to register a did'
+          );
+        });
+    });
+    it('should not be able to register a did document as type is not passed inside signData', async () => {
+      return hypersignDID
+        .register({
+          didDocument,
+          signData: [
+            {
+              verificationMethodId: DIdDOcWithMultiplVM.verificationMethod[0].id,
+              privateKeyMultibase: privKey,
+            },
+          ],
+        })
+        .catch(function (err) {
+          expect(function () {
+            throw err;
+          }).to.throw(Error, 'HID-SSI-SDK:: Error: params.signData[0].type is required to register a did');
+        });
+    });
+    it('should not be able to register a did Doc of type Ed25519VerificationKey2020 with multiple verification method as one of the privateKeyMultibase is not passed', async () => {
+      const signData = [
+        {
+          verificationMethodId: DIdDOcWithMultiplVM.verificationMethod[0].id,
+          privateKeyMultibase: privKey,
+          type: 'Ed25519VerificationKey2020',
+        },
+        {
+          verificationMethodId: DIdDOcWithMultiplVM.verificationMethod[1].id,
+          type: 'Ed25519VerificationKey2020',
+        },
+      ];
+      return await hypersignDID
+        .register({
+          didDocument: DIdDOcWithMultiplVM,
+          signData,
+        })
+        .catch(function (err) {
+          expect(function () {
+            throw err;
+          }).to.throw(
+            Error,
+            `HID-SSI-SDK:: Error: params.signData[1].privateKeyMultibase is required to register a did`
+          );
+        });
+    });
+    it('should be able to register didDocument in the blockchain  with two vm one is of type Ed25519VerificationKey2020 and other is of type X25519KeyAgreementKey2020', async function () {
+      const result = await hypersignDID.register({
+        didDocument,
+        privateKeyMultibase,
+        verificationMethodId,
+        // or we could pass only signData and didDoc
+        // signData: [
+        //   { privateKeyMultibase, verificationMethodId, type: 'Ed25519VerificationKey2020' },
+        //   {
+        //     privateKeyMultibase: 'xyztrtjvnb',
+        //     type: 'X25519KeyAgreementKey2020',
+        //     verificationMethodId: didDocument.verificationMethod[1].id,
+        //   },
+        // ],
+      });
       transactionHash = result.transactionHash;
       should().exist(result.code);
       should().exist(result.height);
@@ -469,6 +591,29 @@ describe('DID Test scenarios', () => {
       should().exist(result.transactionHash);
       should().exist(result.gasUsed);
       should().exist(result.gasWanted);
+    });
+    it('should be able to register a did Doc of type Ed25519VerificationKey2020 with multiple verification method', async () => {
+      const registerdDidDoc = await hypersignDID.register({
+        didDocument: DIdDOcWithMultiplVM,
+        signData: [
+          {
+            verificationMethodId: DIdDOcWithMultiplVM.verificationMethod[0].id,
+            privateKeyMultibase: privKey,
+            type: 'Ed25519VerificationKey2020',
+          },
+          {
+            verificationMethodId: DIdDOcWithMultiplVM.verificationMethod[1].id,
+            privateKeyMultibase,
+            type: 'Ed25519VerificationKey2020',
+          },
+        ],
+      });
+      should().exist(registerdDidDoc.code);
+      should().exist(registerdDidDoc.height);
+      should().exist(registerdDidDoc.rawLog);
+      should().exist(registerdDidDoc.transactionHash);
+      should().exist(registerdDidDoc.gasUsed);
+      should().exist(registerdDidDoc.gasWanted);
     });
   });
 
@@ -491,7 +636,6 @@ describe('DID Test scenarios', () => {
       versionId = result.didDocumentMetadata.versionId;
     });
   });
-
   describe('#update() this is to update didDocument based on didDocId', function () {
     it('should not be able to update did document as privateKeyMultibase is null or empty', function () {
       return hypersignDID

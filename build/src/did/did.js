@@ -308,26 +308,59 @@ class HypersignDID {
             if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
                 throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
             }
-            if (!params.privateKeyMultibase) {
-                throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to register a did');
-            }
-            if (!params.verificationMethodId) {
-                throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
-            }
             if (!this.didrpc) {
                 throw new Error('HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized');
             }
-            const { didDocument, privateKeyMultibase, verificationMethodId } = params;
+            const { didDocument } = params;
             const didDocStringJson = utils_1.default.ldToJsonConvertor(didDocument);
-            const signature = yield this._sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase });
             const didDoc = didDocStringJson;
-            const signInfos = [
-                {
+            const signInfos = [];
+            if (!params.signData) {
+                if (!params.privateKeyMultibase) {
+                    throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to register a did');
+                }
+                if (!params.verificationMethodId) {
+                    throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
+                }
+                const { privateKeyMultibase, verificationMethodId } = params;
+                const signature = yield this._sign({
+                    didDocString: JSON.stringify(didDocStringJson),
+                    privateKeyMultibase,
+                });
+                signInfos.push({
                     signature,
                     verification_method_id: verificationMethodId,
                     clientSpec: undefined,
-                },
-            ];
+                });
+            }
+            else {
+                if (params.signData.length < 1) {
+                    throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
+                }
+                for (const i in params.signData) {
+                    if (!params.signData[i].verificationMethodId) {
+                        throw new Error(`HID-SSI-SDK:: Error: params.signData[${i}].verificationMethodId is required to register a did`);
+                    }
+                    if (!params.signData[i].privateKeyMultibase) {
+                        throw new Error(`HID-SSI-SDK:: Error: params.signData[${i}].privateKeyMultibase is required to register a did`);
+                    }
+                    if (!params.signData[i].type) {
+                        throw new Error(`HID-SSI-SDK:: Error: params.signData[${i}].type is required to register a did`);
+                    }
+                    const { type, privateKeyMultibase, verificationMethodId } = params.signData[i];
+                    if (type !== IDID_1.IKeyType.X25519KeyAgreementKey2020 && type !== IDID_1.IKeyType.X25519KeyAgreementKeyEIP5630) {
+                        const signature = yield this._sign({
+                            didDocString: JSON.stringify(didDocStringJson),
+                            privateKeyMultibase,
+                        });
+                        signInfos.push({
+                            signature,
+                            verification_method_id: verificationMethodId,
+                            clientSpec: undefined,
+                        });
+                    }
+                }
+            }
             return yield this.didrpc.registerDID(didDoc, signInfos);
         });
     }
@@ -875,6 +908,18 @@ class HypersignDID {
             }
         });
     }
+    /**
+     * Add verification method
+     * @param
+     * - params.didDocument          : Optional, unregistered Did document
+     * - params.did                  : Optional, didDoc Id of registered didDoc
+     * - params.type                 : key type
+     * - params.id                   : Optional, verificationMethodId
+     * - params.controller           : Optional, controller field
+     * - params.publicKeyMultibase   : public key
+     * - params.blockchainAccountId  : Optional, blockchain accountId
+     * @return {Promise<Did>}  DidDocument object
+     */
     addVerificationMethod(params) {
         var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
@@ -942,11 +987,18 @@ class HypersignDID {
             }
             const VMLength = didDocument.verificationMethod.length;
             verificationMethod['id'] = (_a = params === null || params === void 0 ? void 0 : params.id) !== null && _a !== void 0 ? _a : `${didDocument.id}#key-${VMLength + 1}`;
-            //verificationMethod['id'] = params?.id ?? `${didDocument.id}#${params.publicKeyMultibase}`;
             verificationMethod['type'] = type;
             verificationMethod['controller'] = didDocument.id;
             if (type !== IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020) {
-                verificationMethod['publicKeyMultibase'] = (_b = params === null || params === void 0 ? void 0 : params.publicKeyMultibase) !== null && _b !== void 0 ? _b : '';
+                if (type === IDID_1.IKeyType.Ed25519VerificationKey2020) {
+                    const { publicKeyMultibase: publicKeyMultibase1 } = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
+                        publicKey: params.publicKeyMultibase,
+                    });
+                    verificationMethod['publicKeyMultibase'] = publicKeyMultibase1;
+                }
+                else {
+                    verificationMethod['publicKeyMultibase'] = (_b = params === null || params === void 0 ? void 0 : params.publicKeyMultibase) !== null && _b !== void 0 ? _b : '';
+                }
             }
             verificationMethod['blockchainAccountId'] = (_c = params === null || params === void 0 ? void 0 : params.blockchainAccountId) !== null && _c !== void 0 ? _c : '';
             didDocument.verificationMethod.push(verificationMethod);

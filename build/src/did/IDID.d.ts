@@ -3,7 +3,7 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
-import { Did as IDidProto, Metadata, VerificationMethod, Service, SignInfo } from '../../libs/generated/ssi/did';
+import { Did as IDidProto, Metadata, VerificationMethod, Service, SignInfo, Did } from '../../libs/generated/ssi/did';
 export interface IPublicKey {
     '@context': string;
     id: string;
@@ -73,8 +73,9 @@ export interface IDID {
     }): Promise<object>;
     register(params: {
         didDocument: object;
-        privateKeyMultibase: string;
-        verificationMethodId: string;
+        privateKeyMultibase?: string;
+        verificationMethodId?: string;
+        signData?: ISignData[];
     }): Promise<object>;
     resolve(params: {
         did: string;
@@ -106,6 +107,15 @@ export interface IDID {
         challenge: string;
         domain?: string;
     }): Promise<object>;
+    addVerificationMethod(params: {
+        did?: string;
+        didDocument?: Did;
+        type: IKeyType;
+        id?: string;
+        controller?: string;
+        publicKeyMultibase?: string;
+        blockchainAccountId?: string;
+    }): Promise<Did>;
 }
 export interface IDIDResolve {
     didDocument: IDidDocument;
@@ -130,6 +140,11 @@ export interface IDidDocument {
     capabilityInvocation: string[];
     capabilityDelegation: string[];
     service: Service[];
+}
+export interface ISignData {
+    verificationMethodId: string;
+    privateKeyMultibase: string;
+    type: IKeyType;
 }
 export {};
 //# sourceMappingURL=IDID.d.ts.map

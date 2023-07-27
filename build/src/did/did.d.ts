@@ -1,6 +1,6 @@
 import { Did, SignInfo } from '../../libs/generated/ssi/did';
 import Web3 from 'web3';
-import { IDID, IDIDResolve, ISignedDIDDocument, IKeyType, IClientSpec, IVerificationRelationships } from './IDID';
+import { IDID, IDIDResolve, ISignedDIDDocument, IKeyType, IClientSpec, IVerificationRelationships, ISignData } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 /** Class representing HypersignDID */
 export default class HypersignDID implements IDID {
@@ -69,8 +69,9 @@ export default class HypersignDID implements IDID {
      */
     register(params: {
         didDocument: object;
-        privateKeyMultibase: string;
-        verificationMethodId: string;
+        privateKeyMultibase?: string;
+        verificationMethodId?: string;
+        signData?: ISignData[];
     }): Promise<object>;
     /**
      * Resolves a DID into DIDDocument from Hypersign blockchain - an onchain activity
@@ -189,6 +190,18 @@ export default class HypersignDID implements IDID {
         didDocument: Did;
         signature: string;
     }>;
+    /**
+     * Add verification method
+     * @param
+     * - params.didDocument          : Optional, unregistered Did document
+     * - params.did                  : Optional, didDoc Id of registered didDoc
+     * - params.type                 : key type
+     * - params.id                   : Optional, verificationMethodId
+     * - params.controller           : Optional, controller field
+     * - params.publicKeyMultibase   : public key
+     * - params.blockchainAccountId  : Optional, blockchain accountId
+     * @return {Promise<Did>}  DidDocument object
+     */
     addVerificationMethod(params: {
         did?: string;
         didDocument?: Did;
