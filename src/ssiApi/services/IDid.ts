@@ -29,7 +29,6 @@ export interface IRegister{
 
 }
 
-
 export interface IUpdate extends IRegister{
     deactivate:boolean
 }
