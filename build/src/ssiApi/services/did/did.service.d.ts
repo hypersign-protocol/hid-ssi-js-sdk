@@ -1,7 +1,7 @@
 import { Did } from '../../../../libs/generated/ssi/did';
 import { IDIDResolve } from '../../../did/IDID';
-import { IGenerateDid, IRegister, IUpdate } from '../IDid';
-export declare class DID {
+import { IDidApi, IGenerateDid, IRegister, IUpdate } from './IDid';
+export default class DidApi implements IDidApi {
     private authService;
     private accessToken;
     constructor(apiKey: string);
@@ -54,6 +54,8 @@ export declare class DID {
       * - params.signInfos.clientSpec              : ClientSpec
       * @return {Promise<transactionHash: string>}
       */
-    updateDid(params: IUpdate): Promise<any>;
+    updateDid(params: IUpdate): Promise<{
+        transactionHash: string;
+    }>;
 }
 //# sourceMappingURL=did.service.d.ts.map

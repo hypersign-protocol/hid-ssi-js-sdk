@@ -12,13 +12,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DID = void 0;
 const IDID_1 = require("../../../did/IDID");
 const api_constant_1 = require("../../api-constant");
 const apiAuth_1 = require("../../apiAuth/apiAuth");
 const node_fetch_1 = __importDefault(require("node-fetch"));
-class DID {
+class DidApi {
     constructor(apiKey) {
+        if (!apiKey || apiKey.trim() === '') {
+            throw new Error('HID-SSI_SDK:: Error: Please Provide apiKey');
+        }
         this.authService = new apiAuth_1.ApiAuth(apiKey);
         this.initAccessToken();
     }
@@ -239,4 +241,4 @@ class DID {
         });
     }
 }
-exports.DID = DID;
+exports.default = DidApi;

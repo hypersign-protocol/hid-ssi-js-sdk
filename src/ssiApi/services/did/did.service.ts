@@ -3,13 +3,16 @@ import { IClientSpec, IDIDResolve } from '../../../did/IDID';
 import { APIENDPOINT } from '../../api-constant';
 import { IAuth, IValidateAccesstokenResp } from '../../apiAuth/IAuth';
 import { ApiAuth } from '../../apiAuth/apiAuth';
-import { IGenerateDid, IRegister, IUpdate } from '../IDid';
+import { IDidApi, IGenerateDid, IRegister, IUpdate } from './IDid';
 import fetch from 'node-fetch';
 
-export class DID {
+export default class DidApi implements IDidApi {
   private authService: IAuth;
   private accessToken;
   constructor(apiKey: string) {
+    if (!apiKey || apiKey.trim() === '') {
+      throw new Error('HID-SSI_SDK:: Error: Please Provide apiKey');
+    } 
     this.authService = new ApiAuth(apiKey);
     this.initAccessToken();
   }
@@ -171,7 +174,7 @@ export class DID {
   * @return {Promise<transactionHash: string>}
   */
 
-  public async updateDid(params:IUpdate){
+  public async updateDid(params:IUpdate):Promise<{transactionHash: string}>{
     if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to update a did');
     }

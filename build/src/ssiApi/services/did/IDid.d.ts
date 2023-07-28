@@ -1,5 +1,5 @@
-import { Did } from "../../../libs/generated/ssi/did";
-import { IClientSpec, IKeyType, IVerificationRelationships } from "../../did/IDID";
+import { Did } from "../../../../libs/generated/ssi/did";
+import { IClientSpec, IDIDResolve, IKeyType, IVerificationRelationships } from "../../../did/IDID";
 export interface IGenerateDid {
     namespace: string;
     methodSpecificId?: string;
@@ -11,11 +11,11 @@ export interface IGenerateDid {
         verificationRelationships: IVerificationRelationships[];
     };
 }
-interface ClientSpec {
+export interface ClientSpec {
     type: IClientSpec;
     adr036SignerAddress?: string;
 }
-interface SignInfo {
+export interface SignInfo {
     verification_method_id: string;
     signature: string;
     clientSpec: ClientSpec;
@@ -28,5 +28,17 @@ export interface IRegister {
 export interface IUpdate extends IRegister {
     deactivate: boolean;
 }
-export {};
+export interface IDidApi {
+    generateDid(params: IGenerateDid): Promise<Did>;
+    registerDid(params: IRegister): Promise<{
+        didDocument: Did;
+        transactionHash: string;
+    }>;
+    resolveDid(params: {
+        did: string;
+    }): Promise<IDIDResolve>;
+    updateDid(params: IUpdate): Promise<{
+        transactionHash: string;
+    }>;
+}
 //# sourceMappingURL=IDid.d.ts.map
