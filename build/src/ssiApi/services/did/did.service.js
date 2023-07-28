@@ -26,8 +26,6 @@ class DID {
         return __awaiter(this, void 0, void 0, function* () {
             const accessToken = yield this.authService.generateAccessToken();
             this.accessToken = accessToken.access_token;
-            const j = yield test.generateDid({ namespace: 'testnet' });
-            //console.log(j, 'j');
         });
     }
     /**
@@ -48,12 +46,8 @@ class DID {
             if (!params.namespace) {
                 throw new Error('HID-SSI-SDK:: Error: params.namespace is required to generate new did doc ');
             }
-            console.log(this.accessToken);
-            this.accessToken = "JhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBJZCI6ImQ2N2NkNjEyNTE2NzY0MmEyMjhjNzRjNTcwZGU5YjZjYzQ0OCIsInVzZXJJZCI6InZhcnNoYWt1bWFyaTM3MEBnbWFpbC5jb20iLCJncmFudFR5cGUiOiJjbGllbnRfY3JlZGVudGlhbHMiLCJpYXQiOjE2OTAxMjk2OTgsImV4cCI6MTY5MDE0NDA5OH0.yc7Ly8XKNmevTe8LjQTOoYFuKVDljjzZdwUfzNZXsbo";
             const isAccessTokenValid = yield this.authService.checkAndRefreshAToken({ accessToken: this.accessToken });
-            console.log(isAccessTokenValid);
             if (!isAccessTokenValid.valid) {
-                console.log('inside if');
                 this.accessToken = isAccessTokenValid.accessToken;
             }
             const apiUrl = `${api_constant_1.APIENDPOINT.STUDIO_API_BASE_URL}${api_constant_1.APIENDPOINT.DID.CREATE_DID_ENDPOINT}`;
@@ -68,10 +62,6 @@ class DID {
             };
             const response = yield (0, node_fetch_1.default)(apiUrl, requestOptions);
             const result = yield response.json();
-            // console.log(result);
-            // need to add scenario of checking if token is expired or not
-            // can be done either by directly call in studio-api and then based on error regenerate it
-            // or add jwt package to validate its expiry
             if (!response.ok) {
                 throw new Error(`HID-SSI-SDK:: Error: ${result.message}`);
             }
@@ -126,6 +116,10 @@ class DID {
                     }
                 }
             }
+            const isAccessTokenValid = yield this.authService.checkAndRefreshAToken({ accessToken: this.accessToken });
+            if (!isAccessTokenValid.valid) {
+                this.accessToken = isAccessTokenValid.accessToken;
+            }
             const apiUrl = `${api_constant_1.APIENDPOINT.STUDIO_API_BASE_URL}${api_constant_1.APIENDPOINT.DID.REGISTER_DID_ENDPOINT}`;
             const headers = {
                 'Content-Type': 'application/json',
@@ -154,6 +148,10 @@ class DID {
         return __awaiter(this, void 0, void 0, function* () {
             if (!params.did) {
                 throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
+            }
+            const isAccessTokenValid = yield this.authService.checkAndRefreshAToken({ accessToken: this.accessToken });
+            if (!isAccessTokenValid.valid) {
+                this.accessToken = isAccessTokenValid.accessToken;
             }
             const apiUrl = `${api_constant_1.APIENDPOINT.STUDIO_API_BASE_URL}${api_constant_1.APIENDPOINT.DID.RESOLVE_DID_ENDPOINT}/${params.did}`;
             const headers = {
@@ -218,6 +216,10 @@ class DID {
                     }
                 }
             }
+            const isAccessTokenValid = yield this.authService.checkAndRefreshAToken({ accessToken: this.accessToken });
+            if (!isAccessTokenValid.valid) {
+                this.accessToken = isAccessTokenValid.accessToken;
+            }
             const apiUrl = `${api_constant_1.APIENDPOINT.STUDIO_API_BASE_URL}${api_constant_1.APIENDPOINT.DID.UPDATE_DID_ENDPOINT}`;
             const headers = {
                 'Content-Type': "application/json",
@@ -238,5 +240,3 @@ class DID {
     }
 }
 exports.DID = DID;
-const test = new DID('286d30b3e009714679904dbb16f97.8c2cd0db41a845bae96b3837a5df159fbf0a881b4f31d5a2d5a35a5d42978e95d428dbd8e57c38d973c73c050b409b7c1');
-console.log(test, 'test');

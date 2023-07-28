@@ -42,7 +42,6 @@ class ApiAuth {
         });
     }
     checkAndRefreshAToken(params) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const decodeToken = jsonwebtoken_1.default.decode(params.accessToken, { complete: true });
@@ -50,7 +49,7 @@ class ApiAuth {
                     throw new Error('HID-SSI-SDK:: Error: Token is invalid or malformed');
                 }
                 const currentTime = Math.floor(Date.now() / 1000);
-                if (currentTime >= ((_a = decodeToken.payload) === null || _a === void 0 ? void 0 : _a.exp)) {
+                if (currentTime >= decodeToken.payload.exp) {
                     const { access_token } = yield this.generateAccessToken();
                     return { valid: false, accessToken: access_token };
                 }
