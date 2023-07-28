@@ -31,6 +31,7 @@ export declare const DID_Ed25519VerificationKey2020: {
     METHOD: string;
     NAMESPACE: string;
     DID_BASE_CONTEXT: string;
+    DID_KEYAGREEMENT_CONTEXT: string;
     VERIFICATION_METHOD_TYPE: string;
     BLOCKCHAINACCOUNTID_CONTEXT: string;
 };
@@ -40,6 +41,7 @@ export declare const DID_EcdsaSecp256k1RecoveryMethod2020: {
     METHOD: string;
     NAMESPACE: string;
     DID_BASE_CONTEXT: string;
+    DID_KEYAGREEMENT_CONTEXT: string;
     BLOCKCHAINACCOUNTID_CONTEXT: string;
     VERIFICATION_METHOD_TYPE: string;
 };

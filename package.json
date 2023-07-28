@@ -31,13 +31,13 @@
     "crypto-ld": "^6.0.0",
     "ethereumeip712signature2021suite": "github:hypersign-protocol/EthereumEip712Signature2021Suite.git",
     "jcs": "github:hypersign-protocol/JCS",
-    "jsonld": "^3.1.1",
+    "jsonld": "^8.2.0",
     "jsonld-signatures": "^9.3.1",
     "jsonwebtoken": "^9.0.1",
     "node-fetch": "^2.6.1",
     "protobufjs": "^6.11.2",
     "uuid": "^8.3.0",
-    "vc-js": "github:hypersign-protocol/vc-js",
+    "vc-js": "https://github.com/hypersign-protocol/vc-js",
     "web3": "^1.6.0"
   },
   "devDependencies": {

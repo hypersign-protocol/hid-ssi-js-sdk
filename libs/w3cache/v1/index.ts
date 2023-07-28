@@ -6,8 +6,16 @@ import jsonld from 'jsonld';
 import dataintegrety from './vc-data-integrety.json'
 import ecdsasecp2020 from './lds-ecdsa-secp256k1-recovery2020.json'
 import schema_org from './schema_org.json'
+import x25519VerificationKey2020 from "./x25519-key-agreement-2020-v1.json"
 // Ref: https://github.com/digitalbazaar/jsonld.js/#custom-document-loader
-const nodeDocumentLoader = jsonld.documentLoaders.node();
+
+let nodeDocumentLoader;
+if (typeof window === 'undefined') {
+    nodeDocumentLoader = jsonld.documentLoaders.node();
+}else{
+    nodeDocumentLoader = jsonld.documentLoaders.xhr();
+}
+import wellknown from './did-wellknown.json'
 const CONTEXTS = Object.freeze({
     "https://www.w3.org/ns/did/v1": {
         ...did
@@ -29,9 +37,14 @@ const CONTEXTS = Object.freeze({
     },
     "https://schema.org": {
         ...schema_org
+    },
+    "https://digitalbazaar.github.io/x25519-key-agreement-2020-context/contexts/x25519-key-agreement-2020-v1.jsonld":{
+        ...x25519VerificationKey2020
+    },
+    "https://identity.foundation/.well-known/did-configuration/v1": {
+        ...wellknown
     }
- 
-})
+});
 
 export default async (url, options) => {
     if (url in CONTEXTS) {

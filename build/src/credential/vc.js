@@ -31,7 +31,8 @@ const credential_1 = require("../../libs/generated/ssi/credential");
 const crypto_1 = __importDefault(require("crypto"));
 const v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 const ethereumeip712signature2021suite_1 = require("ethereumeip712signature2021suite");
-const documentLoader = v1_1.default;
+const jsonld_signatures_2 = require("jsonld-signatures");
+const documentLoader = (0, jsonld_signatures_2.extendContextLoader)(v1_1.default);
 class HypersignVerifiableCredential {
     constructor(params = {}) {
         this._checkIfAllRequiredPropsAreSent = (sentAttributes, requiredProps) => {

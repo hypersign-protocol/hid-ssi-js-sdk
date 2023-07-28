@@ -23,8 +23,9 @@ import crypto from 'crypto';
 import customLoader from '../../libs/w3cache/v1';
 import { EthereumEip712Signature2021 } from 'ethereumeip712signature2021suite';
 import { IClientSpec } from '../did/IDID';
+import { extendContextLoader } from 'jsonld-signatures';
 
-const documentLoader = customLoader;
+const documentLoader = extendContextLoader(customLoader);
 
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
   public context: Array<string>;

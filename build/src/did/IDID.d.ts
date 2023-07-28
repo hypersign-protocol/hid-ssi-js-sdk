@@ -3,7 +3,7 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
-import { Did as IDidProto, Metadata, VerificationMethod, Service, SignInfo } from '../../libs/generated/ssi/did';
+import { Did as IDidProto, Metadata, VerificationMethod, Service, SignInfo, Did } from '../../libs/generated/ssi/did';
 export interface IPublicKey {
     '@context': string;
     id: string;
@@ -20,7 +20,9 @@ export declare enum IVerificationRelationships {
 export declare enum IKeyType {
     Ed25519VerificationKey2020 = "Ed25519VerificationKey2020",
     EcdsaSecp256k1VerificationKey2019 = "EcdsaSecp256k1VerificationKey2019",
-    EcdsaSecp256k1RecoveryMethod2020 = "EcdsaSecp256k1RecoveryMethod2020"
+    EcdsaSecp256k1RecoveryMethod2020 = "EcdsaSecp256k1RecoveryMethod2020",
+    X25519KeyAgreementKey2020 = "X25519KeyAgreementKey2020",
+    X25519KeyAgreementKeyEIP5630 = "X25519KeyAgreementKeyEIP5630"
 }
 export declare enum IClientSpec {
     'eth-personalSign' = "eth-personalSign",
@@ -71,8 +73,9 @@ export interface IDID {
     }): Promise<object>;
     register(params: {
         didDocument: object;
-        privateKeyMultibase: string;
-        verificationMethodId: string;
+        privateKeyMultibase?: string;
+        verificationMethodId?: string;
+        signData?: ISignData[];
     }): Promise<object>;
     resolve(params: {
         did: string;
@@ -104,6 +107,15 @@ export interface IDID {
         challenge: string;
         domain?: string;
     }): Promise<object>;
+    addVerificationMethod(params: {
+        did?: string;
+        didDocument?: Did;
+        type: IKeyType;
+        id?: string;
+        controller?: string;
+        publicKeyMultibase?: string;
+        blockchainAccountId?: string;
+    }): Promise<Did>;
 }
 export interface IDIDResolve {
     didDocument: IDidDocument;
@@ -128,6 +140,11 @@ export interface IDidDocument {
     capabilityInvocation: string[];
     capabilityDelegation: string[];
     service: Service[];
+}
+export interface ISignData {
+    verificationMethodId: string;
+    privateKeyMultibase: string;
+    type: IKeyType;
 }
 export {};
 //# sourceMappingURL=IDID.d.ts.map

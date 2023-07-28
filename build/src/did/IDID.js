@@ -19,6 +19,8 @@ var IKeyType;
     IKeyType["Ed25519VerificationKey2020"] = "Ed25519VerificationKey2020";
     IKeyType["EcdsaSecp256k1VerificationKey2019"] = "EcdsaSecp256k1VerificationKey2019";
     IKeyType["EcdsaSecp256k1RecoveryMethod2020"] = "EcdsaSecp256k1RecoveryMethod2020";
+    IKeyType["X25519KeyAgreementKey2020"] = "X25519KeyAgreementKey2020";
+    IKeyType["X25519KeyAgreementKeyEIP5630"] = "X25519KeyAgreementKeyEIP5630";
 })(IKeyType = exports.IKeyType || (exports.IKeyType = {}));
 var IClientSpec;
 (function (IClientSpec) {

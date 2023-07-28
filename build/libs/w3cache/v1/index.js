@@ -20,8 +20,16 @@ const jsonld_1 = __importDefault(require("jsonld"));
 const vc_data_integrety_json_1 = __importDefault(require("./vc-data-integrety.json"));
 const lds_ecdsa_secp256k1_recovery2020_json_1 = __importDefault(require("./lds-ecdsa-secp256k1-recovery2020.json"));
 const schema_org_json_1 = __importDefault(require("./schema_org.json"));
+const x25519_key_agreement_2020_v1_json_1 = __importDefault(require("./x25519-key-agreement-2020-v1.json"));
 // Ref: https://github.com/digitalbazaar/jsonld.js/#custom-document-loader
-const nodeDocumentLoader = jsonld_1.default.documentLoaders.node();
+let nodeDocumentLoader;
+if (typeof window === 'undefined') {
+    nodeDocumentLoader = jsonld_1.default.documentLoaders.node();
+}
+else {
+    nodeDocumentLoader = jsonld_1.default.documentLoaders.xhr();
+}
+const did_wellknown_json_1 = __importDefault(require("./did-wellknown.json"));
 const CONTEXTS = Object.freeze({
     "https://www.w3.org/ns/did/v1": Object.assign({}, did_json_1.default),
     "https://w3id.org/security/suites/ed25519-2020/v1": Object.assign({}, ed25519_signature_2020_json_1.default),
@@ -29,7 +37,9 @@ const CONTEXTS = Object.freeze({
     "https://www.w3.org/2018/credentials/v1": Object.assign({}, credentials_json_1.default),
     "https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld": Object.assign({}, vc_data_integrety_json_1.default),
     "https://w3id.org/security/suites/secp256k1recovery-2020/v2": Object.assign({}, lds_ecdsa_secp256k1_recovery2020_json_1.default),
-    "https://schema.org": Object.assign({}, schema_org_json_1.default)
+    "https://schema.org": Object.assign({}, schema_org_json_1.default),
+    "https://digitalbazaar.github.io/x25519-key-agreement-2020-context/contexts/x25519-key-agreement-2020-v1.jsonld": Object.assign({}, x25519_key_agreement_2020_v1_json_1.default),
+    "https://identity.foundation/.well-known/did-configuration/v1": Object.assign({}, did_wellknown_json_1.default)
 });
 exports.default = (url, options) => __awaiter(void 0, void 0, void 0, function* () {
     if (url in CONTEXTS) {
