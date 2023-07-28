@@ -3,10 +3,10 @@ import { IClientSpec, IDIDResolve } from '../../../did/IDID';
 import { APIENDPOINT } from '../../api-constant';
 import { IAuth, IValidateAccesstokenResp } from '../../apiAuth/IAuth';
 import { ApiAuth } from '../../apiAuth/apiAuth';
-import { IDidApi, IGenerateDid, IRegister, IUpdate } from './IDid';
+import { IDidApiService, IGenerateDid, IRegister, IUpdate } from './IDIDApi';
 import fetch from 'node-fetch';
 
-export default class DidApi implements IDidApi {
+export default class DidApiService implements IDidApiService {
   private authService: IAuth;
   private accessToken;
   constructor(apiKey: string) {
@@ -60,7 +60,7 @@ export default class DidApi implements IDidApi {
     const { metaData } = result;
     return metaData.didDocument;
   }
-/**
+  /**
   * Register a new DID and Document in Hypersign blockchain - an onchain activity
   * @params
   * - params.didDocument                       : LD did document
@@ -93,10 +93,13 @@ export default class DidApi implements IDidApi {
         if (!params.signInfos[i].clientSpec) {
           throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to register a did`);
         }
-        if (!(params.signInfos[i].clientSpec.type in IClientSpec)) {
-          throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
-        }
-        if (params.signInfos[i].clientSpec?.type === IClientSpec['cosmos-ADR036']) {
+        
+        // 
+        // if (!(params.signInfos[i].clientSpec?.type in IClientSpec)) {
+        //   throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
+        // }
+          
+        if (params.signInfos[i].clientSpec?.type === IClientSpec['cosmos-ADR036'] ) {
           if (
             params.signInfos[i].clientSpec?.adr036SignerAddress === '' ||
             params.signInfos[i].clientSpec?.adr036SignerAddress === undefined
@@ -196,9 +199,9 @@ export default class DidApi implements IDidApi {
         if (!params.signInfos[i].clientSpec) {
           throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to update a did`);
         }
-        if (!(params.signInfos[i].clientSpec.type in IClientSpec)) {
-          throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
-        }
+        // if (!(params.signInfos[i].clientSpec.type in IClientSpec)) {
+        //   throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
+        // }
         if (params.signInfos[i].clientSpec?.type === IClientSpec['cosmos-ADR036']) {
           if (
             params.signInfos[i].clientSpec?.adr036SignerAddress === '' ||

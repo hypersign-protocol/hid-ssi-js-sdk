@@ -13,6 +13,9 @@ import { Did, VerificationMethod, Service, SignInfo } from '../../libs/generated
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import Web3 from 'web3';
+import DidApiService from '../ssiApi/services/did/did.service';
+import { IDidApiService, IRegister } from '../ssiApi/services/did/IDIDApi';
+
 import {
   IParams,
   IDID,
@@ -26,11 +29,14 @@ import {
   IClientSpec,
   IVerificationRelationships,
   ISignData,
+  ISignInfo,
 } from './IDID';
 
 import { ClientSpec } from '../../libs/generated/ssi/clientSpec';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import customLoader from '../../libs/w3cache/v1';
+import { DeliverTxResponse } from '../did/IDID';
+
 class DIDDocument implements Did {
   context: string[];
   id: string;
@@ -143,6 +149,7 @@ class DIDDocument implements Did {
 /** Class representing HypersignDID */
 export default class HypersignDID implements IDID {
   private didrpc: IDIDRpc | null;
+  private didAPIService: IDidApiService | null;
   public namespace: string;
 
   /**
@@ -160,9 +167,10 @@ export default class HypersignDID implements IDID {
       offlineSigner?: OfflineSigner;
       nodeRpcEndpoint?: string;
       nodeRestEndpoint?: string;
+      entityApiSecretKey?: string;
     } = {}
   ) {
-    const { offlineSigner, namespace, nodeRpcEndpoint, nodeRestEndpoint } = params;
+    const { offlineSigner, namespace, nodeRpcEndpoint, nodeRestEndpoint, entityApiSecretKey } = params;
     const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
     const rpcConstructorParams = {
@@ -172,6 +180,11 @@ export default class HypersignDID implements IDID {
     };
     this.didrpc = new DIDRpc(rpcConstructorParams);
     this.namespace = namespace ? namespace : '';
+    if (entityApiSecretKey && entityApiSecretKey != '') {
+      this.didAPIService = new DidApiService(entityApiSecretKey);
+    } else {
+      this.didAPIService = null;
+    }
   }
 
   private async _sign(params: { didDocString: string; privateKeyMultibase: string }): Promise<string> {
@@ -329,18 +342,19 @@ export default class HypersignDID implements IDID {
    * @returns {Promise<object>} Result of the registration
    */
   public async register(params: {
-    didDocument: object; // Ld document
+    didDocument: Did; // Ld document
     privateKeyMultibase?: string;
     verificationMethodId?: string;
     signData?: ISignData[];
-  }): Promise<object> {
+  }): Promise<{ didDocument: Did; transactionHash: string }> {
+    const response = {} as { didDocument: Did; transactionHash: string };
     // TODO:  this method MUST also accept signature/proof
     if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
     }
-    if (!this.didrpc) {
+    if (!this.didrpc && !this.didAPIService) {
       throw new Error(
-        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+        'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"'
       );
     }
     const { didDocument } = params;
@@ -396,7 +410,22 @@ export default class HypersignDID implements IDID {
         }
       }
     }
-    return await this.didrpc.registerDID(didDoc, signInfos);
+
+    if (this.didrpc) {
+      const result: DeliverTxResponse = await this.didrpc.registerDID(didDoc, signInfos);
+      response.didDocument = params.didDocument;
+      response.transactionHash = result.transactionHash;
+    } else if (this.didAPIService) {
+      const newSignInfos = signInfos as Array<ISignInfo>;
+      const result: { didDocument: Did; transactionHash: string } = await this.didAPIService.registerDid({
+        didDocument,
+        verificationMethodId: params.verificationMethodId,
+        signInfos: newSignInfos,
+      });
+      response.didDocument = didDocument;
+      response.transactionHash = result.transactionHash;
+    }
+    return response;
   }
 
   /**

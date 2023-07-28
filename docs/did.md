@@ -526,7 +526,7 @@ Registers a DID and DIDDocument on blockchain
 
 ```js
 register(params: {
-  didDocument: object;
+  didDocument: Did;
   privateKeyMultibase: string;
   verificationMethodId: string
 }): Promise<object>;

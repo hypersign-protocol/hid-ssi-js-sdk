@@ -3,44 +3,42 @@ import HypersignVerifiableCredential from './credential/vc';
 import HypersignVerifiablePresentation from './presentation/vp';
 import HypersignSchema from './schema/schema';
 import { OfflineSigner } from '@cosmjs/proto-signing';
-import  DidApi  from './ssiApi/services/did/did.service';
 
 class HypersignSSISdk {
   did: HypersignDID;
   vc: HypersignVerifiableCredential;
   vp: HypersignVerifiablePresentation;
   schema: HypersignSchema;
-  didApi: DidApi;
   private namespace: string;
   private signer: OfflineSigner;
   private nodeRpcEndpoint: string; // http://localhost:26657 | 'TEST' | 'MAIN'
   private nodeRestEndpoint: string; // "" | http://localhost:1317
-  private apiKey: string;
+  private entityApiSecretKey: string;
   constructor(params: {
     offlineSigner: OfflineSigner;
     nodeRpcEndpoint?: string;
     nodeRestEndpoint?: string;
     namespace?: string;
-    apiKey?: string;
+    entityApiSecretKey?: string;
   }) {
-    const { offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, namespace, apiKey } = params;
+    const { offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, namespace, entityApiSecretKey } = params;
     this.signer = offlineSigner;
     this.nodeRpcEndpoint = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
     this.nodeRestEndpoint = nodeRestEndpoint ? nodeRestEndpoint : '';
     this.namespace = namespace ? namespace : '';
-    this.apiKey = apiKey ? apiKey : '';
+    this.entityApiSecretKey = entityApiSecretKey? entityApiSecretKey : '';
     const constructorParams = {
       offlineSigner: this.signer,
       nodeRpcEndpoint: this.nodeRpcEndpoint,
       nodeRestEndpoint: this.nodeRestEndpoint,
       namespace: this.namespace,
+      entityApiSecretKey: this.entityApiSecretKey
     };
 
     this.did = new HypersignDID(constructorParams);
     this.schema = new HypersignSchema(constructorParams);
     this.vc = new HypersignVerifiableCredential(constructorParams);
     this.vp = new HypersignVerifiablePresentation(constructorParams);
-    this.didApi = new DidApi(this.apiKey);
   }
 
   async init() {
@@ -53,7 +51,6 @@ class HypersignSSISdk {
 export {
   HypersignSSISdk,
   HypersignDID,
-  DidApi,
   HypersignSchema,
   HypersignVerifiableCredential,
   HypersignVerifiablePresentation,
