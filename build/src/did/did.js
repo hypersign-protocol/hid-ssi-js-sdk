@@ -198,7 +198,7 @@ class HypersignDID {
      **/
     signDid(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return this._sign(params);
+            return yield this._sign(params);
         });
     }
     _filterVerificationRelationships(verificationRelationships) {

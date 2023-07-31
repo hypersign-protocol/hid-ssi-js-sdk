@@ -196,7 +196,7 @@ export default class HypersignDID implements IDID {
    * @returns string
    **/
   public async signDid(params: { didDocString: string; privateKeyMultibase: string }): Promise<string> {
-    return this._sign(params);
+    return await this._sign(params);
   }
 
   private _getId = (methodSpecificId: string) => {
