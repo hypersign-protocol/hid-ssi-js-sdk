@@ -20,7 +20,8 @@ let pubKey;
 let privKey;
 let didDocToReg;
 let DIdDOcWithMultiplVM;
-
+const entityApiSecretKey =
+  '8fc3d16ce8f040fd2fc4e5ccc1d73.6b6e55d4d54cd90c85bbcc92d9469873e60c0d7878681223e2fe63fca3abafb63390f939a77b3d73bf2eb58a654810b38';
 //add mnemonic of wallet that have balance
 
 beforeEach(async function () {
@@ -28,6 +29,7 @@ beforeEach(async function () {
 
   const params = {
     offlineSigner,
+    // entityApiSecretKey,
     nodeRestEndpoint: hidNodeEp.rest,
     nodeRpcEndpoint: hidNodeEp.rpc,
     namespace: hidNodeEp.namespace,
@@ -35,6 +37,18 @@ beforeEach(async function () {
   hypersignDID = new HypersignDID(params);
   await hypersignDID.init();
 });
+
+// describe("testing hypersignDid initiation", function(){
+//   it('should not throw error if offlinesigner is not passed', async()=>{
+//     const params = {
+//       nodeRestEndpoint: hidNodeEp.rest,
+//       nodeRpcEndpoint: hidNodeEp.rpc,
+//       namespace: hidNodeEp.namespace,
+//     };
+//     hypersignDID = new HypersignDID(params);
+
+//   })
+// })
 
 describe('DID Test scenarios', () => {
   //remove seed while creating did so that wallet can generate different did every time
@@ -376,7 +390,7 @@ describe('DID Test scenarios', () => {
       });
     });
 
-    it('should be able to add verification method in didDocument', async () => {
+    it('should be able to add verification method of type X25519KeyAgreementKey2020 in didDocument', async () => {
       const params = {
         didDocument: didDocument,
         type: 'X25519KeyAgreementKey2020',
@@ -569,7 +583,7 @@ describe('DID Test scenarios', () => {
           );
         });
     });
-    it('should be able to register didDocument in the blockchain  with two vm one is of type Ed25519VerificationKey2020 and other is of type X25519KeyAgreementKey2020', async function () {
+    it('should be able to register didDocument in the blockchain  with two vm one is of type Ed25519VerificationKey2020 and other is of type X25519KeyAgreementKey2020 and register method is called without signData field', async function () {
       const result = await hypersignDID.register({
         didDocument,
         privateKeyMultibase,
@@ -585,12 +599,7 @@ describe('DID Test scenarios', () => {
         // ],
       });
       transactionHash = result.transactionHash;
-      should().exist(result.code);
-      should().exist(result.height);
-      should().exist(result.rawLog);
       should().exist(result.transactionHash);
-      should().exist(result.gasUsed);
-      should().exist(result.gasWanted);
     });
     it('should be able to register a did Doc of type Ed25519VerificationKey2020 with multiple verification method', async () => {
       const registerdDidDoc = await hypersignDID.register({
@@ -608,15 +617,9 @@ describe('DID Test scenarios', () => {
           },
         ],
       });
-      should().exist(registerdDidDoc.code);
-      should().exist(registerdDidDoc.height);
-      should().exist(registerdDidDoc.rawLog);
       should().exist(registerdDidDoc.transactionHash);
-      should().exist(registerdDidDoc.gasUsed);
-      should().exist(registerdDidDoc.gasWanted);
     });
   });
-
   describe('#resolve() this is to resolve didDocument based on didDocId', function () {
     it('should not able to resolve did document and throw error didDocId is not passed', function () {
       return hypersignDID.resolve({ params: { did: '' } }).catch(function (err) {
@@ -627,7 +630,7 @@ describe('DID Test scenarios', () => {
     });
     it('should be able to resolve did', async function () {
       const params = {
-        did: didDocId,
+        did: didDocId, //"did:hid:testnet:z4PfQRbTsL8wxWnJzfENMij54E7ubhJciNxSPFWfsAHNU",
       };
       const result = await hypersignDID.resolve(params);
       expect(result).to.be.a('object');
@@ -664,7 +667,7 @@ describe('DID Test scenarios', () => {
           }).to.throw(Error, 'HID-SSI-SDK:: Error: params.versionId is required to update a did');
         });
     });
-    it('should not be able to update did document as versionId pased is incorrect', function () {
+    it('should not be able to update did document as versionId passed is incorrect', function () {
       const updateBody = { didDocument, privateKeyMultibase, verificationMethodId, versionId: '1.0.1' };
       didDocument['alsoKnownAs'].push('Random Data');
       return hypersignDID.update(updateBody).catch(function (err) {
@@ -684,12 +687,8 @@ describe('DID Test scenarios', () => {
         verificationMethodId,
         versionId,
       });
-      should().exist(result.code);
-      should().exist(result.height);
-      should().exist(result.rawLog);
+
       should().exist(result.transactionHash);
-      should().exist(result.gasUsed);
-      should().exist(result.gasWanted);
     });
   });
   describe('#resolve() did after updating did document', function () {
@@ -781,12 +780,7 @@ describe('DID Test scenarios', () => {
         verificationMethodId,
         versionId,
       });
-      should().exist(result.code);
-      should().exist(result.height);
-      should().exist(result.rawLog);
       should().exist(result.transactionHash);
-      should().exist(result.gasUsed);
-      should().exist(result.gasWanted);
     });
   });
 

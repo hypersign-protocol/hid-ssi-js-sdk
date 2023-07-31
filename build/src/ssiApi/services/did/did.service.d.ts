@@ -1,11 +1,11 @@
 import { Did } from '../../../../libs/generated/ssi/did';
 import { IDIDResolve } from '../../../did/IDID';
-import { IDidApi, IGenerateDid, IRegister, IUpdate } from './IDid';
-export default class DidApi implements IDidApi {
+import { IDidApiService, IGenerateDid, IRegister, IUpdate } from './IDIDApi';
+export default class DidApiService implements IDidApiService {
     private authService;
     private accessToken;
     constructor(apiKey: string);
-    private initAccessToken;
+    auth(): Promise<void>;
     /**
      * Create a new DID Document from api
      * @param
@@ -21,16 +21,16 @@ export default class DidApi implements IDidApi {
      */
     generateDid(params: IGenerateDid): Promise<Did>;
     /**
-      * Register a new DID and Document in Hypersign blockchain - an onchain activity
-      * @params
-      * - params.didDocument                       : LD did document
-      * - params.verificationMethodId              : VerificationMethodId of the document
-      * - params.signInfos[]                       : Optional, signInfos array of verificationId, signature and clientSpec
-      * - params.signInfos.verification_method_id  : VerificationMethodId of the document
-      * - params.signInfos.signature               : Signature for clientSpec
-      * - params.signInfos.clientSpec              : ClientSpec
-      * @return {Promise<didDocument:Did, transactionHash: string>}
-      */
+    * Register a new DID and Document in Hypersign blockchain - an onchain activity
+    * @params
+    * - params.didDocument                       : LD did document
+    * - params.verificationMethodId              : VerificationMethodId of the document
+    * - params.signInfos[]                       : Optional, signInfos array of verificationId, signature and clientSpec
+    * - params.signInfos.verification_method_id  : VerificationMethodId of the document
+    * - params.signInfos.signature               : Signature for clientSpec
+    * - params.signInfos.clientSpec              : ClientSpec
+    * @return {Promise<didDocument:Did, transactionHash: string>}
+    */
     registerDid(params: IRegister): Promise<{
         didDocument: Did;
         transactionHash: string;

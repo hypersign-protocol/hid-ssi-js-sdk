@@ -63,7 +63,7 @@ export class DIDRpc implements IDIDRpc {
     return txResult;
   }
 
-  async updateDID(didDoc: IDidProto, signInfos: SignInfo[], versionId: string): Promise<object> {
+  async updateDID(didDoc: IDidProto, signInfos: SignInfo[], versionId: string): Promise<DeliverTxResponse> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
@@ -88,7 +88,7 @@ export class DIDRpc implements IDIDRpc {
     return txResult;
   }
 
-  async deactivateDID(did: string, signInfos: SignInfo[], versionId: string): Promise<object> {
+  async deactivateDID(did: string, signInfos: SignInfo[], versionId: string): Promise<DeliverTxResponse> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }

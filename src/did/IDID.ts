@@ -167,8 +167,8 @@ export interface DeliverTxResponse {
 
 export interface IDIDRpc {
   registerDID(didDoc: IDidProto, signInfos: SignInfo[]): Promise<DeliverTxResponse>;
-  updateDID(didDoc: IDidProto | any, signInfos: SignInfo[], versionId: string): Promise<object>;
-  deactivateDID(did: string, signInfos: SignInfo[], versionId: string): Promise<object>;
+  updateDID(didDoc: IDidProto | any, signInfos: SignInfo[], versionId: string): Promise<DeliverTxResponse>;
+  deactivateDID(did: string, signInfos: SignInfo[], versionId: string): Promise<DeliverTxResponse>;
   resolveDID(did: string): Promise<IDIDResolve>;
   init(): Promise<void>;
 }

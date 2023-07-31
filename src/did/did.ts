@@ -173,12 +173,17 @@ export default class HypersignDID implements IDID {
     const { offlineSigner, namespace, nodeRpcEndpoint, nodeRestEndpoint, entityApiSecretKey } = params;
     const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
-    const rpcConstructorParams = {
-      offlineSigner,
-      nodeRpcEndpoint: nodeRPCEp,
-      nodeRestEndpoint: nodeRestEp,
-    };
-    this.didrpc = new DIDRpc(rpcConstructorParams);
+
+    if (offlineSigner) {
+      const rpcConstructorParams = {
+        offlineSigner,
+        nodeRpcEndpoint: nodeRPCEp,
+        nodeRestEndpoint: nodeRestEp,
+      };
+      this.didrpc = new DIDRpc(rpcConstructorParams);
+    } else {
+      this.didrpc = null;
+    }
     this.namespace = namespace ? namespace : '';
     if (entityApiSecretKey && entityApiSecretKey != '') {
       this.didAPIService = new DidApiService(entityApiSecretKey);
@@ -250,12 +255,17 @@ export default class HypersignDID implements IDID {
   }
 
   public async init() {
-    if (!this.didrpc) {
+    if (!this.didrpc && !this.didAPIService) {
       throw new Error(
-        'HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+        'HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized with entityApiSecretKey'
       );
     }
-    await this.didrpc.init();
+    if (this.didrpc) {
+      await this.didrpc.init();
+    }
+    if (this.didAPIService) {
+      await this.didAPIService.auth();
+    }
   }
 
   /**
@@ -410,7 +420,6 @@ export default class HypersignDID implements IDID {
         }
       }
     }
-
     if (this.didrpc) {
       const result: DeliverTxResponse = await this.didrpc.registerDID(didDoc, signInfos);
       response.didDocument = params.didDocument;
@@ -436,29 +445,33 @@ export default class HypersignDID implements IDID {
    * @returns  {Promise<IDIDResolve>} didDocument and didDocumentMetadata
    */
   public async resolve(params: { did: string; ed25519verificationkey2020?: boolean }): Promise<IDIDResolve> {
+    let result = {} as IDIDResolve;
     if (!params.did) {
       throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
     }
 
-    if (!this.didrpc) {
+    if (!this.didrpc && !this.didAPIService) {
       throw new Error(
-        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+        'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"'
       );
     }
-
-    const result = await this.didrpc.resolveDID(params.did);
-    if (params.ed25519verificationkey2020) {
-      const didDoc: IDidDocument = result.didDocument as IDidDocument;
-      const verificationMethods = didDoc.verificationMethod;
-      verificationMethods.forEach((verificationMethod) => {
-        if (verificationMethod.type === constant.DID.VERIFICATION_METHOD_TYPE) {
-          const ed25519PublicKey = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
-            publicKey: verificationMethod.publicKeyMultibase,
-          });
-          verificationMethod.publicKeyMultibase = ed25519PublicKey.publicKeyMultibase;
-        }
-      });
-      didDoc.verificationMethod = verificationMethods;
+    if (this.didrpc) {
+      result = await this.didrpc.resolveDID(params.did);
+      if (params.ed25519verificationkey2020) {
+        const didDoc: IDidDocument = result.didDocument as IDidDocument;
+        const verificationMethods = didDoc.verificationMethod;
+        verificationMethods.forEach((verificationMethod) => {
+          if (verificationMethod.type === constant.DID.VERIFICATION_METHOD_TYPE) {
+            const ed25519PublicKey = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
+              publicKey: verificationMethod.publicKeyMultibase,
+            });
+            verificationMethod.publicKeyMultibase = ed25519PublicKey.publicKeyMultibase;
+          }
+        });
+        didDoc.verificationMethod = verificationMethods;
+      }
+    } else if (this.didAPIService) {
+      result = await this.didAPIService.resolveDid({ did: params.did });
     }
     return {
       didDocument: Utils.jsonToLdConvertor(result.didDocument),
@@ -476,11 +489,13 @@ export default class HypersignDID implements IDID {
    * @returns {Promise<object>} Result of the update operation
    */
   public async update(params: {
-    didDocument: object;
+    didDocument: Did;
     privateKeyMultibase: string;
     verificationMethodId: string;
     versionId: string;
-  }): Promise<object> {
+  }): Promise<{ transactionHash: string }> {
+    const response = {} as { transactionHash: string };
+
     if (!params.didDocument) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to update a did');
     }
@@ -495,9 +510,9 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
     }
 
-    if (!this.didrpc) {
+    if (!this.didrpc && this.didAPIService) {
       throw new Error(
-        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+        'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"'
       );
     }
 
@@ -512,7 +527,19 @@ export default class HypersignDID implements IDID {
         clientSpec: undefined,
       },
     ];
-    return await this.didrpc.updateDID(didDoc, signInfos, versionId);
+    if (this.didrpc) {
+      const result: DeliverTxResponse = await this.didrpc.updateDID(didDoc, signInfos, versionId);
+      response.transactionHash = result.transactionHash;
+    } else if (this.didAPIService) {
+      const newSignInfos = signInfos as Array<ISignInfo>;
+      const result = await this.didAPIService.updateDid({
+        didDocument: didDoc as Did,
+        signInfos: newSignInfos,
+        deactivate: false,
+      });
+      response.transactionHash = result.transactionHash;
+    }
+    return response;
   }
 
   /**
@@ -525,11 +552,13 @@ export default class HypersignDID implements IDID {
    * @returns {Promise<object>} Result of the deactivatee operation
    */
   public async deactivate(params: {
-    didDocument: object;
+    didDocument: Did;
     privateKeyMultibase: string;
     verificationMethodId: string;
     versionId: string;
-  }): Promise<object> {
+  }): Promise<{ transactionHash: string }> {
+    const response = {} as { transactionHash: string };
+
     if (!params.didDocument) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to deactivate a did');
     }
@@ -544,9 +573,9 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
     }
 
-    if (!this.didrpc) {
+    if (!this.didrpc && !this.didAPIService) {
       throw new Error(
-        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+        'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"'
       );
     }
 
@@ -561,7 +590,19 @@ export default class HypersignDID implements IDID {
         clientSpec: undefined,
       },
     ];
-    return await this.didrpc.deactivateDID(didDoc.id, signInfos, versionId);
+    if (this.didrpc) {
+      const result: DeliverTxResponse = await this.didrpc.deactivateDID(didDoc.id, signInfos, versionId);
+      response.transactionHash = result.transactionHash;
+    } else if (this.didAPIService) {
+      const newSignInfos = signInfos as Array<ISignInfo>;
+      const result: { transactionHash: string } = await this.didAPIService.updateDid({
+        didDocument: didDocument as Did,
+        signInfos: newSignInfos,
+        deactivate: true,
+      });
+      response.transactionHash = result.transactionHash;
+    }
+    return response;
   }
 
   /**
@@ -824,13 +865,14 @@ export default class HypersignDID implements IDID {
     didDocument: object; // Ld document
     signInfos: SignInfo[];
   }) {
+    const response = {} as { didDocument: Did; transactionHash: string };
     if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
     }
 
-    if (!this.didrpc) {
+    if (!this.didrpc && !this.didAPIService) {
       throw new Error(
-        'HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+        'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"'
       );
     }
     if (!params.signInfos) {
@@ -874,18 +916,33 @@ export default class HypersignDID implements IDID {
     const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
 
     const didDoc: Did = didDocStringJson as Did;
-    return await this.didrpc.registerDID(didDoc, params.signInfos);
+    const { signInfos } = params;
+    if (this.didrpc) {
+      const result: DeliverTxResponse = await this.didrpc.registerDID(didDoc, signInfos);
+      response.didDocument = didDoc;
+      response.transactionHash = result.transactionHash;
+    } else if (this.didAPIService) {
+      const newSignInfos = signInfos as Array<ISignInfo>;
+      const result: { didDocument: Did; transactionHash: string } = await this.didAPIService.registerDid({
+        didDocument: didDoc,
+        signInfos: newSignInfos,
+      });
+      response.didDocument = didDoc;
+      response.transactionHash = result.transactionHash;
+    }
+    return response;
   }
 
   // using in API
   public async updateByClientSpec(params: {
-    didDocument: object;
+    didDocument: Did;
     versionId: string;
     signInfos: SignInfo[];
-  }): Promise<object> {
-    if (!this.didrpc) {
+  }): Promise<{ transactionHash: string }> {
+    const response = {} as { transactionHash: string };
+    if (!this.didrpc && !this.didAPIService) {
       throw new Error(
-        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+        'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"'
       );
     }
     if (!params.didDocument) {
@@ -928,18 +985,32 @@ export default class HypersignDID implements IDID {
     }
 
     const { didDocument, signInfos, versionId } = params;
-    return await this.didrpc.updateDID(didDocument as Did, signInfos, versionId);
+    if (this.didrpc) {
+      const result: DeliverTxResponse = await this.didrpc.updateDID(didDocument as Did, signInfos, versionId);
+      response.transactionHash = result.transactionHash;
+    } else if (this.didAPIService) {
+      const newSignInfos = signInfos as Array<ISignInfo>;
+      const result: { transactionHash: string } = await this.didAPIService.updateDid({
+        didDocument: didDocument as Did,
+        signInfos: newSignInfos,
+        deactivate: false,
+      });
+      response.transactionHash = result.transactionHash;
+    }
+    return response;
   }
 
   // using in API
   public async deactivateByClientSpec(params: {
-    didDocument: object;
+    didDocument: Did;
     signInfos: SignInfo[];
     versionId: string;
-  }): Promise<object> {
-    if (!this.didrpc) {
+  }): Promise<{ transactionHash: string }> {
+    const response = {} as { transactionHash: string };
+
+    if (!this.didrpc && !this.didAPIService) {
       throw new Error(
-        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized'
+        'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"'
       );
     }
     if (!params.didDocument) {
@@ -990,7 +1061,19 @@ export default class HypersignDID implements IDID {
     // }
     const { didDocument, signInfos, versionId } = params;
     const didDoc: Did = didDocument as Did;
-    return await this.didrpc.deactivateDID(didDoc.id, signInfos, versionId);
+    if (this.didrpc) {
+      const result: DeliverTxResponse = await this.didrpc.deactivateDID(didDoc.id, signInfos, versionId);
+      response.transactionHash = result.transactionHash;
+    } else if (this.didAPIService) {
+      const newSignInfos = signInfos as Array<ISignInfo>;
+      const result: { transactionHash: string } = await this.didAPIService.updateDid({
+        didDocument: didDocument as Did,
+        signInfos: newSignInfos,
+        deactivate: true,
+      });
+      response.transactionHash = result.transactionHash;
+    }
+    return response;
   }
 
   public async signAndRegisterByClientSpec(params: {

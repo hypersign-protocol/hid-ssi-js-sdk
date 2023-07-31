@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HypersignVerifiablePresentation = exports.HypersignVerifiableCredential = exports.HypersignSchema = exports.DidApi = exports.HypersignDID = exports.HypersignSSISdk = void 0;
+exports.HypersignVerifiablePresentation = exports.HypersignVerifiableCredential = exports.HypersignSchema = exports.HypersignDID = exports.HypersignSSISdk = void 0;
 const did_1 = __importDefault(require("./did/did"));
 exports.HypersignDID = did_1.default;
 const vc_1 = __importDefault(require("./credential/vc"));
@@ -21,27 +21,25 @@ const vp_1 = __importDefault(require("./presentation/vp"));
 exports.HypersignVerifiablePresentation = vp_1.default;
 const schema_1 = __importDefault(require("./schema/schema"));
 exports.HypersignSchema = schema_1.default;
-const did_service_1 = __importDefault(require("./ssiApi/services/did/did.service"));
-exports.DidApi = did_service_1.default;
 class HypersignSSISdk {
     constructor(params) {
-        const { offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, namespace, apiKey } = params;
+        const { offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, namespace, entityApiSecretKey } = params;
         this.signer = offlineSigner;
         this.nodeRpcEndpoint = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
         this.nodeRestEndpoint = nodeRestEndpoint ? nodeRestEndpoint : '';
         this.namespace = namespace ? namespace : '';
-        this.apiKey = apiKey ? apiKey : '';
+        this.entityApiSecretKey = entityApiSecretKey ? entityApiSecretKey : '';
         const constructorParams = {
             offlineSigner: this.signer,
             nodeRpcEndpoint: this.nodeRpcEndpoint,
             nodeRestEndpoint: this.nodeRestEndpoint,
             namespace: this.namespace,
+            entityApiSecretKey: this.entityApiSecretKey
         };
         this.did = new did_1.default(constructorParams);
         this.schema = new schema_1.default(constructorParams);
         this.vc = new vc_1.default(constructorParams);
         this.vp = new vp_1.default(constructorParams);
-        this.didApi = new did_service_1.default(this.apiKey);
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {

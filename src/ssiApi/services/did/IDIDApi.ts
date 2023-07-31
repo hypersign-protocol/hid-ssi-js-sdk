@@ -26,6 +26,7 @@ export interface IUpdate extends IRegister{
 
 
 export interface IDidApiService{
+    auth():void,
     generateDid(params:IGenerateDid):Promise<Did>  
     registerDid(params:IRegister):Promise<{ didDocument: Did; transactionHash: string }>
     resolveDid(params:{did:string}):Promise<IDIDResolve>

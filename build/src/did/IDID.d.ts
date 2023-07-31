@@ -3,7 +3,8 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
-import { Did as IDidProto, Metadata, VerificationMethod, Service, SignInfo, Did } from '../../libs/generated/ssi/did';
+import { Did as IDidProto, Metadata, VerificationMethod, Service, Did, SignInfo } from '../../libs/generated/ssi/did';
+import { ClientSpec } from '../../libs/generated/ssi/clientSpec';
 export interface IPublicKey {
     '@context': string;
     id: string;
@@ -27,6 +28,15 @@ export declare enum IKeyType {
 export declare enum IClientSpec {
     'eth-personalSign' = "eth-personalSign",
     'cosmos-ADR036' = "cosmos-ADR036"
+}
+export interface ExtendedClientSpec extends ClientSpec {
+    type: IClientSpec;
+    adr036SignerAddress: string;
+}
+export interface ISignInfo {
+    verification_method_id: string;
+    signature: string;
+    clientSpec?: ExtendedClientSpec | undefined;
 }
 export interface IController {
     '@context': string;
@@ -121,10 +131,24 @@ export interface IDIDResolve {
     didDocument: IDidDocument;
     didDocumentMetadata: Metadata;
 }
+export interface MsgData {
+    msgType: string;
+    data: Uint8Array;
+}
+export interface DeliverTxResponse {
+    readonly height: number;
+    /** Error code. The transaction suceeded iff code is 0. */
+    readonly code: number;
+    readonly transactionHash: string;
+    readonly rawLog?: string;
+    readonly data?: readonly MsgData[];
+    readonly gasUsed: number;
+    readonly gasWanted: number;
+}
 export interface IDIDRpc {
-    registerDID(didDoc: IDidProto, signInfos: SignInfo[]): Promise<object>;
-    updateDID(didDoc: IDidProto | any, signInfos: SignInfo[], versionId: string): Promise<object>;
-    deactivateDID(did: string, signInfos: SignInfo[], versionId: string): Promise<object>;
+    registerDID(didDoc: IDidProto, signInfos: SignInfo[]): Promise<DeliverTxResponse>;
+    updateDID(didDoc: IDidProto | any, signInfos: SignInfo[], versionId: string): Promise<DeliverTxResponse>;
+    deactivateDID(did: string, signInfos: SignInfo[], versionId: string): Promise<DeliverTxResponse>;
     resolveDID(did: string): Promise<IDIDResolve>;
     init(): Promise<void>;
 }

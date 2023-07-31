@@ -5,6 +5,7 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 /** Class representing HypersignDID */
 export default class HypersignDID implements IDID {
     private didrpc;
+    private didAPIService;
     namespace: string;
     /**
      * Creates instance of HypersignDID class
@@ -20,6 +21,7 @@ export default class HypersignDID implements IDID {
         offlineSigner?: OfflineSigner;
         nodeRpcEndpoint?: string;
         nodeRestEndpoint?: string;
+        entityApiSecretKey?: string;
     });
     private _sign;
     private _getId;
@@ -68,11 +70,14 @@ export default class HypersignDID implements IDID {
      * @returns {Promise<object>} Result of the registration
      */
     register(params: {
-        didDocument: object;
+        didDocument: Did;
         privateKeyMultibase?: string;
         verificationMethodId?: string;
         signData?: ISignData[];
-    }): Promise<object>;
+    }): Promise<{
+        didDocument: Did;
+        transactionHash: string;
+    }>;
     /**
      * Resolves a DID into DIDDocument from Hypersign blockchain - an onchain activity
      * @params
@@ -94,11 +99,13 @@ export default class HypersignDID implements IDID {
      * @returns {Promise<object>} Result of the update operation
      */
     update(params: {
-        didDocument: object;
+        didDocument: Did;
         privateKeyMultibase: string;
         verificationMethodId: string;
         versionId: string;
-    }): Promise<object>;
+    }): Promise<{
+        transactionHash: string;
+    }>;
     /**
      * Deactivate a DIDDocument in Hypersign blockchain - an onchain activity
      * @params
@@ -109,11 +116,13 @@ export default class HypersignDID implements IDID {
      * @returns {Promise<object>} Result of the deactivatee operation
      */
     deactivate(params: {
-        didDocument: object;
+        didDocument: Did;
         privateKeyMultibase: string;
         verificationMethodId: string;
         versionId: string;
-    }): Promise<object>;
+    }): Promise<{
+        transactionHash: string;
+    }>;
     /**
      * Signs a DIDDocument
      * @params
@@ -161,17 +170,24 @@ export default class HypersignDID implements IDID {
     registerByClientSpec(params: {
         didDocument: object;
         signInfos: SignInfo[];
-    }): Promise<object>;
+    }): Promise<{
+        didDocument: Did;
+        transactionHash: string;
+    }>;
     updateByClientSpec(params: {
-        didDocument: object;
+        didDocument: Did;
         versionId: string;
         signInfos: SignInfo[];
-    }): Promise<object>;
+    }): Promise<{
+        transactionHash: string;
+    }>;
     deactivateByClientSpec(params: {
-        didDocument: object;
+        didDocument: Did;
         signInfos: SignInfo[];
         versionId: string;
-    }): Promise<object>;
+    }): Promise<{
+        transactionHash: string;
+    }>;
     signAndRegisterByClientSpec(params: {
         didDocument: any;
         address: string;
@@ -179,7 +195,10 @@ export default class HypersignDID implements IDID {
         web3: Web3 | any;
         clientSpec: IClientSpec;
         chainId?: string;
-    }): Promise<object>;
+    }): Promise<{
+        didDocument: Did;
+        transactionHash: string;
+    }>;
     signByClientSpec(params: {
         didDocument: object;
         clientSpec: IClientSpec;

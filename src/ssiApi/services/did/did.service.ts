@@ -1,4 +1,4 @@
-import { Did } from '../../../../libs/generated/ssi/did';
+import { Did, SignInfo } from '../../../../libs/generated/ssi/did';
 import { IClientSpec, IDIDResolve } from '../../../did/IDID';
 import { APIENDPOINT } from '../../api-constant';
 import { IAuth, IValidateAccesstokenResp } from '../../apiAuth/IAuth';
@@ -14,10 +14,9 @@ export default class DidApiService implements IDidApiService {
       throw new Error('HID-SSI_SDK:: Error: Please Provide apiKey');
     } 
     this.authService = new ApiAuth(apiKey);
-    this.initAccessToken();
   }
 
-  private async initAccessToken() {
+  public async auth() {
     const accessToken = await this.authService.generateAccessToken();
     this.accessToken = accessToken.access_token;
   }
@@ -46,6 +45,7 @@ export default class DidApiService implements IDidApiService {
     const headers = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${this.accessToken}`,
+      origin:`${APIENDPOINT.STUDIO_API_ORIGIN}`
     };
     const requestOptions = {
       method: 'POST',
@@ -90,15 +90,13 @@ export default class DidApiService implements IDidApiService {
             `HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`
           );
         }
-        if (!params.signInfos[i].clientSpec) {
-          throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to register a did`);
-        }
-        
-        // 
-        // if (!(params.signInfos[i].clientSpec?.type in IClientSpec)) {
-        //   throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
+        // if (!params.signInfos[i].clientSpec) {
+        //   throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to register a did`);
         // }
-          
+
+         // if (params.signInfos[i].clientSpec && !(params.signInfos[i].clientSpec.type in IClientSpec)) {
+        //   throw new Error('HID-SSI-SDK:: Error: params.clientSpec is invalid');
+        // }          
         if (params.signInfos[i].clientSpec?.type === IClientSpec['cosmos-ADR036'] ) {
           if (
             params.signInfos[i].clientSpec?.adr036SignerAddress === '' ||
@@ -123,6 +121,7 @@ export default class DidApiService implements IDidApiService {
     const headers = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${this.accessToken}`,
+      origin:`${APIENDPOINT.STUDIO_API_ORIGIN}`
     };
     const requestOptions = {
       method: 'POST',
@@ -153,6 +152,7 @@ export default class DidApiService implements IDidApiService {
     const apiUrl = `${APIENDPOINT.STUDIO_API_BASE_URL}${APIENDPOINT.DID.RESOLVE_DID_ENDPOINT}/${params.did}`;
     const headers = {
       Authorization: `Bearer ${this.accessToken}`,
+      origin:`${APIENDPOINT.STUDIO_API_ORIGIN}`
     };
     const requestOptions = {
       method: 'GET',
@@ -225,10 +225,11 @@ export default class DidApiService implements IDidApiService {
     const apiUrl= `${APIENDPOINT.STUDIO_API_BASE_URL}${APIENDPOINT.DID.UPDATE_DID_ENDPOINT}`
     const headers={
       'Content-Type':"application/json",
-      Authorization:`Bearer ${this.accessToken}`
+      Authorization:`Bearer ${this.accessToken}`,
+      origin:`${APIENDPOINT.STUDIO_API_ORIGIN}`
     }
     const requestOptions={
-      method:"PUT",
+      method:"PATCH",
       headers,
       body:JSON.stringify({...params})
     }

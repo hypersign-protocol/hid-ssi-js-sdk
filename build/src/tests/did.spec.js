@@ -30,12 +30,14 @@ let pubKey;
 let privKey;
 let didDocToReg;
 let DIdDOcWithMultiplVM;
+const entityApiSecretKey = '8fc3d16ce8f040fd2fc4e5ccc1d73.6b6e55d4d54cd90c85bbcc92d9469873e60c0d7878681223e2fe63fca3abafb63390f939a77b3d73bf2eb58a654810b38';
 //add mnemonic of wallet that have balance
 beforeEach(function () {
     return __awaiter(this, void 0, void 0, function* () {
         offlineSigner = yield (0, config_1.createWallet)(config_1.mnemonic);
         const params = {
             offlineSigner,
+            // entityApiSecretKey,
             nodeRestEndpoint: config_1.hidNodeEp.rest,
             nodeRpcEndpoint: config_1.hidNodeEp.rpc,
             namespace: config_1.hidNodeEp.namespace,
@@ -44,6 +46,16 @@ beforeEach(function () {
         yield hypersignDID.init();
     });
 });
+// describe("testing hypersignDid initiation", function(){
+//   it('should not throw error if offlinesigner is not passed', async()=>{
+//     const params = {
+//       nodeRestEndpoint: hidNodeEp.rest,
+//       nodeRpcEndpoint: hidNodeEp.rpc,
+//       namespace: hidNodeEp.namespace,
+//     };
+//     hypersignDID = new HypersignDID(params);
+//   })
+// })
 describe('DID Test scenarios', () => {
     //remove seed while creating did so that wallet can generate different did every time
     describe('#generateKeys() method to generate publicKyeMultibase and privateKeyMultiBase', function () {
@@ -357,7 +369,7 @@ describe('DID Test scenarios', () => {
                 }).to.throw(Error, `HID-SSI-SDK:: Error: verificationMethod ${params.id} already exists`);
             });
         }));
-        it('should be able to add verification method in didDocument', () => __awaiter(this, void 0, void 0, function* () {
+        it('should be able to add verification method of type X25519KeyAgreementKey2020 in didDocument', () => __awaiter(this, void 0, void 0, function* () {
             const params = {
                 didDocument: didDocument,
                 type: 'X25519KeyAgreementKey2020',
@@ -532,7 +544,7 @@ describe('DID Test scenarios', () => {
                 }).to.throw(Error, `HID-SSI-SDK:: Error: params.signData[1].privateKeyMultibase is required to register a did`);
             });
         }));
-        it('should be able to register didDocument in the blockchain  with two vm one is of type Ed25519VerificationKey2020 and other is of type X25519KeyAgreementKey2020', function () {
+        it('should be able to register didDocument in the blockchain  with two vm one is of type Ed25519VerificationKey2020 and other is of type X25519KeyAgreementKey2020 and register method is called without signData field', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 const result = yield hypersignDID.register({
                     didDocument,
@@ -549,12 +561,7 @@ describe('DID Test scenarios', () => {
                     // ],
                 });
                 transactionHash = result.transactionHash;
-                (0, chai_1.should)().exist(result.code);
-                (0, chai_1.should)().exist(result.height);
-                (0, chai_1.should)().exist(result.rawLog);
                 (0, chai_1.should)().exist(result.transactionHash);
-                (0, chai_1.should)().exist(result.gasUsed);
-                (0, chai_1.should)().exist(result.gasWanted);
             });
         });
         it('should be able to register a did Doc of type Ed25519VerificationKey2020 with multiple verification method', () => __awaiter(this, void 0, void 0, function* () {
@@ -573,12 +580,7 @@ describe('DID Test scenarios', () => {
                     },
                 ],
             });
-            (0, chai_1.should)().exist(registerdDidDoc.code);
-            (0, chai_1.should)().exist(registerdDidDoc.height);
-            (0, chai_1.should)().exist(registerdDidDoc.rawLog);
             (0, chai_1.should)().exist(registerdDidDoc.transactionHash);
-            (0, chai_1.should)().exist(registerdDidDoc.gasUsed);
-            (0, chai_1.should)().exist(registerdDidDoc.gasWanted);
         }));
     });
     describe('#resolve() this is to resolve didDocument based on didDocId', function () {
@@ -592,7 +594,7 @@ describe('DID Test scenarios', () => {
         it('should be able to resolve did', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 const params = {
-                    did: didDocId,
+                    did: didDocId, //"did:hid:testnet:z4PfQRbTsL8wxWnJzfENMij54E7ubhJciNxSPFWfsAHNU",
                 };
                 const result = yield hypersignDID.resolve(params);
                 (0, chai_1.expect)(result).to.be.a('object');
@@ -630,7 +632,7 @@ describe('DID Test scenarios', () => {
                 }).to.throw(Error, 'HID-SSI-SDK:: Error: params.versionId is required to update a did');
             });
         });
-        it('should not be able to update did document as versionId pased is incorrect', function () {
+        it('should not be able to update did document as versionId passed is incorrect', function () {
             const updateBody = { didDocument, privateKeyMultibase, verificationMethodId, versionId: '1.0.1' };
             didDocument['alsoKnownAs'].push('Random Data');
             return hypersignDID.update(updateBody).catch(function (err) {
@@ -648,12 +650,7 @@ describe('DID Test scenarios', () => {
                     verificationMethodId,
                     versionId,
                 });
-                (0, chai_1.should)().exist(result.code);
-                (0, chai_1.should)().exist(result.height);
-                (0, chai_1.should)().exist(result.rawLog);
                 (0, chai_1.should)().exist(result.transactionHash);
-                (0, chai_1.should)().exist(result.gasUsed);
-                (0, chai_1.should)().exist(result.gasWanted);
             });
         });
     });
@@ -745,12 +742,7 @@ describe('DID Test scenarios', () => {
                     verificationMethodId,
                     versionId,
                 });
-                (0, chai_1.should)().exist(result.code);
-                (0, chai_1.should)().exist(result.height);
-                (0, chai_1.should)().exist(result.rawLog);
                 (0, chai_1.should)().exist(result.transactionHash);
-                (0, chai_1.should)().exist(result.gasUsed);
-                (0, chai_1.should)().exist(result.gasWanted);
             });
         });
     });

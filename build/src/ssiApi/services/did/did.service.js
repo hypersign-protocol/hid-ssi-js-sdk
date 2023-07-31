@@ -16,15 +16,14 @@ const IDID_1 = require("../../../did/IDID");
 const api_constant_1 = require("../../api-constant");
 const apiAuth_1 = require("../../apiAuth/apiAuth");
 const node_fetch_1 = __importDefault(require("node-fetch"));
-class DidApi {
+class DidApiService {
     constructor(apiKey) {
         if (!apiKey || apiKey.trim() === '') {
             throw new Error('HID-SSI_SDK:: Error: Please Provide apiKey');
         }
         this.authService = new apiAuth_1.ApiAuth(apiKey);
-        this.initAccessToken();
     }
-    initAccessToken() {
+    auth() {
         return __awaiter(this, void 0, void 0, function* () {
             const accessToken = yield this.authService.generateAccessToken();
             this.accessToken = accessToken.access_token;
@@ -56,6 +55,7 @@ class DidApi {
             const headers = {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${this.accessToken}`,
+                origin: `${api_constant_1.APIENDPOINT.STUDIO_API_ORIGIN}`
             };
             const requestOptions = {
                 method: 'POST',
@@ -72,16 +72,16 @@ class DidApi {
         });
     }
     /**
-      * Register a new DID and Document in Hypersign blockchain - an onchain activity
-      * @params
-      * - params.didDocument                       : LD did document
-      * - params.verificationMethodId              : VerificationMethodId of the document
-      * - params.signInfos[]                       : Optional, signInfos array of verificationId, signature and clientSpec
-      * - params.signInfos.verification_method_id  : VerificationMethodId of the document
-      * - params.signInfos.signature               : Signature for clientSpec
-      * - params.signInfos.clientSpec              : ClientSpec
-      * @return {Promise<didDocument:Did, transactionHash: string>}
-      */
+    * Register a new DID and Document in Hypersign blockchain - an onchain activity
+    * @params
+    * - params.didDocument                       : LD did document
+    * - params.verificationMethodId              : VerificationMethodId of the document
+    * - params.signInfos[]                       : Optional, signInfos array of verificationId, signature and clientSpec
+    * - params.signInfos.verification_method_id  : VerificationMethodId of the document
+    * - params.signInfos.signature               : Signature for clientSpec
+    * - params.signInfos.clientSpec              : ClientSpec
+    * @return {Promise<didDocument:Did, transactionHash: string>}
+    */
     registerDid(params) {
         var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
@@ -101,12 +101,12 @@ class DidApi {
                     if (!params.signInfos[i].verification_method_id) {
                         throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`);
                     }
-                    if (!params.signInfos[i].clientSpec) {
-                        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to register a did`);
-                    }
-                    if (!(params.signInfos[i].clientSpec.type in IDID_1.IClientSpec)) {
-                        throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
-                    }
+                    // if (!params.signInfos[i].clientSpec) {
+                    //   throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to register a did`);
+                    // }
+                    // if (params.signInfos[i].clientSpec && !(params.signInfos[i].clientSpec.type in IClientSpec)) {
+                    //   throw new Error('HID-SSI-SDK:: Error: params.clientSpec is invalid');
+                    // }          
                     if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
                         if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
                             ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
@@ -126,6 +126,7 @@ class DidApi {
             const headers = {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${this.accessToken}`,
+                origin: `${api_constant_1.APIENDPOINT.STUDIO_API_ORIGIN}`
             };
             const requestOptions = {
                 method: 'POST',
@@ -158,6 +159,7 @@ class DidApi {
             const apiUrl = `${api_constant_1.APIENDPOINT.STUDIO_API_BASE_URL}${api_constant_1.APIENDPOINT.DID.RESOLVE_DID_ENDPOINT}/${params.did}`;
             const headers = {
                 Authorization: `Bearer ${this.accessToken}`,
+                origin: `${api_constant_1.APIENDPOINT.STUDIO_API_ORIGIN}`
             };
             const requestOptions = {
                 method: 'GET',
@@ -204,9 +206,9 @@ class DidApi {
                     if (!params.signInfos[i].clientSpec) {
                         throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to update a did`);
                     }
-                    if (!(params.signInfos[i].clientSpec.type in IDID_1.IClientSpec)) {
-                        throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
-                    }
+                    // if (!(params.signInfos[i].clientSpec.type in IClientSpec)) {
+                    //   throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
+                    // }
                     if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
                         if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
                             ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
@@ -225,10 +227,11 @@ class DidApi {
             const apiUrl = `${api_constant_1.APIENDPOINT.STUDIO_API_BASE_URL}${api_constant_1.APIENDPOINT.DID.UPDATE_DID_ENDPOINT}`;
             const headers = {
                 'Content-Type': "application/json",
-                Authorization: `Bearer ${this.accessToken}`
+                Authorization: `Bearer ${this.accessToken}`,
+                origin: `${api_constant_1.APIENDPOINT.STUDIO_API_ORIGIN}`
             };
             const requestOptions = {
-                method: "PUT",
+                method: "PATCH",
                 headers,
                 body: JSON.stringify(Object.assign({}, params))
             };
@@ -241,4 +244,4 @@ class DidApi {
         });
     }
 }
-exports.default = DidApi;
+exports.default = DidApiService;
