@@ -198,7 +198,12 @@ class HypersignDID {
      **/
     signDid(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this._sign(params);
+            const didDoc = utils_1.default.ldToJsonConvertor(params.didDocument);
+            const didDocString = JSON.stringify(didDoc);
+            return yield this._sign({
+                didDocString,
+                privateKeyMultibase: params.privateKeyMultibase,
+            });
         });
     }
     _filterVerificationRelationships(verificationRelationships) {

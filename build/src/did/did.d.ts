@@ -30,7 +30,7 @@ export default class HypersignDID implements IDID {
      * @returns string
      **/
     signDid(params: {
-        didDocString: string;
+        didDocument: object;
         privateKeyMultibase: string;
     }): Promise<string>;
     private _getId;
