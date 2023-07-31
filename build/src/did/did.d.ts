@@ -22,6 +22,10 @@ export default class HypersignDID implements IDID {
         nodeRestEndpoint?: string;
     });
     private _sign;
+    signDid(params: {
+        didDocString: string;
+        privateKeyMultibase: string;
+    }): Promise<string>;
     private _getId;
     private _filterVerificationRelationships;
     /**

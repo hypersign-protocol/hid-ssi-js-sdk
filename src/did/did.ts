@@ -188,6 +188,10 @@ export default class HypersignDID implements IDID {
     return Buffer.from(signed).toString('base64');
   }
 
+  public async signDid(params: { didDocString: string; privateKeyMultibase: string }): Promise<string> {
+    return this._sign(params);
+  }
+
   private _getId = (methodSpecificId: string) => {
     if (methodSpecificId && methodSpecificId.length < 32) {
       throw new Error('HID-SSI-SDK:: Error: methodSpecificId should be of minimum size 32');
