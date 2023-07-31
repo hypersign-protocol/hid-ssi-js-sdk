@@ -189,6 +189,13 @@ class HypersignDID {
             return Buffer.from(signed).toString('base64');
         });
     }
+    /**
+     * SignDid method is used to sign the did document
+     * @param params
+     * - params.didDocString: stringified did document
+     * - params.privateKeyMultibase: private key of the did document
+     * @returns string
+     **/
     signDid(params) {
         return __awaiter(this, void 0, void 0, function* () {
             return this._sign(params);

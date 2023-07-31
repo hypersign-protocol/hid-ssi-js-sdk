@@ -188,6 +188,13 @@ export default class HypersignDID implements IDID {
     return Buffer.from(signed).toString('base64');
   }
 
+  /**
+   * SignDid method is used to sign the did document
+   * @param params
+   * - params.didDocString: stringified did document
+   * - params.privateKeyMultibase: private key of the did document
+   * @returns string
+   **/
   public async signDid(params: { didDocString: string; privateKeyMultibase: string }): Promise<string> {
     return this._sign(params);
   }

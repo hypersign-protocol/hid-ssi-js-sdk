@@ -22,6 +22,13 @@ export default class HypersignDID implements IDID {
         nodeRestEndpoint?: string;
     });
     private _sign;
+    /**
+     * SignDid method is used to sign the did document
+     * @param params
+     * - params.didDocString: stringified did document
+     * - params.privateKeyMultibase: private key of the did document
+     * @returns string
+     **/
     signDid(params: {
         didDocString: string;
         privateKeyMultibase: string;
