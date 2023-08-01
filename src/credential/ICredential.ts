@@ -42,7 +42,7 @@ export interface ICredentialProof {
 
 // https://www.w3.org/TR/vc-data-model/#basic-concepts
 export interface IVerifiableCredential {
-  context: Array<string>;
+  '@context': Array<string>;
   id: string;
   type: Array<string>;
   issuer: string;

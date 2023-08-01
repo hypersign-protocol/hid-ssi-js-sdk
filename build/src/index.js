@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HypersignVerifiablePresentation = exports.HypersignVerifiableCredential = exports.HypersignSchema = exports.HypersignDID = exports.HypersignSSISdk = void 0;
+exports.Did = exports.IClientSpec = exports.IKeyType = exports.IVerificationRelationships = exports.HypersignVerifiablePresentation = exports.HypersignVerifiableCredential = exports.HypersignSchema = exports.HypersignDID = exports.HypersignSSISdk = void 0;
 const did_1 = __importDefault(require("./did/did"));
 exports.HypersignDID = did_1.default;
 const vc_1 = __importDefault(require("./credential/vc"));
@@ -21,6 +21,12 @@ const vp_1 = __importDefault(require("./presentation/vp"));
 exports.HypersignVerifiablePresentation = vp_1.default;
 const schema_1 = __importDefault(require("./schema/schema"));
 exports.HypersignSchema = schema_1.default;
+const IDID_1 = require("./did/IDID");
+Object.defineProperty(exports, "IClientSpec", { enumerable: true, get: function () { return IDID_1.IClientSpec; } });
+Object.defineProperty(exports, "IKeyType", { enumerable: true, get: function () { return IDID_1.IKeyType; } });
+Object.defineProperty(exports, "IVerificationRelationships", { enumerable: true, get: function () { return IDID_1.IVerificationRelationships; } });
+const did_2 = require("../libs/generated/ssi/did");
+Object.defineProperty(exports, "Did", { enumerable: true, get: function () { return did_2.Did; } });
 class HypersignSSISdk {
     constructor(params) {
         const { offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, namespace, entityApiSecretKey } = params;
@@ -34,7 +40,7 @@ class HypersignSSISdk {
             nodeRpcEndpoint: this.nodeRpcEndpoint,
             nodeRestEndpoint: this.nodeRestEndpoint,
             namespace: this.namespace,
-            entityApiSecretKey: this.entityApiSecretKey
+            entityApiSecretKey: this.entityApiSecretKey,
         };
         this.did = new did_1.default(constructorParams);
         this.schema = new schema_1.default(constructorParams);

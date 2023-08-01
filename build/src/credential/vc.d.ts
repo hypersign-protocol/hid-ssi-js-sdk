@@ -4,7 +4,7 @@ import { DeliverTxResponse } from '@cosmjs/stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { IClientSpec } from '../did/IDID';
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
-    context: Array<string>;
+    '@context': Array<string>;
     id: string;
     type: Array<string>;
     issuer: string;

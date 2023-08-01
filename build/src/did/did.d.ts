@@ -42,7 +42,7 @@ export default class HypersignDID implements IDID {
      * @returns {Promise<object>} The key pair of type Ed25519
      */
     generateKeys(params: {
-        seed?: string;
+        seed?: string | Uint8Array;
         controller?: string;
     }): Promise<{
         privateKeyMultibase: string;
@@ -60,7 +60,7 @@ export default class HypersignDID implements IDID {
         methodSpecificId?: string;
         publicKeyMultibase: string;
         verificationRelationships?: IVerificationRelationships[];
-    }): Promise<object>;
+    }): Promise<Did>;
     /**
      * Register a new DID and Document in Hypersign blockchain - an onchain activity
      * @params
@@ -166,7 +166,7 @@ export default class HypersignDID implements IDID {
         chainId: string;
         clientSpec: IClientSpec;
         verificationRelationships?: IVerificationRelationships[];
-    }): Promise<object>;
+    }): Promise<Did>;
     registerByClientSpec(params: {
         didDocument: object;
         signInfos: SignInfo[];

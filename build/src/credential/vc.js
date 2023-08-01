@@ -98,7 +98,7 @@ class HypersignVerifiableCredential {
         this.credStatusRPC = new credRPC_1.CredentialRPC(offlineConstuctorParams);
         this.hsDid = new did_1.default(offlineConstuctorParams);
         this.hsSchema = new schema_1.default(offlineConstuctorParams);
-        this.context = [];
+        this['@context'] = [];
         this.id = '';
         this.type = [];
         this.issuer = '';

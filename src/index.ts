@@ -3,6 +3,9 @@ import HypersignVerifiableCredential from './credential/vc';
 import HypersignVerifiablePresentation from './presentation/vp';
 import HypersignSchema from './schema/schema';
 import { OfflineSigner } from '@cosmjs/proto-signing';
+import { IClientSpec, IKeyType, ISignInfo, IVerificationRelationships } from './did/IDID';
+import { Did } from '../libs/generated/ssi/did';
+import { IVerifiableCredential } from './credential/ICredential';
 
 class HypersignSSISdk {
   did: HypersignDID;
@@ -26,13 +29,13 @@ class HypersignSSISdk {
     this.nodeRpcEndpoint = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
     this.nodeRestEndpoint = nodeRestEndpoint ? nodeRestEndpoint : '';
     this.namespace = namespace ? namespace : '';
-    this.entityApiSecretKey = entityApiSecretKey? entityApiSecretKey : '';
+    this.entityApiSecretKey = entityApiSecretKey ? entityApiSecretKey : '';
     const constructorParams = {
       offlineSigner: this.signer,
       nodeRpcEndpoint: this.nodeRpcEndpoint,
       nodeRestEndpoint: this.nodeRestEndpoint,
       namespace: this.namespace,
-      entityApiSecretKey: this.entityApiSecretKey
+      entityApiSecretKey: this.entityApiSecretKey,
     };
 
     this.did = new HypersignDID(constructorParams);
@@ -54,4 +57,10 @@ export {
   HypersignSchema,
   HypersignVerifiableCredential,
   HypersignVerifiablePresentation,
+  IVerificationRelationships,
+  IKeyType,
+  ISignInfo,
+  IClientSpec,
+  Did,
+  IVerifiableCredential,
 };

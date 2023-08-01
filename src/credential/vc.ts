@@ -28,7 +28,7 @@ import { extendContextLoader } from 'jsonld-signatures';
 const documentLoader = extendContextLoader(customLoader);
 
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
-  public context: Array<string>;
+  public '@context': Array<string>;
   public id: string;
   public type: Array<string>;
   public issuer: string;
@@ -61,7 +61,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     this.hsDid = new HypersignDID(offlineConstuctorParams);
     this.hsSchema = new HypersignSchema(offlineConstuctorParams);
 
-    this.context = [];
+    this['@context'] = [];
     this.id = '';
     this.type = [];
     this.issuer = '';
@@ -548,7 +548,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     const { publicKeyMultibase } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
       publicKey: publicKeyVerMethod.publicKeyMultibase,
     });
-
     publicKeyVerMethod.publicKeyMultibase = publicKeyMultibase;
 
     const assertionController = {
@@ -566,7 +565,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       verificationMethod: publicKeyId,
       key: keyPair,
     });
-
     /* eslint-disable */
     const that = this;
     /* eslint-enable */
@@ -733,7 +731,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const { credentialId } = params;
     const credentialStatus: CredentialStatus = await this.credStatusRPC.resolveCredentialStatus(credentialId);
-
     if (!credentialStatus) {
       throw new Error('HID-SSI-SDK:: Error: while checking credential status of credentialID ' + credentialId);
     }

@@ -583,6 +583,17 @@ describe('DID Test scenarios', () => {
           );
         });
     });
+    // it('should not able to register did document and throw error as hypersign is neither init by offlinesigner nor entityApiKey', async () => {
+    //   const hypersign = new HypersignDID();
+    //   await hypersign.init();
+    //   return hypersign.register({ didDocument, privateKeyMultibase, verificationMethodId })
+    //     .catch(function (err) {
+    //       console.log(err);
+    //       expect(function () {
+    //         throw err;
+    //       }).to.throw(Error, "HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner");
+    //     });
+    // });
     it('should be able to register didDocument in the blockchain  with two vm one is of type Ed25519VerificationKey2020 and other is of type X25519KeyAgreementKey2020 and register method is called without signData field', async function () {
       const result = await hypersignDID.register({
         didDocument,

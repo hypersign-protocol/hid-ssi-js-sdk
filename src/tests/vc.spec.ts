@@ -152,12 +152,8 @@ describe('DID Opearations', () => {
   describe('#register() this is to register did on the blockchain', function () {
     it('should be able to register didDocument in the blockchain', async function () {
       const result = await hypersignDID.register({ didDocument, privateKeyMultibase, verificationMethodId });
-      should().exist(result.code);
-      should().exist(result.height);
-      should().exist(result.rawLog);
       should().exist(result.transactionHash);
-      should().exist(result.gasUsed);
-      should().exist(result.gasWanted);
+      should().exist(result.didDocument);
     });
   });
 });

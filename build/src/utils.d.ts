@@ -1,3 +1,4 @@
+import { Did } from '../libs/generated/ssi/did';
 export default class Utils {
     static getUUID(): Promise<string>;
     static checkUrl(url: string): string;
@@ -19,7 +20,7 @@ export default class Utils {
         publicKeyMultibase: string;
         privateKeyMultibase: string;
     };
-    static jsonToLdConvertor(json: any): {};
+    static jsonToLdConvertor(json: any): Did;
     static ldToJsonConvertor(ld: any): {};
     static getFee(): string;
 }

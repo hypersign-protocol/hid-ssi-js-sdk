@@ -33,7 +33,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const constants = __importStar(require("./constants"));
-const { encode, decode } = require("base58-universal");
+const { encode, decode } = require('base58-universal');
 const ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
 class Utils {
     static getUUID() {
@@ -48,18 +48,18 @@ class Utils {
     }
     static checkUrl(url) {
         // TODO: check if the url is a valid url
-        if (url.charAt(url.length - 1) === "/") {
+        if (url.charAt(url.length - 1) === '/') {
             return url;
         }
         else {
-            return (url = url + "/");
+            return (url = url + '/');
         }
     }
     static _encodeMbKey(header, key) {
         const mbKey = new Uint8Array(header.length + key.length);
         mbKey.set(header);
         mbKey.set(key, header.length);
-        return "z" + encode(mbKey);
+        return 'z' + encode(mbKey);
     }
     static _decodeMbKey(header, key) {
         let mbKey = new Uint8Array(key); //header + orginaley
@@ -69,12 +69,12 @@ class Utils {
     static _decodeMbPubKey(header, key) {
         let mbKey = new Uint8Array(key); //header + orginaley
         mbKey = mbKey.slice(header.length);
-        return "z" + encode(mbKey); //Buffer.from(mbKey).toString('base64');
+        return 'z' + encode(mbKey); //Buffer.from(mbKey).toString('base64');
     }
     static _bufToMultibase(pubKeyBuf) {
-        return "z" + encode(pubKeyBuf);
+        return 'z' + encode(pubKeyBuf);
     }
-    // Converting 45byte public key to 48 by padding header 
+    // Converting 45byte public key to 48 by padding header
     // Converting 88byte private key to 91 by padding header
     static convertedStableLibKeysIntoEd25519verificationkey2020(stableLibKp) {
         const result = {};
@@ -106,7 +106,7 @@ class Utils {
     static jsonToLdConvertor(json) {
         const ld = {};
         for (const key in json) {
-            if (key === "context") {
+            if (key === 'context') {
                 ld['@' + key] = json[key];
             }
             else {
@@ -118,7 +118,7 @@ class Utils {
     static ldToJsonConvertor(ld) {
         const json = {};
         for (const key in ld) {
-            if (key === "@context") {
+            if (key === '@context') {
                 json['context'] = ld[key];
             }
             else {
@@ -129,7 +129,7 @@ class Utils {
     }
     // TODO: need to find a way to make it dynamic
     static getFee() {
-        return "auto";
+        return 'auto';
     }
 }
 exports.default = Utils;

@@ -27,21 +27,21 @@ export class ApiAuth {
     return authToken;
   }
 
-  public async checkAndRefreshAToken(params:{accessToken:string}):Promise<IValidateAccesstokenResp>{
-   try{
-     const decodeToken= jwt.decode(params.accessToken,{complete: true});
-     if(!decodeToken){
-      throw new Error('HID-SSI-SDK:: Error: Token is invalid or malformed')
-     }
-     const currentTime= Math.floor(Date.now() / 1000);
-     if(currentTime>=decodeToken.payload.exp){
-     const {access_token}= await this.generateAccessToken()
-     return {valid:false,accessToken:access_token }
-     }else{
-      return {valid:true}
-     }
-   }catch(e){
-    throw new Error(`HID-SSI-SDK:: Error: ${e}`);
-   }
+  public async checkAndRefreshAToken(params: { accessToken: string }): Promise<IValidateAccesstokenResp> {
+    try {
+      const decodeToken = jwt.decode(params.accessToken, { complete: true });
+      if (!decodeToken) {
+        throw new Error('HID-SSI-SDK:: Error: Token is invalid or malformed')
+      }
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (currentTime >= decodeToken.payload.exp) {
+        const { access_token } = await this.generateAccessToken()
+        return { valid: false, accessToken: access_token }
+      } else {
+        return { valid: true }
+      }
+    } catch (e) {
+      throw new Error(`HID-SSI-SDK:: Error: ${e}`);
+    }
   }
 }

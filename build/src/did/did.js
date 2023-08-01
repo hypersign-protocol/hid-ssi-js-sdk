@@ -169,24 +169,20 @@ class HypersignDID {
         const { offlineSigner, namespace, nodeRpcEndpoint, nodeRestEndpoint, entityApiSecretKey } = params;
         const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
         const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
-        if (offlineSigner) {
-            const rpcConstructorParams = {
-                offlineSigner,
-                nodeRpcEndpoint: nodeRPCEp,
-                nodeRestEndpoint: nodeRestEp,
-            };
-            this.didrpc = new didRPC_1.DIDRpc(rpcConstructorParams);
-        }
-        else {
-            this.didrpc = null;
-        }
-        this.namespace = namespace ? namespace : '';
+        const rpcConstructorParams = {
+            offlineSigner,
+            nodeRpcEndpoint: nodeRPCEp,
+            nodeRestEndpoint: nodeRestEp,
+        };
+        this.didrpc = new didRPC_1.DIDRpc(rpcConstructorParams);
         if (entityApiSecretKey && entityApiSecretKey != '') {
             this.didAPIService = new did_service_1.default(entityApiSecretKey);
+            this.didrpc = null;
         }
         else {
             this.didAPIService = null;
         }
+        this.namespace = namespace ? namespace : '';
     }
     _sign(params) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -256,14 +252,14 @@ class HypersignDID {
         return __awaiter(this, void 0, void 0, function* () {
             let edKeyPair;
             if (params && params.seed && params.controller) {
-                const seedBytes = new Uint8Array(Buffer.from(params.seed));
+                const seedBytes = params.seed instanceof Uint8Array ? params.seed : new Uint8Array(Buffer.from(params.seed));
                 edKeyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate({ seed: seedBytes, id: params.controller });
             }
             else if (params && params.controller) {
                 edKeyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate({ id: params.controller });
             }
             else if (params && params.seed) {
-                const seedBytes = new Uint8Array(Buffer.from(params.seed));
+                const seedBytes = params.seed instanceof Uint8Array ? params.seed : new Uint8Array(Buffer.from(params.seed));
                 edKeyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate({ seed: seedBytes });
             }
             else {
@@ -409,9 +405,6 @@ class HypersignDID {
             let result = {};
             if (!params.did) {
                 throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
-            }
-            if (!this.didrpc && !this.didAPIService) {
-                throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
             }
             if (this.didrpc) {
                 result = yield this.didrpc.resolveDID(params.did);

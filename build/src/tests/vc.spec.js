@@ -159,12 +159,8 @@ describe('DID Opearations', () => {
         it('should be able to register didDocument in the blockchain', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 const result = yield hypersignDID.register({ didDocument, privateKeyMultibase, verificationMethodId });
-                (0, chai_1.should)().exist(result.code);
-                (0, chai_1.should)().exist(result.height);
-                (0, chai_1.should)().exist(result.rawLog);
                 (0, chai_1.should)().exist(result.transactionHash);
-                (0, chai_1.should)().exist(result.gasUsed);
-                (0, chai_1.should)().exist(result.gasWanted);
+                (0, chai_1.should)().exist(result.didDocument);
             });
         });
     });

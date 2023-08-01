@@ -32,7 +32,6 @@ import {
   ISignInfo,
 } from './IDID';
 
-import { ClientSpec } from '../../libs/generated/ssi/clientSpec';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import customLoader from '../../libs/w3cache/v1';
 import { DeliverTxResponse } from '../did/IDID';
@@ -174,22 +173,19 @@ export default class HypersignDID implements IDID {
     const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
 
-    if (offlineSigner) {
-      const rpcConstructorParams = {
-        offlineSigner,
-        nodeRpcEndpoint: nodeRPCEp,
-        nodeRestEndpoint: nodeRestEp,
-      };
-      this.didrpc = new DIDRpc(rpcConstructorParams);
-    } else {
-      this.didrpc = null;
-    }
-    this.namespace = namespace ? namespace : '';
+    const rpcConstructorParams = {
+      offlineSigner,
+      nodeRpcEndpoint: nodeRPCEp,
+      nodeRestEndpoint: nodeRestEp,
+    };
+    this.didrpc = new DIDRpc(rpcConstructorParams);
     if (entityApiSecretKey && entityApiSecretKey != '') {
       this.didAPIService = new DidApiService(entityApiSecretKey);
+      this.didrpc = null;
     } else {
       this.didAPIService = null;
     }
+    this.namespace = namespace ? namespace : '';
   }
 
   private async _sign(params: { didDocString: string; privateKeyMultibase: string }): Promise<string> {
@@ -275,17 +271,17 @@ export default class HypersignDID implements IDID {
    * @returns {Promise<object>} The key pair of type Ed25519
    */
   public async generateKeys(params: {
-    seed?: string;
+    seed?: string | Uint8Array;
     controller?: string;
   }): Promise<{ privateKeyMultibase: string; publicKeyMultibase: string }> {
     let edKeyPair;
     if (params && params.seed && params.controller) {
-      const seedBytes = new Uint8Array(Buffer.from(params.seed));
+      const seedBytes = params.seed instanceof Uint8Array ? params.seed : new Uint8Array(Buffer.from(params.seed));
       edKeyPair = await Ed25519VerificationKey2020.generate({ seed: seedBytes, id: params.controller });
     } else if (params && params.controller) {
       edKeyPair = await Ed25519VerificationKey2020.generate({ id: params.controller });
     } else if (params && params.seed) {
-      const seedBytes = new Uint8Array(Buffer.from(params.seed));
+      const seedBytes = params.seed instanceof Uint8Array ? params.seed : new Uint8Array(Buffer.from(params.seed));
       edKeyPair = await Ed25519VerificationKey2020.generate({ seed: seedBytes });
     } else {
       edKeyPair = await Ed25519VerificationKey2020.generate();
@@ -308,7 +304,7 @@ export default class HypersignDID implements IDID {
     methodSpecificId?: string;
     publicKeyMultibase: string;
     verificationRelationships?: IVerificationRelationships[];
-  }): Promise<object> {
+  }): Promise<Did> {
     let verificationRelationships: IVerificationRelationships[] = [];
     if (params.verificationRelationships && params.verificationRelationships.length > 0) {
       if (params.verificationRelationships.includes(IVerificationRelationships.keyAgreement)) {
@@ -448,12 +444,6 @@ export default class HypersignDID implements IDID {
     let result = {} as IDIDResolve;
     if (!params.did) {
       throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
-    }
-
-    if (!this.didrpc && !this.didAPIService) {
-      throw new Error(
-        'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"'
-      );
     }
     if (this.didrpc) {
       result = await this.didrpc.resolveDID(params.did);
@@ -778,7 +768,7 @@ export default class HypersignDID implements IDID {
     chainId: string;
     clientSpec: IClientSpec;
     verificationRelationships?: IVerificationRelationships[];
-  }): Promise<object> {
+  }): Promise<Did> {
     if (this['window'] === 'undefined') {
       console.log('HID-SSI-SDK:: Warning:  Running in non browser mode');
     }

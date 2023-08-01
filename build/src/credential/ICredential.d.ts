@@ -28,7 +28,7 @@ export interface ICredentialProof {
     };
 }
 export interface IVerifiableCredential {
-    context: Array<string>;
+    '@context': Array<string>;
     id: string;
     type: Array<string>;
     issuer: string;
