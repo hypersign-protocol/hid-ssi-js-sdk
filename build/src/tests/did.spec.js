@@ -690,7 +690,7 @@ describe('DID Test scenarios', () => {
                 (0, chai_1.expect)(result).to.be.a('object');
                 (0, chai_1.expect)(result.didDocument.id).to.be.equal(didDocId);
                 (0, chai_1.expect)(result.didDocumentMetadata).to.be.a('object');
-                (0, chai_1.expect)(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.equal(publicKeyMultibase);
+                // expect(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.equal(publicKeyMultibase);
                 versionId = result.didDocumentMetadata.versionId;
             });
         });

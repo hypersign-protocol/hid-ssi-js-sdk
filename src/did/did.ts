@@ -424,7 +424,6 @@ export default class HypersignDID implements IDID {
       const newSignInfos = signInfos as Array<ISignInfo>;
       const result: { didDocument: Did; transactionHash: string } = await this.didAPIService.registerDid({
         didDocument,
-        verificationMethodId: params.verificationMethodId,
         signInfos: newSignInfos,
       });
       response.didDocument = didDocument;
@@ -500,7 +499,7 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
     }
 
-    if (!this.didrpc && this.didAPIService) {
+    if (!this.didrpc && !this.didAPIService) {
       throw new Error(
         'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"'
       );
@@ -884,9 +883,6 @@ export default class HypersignDID implements IDID {
           `HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`
         );
       }
-      if (!params.signInfos[i].clientSpec) {
-        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to register a did`);
-      }
 
       if (params.signInfos[i].clientSpec?.type === IClientSpec['cosmos-ADR036']) {
         if (
@@ -950,9 +946,6 @@ export default class HypersignDID implements IDID {
         throw new Error(
           `HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`
         );
-      }
-      if (!params.signInfos[i].clientSpec) {
-        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to register a did`);
       }
 
       if (params.signInfos[i].clientSpec?.type === IClientSpec['cosmos-ADR036']) {
@@ -1019,10 +1012,6 @@ export default class HypersignDID implements IDID {
           `HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`
         );
       }
-      if (!params.signInfos[i].clientSpec) {
-        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to register a did`);
-      }
-
       if (params.signInfos[i].clientSpec?.type === IClientSpec['cosmos-ADR036']) {
         if (
           params.signInfos[i].clientSpec?.adr036SignerAddress === '' ||

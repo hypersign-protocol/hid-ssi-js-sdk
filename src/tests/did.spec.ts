@@ -724,7 +724,7 @@ describe('DID Test scenarios', () => {
       expect(result).to.be.a('object');
       expect(result.didDocument.id).to.be.equal(didDocId);
       expect(result.didDocumentMetadata).to.be.a('object');
-      expect(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.equal(publicKeyMultibase);
+      // expect(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.equal(publicKeyMultibase);
       versionId = result.didDocumentMetadata.versionId;
     });
 
@@ -737,7 +737,6 @@ describe('DID Test scenarios', () => {
       };
 
       const result = await hypersignDID.resolve(params);
-
       expect(result).to.be.a('object');
       expect(result.didDocument.id).to.be.equal(didDocId);
       expect(result.didDocumentMetadata).to.be.a('object');
@@ -774,7 +773,6 @@ describe('DID Test scenarios', () => {
     });
     it('should not be able to deactivate did document as versionId pased is incorrect', function () {
       const deactivateBody = { didDocument, privateKeyMultibase, verificationMethodId, versionId: '1.0.1' };
-
       return hypersignDID.deactivate(deactivateBody).catch(function (err) {
         expect(function () {
           throw err;

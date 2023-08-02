@@ -384,7 +384,6 @@ class HypersignDID {
                 const newSignInfos = signInfos;
                 const result = yield this.didAPIService.registerDid({
                     didDocument,
-                    verificationMethodId: params.verificationMethodId,
                     signInfos: newSignInfos,
                 });
                 response.didDocument = didDocument;
@@ -455,7 +454,7 @@ class HypersignDID {
             if (!params.versionId) {
                 throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
             }
-            if (!this.didrpc && this.didAPIService) {
+            if (!this.didrpc && !this.didAPIService) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
             }
             const { didDocument, privateKeyMultibase, verificationMethodId, versionId } = params;
@@ -765,9 +764,6 @@ class HypersignDID {
                 if (!params.signInfos[i].verification_method_id) {
                     throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`);
                 }
-                if (!params.signInfos[i].clientSpec) {
-                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to register a did`);
-                }
                 if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
                     if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
                         ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
@@ -819,9 +815,6 @@ class HypersignDID {
                 if (!params.signInfos[i].verification_method_id) {
                     throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`);
                 }
-                if (!params.signInfos[i].clientSpec) {
-                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to register a did`);
-                }
                 if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
                     if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
                         ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
@@ -872,9 +865,6 @@ class HypersignDID {
             for (const i in params.signInfos) {
                 if (!params.signInfos[i].verification_method_id) {
                     throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`);
-                }
-                if (!params.signInfos[i].clientSpec) {
-                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to register a did`);
                 }
                 if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
                     if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
