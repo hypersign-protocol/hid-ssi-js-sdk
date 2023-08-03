@@ -36,6 +36,7 @@ let credenStatus;
 let credentialStatusProof2 = {};
 let credentialStatus2 = {};
 let credentialStatus;
+const entityApiSecretKey = '57ed4af5b3f51428250e76a769ce8.d8f70a64e3d060b377c85eb75b60ae25011ecebb63f28a27f72183e5bcba140222f8628f17a72eee4833a9174f5ae8309';
 const credentialBody = {
     schemaId: '',
     subjectDid: '',
@@ -478,11 +479,11 @@ describe('Verifiable Credential Opearations', () => {
                 (0, chai_1.should)().exist(signedCredential['credentialSchema']);
                 (0, chai_1.should)().exist(signedCredential['credentialStatus']);
                 (0, chai_1.should)().exist(signedCredential['proof']);
-                console.log({
-                    signedCredentialId: signedVC ? signedVC['id'] : '',
-                    credentialId,
-                    id: tempIssueCredentialBody.credential.id,
-                });
+                // console.log({
+                //   signedCredentialId: signedVC ? signedVC['id'] : '',
+                //   credentialId,
+                //   id: tempIssueCredentialBody.credential.id,
+                // });
                 (0, chai_1.expect)(signedCredential['id']).to.be.equal(tempIssueCredentialBody.credential.id);
                 (0, chai_1.expect)(credentialStatus).to.be.a('object');
                 (0, chai_1.should)().exist(credentialStatus['claim']);
@@ -663,7 +664,7 @@ describe('Verifiable Credential Status Opearations', () => {
             return __awaiter(this, void 0, void 0, function* () {
                 // console.log('Credential ID ' + credentialId);
                 const credentialStatus = yield hypersignVC.checkCredentialStatus({ credentialId: credentialId });
-                // console.log(JSON.stringify(credentialStatus, null, 2));
+                console.log(JSON.stringify(credentialStatus, null, 2));
                 (0, chai_1.expect)(credentialStatus).to.be.a('object');
                 (0, chai_1.should)().exist(credentialStatus.verified);
                 (0, chai_1.expect)(credentialStatus.verified).to.be.equal(true);
@@ -824,16 +825,11 @@ describe('Verifiable Credential Status Opearations', () => {
         });
         it('should be able to register credential on blockchain', function () {
             return __awaiter(this, void 0, void 0, function* () {
-                // console.log({
-                //   credentialStatus2,
-                // });
                 const registerCredDetail = yield hypersignVC.registerCredentialStatus({
                     credentialStatus: credentialStatus2,
                     credentialStatusProof: credentialStatusProof2,
                 });
-                // console.log(JSON.stringify(registerCredDetail, null, 2));
                 (0, chai_1.expect)(registerCredDetail).to.be.a('object');
-                (0, chai_1.should)().exist(registerCredDetail.code);
                 (0, chai_1.should)().exist(registerCredDetail.transactionHash);
             });
         });

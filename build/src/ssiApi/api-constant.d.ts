@@ -8,5 +8,8 @@ export declare const APIENDPOINT: {
         UPDATE_DID_ENDPOINT: string;
         RESOLVE_DID_ENDPOINT: string;
     };
+    CREDENTIALS: {
+        REGISTER_CREDENTIAL_STATUS: string;
+    };
 };
 //# sourceMappingURL=api-constant.d.ts.map

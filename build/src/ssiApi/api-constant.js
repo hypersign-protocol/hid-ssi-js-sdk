@@ -11,4 +11,7 @@ exports.APIENDPOINT = {
         UPDATE_DID_ENDPOINT: '/did',
         RESOLVE_DID_ENDPOINT: '/did/resolve',
     },
+    CREDENTIALS: {
+        REGISTER_CREDENTIAL_STATUS: '/credential/status/register',
+    },
 };

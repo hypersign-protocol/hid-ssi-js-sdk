@@ -15,6 +15,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     proof: ICredentialProof;
     credentialStatus: ICredentialStatus;
     private credStatusRPC;
+    private credentialApiService;
     private namespace;
     private hsSchema;
     private hsDid;
@@ -23,6 +24,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         offlineSigner?: OfflineSigner;
         nodeRpcEndpoint?: string;
         nodeRestEndpoint?: string;
+        entityApiSecretKey?: string;
     });
     private _sign;
     private _dateNow;
@@ -132,7 +134,9 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     registerCredentialStatus(params: {
         credentialStatus: CredentialStatus;
         credentialStatusProof: CredentialProof;
-    }): Promise<DeliverTxResponse>;
+    }): Promise<{
+        transactionHash: string;
+    }>;
     generateRegisterCredentialStatusTxnMessage(credentialStatus: CredentialStatus, proof: CredentialProof): Promise<{
         typeUrl: string;
         value: import("../../libs/generated/ssi/tx").MsgRegisterCredentialStatus;

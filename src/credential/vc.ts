@@ -24,6 +24,8 @@ import customLoader from '../../libs/w3cache/v1';
 import { EthereumEip712Signature2021 } from 'ethereumeip712signature2021suite';
 import { IClientSpec } from '../did/IDID';
 import { extendContextLoader } from 'jsonld-signatures';
+import { ICredentialService } from '../ssiApi/services/credential/ICredentialApi';
+import CredentialApiService from '../ssiApi/services/credential/credential.service';
 
 const documentLoader = extendContextLoader(customLoader);
 
@@ -38,7 +40,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public credentialSchema: ISchema;
   public proof: ICredentialProof;
   public credentialStatus: ICredentialStatus;
-  private credStatusRPC: CredentialRPC;
+  private credStatusRPC: CredentialRPC | null;
+  private credentialApiService: ICredentialService | null;
   private namespace: string;
   private hsSchema: HypersignSchema;
   private hsDid: HypersignDID;
@@ -49,9 +52,10 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       offlineSigner?: OfflineSigner;
       nodeRpcEndpoint?: string;
       nodeRestEndpoint?: string;
+      entityApiSecretKey?: string;
     } = {}
   ) {
-    const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint } = params;
+    const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, entityApiSecretKey } = params;
 
     this.namespace = namespace && namespace != '' ? namespace : '';
     const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
@@ -60,6 +64,12 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     this.credStatusRPC = new CredentialRPC(offlineConstuctorParams);
     this.hsDid = new HypersignDID(offlineConstuctorParams);
     this.hsSchema = new HypersignSchema(offlineConstuctorParams);
+    if (entityApiSecretKey && entityApiSecretKey != '') {
+      this.credentialApiService = new CredentialApiService(entityApiSecretKey);
+      this.credStatusRPC = null;
+    } else {
+      this.credentialApiService = null;
+    }
 
     this['@context'] = [];
     this.id = '';
@@ -189,12 +199,17 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
    * Initialise the offlinesigner to interact with Hypersign blockchain
    */
   public async init() {
-    if (!this.credStatusRPC) {
+    if (!this.credStatusRPC && !this.credentialApiService) {
       throw new Error(
-        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized with entityApiSecretKey'
       );
     }
-    await this.credStatusRPC.init();
+    if (this.credStatusRPC) {
+      await this.credStatusRPC.init();
+    }
+    if (this.credentialApiService) {
+      await this.credentialApiService.auth();
+    }
   }
 
   /**
@@ -590,8 +605,13 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public async resolveCredentialStatus(params: { credentialId: string }): Promise<CredentialStatus> {
     if (!params || !params.credentialId)
       throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
-
-    const credentialStatus: CredentialStatus = await this.credStatusRPC.resolveCredentialStatus(params.credentialId);
+    let credentialStatus = {} as CredentialStatus;
+    if (!this.credStatusRPC) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: HypersignVerifiableCred is not instantiated with Offlinesigner or not initialized'
+      );
+    }
+    credentialStatus = await this.credStatusRPC.resolveCredentialStatus(params.credentialId);
     return credentialStatus;
   }
 
@@ -730,7 +750,11 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
 
     const { credentialId } = params;
-    const credentialStatus: CredentialStatus = await this.credStatusRPC.resolveCredentialStatus(credentialId);
+    let credentialStatus = {} as CredentialStatus;
+    if (!this.credStatusRPC) {
+      throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCred is not instantiated with Offlinesigner');
+    }
+    credentialStatus = await this.credStatusRPC.resolveCredentialStatus(credentialId);
     if (!credentialStatus) {
       throw new Error('HID-SSI-SDK:: Error: while checking credential status of credentialID ' + credentialId);
     }
@@ -752,25 +776,35 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public async registerCredentialStatus(params: {
     credentialStatus: CredentialStatus;
     credentialStatusProof: CredentialProof;
-  }): Promise<DeliverTxResponse> {
+  }): Promise<{ transactionHash: string }> {
     const { credentialStatus, credentialStatusProof } = params;
     if (!credentialStatus || !credentialStatusProof)
       throw new Error(
         'HID-SSI-SDK:: Error: credentialStatus and credentialStatusProof are required to register credential status'
       );
 
-    if (!this.credStatusRPC) {
+    if (!this.credStatusRPC && !this.credentialApiService) {
       throw new Error(
-        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized with entityApiSecret'
       );
     }
 
-    const resp: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(
-      credentialStatus,
-      credentialStatusProof
-    );
-    if (!resp || resp.code != 0) {
-      throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+    let resp = {} as { transactionHash: string };
+    if (this.credStatusRPC) {
+      const result: DeliverTxResponse = await this.credStatusRPC.registerCredentialStatus(
+        credentialStatus,
+        credentialStatusProof
+      );
+      if (!result || result.code != 0) {
+        throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + result.rawLog);
+      }
+      resp.transactionHash = result.transactionHash;
+    } else if (this.credentialApiService) {
+      resp = await this.credentialApiService.registerCredentialStatus({
+        credentialStatus,
+        credentialStatusProof,
+        namespace: this.namespace,
+      });
     }
     return resp;
   }

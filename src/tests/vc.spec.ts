@@ -2,6 +2,7 @@ import { expect, should } from 'chai';
 import { HypersignDID, HypersignSchema, HypersignVerifiableCredential } from '../index';
 import { createWallet, mnemonic, hidNodeEp } from './config';
 import { ICredentialStatus, IVerifiableCredential } from '../credential/ICredential';
+import { CredentialProof, CredentialStatus } from '../../libs/generated/ssi/credential';
 
 let privateKeyMultibase;
 let publicKeyMultibase;
@@ -27,6 +28,7 @@ let credenStatus: ICredentialStatus;
 let credentialStatusProof2 = {};
 let credentialStatus2 = {};
 let credentialStatus;
+const entityApiSecretKey = "57ed4af5b3f51428250e76a769ce8.d8f70a64e3d060b377c85eb75b60ae25011ecebb63f28a27f72183e5bcba140222f8628f17a72eee4833a9174f5ae8309"
 const credentialBody = {
   schemaId: '',
   subjectDid: '',
@@ -99,12 +101,12 @@ describe('DID Opearations', () => {
       should().exist(didDocument['verificationMethod']);
       expect(
         didDocument['verificationMethod'] &&
-          didDocument['authentication'] &&
-          didDocument['assertionMethod'] &&
-          didDocument['keyAgreement'] &&
-          didDocument['capabilityInvocation'] &&
-          didDocument['capabilityDelegation'] &&
-          didDocument['service']
+        didDocument['authentication'] &&
+        didDocument['assertionMethod'] &&
+        didDocument['keyAgreement'] &&
+        didDocument['capabilityInvocation'] &&
+        didDocument['capabilityDelegation'] &&
+        didDocument['service']
       ).to.be.a('array');
       should().exist(didDocument['authentication']);
       should().exist(didDocument['assertionMethod']);
@@ -463,11 +465,11 @@ describe('Verifiable Credential Opearations', () => {
       should().exist(signedCredential['credentialSchema']);
       should().exist(signedCredential['credentialStatus']);
       should().exist(signedCredential['proof']);
-      console.log({
-        signedCredentialId: signedVC ? signedVC['id'] : '',
-        credentialId,
-        id: tempIssueCredentialBody.credential.id,
-      });
+      // console.log({
+      //   signedCredentialId: signedVC ? signedVC['id'] : '',
+      //   credentialId,
+      //   id: tempIssueCredentialBody.credential.id,
+      // });
       expect(signedCredential['id']).to.be.equal(tempIssueCredentialBody.credential.id);
 
       expect(credentialStatus).to.be.a('object');
@@ -531,7 +533,6 @@ describe('Verifiable Credential Opearations', () => {
       should().not.exist(credentialStatusRegistrationResult);
     });
   });
-
   describe('#verifyCredential() method to verify a credential', function () {
     it('should be able to verify credential', async function () {
       const params = {
@@ -656,7 +657,7 @@ describe('Verifiable Credential Status Opearations', () => {
     it('should be able to check credential status', async function () {
       // console.log('Credential ID ' + credentialId);
       const credentialStatus = await hypersignVC.checkCredentialStatus({ credentialId: credentialId });
-      // console.log(JSON.stringify(credentialStatus, null, 2));
+      console.log(JSON.stringify(credentialStatus, null, 2));
       expect(credentialStatus).to.be.a('object');
       should().exist(credentialStatus.verified);
       expect(credentialStatus.verified).to.be.equal(true);
@@ -807,17 +808,11 @@ describe('Verifiable Credential Status Opearations', () => {
         });
     });
     it('should be able to register credential on blockchain', async function () {
-      // console.log({
-      //   credentialStatus2,
-      // });
       const registerCredDetail = await hypersignVC.registerCredentialStatus({
-        credentialStatus: credentialStatus2,
-        credentialStatusProof: credentialStatusProof2,
+        credentialStatus: credentialStatus2 as CredentialStatus,
+        credentialStatusProof: credentialStatusProof2 as CredentialProof,
       });
-
-      // console.log(JSON.stringify(registerCredDetail, null, 2));
       expect(registerCredDetail).to.be.a('object');
-      should().exist(registerCredDetail.code);
       should().exist(registerCredDetail.transactionHash);
     });
   });

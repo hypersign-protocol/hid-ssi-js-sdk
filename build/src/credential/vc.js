@@ -32,6 +32,7 @@ const crypto_1 = __importDefault(require("crypto"));
 const v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 const ethereumeip712signature2021suite_1 = require("ethereumeip712signature2021suite");
 const jsonld_signatures_2 = require("jsonld-signatures");
+const credential_service_1 = __importDefault(require("../ssiApi/services/credential/credential.service"));
 const documentLoader = (0, jsonld_signatures_2.extendContextLoader)(v1_1.default);
 class HypersignVerifiableCredential {
     constructor(params = {}) {
@@ -90,7 +91,7 @@ class HypersignVerifiableCredential {
             });
             return context;
         };
-        const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint } = params;
+        const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, entityApiSecretKey } = params;
         this.namespace = namespace && namespace != '' ? namespace : '';
         const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
         const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
@@ -98,6 +99,13 @@ class HypersignVerifiableCredential {
         this.credStatusRPC = new credRPC_1.CredentialRPC(offlineConstuctorParams);
         this.hsDid = new did_1.default(offlineConstuctorParams);
         this.hsSchema = new schema_1.default(offlineConstuctorParams);
+        if (entityApiSecretKey && entityApiSecretKey != '') {
+            this.credentialApiService = new credential_service_1.default(entityApiSecretKey);
+            this.credStatusRPC = null;
+        }
+        else {
+            this.credentialApiService = null;
+        }
         this['@context'] = [];
         this.id = '';
         this.type = [];
@@ -158,10 +166,15 @@ class HypersignVerifiableCredential {
      */
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!this.credStatusRPC) {
-                throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
+            if (!this.credStatusRPC && !this.credentialApiService) {
+                throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized with entityApiSecretKey');
             }
-            yield this.credStatusRPC.init();
+            if (this.credStatusRPC) {
+                yield this.credStatusRPC.init();
+            }
+            if (this.credentialApiService) {
+                yield this.credentialApiService.auth();
+            }
         });
     }
     /**
@@ -472,7 +485,11 @@ class HypersignVerifiableCredential {
         return __awaiter(this, void 0, void 0, function* () {
             if (!params || !params.credentialId)
                 throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
-            const credentialStatus = yield this.credStatusRPC.resolveCredentialStatus(params.credentialId);
+            let credentialStatus = {};
+            if (!this.credStatusRPC) {
+                throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCred is not instantiated with Offlinesigner or not initialized');
+            }
+            credentialStatus = yield this.credStatusRPC.resolveCredentialStatus(params.credentialId);
             return credentialStatus;
         });
     }
@@ -577,7 +594,11 @@ class HypersignVerifiableCredential {
             if (!params || !params.credentialId)
                 throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
             const { credentialId } = params;
-            const credentialStatus = yield this.credStatusRPC.resolveCredentialStatus(credentialId);
+            let credentialStatus = {};
+            if (!this.credStatusRPC) {
+                throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCred is not instantiated with Offlinesigner');
+            }
+            credentialStatus = yield this.credStatusRPC.resolveCredentialStatus(credentialId);
             if (!credentialStatus) {
                 throw new Error('HID-SSI-SDK:: Error: while checking credential status of credentialID ' + credentialId);
             }
@@ -599,12 +620,23 @@ class HypersignVerifiableCredential {
             const { credentialStatus, credentialStatusProof } = params;
             if (!credentialStatus || !credentialStatusProof)
                 throw new Error('HID-SSI-SDK:: Error: credentialStatus and credentialStatusProof are required to register credential status');
-            if (!this.credStatusRPC) {
-                throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
+            if (!this.credStatusRPC && !this.credentialApiService) {
+                throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized with entityApiSecret');
             }
-            const resp = yield this.credStatusRPC.registerCredentialStatus(credentialStatus, credentialStatusProof);
-            if (!resp || resp.code != 0) {
-                throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
+            let resp = {};
+            if (this.credStatusRPC) {
+                const result = yield this.credStatusRPC.registerCredentialStatus(credentialStatus, credentialStatusProof);
+                if (!result || result.code != 0) {
+                    throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + result.rawLog);
+                }
+                resp.transactionHash = result.transactionHash;
+            }
+            else if (this.credentialApiService) {
+                resp = yield this.credentialApiService.registerCredentialStatus({
+                    credentialStatus,
+                    credentialStatusProof,
+                    namespace: this.namespace,
+                });
             }
             return resp;
         });
