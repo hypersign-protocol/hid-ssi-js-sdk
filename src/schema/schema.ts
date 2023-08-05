@@ -10,6 +10,8 @@ import * as constants from '../constants';
 import { ISchemaFields, ISchemaMethods } from './ISchema';
 import Utils from '../utils';
 import { OfflineSigner } from '@cosmjs/proto-signing';
+import { DeliverTxResponse } from '@cosmjs/stargate';
+import SchemaApiService from '../ssiApi/services/schema/schema.service';
 const ed25519 = require('@stablelib/ed25519');
 
 export default class HyperSignSchema implements ISchemaMethods {
@@ -22,20 +24,26 @@ export default class HyperSignSchema implements ISchemaMethods {
   schema: SchemaProperty;
   schemaRpc: SchemaRpc | null;
   namespace: string;
-
+  private schemaApiService: SchemaApiService | null;
   constructor(
     params: {
       namespace?: string;
       offlineSigner?: OfflineSigner;
       nodeRpcEndpoint?: string;
       nodeRestEndpoint?: string;
+      entityApiSecretKey?: string;
     } = {}
   ) {
-    const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint } = params;
+    const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, entityApiSecretKey } = params;
     const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
     this.schemaRpc = new SchemaRpc({ offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
-
+    if (entityApiSecretKey && entityApiSecretKey != '') {
+      this.schemaApiService = new SchemaApiService(entityApiSecretKey);
+      this.schemaRpc = null;
+    } else {
+      this.schemaApiService = null;
+    }
     this.namespace = namespace && namespace != '' ? namespace : '';
     (this.type = constants.SCHEMA.SCHEMA_TYPE),
       (this.modelVersion = '1.0'),
@@ -74,12 +82,17 @@ export default class HyperSignSchema implements ISchemaMethods {
    * Initialise the offlinesigner to interact with Hypersign blockchain
    */
   public async init() {
-    if (!this.schemaRpc) {
+    if (!this.schemaRpc && !this.schemaApiService) {
       throw new Error(
-        'HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignSchema class is not instantiated with Offlinesigner or have not been initilized'
+        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized with entityApiSecretKey'
       );
     }
-    await this.schemaRpc.init();
+    if (this.schemaRpc) {
+      await this.schemaRpc.init();
+    }
+    if (this.schemaApiService) {
+      await this.schemaApiService.auth();
+    }
   }
 
   /**
@@ -193,7 +206,7 @@ export default class HyperSignSchema implements ISchemaMethods {
    *  - params.schema               : The schema document with schemaProof
    * @returns {Promise<object>} Result of the registration
    */
-  public async register(params: { schema: Schema }): Promise<object> {
+  public async register(params: { schema: Schema }): Promise<{ transactionHash: string }> {
     if (!params.schema) throw new Error('HID-SSI-SDK:: Error: schema must be passed');
     if (!params.schema.proof) throw new Error('HID-SSI-SDK:: Error: schema.proof must be passed');
     if (!params.schema.proof.created) throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain created');
@@ -204,12 +217,23 @@ export default class HyperSignSchema implements ISchemaMethods {
     if (!params.schema.proof.verificationMethod)
       throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain verificationMethod');
 
-    if (!this.schemaRpc) {
+    if (!this.schemaRpc && !this.schemaApiService) {
       throw new Error(
-        'HID-SSI-SDK:: Error: HypersignSchema class is not instantiated with Offlinesigner or have not been initilized'
+        'HID-SSI-SDK:: Error: HypersignSchema class is not instantiated with Offlinesigner or have not been initilized with entityApiSecret'
       );
     }
-    return this.schemaRpc.createSchema(params.schema, params.schema.proof);
+    const response = {} as { transactionHash: string };
+    if (this.schemaRpc) {
+      const result: DeliverTxResponse = await this.schemaRpc.createSchema(params.schema, params.schema.proof);
+      response.transactionHash = result.transactionHash;
+    } else if (this.schemaApiService) {
+      const result: { transactionHash: string } = await this.schemaApiService.registerSchema({
+        schemaDocument: params.schema,
+        schemaProof: params.schema.proof,
+      });
+      response.transactionHash = result.transactionHash;
+    }
+    return response;
   }
 
   /**

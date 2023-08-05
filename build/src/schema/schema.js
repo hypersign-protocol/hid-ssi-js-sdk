@@ -44,13 +44,21 @@ const schema_1 = require("../../libs/generated/ssi/schema");
 const schemaRPC_1 = require("./schemaRPC");
 const constants = __importStar(require("../constants"));
 const utils_1 = __importDefault(require("../utils"));
+const schema_service_1 = __importDefault(require("../ssiApi/services/schema/schema.service"));
 const ed25519 = require('@stablelib/ed25519');
 class HyperSignSchema {
     constructor(params = {}) {
-        const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint } = params;
+        const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, entityApiSecretKey } = params;
         const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
         const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
         this.schemaRpc = new schemaRPC_1.SchemaRpc({ offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
+        if (entityApiSecretKey && entityApiSecretKey != '') {
+            this.schemaApiService = new schema_service_1.default(entityApiSecretKey);
+            this.schemaRpc = null;
+        }
+        else {
+            this.schemaApiService = null;
+        }
         this.namespace = namespace && namespace != '' ? namespace : '';
         (this.type = constants.SCHEMA.SCHEMA_TYPE),
             (this.modelVersion = '1.0'),
@@ -90,10 +98,15 @@ class HyperSignSchema {
      */
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!this.schemaRpc) {
-                throw new Error('HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignSchema class is not instantiated with Offlinesigner or have not been initilized');
+            if (!this.schemaRpc && !this.schemaApiService) {
+                throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized with entityApiSecretKey');
             }
-            yield this.schemaRpc.init();
+            if (this.schemaRpc) {
+                yield this.schemaRpc.init();
+            }
+            if (this.schemaApiService) {
+                yield this.schemaApiService.auth();
+            }
         });
     }
     /**
@@ -205,10 +218,22 @@ class HyperSignSchema {
                 throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain type');
             if (!params.schema.proof.verificationMethod)
                 throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain verificationMethod');
-            if (!this.schemaRpc) {
-                throw new Error('HID-SSI-SDK:: Error: HypersignSchema class is not instantiated with Offlinesigner or have not been initilized');
+            if (!this.schemaRpc && !this.schemaApiService) {
+                throw new Error('HID-SSI-SDK:: Error: HypersignSchema class is not instantiated with Offlinesigner or have not been initilized with entityApiSecret');
             }
-            return this.schemaRpc.createSchema(params.schema, params.schema.proof);
+            const response = {};
+            if (this.schemaRpc) {
+                const result = yield this.schemaRpc.createSchema(params.schema, params.schema.proof);
+                response.transactionHash = result.transactionHash;
+            }
+            else if (this.schemaApiService) {
+                const result = yield this.schemaApiService.registerSchema({
+                    schemaDocument: params.schema,
+                    schemaProof: params.schema.proof,
+                });
+                response.transactionHash = result.transactionHash;
+            }
+            return response;
         });
     }
     /**

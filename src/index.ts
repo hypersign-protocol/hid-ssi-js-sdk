@@ -6,6 +6,7 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 import { IClientSpec, IKeyType, ISignInfo, IVerificationRelationships } from './did/IDID';
 import { Did } from '../libs/generated/ssi/did';
 import { IVerifiableCredential } from './credential/ICredential';
+import { Schema } from '../libs/generated/ssi/schema';
 
 class HypersignSSISdk {
   did: HypersignDID;
@@ -63,4 +64,5 @@ export {
   IClientSpec,
   Did,
   IVerifiableCredential,
+  Schema,
 };

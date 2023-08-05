@@ -23,7 +23,7 @@ export interface ISchemaMethods {
 
   sign(params: { privateKeyMultibase: string; schema: SchemaDocument; verificationMethodId: string }): Promise<Schema>;
 
-  register(params: { schema: Schema }): Promise<object>;
+  register(params: { schema: Schema }): Promise<{ transactionHash: string }>;
 
   resolve(params: { schemaId: string }): Promise<Schema>;
 }

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Did = exports.IClientSpec = exports.IKeyType = exports.IVerificationRelationships = exports.HypersignVerifiablePresentation = exports.HypersignVerifiableCredential = exports.HypersignSchema = exports.HypersignDID = exports.HypersignSSISdk = void 0;
+exports.Schema = exports.Did = exports.IClientSpec = exports.IKeyType = exports.IVerificationRelationships = exports.HypersignVerifiablePresentation = exports.HypersignVerifiableCredential = exports.HypersignSchema = exports.HypersignDID = exports.HypersignSSISdk = void 0;
 const did_1 = __importDefault(require("./did/did"));
 exports.HypersignDID = did_1.default;
 const vc_1 = __importDefault(require("./credential/vc"));
@@ -27,6 +27,8 @@ Object.defineProperty(exports, "IKeyType", { enumerable: true, get: function () 
 Object.defineProperty(exports, "IVerificationRelationships", { enumerable: true, get: function () { return IDID_1.IVerificationRelationships; } });
 const did_2 = require("../libs/generated/ssi/did");
 Object.defineProperty(exports, "Did", { enumerable: true, get: function () { return did_2.Did; } });
+const schema_2 = require("../libs/generated/ssi/schema");
+Object.defineProperty(exports, "Schema", { enumerable: true, get: function () { return schema_2.Schema; } });
 class HypersignSSISdk {
     constructor(params) {
         const { offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, namespace, entityApiSecretKey } = params;

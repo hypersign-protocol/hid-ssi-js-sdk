@@ -5,6 +5,7 @@
  */
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { Schema, SchemaProof } from '../../libs/generated/ssi/schema';
+import { DeliverTxResponse } from '@cosmjs/stargate';
 export interface ISchemaRPC {
     createSchema(schema: Schema, proof: SchemaProof): Promise<object>;
     resolveSchema(schemaId: string): Promise<object>;
@@ -18,7 +19,7 @@ export declare class SchemaRpc implements ISchemaRPC {
         nodeRestEndpoint: string;
     });
     init(): Promise<void>;
-    createSchema(schema: Schema, proof: SchemaProof): Promise<object>;
+    createSchema(schema: Schema, proof: SchemaProof): Promise<DeliverTxResponse>;
     resolveSchema(schemaId: string): Promise<Array<object>>;
 }
 //# sourceMappingURL=schemaRPC.d.ts.map

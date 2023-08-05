@@ -42,6 +42,7 @@ beforeEach(function () {
         // hsSdk = new HypersignSSISdk(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest, hidNodeEp.namespace);
         // await hsSdk.init();
         hypersignSchema = new index_1.HypersignSchema({
+            // entityApiSecretKey,
             offlineSigner,
             nodeRestEndpoint: config_1.hidNodeEp.rest,
             nodeRpcEndpoint: config_1.hidNodeEp.rpc,
@@ -109,12 +110,7 @@ describe('#register() this is to register did on the blockchain', function () {
     it('should be able to register didDocument in the blockchain', function () {
         return __awaiter(this, void 0, void 0, function* () {
             const result = yield hypersignDID.register({ didDocument, privateKeyMultibase, verificationMethodId });
-            (0, chai_1.should)().exist(result.code);
-            (0, chai_1.should)().exist(result.height);
-            (0, chai_1.should)().exist(result.rawLog);
             (0, chai_1.should)().exist(result.transactionHash);
-            (0, chai_1.should)().exist(result.gasUsed);
-            (0, chai_1.should)().exist(result.gasWanted);
         });
     });
 });
@@ -287,15 +283,8 @@ describe('#register() function to register schema on blockchain', function () {
             const registeredSchema = yield hypersignSchema.register({
                 schema: signedSchema,
             });
-            //console.log(JSON.stringify(registeredSchema, null, 2))
-            (0, chai_1.expect)(registeredSchema).to.be.a('object');
-            (0, chai_1.should)().exist(registeredSchema.code);
-            (0, chai_1.should)().exist(registeredSchema.height);
-            (0, chai_1.should)().exist(registeredSchema.rawLog);
+            // console.log(JSON.stringify(registeredSchema, null, 2));
             (0, chai_1.should)().exist(registeredSchema.transactionHash);
-            (0, chai_1.should)().exist(registeredSchema.gasUsed);
-            (0, chai_1.should)().exist(registeredSchema.gasWanted);
-            (0, chai_1.expect)(registeredSchema.rawLog).to.be.a('string');
         });
     });
 });

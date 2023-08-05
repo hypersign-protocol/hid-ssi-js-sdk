@@ -11,4 +11,7 @@ export const APIENDPOINT = {
   CREDENTIALS: {
     REGISTER_CREDENTIAL_STATUS: '/credential/status/register',
   },
+  SCHEMA: {
+    REGISTER_SCHEMA: '/schema/register',
+  },
 };

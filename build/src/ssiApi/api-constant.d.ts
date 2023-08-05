@@ -11,5 +11,8 @@ export declare const APIENDPOINT: {
     CREDENTIALS: {
         REGISTER_CREDENTIAL_STATUS: string;
     };
+    SCHEMA: {
+        REGISTER_SCHEMA: string;
+    };
 };
 //# sourceMappingURL=api-constant.d.ts.map

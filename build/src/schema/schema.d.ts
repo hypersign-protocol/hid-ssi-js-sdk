@@ -17,11 +17,13 @@ export default class HyperSignSchema implements ISchemaMethods {
     schema: SchemaProperty;
     schemaRpc: SchemaRpc | null;
     namespace: string;
+    private schemaApiService;
     constructor(params?: {
         namespace?: string;
         offlineSigner?: OfflineSigner;
         nodeRpcEndpoint?: string;
         nodeRestEndpoint?: string;
+        entityApiSecretKey?: string;
     });
     private _getSchemaId;
     private _getDateTime;
@@ -67,7 +69,9 @@ export default class HyperSignSchema implements ISchemaMethods {
      */
     register(params: {
         schema: Schema;
-    }): Promise<object>;
+    }): Promise<{
+        transactionHash: string;
+    }>;
     /**
      * Resolves a schema document with schemId from Hypersign blockchain - an onchain activity
      * @params

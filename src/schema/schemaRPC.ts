@@ -10,8 +10,7 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
 import { Schema, SchemaProof } from '../../libs/generated/ssi/schema';
-import { SignInfo } from '../../libs/generated/ssi/did';
-import { SigningStargateClient } from '@cosmjs/stargate';
+import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate';
 
 export interface ISchemaRPC {
   createSchema(schema: Schema, proof: SchemaProof): Promise<object>;
@@ -46,7 +45,7 @@ export class SchemaRpc implements ISchemaRPC {
     await this.hidClient.init();
   }
 
-  async createSchema(schema: Schema, proof: SchemaProof): Promise<object> {
+  async createSchema(schema: Schema, proof: SchemaProof): Promise<DeliverTxResponse> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: SchemaRpc class is not initialise with offlinesigner');
     }

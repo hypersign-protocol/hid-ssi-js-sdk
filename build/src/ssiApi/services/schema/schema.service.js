@@ -11,10 +11,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const api_constant_1 = require("../../api-constant");
 const apiAuth_1 = require("../../apiAuth/apiAuth");
-class CredentialApiService {
+class SchemaApiService {
     constructor(apiKey) {
         if (!apiKey || apiKey.trim() === "") {
-            throw new Error('HID-SSI-SDK:: Error: Please Provide apiKey');
+            throw new Error('HID:SSI-SDK:: Error: Please Provide apiKey');
         }
         this.authService = new apiAuth_1.ApiAuth(apiKey);
     }
@@ -25,27 +25,27 @@ class CredentialApiService {
         });
     }
     /**
-     * Register credential status on blockchain
+     * Register schema on blockchain
      * @param
-     * - params.credentialStatus           : Credential status information
-     * - params.credentialStatusProof      : Status proof of the credential
+     * - params.SchemaDocument    :Schema document to be registered on blockchain
+     * - params.SchemaProof       :Proof of schema document
      * @return {Promise<{transactionHash: string}>}
      */
-    registerCredentialStatus(params) {
+    registerSchema(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!params.credentialStatus || Object.keys(params.credentialStatus).length === 0) {
-                throw new Error('HID-SSI-SDK:: Error: params.credentialStatus is required to register credential status');
+            if (!params.schemaDocument || Object.keys(params.schemaDocument).length === 0) {
+                throw new Error('HID-SSI-SDK:: Error: params.schemaDocument is required to register schema on blockchain');
             }
-            if (!params.credentialStatusProof || Object.keys(params.credentialStatusProof).length === 0) {
-                throw new Error('HID-SSI-SDK:: Error: params.credentialStatusProof is required to register credential status');
+            if (!params.schemaProof || Object.keys(params.schemaProof).length === 0) {
+                throw new Error('HID-SSI-SDK:: Error: params.schemaProof is required to register schema on blockchain');
             }
             const isAccessTokenValid = yield this.authService.checkAndRefreshAToken({ accessToken: this.accessToken });
             if (!isAccessTokenValid.valid) {
                 this.accessToken = isAccessTokenValid.accessToken;
             }
-            const apiUrl = `${api_constant_1.APIENDPOINT.STUDIO_API_BASE_URL}${api_constant_1.APIENDPOINT.CREDENTIALS.REGISTER_CREDENTIAL_STATUS}`;
+            const apiUrl = `${api_constant_1.APIENDPOINT.STUDIO_API_BASE_URL}${api_constant_1.APIENDPOINT.SCHEMA.REGISTER_SCHEMA}`;
             const headers = {
-                'Content-Type': 'application/json',
+                'Content-Type': "application/json",
                 Authorization: `Bearer ${this.accessToken}`,
                 origin: `${api_constant_1.APIENDPOINT.STUDIO_API_ORIGIN}`
             };
@@ -63,4 +63,4 @@ class CredentialApiService {
         });
     }
 }
-exports.default = CredentialApiService;
+exports.default = SchemaApiService;

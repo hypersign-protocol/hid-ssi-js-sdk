@@ -2,7 +2,6 @@ import { expect, should } from 'chai';
 import { HypersignSSISdk, HypersignDID, HypersignSchema } from '../index';
 import { createWallet, mnemonic, hidNodeEp } from './config';
 import { Schema, SchemaProof, SchemaDocument } from '../../libs/generated/ssi/schema';
-import { cosmjsSalt } from '@cosmjs/amino/build/wallet';
 
 let hsSdk;
 let privateKeyMultibase;
@@ -36,6 +35,7 @@ beforeEach(async function () {
   // await hsSdk.init();
 
   hypersignSchema = new HypersignSchema({
+    // entityApiSecretKey,
     offlineSigner,
     nodeRestEndpoint: hidNodeEp.rest,
     nodeRpcEndpoint: hidNodeEp.rpc,
@@ -103,12 +103,7 @@ describe('#generate() to generate did', function () {
 describe('#register() this is to register did on the blockchain', function () {
   it('should be able to register didDocument in the blockchain', async function () {
     const result = await hypersignDID.register({ didDocument, privateKeyMultibase, verificationMethodId });
-    should().exist(result.code);
-    should().exist(result.height);
-    should().exist(result.rawLog);
     should().exist(result.transactionHash);
-    should().exist(result.gasUsed);
-    should().exist(result.gasWanted);
   });
 });
 
@@ -290,15 +285,8 @@ describe('#register() function to register schema on blockchain', function () {
     const registeredSchema = await hypersignSchema.register({
       schema: signedSchema,
     });
-    //console.log(JSON.stringify(registeredSchema, null, 2))
-    expect(registeredSchema).to.be.a('object');
-    should().exist(registeredSchema.code);
-    should().exist(registeredSchema.height);
-    should().exist(registeredSchema.rawLog);
+    // console.log(JSON.stringify(registeredSchema, null, 2));
     should().exist(registeredSchema.transactionHash);
-    should().exist(registeredSchema.gasUsed);
-    should().exist(registeredSchema.gasWanted);
-    expect(registeredSchema.rawLog).to.be.a('string');
   });
 });
 

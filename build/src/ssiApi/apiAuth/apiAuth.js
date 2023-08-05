@@ -28,6 +28,7 @@ class ApiAuth {
             const studioApiUrl = `${api_constant_1.APIENDPOINT.STUDIO_API_BASE_URL}${api_constant_1.APIENDPOINT.AUTH}`;
             const headers = {
                 'X-Api-Secret-Key': this.apiKey,
+                origin: `${api_constant_1.APIENDPOINT.STUDIO_API_ORIGIN}`
             };
             const requestOptions = {
                 method: 'POST',

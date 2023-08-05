@@ -25,7 +25,9 @@ export interface ISchemaMethods {
     }): Promise<Schema>;
     register(params: {
         schema: Schema;
-    }): Promise<object>;
+    }): Promise<{
+        transactionHash: string;
+    }>;
     resolve(params: {
         schemaId: string;
     }): Promise<Schema>;

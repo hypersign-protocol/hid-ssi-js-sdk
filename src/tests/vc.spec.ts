@@ -28,7 +28,8 @@ let credenStatus: ICredentialStatus;
 let credentialStatusProof2 = {};
 let credentialStatus2 = {};
 let credentialStatus;
-const entityApiSecretKey = "57ed4af5b3f51428250e76a769ce8.d8f70a64e3d060b377c85eb75b60ae25011ecebb63f28a27f72183e5bcba140222f8628f17a72eee4833a9174f5ae8309"
+const entityApiSecretKey =
+  '57ed4af5b3f51428250e76a769ce8.d8f70a64e3d060b377c85eb75b60ae25011ecebb63f28a27f72183e5bcba140222f8628f17a72eee4833a9174f5ae8309';
 const credentialBody = {
   schemaId: '',
   subjectDid: '',
@@ -101,12 +102,12 @@ describe('DID Opearations', () => {
       should().exist(didDocument['verificationMethod']);
       expect(
         didDocument['verificationMethod'] &&
-        didDocument['authentication'] &&
-        didDocument['assertionMethod'] &&
-        didDocument['keyAgreement'] &&
-        didDocument['capabilityInvocation'] &&
-        didDocument['capabilityDelegation'] &&
-        didDocument['service']
+          didDocument['authentication'] &&
+          didDocument['assertionMethod'] &&
+          didDocument['keyAgreement'] &&
+          didDocument['capabilityInvocation'] &&
+          didDocument['capabilityDelegation'] &&
+          didDocument['service']
       ).to.be.a('array');
       should().exist(didDocument['authentication']);
       should().exist(didDocument['assertionMethod']);
