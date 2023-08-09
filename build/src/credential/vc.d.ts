@@ -126,26 +126,61 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         status: string;
         statusReason?: string;
     }): Promise<DeliverTxResponse>;
+    /**
+     * Check status of credential on Hypersign Chain
+     * @param
+     * - params.credentialId     : Credential Id
+     * @returns {Promise<{ verified: boolean }>}
+     */
     checkCredentialStatus(params: {
         credentialId: string;
     }): Promise<{
         verified: boolean;
     }>;
+    /**
+     * Register credential status on Hypersign Chain
+     * @param
+     * - params.credentialStatus       : Credential status
+     * - params.credentialStatusProof  : Status proof of the credential
+     * @returns {Promise<{ transactionHash: string }>}
+     */
     registerCredentialStatus(params: {
         credentialStatus: CredentialStatus;
         credentialStatusProof: CredentialProof;
     }): Promise<{
         transactionHash: string;
     }>;
+    /**
+     * Generate transaction message
+     * @param
+     * - params.credentialStatus       : Credential status
+     * - params.credentialStatusProof  : Status proof of the credential
+     * @returns {Promise<{typeUrl: string, value: MsgRegisterCredentialStatus}>}
+     */
     generateRegisterCredentialStatusTxnMessage(credentialStatus: CredentialStatus, proof: CredentialProof): Promise<{
         typeUrl: string;
         value: import("../../libs/generated/ssi/tx").MsgRegisterCredentialStatus;
     }>;
+    /**
+     * Register multiple credential status
+     * @param
+     * - params.txnMessage      : Array of transaction message
+     * @returns {Promise<DeliverTxResponse>}
+     */
     registerCredentialStatusTxnBulk(txnMessage: []): Promise<DeliverTxResponse>;
     /**
-     * Issue credentials document with EthereumEip712Signature2021
-   
-    */
+     *  Issue credentials document with EthereumEip712Signature2021
+     * @param
+     * - params.credential           : Hypersign credentail document
+     * - params.issuerDid            : Did of the issuer
+     * - params.verificationMethodId : Verification Method of Issuer
+     * - params.type                 : Optional, Type of document
+     * - params.web3Obj              : Web3 object
+     * - params.registerCredential   : Optional, Set registerCredential to true if you want to register, false otherwise
+     * - params.domain               : Optional, domain url
+     * - params.clientspec           : Optional, ClientSpec either it is eth-personalSign or cosmos-ADR036
+     * @returns {Promise<IVerifiableCredential>}
+     */
     issueByClientSpec(params: {
         credential: IVerifiableCredential;
         issuerDid: string;
@@ -158,6 +193,15 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     }): Promise<Error | {
         signedCredential: IVerifiableCredential;
     }>;
+    /**
+     * Verfies signed/issued credential document with EthereumEip712Signature2021
+     * @param
+     * - params.credential           : Hypersign credentail document
+     * - params.issuerDid            : Did of the issuer
+     * - params.verificationMethodId : Verification Method of Issuer
+     * - params.web3Obj              : Web3 object
+     * @returns {Promise<object>}
+     */
     verifyByClientSpec(params: {
         credential: IVerifiableCredential;
         issuerDid: string;

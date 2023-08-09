@@ -589,6 +589,12 @@ class HypersignVerifiableCredential {
             return resp;
         });
     }
+    /**
+     * Check status of credential on Hypersign Chain
+     * @param
+     * - params.credentialId     : Credential Id
+     * @returns {Promise<{ verified: boolean }>}
+     */
     checkCredentialStatus(params) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!params || !params.credentialId)
@@ -615,6 +621,13 @@ class HypersignVerifiableCredential {
             return { verified: true };
         });
     }
+    /**
+     * Register credential status on Hypersign Chain
+     * @param
+     * - params.credentialStatus       : Credential status
+     * - params.credentialStatusProof  : Status proof of the credential
+     * @returns {Promise<{ transactionHash: string }>}
+     */
     registerCredentialStatus(params) {
         return __awaiter(this, void 0, void 0, function* () {
             const { credentialStatus, credentialStatusProof } = params;
@@ -641,6 +654,13 @@ class HypersignVerifiableCredential {
             return resp;
         });
     }
+    /**
+     * Generate transaction message
+     * @param
+     * - params.credentialStatus       : Credential status
+     * - params.credentialStatusProof  : Status proof of the credential
+     * @returns {Promise<{typeUrl: string, value: MsgRegisterCredentialStatus}>}
+     */
     generateRegisterCredentialStatusTxnMessage(credentialStatus, proof) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!credentialStatus || !proof)
@@ -652,6 +672,12 @@ class HypersignVerifiableCredential {
             return txnMessage;
         });
     }
+    /**
+     * Register multiple credential status
+     * @param
+     * - params.txnMessage      : Array of transaction message
+     * @returns {Promise<DeliverTxResponse>}
+     */
     registerCredentialStatusTxnBulk(txnMessage) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!txnMessage)
@@ -667,9 +693,18 @@ class HypersignVerifiableCredential {
         });
     }
     /**
-     * Issue credentials document with EthereumEip712Signature2021
-   
-    */
+     *  Issue credentials document with EthereumEip712Signature2021
+     * @param
+     * - params.credential           : Hypersign credentail document
+     * - params.issuerDid            : Did of the issuer
+     * - params.verificationMethodId : Verification Method of Issuer
+     * - params.type                 : Optional, Type of document
+     * - params.web3Obj              : Web3 object
+     * - params.registerCredential   : Optional, Set registerCredential to true if you want to register, false otherwise
+     * - params.domain               : Optional, domain url
+     * - params.clientspec           : Optional, ClientSpec either it is eth-personalSign or cosmos-ADR036
+     * @returns {Promise<IVerifiableCredential>}
+     */
     issueByClientSpec(params) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!params.verificationMethodId) {
@@ -729,6 +764,15 @@ class HypersignVerifiableCredential {
         });
     }
     // verify credentila issued by client spec
+    /**
+     * Verfies signed/issued credential document with EthereumEip712Signature2021
+     * @param
+     * - params.credential           : Hypersign credentail document
+     * - params.issuerDid            : Did of the issuer
+     * - params.verificationMethodId : Verification Method of Issuer
+     * - params.web3Obj              : Web3 object
+     * @returns {Promise<object>}
+     */
     verifyByClientSpec(params) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!params.credential) {

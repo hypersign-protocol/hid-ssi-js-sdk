@@ -86,7 +86,7 @@ class HypersignVerifiablePresentation {
      *  - params.verificationMethodId : verificationMethodId of holder
      *  - params.privateKeyMultibase  : Private key associated with the verification method
      *  - params.challenge            : Any random challenge
-     * @returns {Promise<object>}
+     * @returns {Promise<IVerifiablePresentation>}
      */
     sign(params) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -150,7 +150,7 @@ class HypersignVerifiablePresentation {
      *  - params.holderDidDocSigned         : DIDdocument of the subject
      *  - params.holderVerificationMethodId : verificationMethodId of holder
      *  - params.issuerDid                  : DID of the issuer
-     *  - params.issuerVerificationMethodId : Optional DIDDoc of the issuer
+     *  - params.issuerVerificationMethodId : verificationMethodId of issuer
      *  - params.domain                     : Optional domain
      *  - params.challenge                  : Random challenge
      * @returns {Promise<object>}
@@ -273,6 +273,17 @@ class HypersignVerifiablePresentation {
             return result;
         });
     }
+    /**
+     * Sign a new presentation document generated using wallet
+     * @param
+     * - params.presentation            : Array of Verifiable Credentials
+     * - params.holderDid               : *Optional* DID of the subject
+     * - params.verificationMethodId    : verificationMethodId of holder
+     * - params.web3obj                 : Web3 object
+     * - params.domain                  : *Optional* Domain url
+     * - params.challenge               : *Optional* Any rando challenge
+     * @returns {Promise<IVerifiablePresentation>}
+     */
     signByClientSpec(params) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!params.holderDid) {
@@ -325,6 +336,20 @@ class HypersignVerifiablePresentation {
             return signedVP;
         });
     }
+    /**
+     * Verifies signed presentation document
+     * @param
+     * - params.signedPresentation          : Signed presentation document
+     * - params.challenge                   : *Optional* Random challenge
+     * - params.domain                      : *Optional* domain url
+     * - params.issuerDid                   : Did of the issuer
+     * - params.holderDid                   : *Optional* Did of the subject
+     * - params.holderDidDocSigned          : *Optional* DidDocument of the subject
+     * - params.holderVerificationMethodId  : verificationMethodId of holder
+     * - params.issuerVerificationMethodId  : verificationMethodId of issuer
+     * - params.web3obj                     : Web3 object
+     * @returns {Promise<{object}>}
+     */
     verifyByClientSpec(params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
