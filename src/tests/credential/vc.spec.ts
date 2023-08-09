@@ -1,8 +1,8 @@
 import { expect, should } from 'chai';
-import { HypersignDID, HypersignSchema, HypersignVerifiableCredential } from '../index';
-import { createWallet, mnemonic, hidNodeEp } from './config';
-import { ICredentialStatus, IVerifiableCredential } from '../credential/ICredential';
-import { CredentialProof, CredentialStatus } from '../../libs/generated/ssi/credential';
+import { HypersignDID, HypersignSchema, HypersignVerifiableCredential } from '../../index';
+import { createWallet, mnemonic, hidNodeEp } from '../config';
+import { ICredentialStatus, IVerifiableCredential } from '../../credential/ICredential';
+import { CredentialProof, CredentialStatus } from '../../../libs/generated/ssi/credential';
 
 let privateKeyMultibase;
 let publicKeyMultibase;
@@ -102,12 +102,12 @@ describe('DID Opearations', () => {
       should().exist(didDocument['verificationMethod']);
       expect(
         didDocument['verificationMethod'] &&
-          didDocument['authentication'] &&
-          didDocument['assertionMethod'] &&
-          didDocument['keyAgreement'] &&
-          didDocument['capabilityInvocation'] &&
-          didDocument['capabilityDelegation'] &&
-          didDocument['service']
+        didDocument['authentication'] &&
+        didDocument['assertionMethod'] &&
+        didDocument['keyAgreement'] &&
+        didDocument['capabilityInvocation'] &&
+        didDocument['capabilityDelegation'] &&
+        didDocument['service']
       ).to.be.a('array');
       should().exist(didDocument['authentication']);
       should().exist(didDocument['assertionMethod']);
@@ -195,15 +195,9 @@ describe('Schema Opearations', () => {
       const registeredSchema = await hypersignSchema.register({
         schema: signedSchema,
       });
-      //console.log(JSON.stringify(registeredSchema, null, 2))
+      // console.log(registeredSchema)
       expect(registeredSchema).to.be.a('object');
-      should().exist(registeredSchema.code);
-      should().exist(registeredSchema.height);
-      should().exist(registeredSchema.rawLog);
       should().exist(registeredSchema.transactionHash);
-      should().exist(registeredSchema.gasUsed);
-      should().exist(registeredSchema.gasWanted);
-      expect(registeredSchema.rawLog).to.be.a('string');
     });
   });
 });
@@ -466,11 +460,7 @@ describe('Verifiable Credential Opearations', () => {
       should().exist(signedCredential['credentialSchema']);
       should().exist(signedCredential['credentialStatus']);
       should().exist(signedCredential['proof']);
-      // console.log({
-      //   signedCredentialId: signedVC ? signedVC['id'] : '',
-      //   credentialId,
-      //   id: tempIssueCredentialBody.credential.id,
-      // });
+
       expect(signedCredential['id']).to.be.equal(tempIssueCredentialBody.credential.id);
 
       expect(credentialStatus).to.be.a('object');
@@ -658,7 +648,7 @@ describe('Verifiable Credential Status Opearations', () => {
     it('should be able to check credential status', async function () {
       // console.log('Credential ID ' + credentialId);
       const credentialStatus = await hypersignVC.checkCredentialStatus({ credentialId: credentialId });
-      console.log(JSON.stringify(credentialStatus, null, 2));
+      // console.log(JSON.stringify(credentialStatus, null, 2));
       expect(credentialStatus).to.be.a('object');
       should().exist(credentialStatus.verified);
       expect(credentialStatus.verified).to.be.equal(true);

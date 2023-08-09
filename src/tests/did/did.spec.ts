@@ -1,8 +1,8 @@
 import { expect, should } from 'chai';
-import { HypersignDID, HypersignSSISdk } from '../index';
-import { IPublicKey, IController, IDID, IKeyType } from '../did/IDID';
+import { HypersignDID, HypersignSSISdk } from '../../index';
+import { IPublicKey, IController, IDID, IKeyType } from '../../did/IDID';
 
-import { createWallet, mnemonic, hidNodeEp } from './config';
+import { createWallet, mnemonic, hidNodeEp } from '../config';
 let privateKeyMultibase;
 let publicKeyMultibase;
 let verificationMethodId;
@@ -20,8 +20,7 @@ let pubKey;
 let privKey;
 let didDocToReg;
 let DIdDOcWithMultiplVM;
-const entityApiSecretKey =
-  '8fc3d16ce8f040fd2fc4e5ccc1d73.6b6e55d4d54cd90c85bbcc92d9469873e60c0d7878681223e2fe63fca3abafb63390f939a77b3d73bf2eb58a654810b38';
+
 //add mnemonic of wallet that have balance
 
 beforeEach(async function () {
@@ -29,7 +28,6 @@ beforeEach(async function () {
 
   const params = {
     offlineSigner,
-    // entityApiSecretKey,
     nodeRestEndpoint: hidNodeEp.rest,
     nodeRpcEndpoint: hidNodeEp.rpc,
     namespace: hidNodeEp.namespace,
@@ -37,18 +35,6 @@ beforeEach(async function () {
   hypersignDID = new HypersignDID(params);
   await hypersignDID.init();
 });
-
-// describe("testing hypersignDid initiation", function(){
-//   it('should not throw error if offlinesigner is not passed', async()=>{
-//     const params = {
-//       nodeRestEndpoint: hidNodeEp.rest,
-//       nodeRpcEndpoint: hidNodeEp.rpc,
-//       namespace: hidNodeEp.namespace,
-//     };
-//     hypersignDID = new HypersignDID(params);
-
-//   })
-// })
 
 describe('DID Test scenarios', () => {
   //remove seed while creating did so that wallet can generate different did every time
@@ -94,12 +80,12 @@ describe('DID Test scenarios', () => {
       should().exist(didDocument['verificationMethod']);
       expect(
         didDocument['verificationMethod'] &&
-          didDocument['authentication'] &&
-          didDocument['assertionMethod'] &&
-          didDocument['keyAgreement'] &&
-          didDocument['capabilityInvocation'] &&
-          didDocument['capabilityDelegation'] &&
-          didDocument['service']
+        didDocument['authentication'] &&
+        didDocument['assertionMethod'] &&
+        didDocument['keyAgreement'] &&
+        didDocument['capabilityInvocation'] &&
+        didDocument['capabilityDelegation'] &&
+        didDocument['service']
       ).to.be.a('array');
       should().exist(didDocument['authentication']);
       should().exist(didDocument['assertionMethod']);
@@ -125,12 +111,12 @@ describe('DID Test scenarios', () => {
       should().exist(didDocument['verificationMethod']);
       expect(
         didDocument['verificationMethod'] &&
-          didDocument['authentication'] &&
-          didDocument['assertionMethod'] &&
-          didDocument['keyAgreement'] &&
-          didDocument['capabilityInvocation'] &&
-          didDocument['capabilityDelegation'] &&
-          didDocument['service']
+        didDocument['authentication'] &&
+        didDocument['assertionMethod'] &&
+        didDocument['keyAgreement'] &&
+        didDocument['capabilityInvocation'] &&
+        didDocument['capabilityDelegation'] &&
+        didDocument['service']
       ).to.be.a('array');
 
       should().exist(didDocument['authentication']);
@@ -157,12 +143,12 @@ describe('DID Test scenarios', () => {
       should().exist(didDocument['verificationMethod']);
       expect(
         didDocument['verificationMethod'] &&
-          didDocument['authentication'] &&
-          didDocument['assertionMethod'] &&
-          didDocument['keyAgreement'] &&
-          didDocument['capabilityInvocation'] &&
-          didDocument['capabilityDelegation'] &&
-          didDocument['service']
+        didDocument['authentication'] &&
+        didDocument['assertionMethod'] &&
+        didDocument['keyAgreement'] &&
+        didDocument['capabilityInvocation'] &&
+        didDocument['capabilityDelegation'] &&
+        didDocument['service']
       ).to.be.a('array');
       should().exist(didDocument['authentication']);
       should().exist(didDocument['assertionMethod']);
@@ -185,12 +171,12 @@ describe('DID Test scenarios', () => {
       should().exist(didDocument['verificationMethod']);
       expect(
         didDocument['verificationMethod'] &&
-          didDocument['authentication'] &&
-          didDocument['assertionMethod'] &&
-          didDocument['keyAgreement'] &&
-          didDocument['capabilityInvocation'] &&
-          didDocument['capabilityDelegation'] &&
-          didDocument['service']
+        didDocument['authentication'] &&
+        didDocument['assertionMethod'] &&
+        didDocument['keyAgreement'] &&
+        didDocument['capabilityInvocation'] &&
+        didDocument['capabilityDelegation'] &&
+        didDocument['service']
       ).to.be.a('array');
       should().exist(didDocument['authentication']);
       should().exist(didDocument['assertionMethod']);
@@ -226,12 +212,12 @@ describe('DID Test scenarios', () => {
       should().exist(didDocument['verificationMethod']);
       expect(
         didDocument['verificationMethod'] &&
-          didDocument['authentication'] &&
-          didDocument['assertionMethod'] &&
-          didDocument['keyAgreement'] &&
-          didDocument['capabilityInvocation'] &&
-          didDocument['capabilityDelegation'] &&
-          didDocument['service']
+        didDocument['authentication'] &&
+        didDocument['assertionMethod'] &&
+        didDocument['keyAgreement'] &&
+        didDocument['capabilityInvocation'] &&
+        didDocument['capabilityDelegation'] &&
+        didDocument['service']
       ).to.be.a('array');
       should().exist(didDocument['authentication']);
       should().exist(didDocument['assertionMethod']);
@@ -407,12 +393,12 @@ describe('DID Test scenarios', () => {
       should().exist(updatedDidDoc['verificationMethod']);
       expect(
         updatedDidDoc['verificationMethod'] &&
-          updatedDidDoc['authentication'] &&
-          updatedDidDoc['assertionMethod'] &&
-          updatedDidDoc['keyAgreement'] &&
-          updatedDidDoc['capabilityInvocation'] &&
-          updatedDidDoc['capabilityDelegation'] &&
-          updatedDidDoc['service']
+        updatedDidDoc['authentication'] &&
+        updatedDidDoc['assertionMethod'] &&
+        updatedDidDoc['keyAgreement'] &&
+        updatedDidDoc['capabilityInvocation'] &&
+        updatedDidDoc['capabilityDelegation'] &&
+        updatedDidDoc['service']
       ).to.be.a('array');
       should().exist(updatedDidDoc['authentication']);
       should().exist(updatedDidDoc['assertionMethod']);
@@ -436,12 +422,12 @@ describe('DID Test scenarios', () => {
       should().exist(testDidDoc['verificationMethod']);
       expect(
         testDidDoc['verificationMethod'] &&
-          testDidDoc['authentication'] &&
-          testDidDoc['assertionMethod'] &&
-          testDidDoc['keyAgreement'] &&
-          testDidDoc['capabilityInvocation'] &&
-          testDidDoc['capabilityDelegation'] &&
-          testDidDoc['service']
+        testDidDoc['authentication'] &&
+        testDidDoc['assertionMethod'] &&
+        testDidDoc['keyAgreement'] &&
+        testDidDoc['capabilityInvocation'] &&
+        testDidDoc['capabilityDelegation'] &&
+        testDidDoc['service']
       ).to.be.a('array');
       should().exist(testDidDoc['authentication']);
       should().exist(testDidDoc['assertionMethod']);
@@ -464,12 +450,12 @@ describe('DID Test scenarios', () => {
       should().exist(DIdDOcWithMultiplVM['verificationMethod']);
       expect(
         DIdDOcWithMultiplVM['verificationMethod'] &&
-          DIdDOcWithMultiplVM['authentication'] &&
-          DIdDOcWithMultiplVM['assertionMethod'] &&
-          DIdDOcWithMultiplVM['keyAgreement'] &&
-          DIdDOcWithMultiplVM['capabilityInvocation'] &&
-          DIdDOcWithMultiplVM['capabilityDelegation'] &&
-          DIdDOcWithMultiplVM['service']
+        DIdDOcWithMultiplVM['authentication'] &&
+        DIdDOcWithMultiplVM['assertionMethod'] &&
+        DIdDOcWithMultiplVM['keyAgreement'] &&
+        DIdDOcWithMultiplVM['capabilityInvocation'] &&
+        DIdDOcWithMultiplVM['capabilityDelegation'] &&
+        DIdDOcWithMultiplVM['service']
       ).to.be.a('array');
       should().exist(DIdDOcWithMultiplVM['authentication']);
       should().exist(DIdDOcWithMultiplVM['assertionMethod']);
@@ -641,7 +627,7 @@ describe('DID Test scenarios', () => {
     });
     it('should be able to resolve did', async function () {
       const params = {
-        did: didDocId, //"did:hid:testnet:z4PfQRbTsL8wxWnJzfENMij54E7ubhJciNxSPFWfsAHNU",
+        did: didDocId,
       };
       const result = await hypersignDID.resolve(params);
       expect(result).to.be.a('object');
@@ -698,7 +684,6 @@ describe('DID Test scenarios', () => {
         verificationMethodId,
         versionId,
       });
-
       should().exist(result.transactionHash);
     });
   });
@@ -968,8 +953,8 @@ describe('DID Test scenarios', () => {
           }).to.throw(
             Error,
             'HID-SSI-SDK:: Error: could not find verification method for verificationMethodId: ' +
-              verMethIdMod +
-              ' in did document'
+            verMethIdMod +
+            ' in did document'
           );
         });
     });

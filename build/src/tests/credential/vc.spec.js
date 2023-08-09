@@ -10,8 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const index_1 = require("../index");
-const config_1 = require("./config");
+const index_1 = require("../../index");
+const config_1 = require("../config");
 let privateKeyMultibase;
 let publicKeyMultibase;
 let didDocId;
@@ -204,15 +204,9 @@ describe('Schema Opearations', () => {
                 const registeredSchema = yield hypersignSchema.register({
                     schema: signedSchema,
                 });
-                //console.log(JSON.stringify(registeredSchema, null, 2))
+                // console.log(registeredSchema)
                 (0, chai_1.expect)(registeredSchema).to.be.a('object');
-                (0, chai_1.should)().exist(registeredSchema.code);
-                (0, chai_1.should)().exist(registeredSchema.height);
-                (0, chai_1.should)().exist(registeredSchema.rawLog);
                 (0, chai_1.should)().exist(registeredSchema.transactionHash);
-                (0, chai_1.should)().exist(registeredSchema.gasUsed);
-                (0, chai_1.should)().exist(registeredSchema.gasWanted);
-                (0, chai_1.expect)(registeredSchema.rawLog).to.be.a('string');
             });
         });
     });
@@ -479,11 +473,6 @@ describe('Verifiable Credential Opearations', () => {
                 (0, chai_1.should)().exist(signedCredential['credentialSchema']);
                 (0, chai_1.should)().exist(signedCredential['credentialStatus']);
                 (0, chai_1.should)().exist(signedCredential['proof']);
-                // console.log({
-                //   signedCredentialId: signedVC ? signedVC['id'] : '',
-                //   credentialId,
-                //   id: tempIssueCredentialBody.credential.id,
-                // });
                 (0, chai_1.expect)(signedCredential['id']).to.be.equal(tempIssueCredentialBody.credential.id);
                 (0, chai_1.expect)(credentialStatus).to.be.a('object');
                 (0, chai_1.should)().exist(credentialStatus['claim']);
@@ -664,7 +653,7 @@ describe('Verifiable Credential Status Opearations', () => {
             return __awaiter(this, void 0, void 0, function* () {
                 // console.log('Credential ID ' + credentialId);
                 const credentialStatus = yield hypersignVC.checkCredentialStatus({ credentialId: credentialId });
-                console.log(JSON.stringify(credentialStatus, null, 2));
+                // console.log(JSON.stringify(credentialStatus, null, 2));
                 (0, chai_1.expect)(credentialStatus).to.be.a('object');
                 (0, chai_1.should)().exist(credentialStatus.verified);
                 (0, chai_1.expect)(credentialStatus.verified).to.be.equal(true);

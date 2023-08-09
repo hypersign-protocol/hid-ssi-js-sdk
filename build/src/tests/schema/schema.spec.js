@@ -10,8 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const index_1 = require("../index");
-const config_1 = require("./config");
+const index_1 = require("../../index");
+const config_1 = require("../config");
 let hsSdk;
 let privateKeyMultibase;
 let publicKeyMultibase;
@@ -123,13 +123,31 @@ describe('#generate() method to create schema', function () {
             }).to.throw(Error, 'HID-SSI-SDK:: Error: Author must be passed');
         });
     });
+    it('should able to create a new schema without offlinesigner', function () {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tempSchemaBody = Object.assign({}, schemaBody);
+            tempSchemaBody.author = didDocId;
+            const hypersignSchema = new index_1.HypersignSchema();
+            const schemaDoc = yield hypersignSchema.generate(tempSchemaBody);
+            (0, chai_1.expect)(schemaDoc).to.be.a('object');
+            (0, chai_1.should)().exist(schemaDoc['type']);
+            (0, chai_1.should)().exist(schemaDoc['modelVersion']);
+            (0, chai_1.should)().exist(schemaDoc['id']);
+            (0, chai_1.should)().exist(schemaDoc['name']);
+            (0, chai_1.should)().exist(schemaDoc['author']);
+            (0, chai_1.should)().exist(schemaDoc['authored']);
+            (0, chai_1.should)().exist(schemaDoc['schema']);
+            (0, chai_1.expect)(schemaDoc.schema).to.be.a('object');
+            (0, chai_1.expect)(schemaDoc['name']).to.be.equal(tempSchemaBody.name);
+            (0, chai_1.expect)(schemaDoc['author']).to.be.equal(tempSchemaBody.author);
+        });
+    });
     it('should able to create a new schema', function () {
         return __awaiter(this, void 0, void 0, function* () {
             const tempSchemaBody = Object.assign({}, schemaBody);
             tempSchemaBody.author = didDocId;
             schemaObject = yield hypersignSchema.generate(tempSchemaBody);
             schemaId = schemaObject['id'];
-            //console.log(JSON.stringify(schemaObject, null, 2));
             (0, chai_1.expect)(schemaObject).to.be.a('object');
             (0, chai_1.should)().exist(schemaObject['type']);
             (0, chai_1.should)().exist(schemaObject['modelVersion']);
@@ -172,118 +190,75 @@ describe('#sign() function to sign schema', function () {
     });
 });
 describe('#register() function to register schema on blockchain', function () {
-    // it('should not be able to register  schema on blockchain as proof.created is null or empty', async function () {
-    //   let tempParam = {} as Schema;
-    //   tempParam.proof = {} as SchemaProof;
-    //   Object.assign(tempParam, {...signedSchema})
-    //   tempParam.proof.created = '';
-    //   signedSchema.proof.created = signSchema.proof ? signSchema.proof.created : '';
-    //   console.log({
-    //     signedSchema, tempParam
-    //   });
-    //   return hypersignSchema.register({schema: tempParam}).catch(function (err) {
-    //     expect(function () {
-    //       throw err;
-    //     }).to.throw(Error, 'HID-SSI-SDK:: Error: schema.proof must Contain created');
-    //   });
-    // });
-    // it('should not be able to register  schema on blockchain as proof.proofPurpose is null or empty', async function () {
-    //   let tempParam = {} as Schema;
-    //   tempParam.proof = {} as SchemaProof;
-    //   Object.assign(tempParam, {...signedSchema})
-    //   tempParam.proof.proofPurpose = '';
-    //   signedSchema.proof.proofPurpose = signSchema.proof? signSchema.proof.proofPurpose: ''
-    //   console.log({tempParam, signedSchema})
-    //   return hypersignSchema.register({schema: tempParam}).catch(function (err) {
-    //     expect(function () {
-    //       throw err;
-    //     }).to.throw(Error, 'HID-SSI-SDK:: Error: schema.proof must Contain proofPurpose');
-    //   });
-    // });
-    // it('should not be able to register  schema on blockchain as proof.proofValue is null or empty', async function () {
-    //   let tempParam = {} as Schema;
-    //   tempParam.proof = {} as SchemaProof;
-    //   Object.assign(tempParam, {...signedSchema})
-    //   tempParam.proof.proofValue = '';
-    //   return hypersignSchema.register({schema: tempParam}).catch(function (err) {
-    //     expect(function () {
-    //       throw err;
-    //     }).to.throw(Error, 'HID-SSI-SDK:: Error: schema.proof must Contain proofValue');
-    //   });
-    // });
-    // it('should not be able to register  schema on blockchain as proof.type is null or empty', async function () {
-    //   let tempParam = {} as Schema;
-    //   tempParam.proof = {} as SchemaProof;
-    //   Object.assign(tempParam, {...signedSchema})
-    //   tempParam.proof.type = '';
-    //   return hypersignSchema.register({schema: tempParam}).catch(function (err) {
-    //     expect(function () {
-    //       throw err;
-    //     }).to.throw(Error, 'HID-SSI-SDK:: Error: schema.proof must Contain type');
-    //   });
-    // });
-    // it('should not be able to register  schema on blockchain as proof.verificationMethod is null or empty', async function () {
-    //   let tempParam = {} as Schema;
-    //   tempParam.proof = {} as SchemaProof;
-    //   Object.assign(tempParam, {...signedSchema})
-    //   tempParam.proof.verificationMethod = '';
-    //   return hypersignSchema.register({schema: tempParam}).catch(function (err) {
-    //     expect(function () {
-    //       throw err;
-    //     }).to.throw(Error, 'HID-SSI-SDK:: Error: schema.proof must Contain verificationMethod');
-    //   });
-    // });
-    // it('should not be able to register  schema on blockchain as schema.proof is null or empty', function () {
-    //   const tempParam = {...signedSchema};
-    //   tempParam.proof = undefined;
-    //   return hypersignSchema.register({schema: tempParam}).catch(function (err) {
-    //     expect(function () {
-    //       throw err;
-    //     }).to.throw(Error, 'HID-SSI-SDK:: Error: schema.proof must be passed');
-    //   });
-    // });
-    // it('should not be able to register schema on blockchain as schema is not passed', function () {
-    //   const tempParam = {...signedSchema};
-    //   tempParam.schema = undefined;
-    //   tempParam.proof.created = '';
-    //   return hypersignSchema.register(tempParam).catch(function (err) {
-    //     expect(function () {
-    //       throw err;
-    //     }).to.throw(Error, 'HID-SSI-SDK:: Error: schema must be passed');
-    //   });
-    // });
-    // it('should not be able to register  schema on blockchain as proof.type is null or empty', async function () {
-    //   const tempParam = { ...params };
-    //   tempParam.schema = schemaObject;
-    //   tempParam.proof.created = schemaObject.authored;
-    //   tempParam.proof.proofValue = schemaSignature;
-    //   tempParam.proof.proofPurpose = 'assertion';
-    //   tempParam.proof.type = '';
-    //   return hypersignSchema.register(tempParam).catch(function (err) {
-    //     expect(function () {
-    //       throw err;
-    //     }).to.throw(Error, 'HID-SSI-SDK:: Error: Proof must Contain type');
-    //   });
-    // });
-    // it('should not be able to register  schema on blockchain as proof.verificationMethod is null or empty', async function () {
-    //   const tempParam = { ...params };
-    //   tempParam.schema = schemaObject;
-    //   tempParam.proof.proofPurpose = 'assertion';
-    //   tempParam.proof.created = schemaObject.authored;
-    //   tempParam.proof.proofValue = schemaSignature;
-    //   tempParam.proof.type = 'Ed25519VerificationKey2020';
-    //   return hypersignSchema.register(tempParam).catch(function (err) {
-    //     expect(function () {
-    //       throw err;
-    //     }).to.throw(Error, 'HID-SSI-SDK:: Error: Proof must Contain verificationMethod');
-    //   });
-    // });
+    it('Should not be able to register schema as schema is not passed in params', () => __awaiter(this, void 0, void 0, function* () {
+        const params = {
+            schemas: signedSchema
+        };
+        return hypersignSchema.register(params).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: schema must be passed');
+        });
+    }));
+    it('Should not be able to register schema as schema object does not have proof field', () => __awaiter(this, void 0, void 0, function* () {
+        const tempSchemaDetail = Object.assign({}, signedSchema);
+        delete tempSchemaDetail.proof;
+        return hypersignSchema.register({ schema: tempSchemaDetail }).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: schema.proof must be passed');
+        });
+    }));
+    it('Should not be able to register schema as schema proof does not have "created" field or it is empty ', () => __awaiter(this, void 0, void 0, function* () {
+        const tempSchemaDetail = JSON.parse(JSON.stringify(Object.assign({}, signedSchema)));
+        tempSchemaDetail.proof.created = "";
+        return hypersignSchema.register({ schema: tempSchemaDetail }).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: schema.proof must Contain created');
+        });
+    }));
+    it('Should not be able to register schema as schema proof does not have "proofPurpose" field or it is empty ', () => __awaiter(this, void 0, void 0, function* () {
+        const tempSchemaDetail = JSON.parse(JSON.stringify(Object.assign({}, signedSchema)));
+        tempSchemaDetail.proof.proofPurpose = "";
+        return hypersignSchema.register({ schema: tempSchemaDetail }).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: schema.proof must Contain proofPurpose');
+        });
+    }));
+    it('Should not be able to register schema as schema proof does not have "proofValue" field or it is empty ', () => __awaiter(this, void 0, void 0, function* () {
+        const tempSchemaDetail = JSON.parse(JSON.stringify(Object.assign({}, signedSchema)));
+        tempSchemaDetail.proof.proofValue = "";
+        return hypersignSchema.register({ schema: tempSchemaDetail }).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: schema.proof must Contain proofValue');
+        });
+    }));
+    it('Should not be able to register schema as schema proof does not have "type" field or it is empty ', () => __awaiter(this, void 0, void 0, function* () {
+        const tempSchemaDetail = JSON.parse(JSON.stringify(Object.assign({}, signedSchema)));
+        tempSchemaDetail.proof.type = "";
+        return hypersignSchema.register({ schema: tempSchemaDetail }).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: schema.proof must Contain type');
+        });
+    }));
+    it('Should not be able to register schema as schema proof does not have "verificationMethod" field or it is empty ', () => __awaiter(this, void 0, void 0, function* () {
+        const tempSchemaDetail = JSON.parse(JSON.stringify(Object.assign({}, signedSchema)));
+        tempSchemaDetail.proof.verificationMethod = "";
+        return hypersignSchema.register({ schema: tempSchemaDetail }).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: schema.proof must Contain verificationMethod');
+        });
+    }));
     it('should be able to register schema on blockchain', function () {
         return __awaiter(this, void 0, void 0, function* () {
             const registeredSchema = yield hypersignSchema.register({
                 schema: signedSchema,
             });
-            // console.log(JSON.stringify(registeredSchema, null, 2));
             (0, chai_1.should)().exist(registeredSchema.transactionHash);
         });
     });
@@ -302,9 +277,24 @@ describe('#resolve() this is to resolve schema', function () {
                 schemaId,
             };
             const result = yield hypersignSchema.resolve(params);
-            //console.log(JSON.stringify(result, null, 2))
             (0, chai_1.expect)(result).to.be.a('object');
+            (0, chai_1.should)().exist(result.type);
+            (0, chai_1.expect)(result.type).to.be.a('string');
+            (0, chai_1.should)().exist(result.modelVersion);
+            (0, chai_1.expect)(result.modelVersion).to.be.a('string');
+            (0, chai_1.should)().exist(result.id);
+            (0, chai_1.expect)(result.id).to.be.a('string');
             (0, chai_1.expect)(result.id).to.be.equal(schemaId);
+            (0, chai_1.expect)(result.name).to.be.a('string');
+            (0, chai_1.should)().exist(result.name);
+            (0, chai_1.should)().exist(result.author);
+            (0, chai_1.expect)(result.author).to.be.a('string');
+            (0, chai_1.should)().exist(result.authored);
+            (0, chai_1.expect)(result.authored).to.be.a('string');
+            (0, chai_1.should)().exist(result.schema);
+            (0, chai_1.expect)(result.schema).to.be.a('object');
+            (0, chai_1.should)().exist(result.proof);
+            (0, chai_1.expect)(result.proof).to.be.a('object');
             (0, chai_1.expect)(result.proof.verificationMethod).to.be.equal(verificationMethod);
             (0, chai_1.expect)(result.proof).to.be.a('object');
         });

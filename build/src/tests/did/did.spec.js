@@ -10,9 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
-const index_1 = require("../index");
-const IDID_1 = require("../did/IDID");
-const config_1 = require("./config");
+const index_1 = require("../../index");
+const IDID_1 = require("../../did/IDID");
+const config_1 = require("../config");
 let privateKeyMultibase;
 let publicKeyMultibase;
 let verificationMethodId;
@@ -30,14 +30,12 @@ let pubKey;
 let privKey;
 let didDocToReg;
 let DIdDOcWithMultiplVM;
-const entityApiSecretKey = '8fc3d16ce8f040fd2fc4e5ccc1d73.6b6e55d4d54cd90c85bbcc92d9469873e60c0d7878681223e2fe63fca3abafb63390f939a77b3d73bf2eb58a654810b38';
 //add mnemonic of wallet that have balance
 beforeEach(function () {
     return __awaiter(this, void 0, void 0, function* () {
         offlineSigner = yield (0, config_1.createWallet)(config_1.mnemonic);
         const params = {
             offlineSigner,
-            // entityApiSecretKey,
             nodeRestEndpoint: config_1.hidNodeEp.rest,
             nodeRpcEndpoint: config_1.hidNodeEp.rpc,
             namespace: config_1.hidNodeEp.namespace,
@@ -46,16 +44,6 @@ beforeEach(function () {
         yield hypersignDID.init();
     });
 });
-// describe("testing hypersignDid initiation", function(){
-//   it('should not throw error if offlinesigner is not passed', async()=>{
-//     const params = {
-//       nodeRestEndpoint: hidNodeEp.rest,
-//       nodeRpcEndpoint: hidNodeEp.rpc,
-//       namespace: hidNodeEp.namespace,
-//     };
-//     hypersignDID = new HypersignDID(params);
-//   })
-// })
 describe('DID Test scenarios', () => {
     //remove seed while creating did so that wallet can generate different did every time
     describe('#generateKeys() method to generate publicKyeMultibase and privateKeyMultiBase', function () {
@@ -605,7 +593,7 @@ describe('DID Test scenarios', () => {
         it('should be able to resolve did', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 const params = {
-                    did: didDocId, //"did:hid:testnet:z4PfQRbTsL8wxWnJzfENMij54E7ubhJciNxSPFWfsAHNU",
+                    did: didDocId,
                 };
                 const result = yield hypersignDID.resolve(params);
                 (0, chai_1.expect)(result).to.be.a('object');
