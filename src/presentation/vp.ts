@@ -357,7 +357,6 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     presentation: IVerifiablePresentation;
     holderDid?: string;
     verificationMethodId: string;
-
     web3Obj;
     domain?: string;
     challenge?: string;
