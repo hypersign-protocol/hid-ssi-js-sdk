@@ -883,7 +883,10 @@ export default class HypersignDID implements IDID {
           `HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`
         );
       }
-
+      const clientSpec = params.signInfos[i].clientSpec;
+      if (clientSpec && clientSpec.type && !(clientSpec.type in IClientSpec)) {
+        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${0}].clientSpec is invalid`);
+      }
       if (params.signInfos[i].clientSpec?.type === IClientSpec['cosmos-ADR036']) {
         if (
           params.signInfos[i].clientSpec?.adr036SignerAddress === '' ||
@@ -948,6 +951,11 @@ export default class HypersignDID implements IDID {
         );
       }
 
+      const clientSpec = params.signInfos[i].clientSpec;
+      if (clientSpec && clientSpec.type && !(clientSpec.type in IClientSpec)) {
+        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${0}].clientSpec is invalid`);
+      }
+
       if (params.signInfos[i].clientSpec?.type === IClientSpec['cosmos-ADR036']) {
         if (
           params.signInfos[i].clientSpec?.adr036SignerAddress === '' ||
@@ -1000,7 +1008,7 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to deactivate a did');
     }
     if (!params.signInfos) {
-      throw new Error('HID-SSI-SDK:: Error: params.signInfos is required to register a did');
+      throw new Error('HID-SSI-SDK:: Error: params.signInfos is required to deactivate a did');
     }
     if (params.signInfos.length < 1) {
       throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
@@ -1009,8 +1017,13 @@ export default class HypersignDID implements IDID {
     for (const i in params.signInfos) {
       if (!params.signInfos[i].verification_method_id) {
         throw new Error(
-          `HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`
+          `HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to deactivate a did`
         );
+      }
+
+      const clientSpec = params.signInfos[i].clientSpec;
+      if (clientSpec && clientSpec.type && !(clientSpec.type in IClientSpec)) {
+        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${0}].clientSpec is invalid`);
       }
       if (params.signInfos[i].clientSpec?.type === IClientSpec['cosmos-ADR036']) {
         if (
@@ -1018,26 +1031,19 @@ export default class HypersignDID implements IDID {
           params.signInfos[i].clientSpec?.adr036SignerAddress === undefined
         ) {
           throw new Error(
-            `HID-SSI-SDK:: Error: params.signInfos[${i}].adr036SignerAddress is required to register a did, when clientSpec type is${params.signInfos[i].clientSpec?.type} `
+            `HID-SSI-SDK:: Error: params.signInfos[${i}].adr036SignerAddress is required to deactivate a did, when clientSpec type is${params.signInfos[i].clientSpec?.type} `
           );
         }
       }
 
       if (!params.signInfos[i].signature) {
-        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].signature is required to register a did`);
+        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].signature is required to deactivate a did`);
       }
     }
 
     if (!params.versionId) {
       throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
     }
-
-    // if (!params.clientSpec) {
-    //   throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to deactivate');
-    // }
-    // if (!(params.clientSpec in IClientSpec)) {
-    //   throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
-    // }
     const { didDocument, signInfos, versionId } = params;
     const didDoc: Did = didDocument as Did;
     if (this.didrpc) {
@@ -1137,7 +1143,9 @@ export default class HypersignDID implements IDID {
     if (!(params.clientSpec in IClientSpec)) {
       throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
     }
-
+    if (!params.web3) {
+      throw new Error('HID-SSI-SDK:: Error: params.web3 is required to sign');
+    }
     switch (params.clientSpec) {
       case IClientSpec['eth-personalSign']: {
         const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);

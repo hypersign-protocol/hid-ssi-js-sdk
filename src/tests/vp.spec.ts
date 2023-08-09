@@ -36,6 +36,9 @@ let hypersignVP;
 let unsignedverifiablePresentation: IVerifiablePresentation;
 let verifiableCredentialPresentationId;
 let signedVerifiablePresentation: IVerifiablePresentation;
+let didDocumentByClientspec;
+const MMWalletAddress = '0x7967C85D989c41cA245f1Bb54c97D42173B135E0';
+
 const credentialBody = {
   schemaId: '',
   subjectDid: '',
@@ -132,6 +135,34 @@ describe('DID Opearations', () => {
       should().exist(didDocument['capabilityInvocation']);
       should().exist(didDocument['capabilityDelegation']);
       should().exist(didDocument['service']);
+    });
+    it('should be able to generate new did with MMwallet address using client spec', async () => {
+      const params = {
+        methodSpecificId: MMWalletAddress,
+        address: MMWalletAddress,
+        chainId: '0x1',
+        clientSpec: 'eth-personalSign',
+      };
+      didDocumentByClientspec = await hypersignDID.createByClientSpec(params);
+      expect(didDocumentByClientspec).to.be.a('object');
+      should().exist(didDocumentByClientspec['@context']);
+      should().exist(didDocumentByClientspec['id']);
+      should().exist(didDocumentByClientspec['controller']);
+      should().exist(didDocumentByClientspec['alsoKnownAs']);
+      should().exist(didDocumentByClientspec['verificationMethod']);
+      expect(
+        didDocumentByClientspec['verificationMethod'] &&
+          didDocumentByClientspec['authentication'] &&
+          didDocumentByClientspec['assertionMethod'] &&
+          didDocumentByClientspec['keyAgreement'] &&
+          didDocumentByClientspec['capabilityInvocation'] &&
+          didDocumentByClientspec['capabilityDelegation']
+      ).to.be.a('array');
+      should().exist(didDocumentByClientspec['authentication']);
+      should().exist(didDocumentByClientspec['assertionMethod']);
+      should().exist(didDocumentByClientspec['keyAgreement']);
+      should().exist(didDocumentByClientspec['capabilityInvocation']);
+      should().exist(didDocumentByClientspec['capabilityDelegation']);
     });
   });
 

@@ -1,5 +1,7 @@
 export const APIENDPOINT = {
-  STUDIO_API_BASE_URL: 'https://api.entity.hypersign.id/api/v1',
+  STUDIO_API_BASE_URL: 'http://localhost:3001/api/v1',
+
+  // STUDIO_API_BASE_URL: 'https://api.entity.hypersign.id/api/v1',
   STUDIO_API_ORIGIN: 'https://entity.hypersign.id',
   AUTH: '/app/oauth',
   DID: {
