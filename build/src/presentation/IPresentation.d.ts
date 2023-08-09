@@ -27,5 +27,29 @@ export interface IPresentationMethods {
         holderVerificationMethodId: string;
         issuerVerificationMethodId: string;
     }): Promise<object>;
+    signByClientSpec(params: {
+        presentation: IVerifiablePresentation;
+        holderDid?: string;
+        verificationMethodId: string;
+        web3Obj: any;
+        domain?: string;
+        challenge?: string;
+    }): Promise<IVerifiablePresentation>;
+    verifyByClientSpec(params: {
+        signedPresentation: IVerifiablePresentation;
+        challenge?: string;
+        domain?: string;
+        issuerDid: string;
+        holderDid?: string;
+        holderDidDocSigned?: JSON;
+        holderVerificationMethodId: string;
+        issuerVerificationMethodId: string;
+        web3Obj: any;
+    }): Promise<{
+        verified: boolean;
+        credentialResults: any;
+        presentationResult: any;
+        error: any;
+    }>;
 }
 //# sourceMappingURL=IPresentation.d.ts.map
