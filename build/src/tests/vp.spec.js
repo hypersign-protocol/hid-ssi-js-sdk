@@ -38,6 +38,8 @@ let hypersignVP;
 let unsignedverifiablePresentation;
 let verifiableCredentialPresentationId;
 let signedVerifiablePresentation;
+let didDocumentByClientspec;
+const MMWalletAddress = '0x7967C85D989c41cA245f1Bb54c97D42173B135E0';
 const credentialBody = {
     schemaId: '',
     subjectDid: '',
@@ -128,6 +130,32 @@ describe('DID Opearations', () => {
                 (0, chai_1.should)().exist(didDocument['service']);
             });
         });
+        it('should be able to generate new did with MMwallet address using client spec', () => __awaiter(this, void 0, void 0, function* () {
+            const params = {
+                methodSpecificId: MMWalletAddress,
+                address: MMWalletAddress,
+                chainId: '0x1',
+                clientSpec: 'eth-personalSign',
+            };
+            didDocumentByClientspec = yield hypersignDID.createByClientSpec(params);
+            (0, chai_1.expect)(didDocumentByClientspec).to.be.a('object');
+            (0, chai_1.should)().exist(didDocumentByClientspec['@context']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['id']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['controller']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['alsoKnownAs']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['verificationMethod']);
+            (0, chai_1.expect)(didDocumentByClientspec['verificationMethod'] &&
+                didDocumentByClientspec['authentication'] &&
+                didDocumentByClientspec['assertionMethod'] &&
+                didDocumentByClientspec['keyAgreement'] &&
+                didDocumentByClientspec['capabilityInvocation'] &&
+                didDocumentByClientspec['capabilityDelegation']).to.be.a('array');
+            (0, chai_1.should)().exist(didDocumentByClientspec['authentication']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['assertionMethod']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['keyAgreement']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['capabilityInvocation']);
+            (0, chai_1.should)().exist(didDocumentByClientspec['capabilityDelegation']);
+        }));
     });
     describe('#sign() this is to sign didDoc', function () {
         const controller = {

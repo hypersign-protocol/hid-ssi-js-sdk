@@ -764,6 +764,10 @@ class HypersignDID {
                 if (!params.signInfos[i].verification_method_id) {
                     throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`);
                 }
+                const clientSpec = params.signInfos[i].clientSpec;
+                if (clientSpec && clientSpec.type && !(clientSpec.type in IDID_1.IClientSpec)) {
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${0}].clientSpec is invalid`);
+                }
                 if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
                     if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
                         ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
@@ -815,6 +819,10 @@ class HypersignDID {
                 if (!params.signInfos[i].verification_method_id) {
                     throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`);
                 }
+                const clientSpec = params.signInfos[i].clientSpec;
+                if (clientSpec && clientSpec.type && !(clientSpec.type in IDID_1.IClientSpec)) {
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${0}].clientSpec is invalid`);
+                }
                 if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
                     if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
                         ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
@@ -857,34 +865,32 @@ class HypersignDID {
                 throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to deactivate a did');
             }
             if (!params.signInfos) {
-                throw new Error('HID-SSI-SDK:: Error: params.signInfos is required to register a did');
+                throw new Error('HID-SSI-SDK:: Error: params.signInfos is required to deactivate a did');
             }
             if (params.signInfos.length < 1) {
                 throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
             }
             for (const i in params.signInfos) {
                 if (!params.signInfos[i].verification_method_id) {
-                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`);
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to deactivate a did`);
+                }
+                const clientSpec = params.signInfos[i].clientSpec;
+                if (clientSpec && clientSpec.type && !(clientSpec.type in IDID_1.IClientSpec)) {
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${0}].clientSpec is invalid`);
                 }
                 if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
                     if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
                         ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
-                        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].adr036SignerAddress is required to register a did, when clientSpec type is${(_d = params.signInfos[i].clientSpec) === null || _d === void 0 ? void 0 : _d.type} `);
+                        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].adr036SignerAddress is required to deactivate a did, when clientSpec type is${(_d = params.signInfos[i].clientSpec) === null || _d === void 0 ? void 0 : _d.type} `);
                     }
                 }
                 if (!params.signInfos[i].signature) {
-                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].signature is required to register a did`);
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].signature is required to deactivate a did`);
                 }
             }
             if (!params.versionId) {
                 throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
             }
-            // if (!params.clientSpec) {
-            //   throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to deactivate');
-            // }
-            // if (!(params.clientSpec in IClientSpec)) {
-            //   throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
-            // }
             const { didDocument, signInfos, versionId } = params;
             const didDoc = didDocument;
             if (this.didrpc) {
@@ -966,6 +972,9 @@ class HypersignDID {
             }
             if (!(params.clientSpec in IDID_1.IClientSpec)) {
                 throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
+            }
+            if (!params.web3) {
+                throw new Error('HID-SSI-SDK:: Error: params.web3 is required to sign');
             }
             switch (params.clientSpec) {
                 case IDID_1.IClientSpec['eth-personalSign']: {
