@@ -135,7 +135,7 @@ export default class HypersignDID implements IDID {
      * @returns {Promise<object>} Signed DID Document
      */
     sign(params: {
-        didDocument: object;
+        didDocument: Did;
         privateKeyMultibase: string;
         challenge: string;
         domain: string;
@@ -153,7 +153,7 @@ export default class HypersignDID implements IDID {
      * @returns Promise<{ verificationResult }> Verification Result
      */
     verify(params: {
-        didDocument: object;
+        didDocument: Did;
         verificationMethodId: string;
         challenge: string;
         domain?: string;
@@ -168,7 +168,7 @@ export default class HypersignDID implements IDID {
         verificationRelationships?: IVerificationRelationships[];
     }): Promise<Did>;
     registerByClientSpec(params: {
-        didDocument: object;
+        didDocument: Did;
         signInfos: SignInfo[];
     }): Promise<{
         didDocument: Did;
@@ -189,7 +189,7 @@ export default class HypersignDID implements IDID {
         transactionHash: string;
     }>;
     signAndRegisterByClientSpec(params: {
-        didDocument: any;
+        didDocument: Did;
         address: string;
         verificationMethodId: string;
         web3: Web3 | any;
@@ -200,7 +200,7 @@ export default class HypersignDID implements IDID {
         transactionHash: string;
     }>;
     signByClientSpec(params: {
-        didDocument: object;
+        didDocument: Did;
         clientSpec: IClientSpec;
         address: string;
         web3: Web3 | any;

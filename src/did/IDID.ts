@@ -6,6 +6,7 @@
 
 import { Did as IDidProto, Metadata, VerificationMethod, Service, Did, SignInfo } from '../../libs/generated/ssi/did';
 import { ClientSpec } from '../../libs/generated/ssi/clientSpec';
+import Web3 from 'web3';
 
 export interface IPublicKey {
   '@context': string;
@@ -91,43 +92,43 @@ export interface IDID {
     methodSpecificId?: string;
     publicKeyMultibase: string;
     verificationRelationships: IVerificationRelationships[];
-  }): Promise<object>;
+  }): Promise<Did>;
 
   register(params: {
-    didDocument: object;
+    didDocument: Did;
     privateKeyMultibase?: string;
     verificationMethodId?: string;
     signData?: ISignData[];
-  }): Promise<object>;
+  }): Promise<{ didDocument: Did; transactionHash: string }>;
 
-  resolve(params: { did: string; ed25519verificationkey2020?: boolean }): Promise<object>;
+  resolve(params: { did: string; ed25519verificationkey2020?: boolean }): Promise<IDIDResolve>;
 
   update(params: {
-    didDocument: object;
+    didDocument: Did;
     privateKeyMultibase: string;
     verificationMethodId: string;
     versionId: string;
-  }): Promise<object>;
+  }): Promise<{ transactionHash: string }>;
 
   deactivate(params: {
     didDocument: object;
     privateKeyMultibase: string;
     verificationMethodId: string;
     versionId: string;
-  }): Promise<object>;
+  }): Promise<{ transactionHash: string }>;
 
   // didAuth
   sign(params: {
-    didDocument: object;
+    didDocument: Did;
     privateKeyMultibase: string;
     challenge: string;
     domain: string;
     did: string;
     verificationMethodId: string;
-  }): Promise<object>;
+  }): Promise<ISignedDIDDocument>;
 
   verify(params: {
-    didDocument: object;
+    didDocument: Did;
     verificationMethodId: string;
     challenge: string;
     domain?: string;
@@ -142,6 +143,47 @@ export interface IDID {
     publicKeyMultibase?: string;
     blockchainAccountId?: string;
   }): Promise<Did>;
+
+  createByClientSpec(params: {
+    methodSpecificId: string;
+    publicKey?: string;
+    address: string;
+    chainId: string;
+    clientSpec: IClientSpec;
+    verificationRelationships?: IVerificationRelationships[];
+  }): Promise<Did>;
+  registerByClientSpec(params: {
+    didDocument: Did; // Ld document
+    signInfos: SignInfo[];
+  }): Promise<{ didDocument: Did; transactionHash: string }>;
+
+  updateByClientSpec(params: {
+    didDocument: Did;
+    versionId: string;
+    signInfos: SignInfo[];
+  }): Promise<{ transactionHash: string }>;
+
+  deactivateByClientSpec(params: {
+    didDocument: Did;
+    signInfos: SignInfo[];
+    versionId: string;
+  }): Promise<{ transactionHash: string }>;
+
+  signAndRegisterByClientSpec(params: {
+    didDocument: Did;
+    address: string;
+    verificationMethodId: string;
+    web3: Web3 | any;
+    clientSpec: IClientSpec;
+    chainId?: string; // only for [cosmos-ADR036]
+  }): Promise<{ didDocument: Did; transactionHash: string }>;
+  signByClientSpec(params: {
+    didDocument: Did;
+    clientSpec: IClientSpec;
+    address: string;
+    web3: Web3 | any;
+    chainId?: string; // only for [cosmos-ADR036]
+  }): Promise<{ didDocument: Did; signature: string }>;
 }
 
 export interface IDIDResolve {

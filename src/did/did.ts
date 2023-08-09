@@ -606,7 +606,7 @@ export default class HypersignDID implements IDID {
    * @returns {Promise<object>} Signed DID Document
    */
   public async sign(params: {
-    didDocument: object;
+    didDocument: Did;
     privateKeyMultibase: string;
     challenge: string;
     domain: string;
@@ -686,7 +686,7 @@ export default class HypersignDID implements IDID {
    * @returns Promise<{ verificationResult }> Verification Result
    */
   public async verify(params: {
-    didDocument: object;
+    didDocument: Did;
     verificationMethodId: string;
     challenge: string;
     domain?: string;
@@ -851,7 +851,7 @@ export default class HypersignDID implements IDID {
 
   // using in API
   public async registerByClientSpec(params: {
-    didDocument: object; // Ld document
+    didDocument: Did; // Ld document
     signInfos: SignInfo[];
   }) {
     const response = {} as { didDocument: Did; transactionHash: string };
@@ -1062,13 +1062,13 @@ export default class HypersignDID implements IDID {
   }
 
   public async signAndRegisterByClientSpec(params: {
-    didDocument: any;
+    didDocument: Did;
     address: string;
     verificationMethodId: string;
     web3: Web3 | any;
     clientSpec: IClientSpec;
     chainId?: string; // only for [cosmos-ADR036]
-  }) {
+  }): Promise<{ didDocument: Did; transactionHash: string }> {
     if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
     }
@@ -1121,7 +1121,7 @@ export default class HypersignDID implements IDID {
   }
 
   public async signByClientSpec(params: {
-    didDocument: object;
+    didDocument: Did;
     clientSpec: IClientSpec;
     address: string;
     web3: Web3 | any;
