@@ -7,6 +7,7 @@ import { IClientSpec, IKeyType, ISignInfo, IVerificationRelationships } from './
 import { Did } from '../libs/generated/ssi/did';
 import { IVerifiableCredential } from './credential/ICredential';
 import { Schema } from '../libs/generated/ssi/schema';
+import { IVerifiablePresentation } from './presentation/IPresentation';
 
 class HypersignSSISdk {
   did: HypersignDID;
@@ -64,5 +65,6 @@ export {
   IClientSpec,
   Did,
   IVerifiableCredential,
+  IVerifiablePresentation,
   Schema,
 };

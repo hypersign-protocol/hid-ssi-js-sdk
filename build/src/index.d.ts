@@ -7,6 +7,7 @@ import { IClientSpec, IKeyType, ISignInfo, IVerificationRelationships } from './
 import { Did } from '../libs/generated/ssi/did';
 import { IVerifiableCredential } from './credential/ICredential';
 import { Schema } from '../libs/generated/ssi/schema';
+import { IVerifiablePresentation } from './presentation/IPresentation';
 declare class HypersignSSISdk {
     did: HypersignDID;
     vc: HypersignVerifiableCredential;
@@ -26,5 +27,5 @@ declare class HypersignSSISdk {
     });
     init(): Promise<void>;
 }
-export { HypersignSSISdk, HypersignDID, HypersignSchema, HypersignVerifiableCredential, HypersignVerifiablePresentation, IVerificationRelationships, IKeyType, ISignInfo, IClientSpec, Did, IVerifiableCredential, Schema, };
+export { HypersignSSISdk, HypersignDID, HypersignSchema, HypersignVerifiableCredential, HypersignVerifiablePresentation, IVerificationRelationships, IKeyType, ISignInfo, IClientSpec, Did, IVerifiableCredential, IVerifiablePresentation, Schema, };
 //# sourceMappingURL=index.d.ts.map
