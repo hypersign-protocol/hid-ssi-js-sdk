@@ -745,6 +745,13 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return resp;
   }
 
+  /**
+   * Check status of credential on Hypersign Chain
+   * @param
+   * - params.credentialId     : Credential Id
+   * @returns {Promise<{ verified: boolean }>}
+   */
+
   public async checkCredentialStatus(params: { credentialId: string }): Promise<{ verified: boolean }> {
     if (!params || !params.credentialId)
       throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
@@ -773,6 +780,13 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return { verified: true };
   }
 
+  /**
+   * Register credential status on Hypersign Chain
+   * @param
+   * - params.credentialStatus       : Credential status
+   * - params.credentialStatusProof  : Status proof of the credential
+   * @returns {Promise<{ transactionHash: string }>}
+   */
   public async registerCredentialStatus(params: {
     credentialStatus: CredentialStatus;
     credentialStatusProof: CredentialProof;
@@ -809,6 +823,13 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     return resp;
   }
 
+  /**
+   * Generate transaction message
+   * @param
+   * - params.credentialStatus       : Credential status
+   * - params.credentialStatusProof  : Status proof of the credential
+   * @returns {Promise<{typeUrl: string, value: MsgRegisterCredentialStatus}>}
+   */
   public async generateRegisterCredentialStatusTxnMessage(credentialStatus: CredentialStatus, proof: CredentialProof) {
     if (!credentialStatus || !proof)
       throw new Error('HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
@@ -822,6 +843,12 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     return txnMessage;
   }
+  /**
+   * Register multiple credential status
+   * @param
+   * - params.txnMessage      : Array of transaction message
+   * @returns {Promise<DeliverTxResponse>}
+   */
 
   public async registerCredentialStatusTxnBulk(txnMessage: []) {
     if (!txnMessage) throw new Error('HID-SSI-SDK:: Error: txnMessage is required to register credential status');
@@ -840,9 +867,18 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   }
 
   /**
-   * Issue credentials document with EthereumEip712Signature2021
- 
-  */
+   *  Issue credentials document with EthereumEip712Signature2021
+   * @param
+   * - params.credential           : Hypersign credentail document
+   * - params.issuerDid            : Did of the issuer
+   * - params.verificationMethodId : Verification Method of Issuer
+   * - params.type                 : Optional, Type of document
+   * - params.web3Obj              : Web3 object
+   * - params.registerCredential   : Optional, Set registerCredential to true if you want to register, false otherwise
+   * - params.domain               : Optional, domain url
+   * - params.clientspec           : Optional, ClientSpec either it is eth-personalSign or cosmos-ADR036
+   * @returns {Promise<IVerifiableCredential>}
+   */
 
   public async issueByClientSpec(params: {
     credential: IVerifiableCredential;
@@ -922,6 +958,15 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   }
 
   // verify credentila issued by client spec
+  /**
+   * Verfies signed/issued credential document with EthereumEip712Signature2021
+   * @param
+   * - params.credential           : Hypersign credentail document
+   * - params.issuerDid            : Did of the issuer
+   * - params.verificationMethodId : Verification Method of Issuer
+   * - params.web3Obj              : Web3 object
+   * @returns {Promise<object>}
+   */
 
   public async verifyByClientSpec(params: {
     credential: IVerifiableCredential;
