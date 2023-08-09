@@ -23,7 +23,7 @@ export class ApiAuth {
     const response = await fetch(studioApiUrl, requestOptions);
     const authToken = await response.json();
     if (!response.ok) {
-      throw new Error(`HID-SSI-SDK:: Error: ${authToken.message}`);
+      throw new Error(`HID-SSI-SDK:: ${authToken.message}`);
     }
     return authToken;
   }

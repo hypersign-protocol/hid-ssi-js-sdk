@@ -37,7 +37,7 @@ class ApiAuth {
             const response = yield (0, node_fetch_1.default)(studioApiUrl, requestOptions);
             const authToken = yield response.json();
             if (!response.ok) {
-                throw new Error(`HID-SSI-SDK:: Error: ${authToken.message}`);
+                throw new Error(`HID-SSI-SDK:: ${authToken.message}`);
             }
             return authToken;
         });
