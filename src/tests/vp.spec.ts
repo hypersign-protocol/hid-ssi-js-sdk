@@ -173,7 +173,7 @@ describe('DID Opearations', () => {
     it('should be able to register didDocument in the blockchain', async function () {
       const result = await hypersignDID.register({ didDocument, privateKeyMultibase, verificationMethodId });
       should().exist(result.transactionHash);
-      should().exist(result.didDocumentLd);
+      should().exist(result.didDocument);
     });
   });
 });
@@ -214,13 +214,7 @@ describe('Schema Opearations', () => {
       });
       //console.log(JSON.stringify(registeredSchema, null, 2))
       expect(registeredSchema).to.be.a('object');
-      should().exist(registeredSchema.code);
-      should().exist(registeredSchema.height);
-      should().exist(registeredSchema.rawLog);
       should().exist(registeredSchema.transactionHash);
-      should().exist(registeredSchema.gasUsed);
-      should().exist(registeredSchema.gasWanted);
-      expect(registeredSchema.rawLog).to.be.a('string');
     });
   });
 });

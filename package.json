@@ -9,6 +9,8 @@
     "test-didByApiKey": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/did/didByEntityApiKey.spec.ts' --exit --timeout 400000",
     "test-schema": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/schema/schema.spec.ts' --exit --timeout 400000",
     "test-schemaByApiKey": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/schema/schemaByEntityApiKey.spec.ts' --exit --timeout 400000",
+    "test-credential": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/credential/vc.spec.ts' --exit --timeout 400000",
+    "test-credentialByApiKey": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/credential/vcByEntityApiKey.spec.ts' --exit --timeout 400000",
     "test-presentation": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/vp.spec.ts' --exit --timeout 400000",
     "test-signdid": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/didSign.spec.ts' --exit --timeout 400000",
     "start": "node build/index.js",
