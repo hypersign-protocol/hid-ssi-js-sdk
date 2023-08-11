@@ -1172,10 +1172,16 @@ class HypersignDID {
                 didDocument.capabilityInvocation.push(verificationMethod['id']);
             }
             if (verificationMethod['type'] === IDID_1.IKeyType.X25519KeyAgreementKey2020) {
-                didDocument['context'].push(constant['DID_' + IDID_1.IKeyType.Ed25519VerificationKey2020].DID_KEYAGREEMENT_CONTEXT);
+                const newContext = constant['DID_' + IDID_1.IKeyType.Ed25519VerificationKey2020].DID_KEYAGREEMENT_CONTEXT;
+                if (!didDocument['context'].includes(newContext)) {
+                    didDocument['context'].push(newContext);
+                }
             }
             if (verificationMethod['type'] === IDID_1.IKeyType.X25519KeyAgreementKeyEIP5630) {
-                didDocument['context'].push(constant['DID_' + IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020].DID_KEYAGREEMENT_CONTEXT);
+                const newContext = constant['DID_' + IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020].DID_KEYAGREEMENT_CONTEXT;
+                if (!didDocument['context'].includes(newContext)) {
+                    didDocument['context'].push(newContext);
+                }
             }
             return didDocument;
         });

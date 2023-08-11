@@ -1367,12 +1367,16 @@ export default class HypersignDID implements IDID {
       didDocument.capabilityInvocation.push(verificationMethod['id']);
     }
     if (verificationMethod['type'] === IKeyType.X25519KeyAgreementKey2020) {
-      didDocument['context'].push(constant['DID_' + IKeyType.Ed25519VerificationKey2020].DID_KEYAGREEMENT_CONTEXT);
+      const newContext = constant['DID_' + IKeyType.Ed25519VerificationKey2020].DID_KEYAGREEMENT_CONTEXT;
+      if (!didDocument['context'].includes(newContext)) {
+        didDocument['context'].push(newContext);
+      }
     }
     if (verificationMethod['type'] === IKeyType.X25519KeyAgreementKeyEIP5630) {
-      didDocument['context'].push(
-        constant['DID_' + IKeyType.EcdsaSecp256k1RecoveryMethod2020].DID_KEYAGREEMENT_CONTEXT
-      );
+      const newContext = constant['DID_' + IKeyType.EcdsaSecp256k1RecoveryMethod2020].DID_KEYAGREEMENT_CONTEXT;
+      if (!didDocument['context'].includes(newContext)) {
+        didDocument['context'].push(newContext);
+      }
     }
     return didDocument;
   }
