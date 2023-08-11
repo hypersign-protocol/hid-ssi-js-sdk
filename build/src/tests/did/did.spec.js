@@ -364,9 +364,9 @@ describe('DID Test scenarios', () => {
                 publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
             };
             const didDoc = JSON.parse(JSON.stringify(didDocument));
-            const updatedDidDoc = yield hypersignDID.addVerificationMethod(params);
+            const updatedDidDoc = yield hypersignDID.addVerificationMethod(Object.assign({}, params));
             (0, chai_1.expect)(updatedDidDoc).to.be.a('object');
-            (0, chai_1.should)().exist(updatedDidDoc['@context']);
+            (0, chai_1.should)().exist(updatedDidDoc['context']);
             (0, chai_1.should)().exist(updatedDidDoc['id']);
             (0, chai_1.should)().exist(updatedDidDoc['controller']);
             (0, chai_1.should)().exist(updatedDidDoc['alsoKnownAs']);
@@ -392,7 +392,7 @@ describe('DID Test scenarios', () => {
             };
             const testDidDoc = yield hypersignDid.addVerificationMethod(params);
             (0, chai_1.expect)(testDidDoc).to.be.a('object');
-            (0, chai_1.should)().exist(testDidDoc['@context']);
+            (0, chai_1.should)().exist(testDidDoc['context']);
             (0, chai_1.should)().exist(testDidDoc['id']);
             (0, chai_1.should)().exist(testDidDoc['controller']);
             (0, chai_1.should)().exist(testDidDoc['alsoKnownAs']);
@@ -417,7 +417,7 @@ describe('DID Test scenarios', () => {
             const didDoc = JSON.parse(JSON.stringify(didDocToReg));
             DIdDOcWithMultiplVM = yield hypersignDID.addVerificationMethod(params);
             (0, chai_1.expect)(DIdDOcWithMultiplVM).to.be.a('object');
-            (0, chai_1.should)().exist(DIdDOcWithMultiplVM['@context']);
+            (0, chai_1.should)().exist(DIdDOcWithMultiplVM['context']);
             (0, chai_1.should)().exist(DIdDOcWithMultiplVM['id']);
             (0, chai_1.should)().exist(DIdDOcWithMultiplVM['controller']);
             (0, chai_1.should)().exist(DIdDOcWithMultiplVM['alsoKnownAs']);

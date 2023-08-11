@@ -1136,7 +1136,8 @@ class HypersignDID {
                 throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to addVerificationMethod');
             }
             const verificationMethod = {};
-            const { didDocument } = resolvedDidDoc;
+            let { didDocument } = resolvedDidDoc;
+            didDocument = utils_1.default.ldToJsonConvertor(didDocument);
             if (params.id) {
                 const checkIfVmIdExists = didDocument.verificationMethod.some((vm) => vm.id === params.id);
                 if (checkIfVmIdExists) {
@@ -1171,10 +1172,10 @@ class HypersignDID {
                 didDocument.capabilityInvocation.push(verificationMethod['id']);
             }
             if (verificationMethod['type'] === IDID_1.IKeyType.X25519KeyAgreementKey2020) {
-                didDocument['@context'].push(constant['DID_' + IDID_1.IKeyType.Ed25519VerificationKey2020].DID_KEYAGREEMENT_CONTEXT);
+                didDocument['context'].push(constant['DID_' + IDID_1.IKeyType.Ed25519VerificationKey2020].DID_KEYAGREEMENT_CONTEXT);
             }
             if (verificationMethod['type'] === IDID_1.IKeyType.X25519KeyAgreementKeyEIP5630) {
-                didDocument['@context'].push(constant['DID_' + IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020].DID_KEYAGREEMENT_CONTEXT);
+                didDocument['context'].push(constant['DID_' + IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020].DID_KEYAGREEMENT_CONTEXT);
             }
             return didDocument;
         });

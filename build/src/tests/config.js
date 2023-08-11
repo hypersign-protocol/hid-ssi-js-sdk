@@ -49,3 +49,4 @@ const createWallet = (mnemonic) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.createWallet = createWallet;
+// wallet address: hid1rh5h603fv9dneqm422uvl4xk3fc77a4uheleq5

@@ -25,7 +25,6 @@ let DIdDOcWithMultiplVM;
 
 beforeEach(async function () {
   offlineSigner = await createWallet(mnemonic);
-
   const params = {
     offlineSigner,
     nodeRestEndpoint: hidNodeEp.rest,
@@ -384,9 +383,9 @@ describe('DID Test scenarios', () => {
       };
       const didDoc = JSON.parse(JSON.stringify(didDocument));
 
-      const updatedDidDoc = await hypersignDID.addVerificationMethod(params);
+      const updatedDidDoc = await hypersignDID.addVerificationMethod({ ...params });
       expect(updatedDidDoc).to.be.a('object');
-      should().exist(updatedDidDoc['@context']);
+      should().exist(updatedDidDoc['context']);
       should().exist(updatedDidDoc['id']);
       should().exist(updatedDidDoc['controller']);
       should().exist(updatedDidDoc['alsoKnownAs']);
@@ -415,7 +414,7 @@ describe('DID Test scenarios', () => {
 
       const testDidDoc = await hypersignDid.addVerificationMethod(params);
       expect(testDidDoc).to.be.a('object');
-      should().exist(testDidDoc['@context']);
+      should().exist(testDidDoc['context']);
       should().exist(testDidDoc['id']);
       should().exist(testDidDoc['controller']);
       should().exist(testDidDoc['alsoKnownAs']);
@@ -443,7 +442,7 @@ describe('DID Test scenarios', () => {
 
       DIdDOcWithMultiplVM = await hypersignDID.addVerificationMethod(params);
       expect(DIdDOcWithMultiplVM).to.be.a('object');
-      should().exist(DIdDOcWithMultiplVM['@context']);
+      should().exist(DIdDOcWithMultiplVM['context']);
       should().exist(DIdDOcWithMultiplVM['id']);
       should().exist(DIdDOcWithMultiplVM['controller']);
       should().exist(DIdDOcWithMultiplVM['alsoKnownAs']);

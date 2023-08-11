@@ -1329,7 +1329,9 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to addVerificationMethod');
     }
     const verificationMethod = {} as VerificationMethod;
-    const { didDocument } = resolvedDidDoc;
+    let { didDocument } = resolvedDidDoc;
+    didDocument = Utils.ldToJsonConvertor(didDocument);
+
     if (params.id) {
       const checkIfVmIdExists = didDocument.verificationMethod.some((vm) => vm.id === params.id);
       if (checkIfVmIdExists) {
@@ -1365,10 +1367,10 @@ export default class HypersignDID implements IDID {
       didDocument.capabilityInvocation.push(verificationMethod['id']);
     }
     if (verificationMethod['type'] === IKeyType.X25519KeyAgreementKey2020) {
-      didDocument['@context'].push(constant['DID_' + IKeyType.Ed25519VerificationKey2020].DID_KEYAGREEMENT_CONTEXT);
+      didDocument['context'].push(constant['DID_' + IKeyType.Ed25519VerificationKey2020].DID_KEYAGREEMENT_CONTEXT);
     }
     if (verificationMethod['type'] === IKeyType.X25519KeyAgreementKeyEIP5630) {
-      didDocument['@context'].push(
+      didDocument['context'].push(
         constant['DID_' + IKeyType.EcdsaSecp256k1RecoveryMethod2020].DID_KEYAGREEMENT_CONTEXT
       );
     }
