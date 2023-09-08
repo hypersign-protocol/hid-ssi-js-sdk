@@ -78,6 +78,11 @@ export default class HypersignDID implements IDID {
         didDocument: Did;
         transactionHash: string;
     }>;
+    createSignInfos(params: {
+        didDocument: Did;
+        privateKeyMultibase: string;
+        verificationMethodId: string;
+    }): Promise<Array<SignInfo>>;
     /**
      * Resolves a DID into DIDDocument from Hypersign blockchain - an onchain activity
      * @params

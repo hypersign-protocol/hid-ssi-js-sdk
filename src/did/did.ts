@@ -432,6 +432,28 @@ export default class HypersignDID implements IDID {
     return response;
   }
 
+  public async createSignInfos(params: {
+    didDocument: Did; // Ld document
+    privateKeyMultibase: string;
+    verificationMethodId: string;
+  }): Promise<Array<SignInfo>> {
+    const { didDocument } = params;
+    const didDocStringJson = Utils.ldToJsonConvertor(didDocument);
+    const didDoc: Did = didDocStringJson as Did;
+    const signInfos: Array<SignInfo> = [];
+    const { privateKeyMultibase, verificationMethodId } = params;
+    const signature: string = await this._sign({
+      didDocString: JSON.stringify(didDocStringJson),
+      privateKeyMultibase,
+    });
+    signInfos.push({
+      signature,
+      verification_method_id: verificationMethodId,
+      clientSpec: undefined,
+    });
+    return signInfos;
+  }
+
   /**
    * Resolves a DID into DIDDocument from Hypersign blockchain - an onchain activity
    * @params

@@ -392,6 +392,25 @@ class HypersignDID {
             return response;
         });
     }
+    createSignInfos(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { didDocument } = params;
+            const didDocStringJson = utils_1.default.ldToJsonConvertor(didDocument);
+            const didDoc = didDocStringJson;
+            const signInfos = [];
+            const { privateKeyMultibase, verificationMethodId } = params;
+            const signature = yield this._sign({
+                didDocString: JSON.stringify(didDocStringJson),
+                privateKeyMultibase,
+            });
+            signInfos.push({
+                signature,
+                verification_method_id: verificationMethodId,
+                clientSpec: undefined,
+            });
+            return signInfos;
+        });
+    }
     /**
      * Resolves a DID into DIDDocument from Hypersign blockchain - an onchain activity
      * @params
