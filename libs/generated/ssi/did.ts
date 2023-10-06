@@ -4,6 +4,7 @@ import { Writer, Reader } from "protobufjs/minimal";
 
 export const protobufPackage = "hypersignprotocol.hidnode.ssi";
 
+// DIDDocument... 
 export interface Did {
   context: string[];
   id: string;
