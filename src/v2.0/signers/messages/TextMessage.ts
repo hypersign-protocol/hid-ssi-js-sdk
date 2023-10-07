@@ -1,4 +1,4 @@
-import BaseMessage from './IBaseMessage'
+import {BaseMessage} from '../types'
 export default class TextMessage implements BaseMessage<string>{
     message: string;
     constructor(message: string){

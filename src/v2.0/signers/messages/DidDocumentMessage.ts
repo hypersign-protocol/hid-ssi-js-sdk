@@ -1,5 +1,5 @@
 import { IDidDocument, DIDEncoder } from '../../did/types' 
-import BaseMessage from './IBaseMessage'
+import {BaseMessage} from '../types'
 export default class DidDocumentMessage implements BaseMessage<IDidDocument>{
     message: IDidDocument;
     constructor(message: IDidDocument){
