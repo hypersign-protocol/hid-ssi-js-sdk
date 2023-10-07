@@ -85,9 +85,9 @@ abstract class BaseDIDDocument implements IDidDocument {
       return this.#assertionMethod
     }
 
-    protected set verificationMethod(verificationMethods: Array<IVerificationMethod>){
-      this.#verificationMethod = verificationMethods;
-    }
+    // protected set verificationMethod(verificationMethods: Array<IVerificationMethod>){
+    //   this.#verificationMethod = verificationMethods;
+    // }
 }
 
 interface IHypersignDIDDocument {
@@ -119,11 +119,15 @@ export default class HypersignDIDDocument extends BaseDIDDocument  implements IH
       this.verificationMethod.push(verificationMethod);
     }
 
-    removeVerificationMethod(verificationMethodId: string) {}
+    removeVerificationMethod(verificationMethodId: string) { throw new Error('Not implemented'); }
 
-    addService(service: IService) {}
+    addService(service: IService) {
+      throw new Error('Not implemented');
+    }
 
-    removeService(serviceId: string) {}
+    removeService(serviceId: string) {
+      throw new Error('Not implemented');
+    }
 
     getDIDDocument(): IDidDocument {
       return {
