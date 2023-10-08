@@ -1,12 +1,12 @@
 import { 
-    Did as IDidDocument,  
+    Did as IDidDocumentJs,  
     Did as DIDEncoder,  
     Metadata as IDidDocumentMetadata,
     VerificationMethod as IVerificationMethod,
     Service as IService,
 } from '../../../libs/generated/ssi/did';
 
-import { HypersignBaseSigner } from '../signers/types'
+import { BaseSigner } from '../signers/types'
 import DidDocumentMessage from '../signers/messages/DidDocumentMessage'
 
 export interface IDIDResolve {
@@ -14,26 +14,27 @@ export interface IDIDResolve {
     didDocumentMetadata: IDidDocumentMetadata;
 }
 
-
-export interface IHypersignDidDocument extends IDidDocument {
+type IDidDocumentJson = Omit<IDidDocumentJs, "context">;
+export interface IDidDocument extends IDidDocumentJson {
+    // TODO: add appropriate type here.
     '@context': Array<any>;
 }
-  
+
 export interface IProof {
     type: string;
     created: string;
     verificationMethod: string;
     proofPurpose: string;
-    challenge: string;
-    domain: string;
+    challenge?: string;
+    domain?: string;
     proofValue: string;
 }
   
-export interface ISignedDIDDocument extends IHypersignDidDocument {
+export interface ISignedDIDDocument extends IDidDocument {
     proof: IProof;
 }
 
-export interface IHypersignDIDManager {
+export interface IDIDManager {
     didDocument: IDidDocument;
     did: string;
     createDIDDocument();
@@ -41,6 +42,16 @@ export interface IHypersignDIDManager {
     updateDIDDocument();
     deactivateDIDDocument();
 }
+
+
+export interface IDIDDocumentService {
+    addVerificationMethod(verificationMethod: IVerificationMethod);
+    removeVerificationMethod(verificationMethodId: string);
+    addService(service: IService);
+    removeService(serviceId: string);
+  }
+  
+
 
 export type IVerificationRelationship =
       'authentication'
@@ -56,11 +67,11 @@ export type IClientSpec =
 
 
 
-export interface IHypersignManager {
+export interface IManager {
 
     sign(params: {
         didDocument: DidDocumentMessage;
-        signer: HypersignBaseSigner
+        signer: BaseSigner
     }): Promise<ISignedDIDDocument>
 
     // register(params: {
@@ -89,7 +100,7 @@ export interface IHypersignManager {
 
 
 export {
-    IDidDocument,
+    IDidDocumentJs,
     IDidDocumentMetadata,
     IVerificationMethod,
     IService,

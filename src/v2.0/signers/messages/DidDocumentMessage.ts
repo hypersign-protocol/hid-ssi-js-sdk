@@ -1,9 +1,16 @@
-import { IDidDocument, DIDEncoder } from '../../did/types' 
+import { IDidDocument, DIDEncoder, IDidDocumentJs } from '../../did/types' 
 import {BaseMessage} from '../types'
-export default class DidDocumentMessage implements BaseMessage<IDidDocument>{
-    message: IDidDocument;
+export default class DidDocumentMessage implements BaseMessage<IDidDocumentJs>{
+    message: IDidDocumentJs;
     constructor(message: IDidDocument){
-        this.message = message; 
+
+        //TODO: adter asking arnab, what to do with context, fix this. 
+        // force converting for now..
+        const idDIDDoc: IDidDocumentJs = {
+            'context': message['@context'],
+            ...message
+        }
+        this.message = idDIDDoc; 
     }
 
     async encode(): Promise<Uint8Array> {

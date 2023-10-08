@@ -1,7 +1,7 @@
 import TextMessage  from '../messages/TextMessage';
 import DidDocumentMessage from '../messages/DidDocumentMessage';
 import Ed25519KeyManager from './Ed25519KeyManager';
-import { HypersignBaseSigner, Purpose, BaseMessage } from '../types';
+import { BaseSigner, Purpose, BaseMessage } from '../types';
 import * as constant from '../../../constants';
 import jsonSigs from 'jsonld-signatures';
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
@@ -12,7 +12,7 @@ import  { ISignedDIDDocument } from '../../../v2.0/did/types'
 
 
 
-export default class Ed25519Signer extends Ed25519KeyManager implements HypersignBaseSigner{
+export default class Ed25519Signer extends Ed25519KeyManager implements BaseSigner{
     constructor(params : {seed?: string | Uint8Array; controller?: string} ){
         super(params);
     }

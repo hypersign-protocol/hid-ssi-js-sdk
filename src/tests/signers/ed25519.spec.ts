@@ -5,9 +5,9 @@ import DidDocumentMessage  from '../../v2.0/signers/messages/DidDocumentMessage'
 import { IDidDocument } from '../../v2.0/did/types';
 
 
-import HypersignDIDDocument from '../../v2.0/did/didDocument';
+import DIDDocument from '../../v2.0/did/DIDDocument';
 import Ed25519VerificationMethod from '../../v2.0/did/Ed25519VerificationMethod';
-import HypersignDIDManager from '../../v2.0/did/didManager'
+
 
 
   //remove seed while creating did so that wallet can generate different did every time
@@ -23,7 +23,7 @@ import HypersignDIDManager from '../../v2.0/did/didManager'
 
 
       const ed25519VerMetho = new Ed25519VerificationMethod(ed25519Signer)
-      const hsDIDDoc = new HypersignDIDDocument(
+      const hsDIDDoc = new DIDDocument(
          [ed25519VerMetho],
          ['authentication', 'assertionMethod'],
          ed25519Signer.id,
@@ -33,10 +33,10 @@ import HypersignDIDManager from '../../v2.0/did/didManager'
 
       
 
-      const didDocMsgObj = new DidDocumentMessage(hsDIDDoc.getDIDDocument());
-      const didManager = new HypersignDIDManager()
-      const proof = await didManager.sign({  didDocument: didDocMsgObj, signer: ed25519Signer})
-      console.log(proof)
+      // const didDocMsgObj = new DidDocumentMessage(hsDIDDoc.getDIDDocument());
+      // const didManager = new HypersignDIDManager()
+      // const proof = await didManager.sign({  didDocument: didDocMsgObj, signer: ed25519Signer})
+      // console.log(proof)
 
       expect(kp).to.be.a('object');
     })

@@ -13,7 +13,7 @@ export type Purpose =
     | 'AssertionProofPurpose'
 
 
-export interface HypersignBaseSigner {
+export interface BaseSigner {
     sign<T extends TextMessage | DidDocumentMessage>(message: T): Promise<string>;
     ldSign<T extends BaseMessage<any>>(message: T, 
         purposeType: Purpose, 
