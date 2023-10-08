@@ -4,10 +4,10 @@ import {
     Metadata as IDidDocumentMetadata,
     VerificationMethod as IVerificationMethod,
     Service as IService,
+    SignInfo
 } from '../../../libs/generated/ssi/did';
 
 import { BaseSigner } from '../signers/types'
-import DidDocumentMessage from '../signers/messages/DidDocumentMessage'
 
 export interface IDIDResolve {
     didDocument: IDidDocument;
@@ -60,13 +60,36 @@ export type IVerificationRelationship =
     | 'capabilityInvocation'
     | 'capabilityDelegation'
 
-export type IClientSpec = 
-      'eth-personalSign'
-    | 'cosmos-ADR036'
+export enum IClientSpec {
+    'eth-personalSign' = 'eth-personalSign',
+    'cosmos-ADR036' = 'cosmos-ADR036',
+    }
 
 
 
-
+export interface MsgData {
+    msgType: string;
+    data: Uint8Array;
+}
+    
+export interface DeliverTxResponse {
+    readonly height: number;
+    /** Error code. The transaction suceeded iff code is 0. */
+    readonly code: number;
+    readonly transactionHash: string;
+    readonly rawLog?: string;
+    readonly data?: readonly MsgData[];
+    readonly gasUsed: number;
+    readonly gasWanted: number;
+}
+    
+export interface IDIDRpc {
+    registerDID(didDoc: IDidDocumentJs, signInfos: SignInfo[]): Promise<DeliverTxResponse>;
+    updateDID(didDoc: IDidDocumentJs | any, signInfos: SignInfo[], versionId: string): Promise<DeliverTxResponse>;
+    deactivateDID(did: string, signInfos: SignInfo[], versionId: string): Promise<DeliverTxResponse>;
+    resolveDID(did: string): Promise<IDIDResolve>;
+    init(): Promise<void>;
+}
 export interface IDidManager {
 
     sign(params: {
@@ -104,7 +127,7 @@ export {
     IDidDocumentMetadata,
     IVerificationMethod,
     IService,
-    DIDEncoder   
+    DIDEncoder,   
 }
 
 

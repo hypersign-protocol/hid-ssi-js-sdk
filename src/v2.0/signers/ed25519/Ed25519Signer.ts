@@ -24,7 +24,8 @@ export default class Ed25519Signer extends Ed25519KeyManager implements BaseSign
 
     async ldSign<T extends BaseMessage<any>>(message: T, purposeType: Purpose, challenge?: string, domain?: string): Promise<ISignedDIDDocument> {
         const suite = new Ed25519Signature2020({
-            signer: this.signer
+            signer: this.signer,
+            verificationMethod: 'did:hid:testnet:123123123#z6MkjFeZb4H2MYndV5zzUBVCKGoQ9LQ8BapAahxensptxxry'
         })
         suite.date = '2010-01-01T19:23:24Z';
         const jsonDIDDoc = message.message;

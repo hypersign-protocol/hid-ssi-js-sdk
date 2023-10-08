@@ -28,7 +28,7 @@ export default abstract class BaseDIDDocument implements IDidDocument {
       this.#controller = controller 
       this.#alsoKnownAs = alsoKnownAs || []; //todo
       this.#verificationMethod = verificationMethods;
-      this.#authentication = [];
+      this.#authentication = [this.#verificationMethod[0].id];
       this.#assertionMethod = [];
       this.#keyAgreement = [];
       this.#capabilityInvocation = [];

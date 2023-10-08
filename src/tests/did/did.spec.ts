@@ -25,6 +25,7 @@ let DIdDOcWithMultiplVM;
 
 beforeEach(async function () {
   offlineSigner = await createWallet(mnemonic);
+  
   const params = {
     offlineSigner,
     nodeRestEndpoint: hidNodeEp.rest,
