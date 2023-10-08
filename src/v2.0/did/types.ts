@@ -67,10 +67,10 @@ export type IClientSpec =
 
 
 
-export interface IManager {
+export interface IDidManager {
 
     sign(params: {
-        didDocument: DidDocumentMessage;
+        didDocument: IDidDocument;
         signer: BaseSigner
     }): Promise<ISignedDIDDocument>
 

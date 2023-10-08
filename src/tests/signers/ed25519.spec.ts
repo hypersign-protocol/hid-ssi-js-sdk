@@ -3,7 +3,7 @@ import { expect, should } from 'chai';
 import TextMessage from '../../v2.0/signers/messages/TextMessage';
 import DidDocumentMessage  from '../../v2.0/signers/messages/DidDocumentMessage';
 import { IDidDocument } from '../../v2.0/did/types';
-
+import DIDManager from '../../v2.0/did/DIDManager'
 
 import DIDDocument from '../../v2.0/did/DIDDocument';
 import Ed25519VerificationMethod from '../../v2.0/did/Ed25519VerificationMethod';
@@ -33,10 +33,10 @@ import Ed25519VerificationMethod from '../../v2.0/did/Ed25519VerificationMethod'
 
       
 
-      // const didDocMsgObj = new DidDocumentMessage(hsDIDDoc.getDIDDocument());
-      // const didManager = new HypersignDIDManager()
-      // const proof = await didManager.sign({  didDocument: didDocMsgObj, signer: ed25519Signer})
-      // console.log(proof)
+
+      const didManager = new DIDManager()
+      const proof = await didManager.sign({  didDocument: hsDIDDoc.getDIDDocument(), signer: ed25519Signer})
+      console.log(proof)
 
       expect(kp).to.be.a('object');
     })

@@ -1,25 +1,25 @@
-import { IDidDocument, ISignedDIDDocument, IManager } from './types';
+import { IDidDocument, ISignedDIDDocument, IDidManager } from './types';
 import { BaseSigner } from '../signers/types';
 import DidDocumentMessage from '../signers/messages/DidDocumentMessage';
 
-export default class DIDManager implements IManager {
+export default class DIDManager implements IDidManager {
     async sign(params: {
-        didDocument: DidDocumentMessage;
+        didDocument: IDidDocument;
         signer: BaseSigner
     }): Promise<ISignedDIDDocument>{
         const { signer , didDocument}    = params;
-        const proof = await signer.ldSign(didDocument, 'AssertionProofPurpose')
+        const didDocMessage  = new DidDocumentMessage(didDocument)
+        const proof = await signer.ldSign(didDocMessage, 'AssertionProofPurpose')
         return proof;
     }
 
 
     // register(params: {
-    //     didDocument: DidDocumentMessage; // Ld document
-    //     privateKeyMultibase?: string;
-    //     verificationMethodId?: string;
-    //     signData?: any[];
-    // }): Promise<{ didDocument: IDidDocument; transactionHash: string }> {
+    //     signedDidDocument: ISignedDIDDocument; 
+    // }): Promise<{ didDocument: IDidDocument; transactionHash: string }> {} 
 
-    // }
+
+    
 
 }
+
