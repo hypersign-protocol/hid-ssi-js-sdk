@@ -1,10 +1,7 @@
 import { expect, should } from 'chai';
 import { HypersignDID } from '../../index';
-import { createWallet, mnemonic, hidNodeEp } from '../config';
-// const entityApiSecretKey =
-//   '8fc3d16ce8f040fd2fc4e5ccc1d73.6b6e55d4d54cd90c85bbcc92d9469873e60c0d7878681223e2fe63fca3abafb63390f939a77b3d73bf2eb58a654810b38';
-const entityApiSecret =
-    "69b91e007904228e3313e586ba695.bc7705956989e43bbd7060e845c2763a381cbc80f935ac848119b8c2d7d00616346eeb74efe22a0ff140506a0c6157ef6"
+import { createWallet, mnemonic, hidNodeEp, entityApiSecret } from '../config';
+
 // with local edv
 let offlineSigner;
 let hypersignDID;

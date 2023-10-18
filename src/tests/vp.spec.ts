@@ -36,8 +36,8 @@ let hypersignVP;
 let unsignedverifiablePresentation: IVerifiablePresentation;
 let verifiableCredentialPresentationId;
 let signedVerifiablePresentation: IVerifiablePresentation;
-let didDocumentByClientspec;
 const MMWalletAddress = '0x7967C85D989c41cA245f1Bb54c97D42173B135E0';
+let didDocumentByClientspec;
 
 const credentialBody = {
   schemaId: '',

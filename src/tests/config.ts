@@ -45,4 +45,6 @@ export const createWallet = async (mnemonic) => {
   }
 };
 
+
+export const entityApiSecret = '29a393a5d70094e409824359fc5d5.befc6c6f32d622e1c29ca900299a5695251b2407ca7cf6db8e6b2569dc13f937a4b83f4fa78738715d6267d3733e4f139'
 // wallet address: hid1rh5h603fv9dneqm422uvl4xk3fc77a4uheleq5

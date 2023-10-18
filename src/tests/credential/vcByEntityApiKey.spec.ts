@@ -1,6 +1,6 @@
 import { expect, should } from 'chai';
 import { HypersignDID, HypersignSchema, HypersignVerifiableCredential } from '../../index';
-import { createWallet, mnemonic, hidNodeEp } from '../config';
+import { createWallet, mnemonic, hidNodeEp, entityApiSecret } from '../config';
 import { ICredentialStatus, IVerifiableCredential } from '../../credential/ICredential';
 import { CredentialProof, CredentialStatus } from '../../../libs/generated/ssi/credential';
 let didDocument;
@@ -29,8 +29,6 @@ const schemaBody = {
     fields: [{ name: 'name', type: 'string', isRequired: false }],
     additionalProperties: false,
 };
-const entityApiSecret =
-    "69b91e007904228e3313e586ba695.bc7705956989e43bbd7060e845c2763a381cbc80f935ac848119b8c2d7d00616346eeb74efe22a0ff140506a0c6157ef6"
 beforeEach(async function () {
     offlineSigner = await createWallet(mnemonic);
     const constructorParams = {

@@ -7,6 +7,7 @@ import dataintegrety from './vc-data-integrety.json'
 import ecdsasecp2020 from './lds-ecdsa-secp256k1-recovery2020.json'
 import schema_org from './schema_org.json'
 import x25519VerificationKey2020 from "./x25519-key-agreement-2020-v1.json"
+import X25519KeyAgreementKeyEIP5630 from './X25519KeyAgreementKeyEIP5630.json'
 // Ref: https://github.com/digitalbazaar/jsonld.js/#custom-document-loader
 
 let nodeDocumentLoader;
@@ -43,6 +44,9 @@ const CONTEXTS = Object.freeze({
     },
     "https://identity.foundation/.well-known/did-configuration/v1": {
         ...wellknown
+    },  
+    "https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/libs/w3cache/v1/X25519KeyAgreementKeyEIP5630.json":{
+        ...X25519KeyAgreementKeyEIP5630
     }
 });
 
