@@ -1,0 +1,36 @@
+{
+    "@context": {
+        "id": "@id",
+        "type": "@type",
+        "@protected": true,
+        "proof": {
+            "@id": "https://w3id.org/security#proof",
+            "@type": "@id",
+            "@container": "@graph"
+        },
+        "X25519KeyAgreementKeyEIP5630": {
+            "@id": "https://w3id.org/security#X25519KeyAgreementKeyEIP5630",
+            "@context": {
+                "@protected": true,
+                "id": "@id",
+                "type": "@type",
+                "controller": {
+                    "@id": "https://w3id.org/security#controller",
+                    "@type": "@id"
+                },
+                "revoked": {
+                    "@id": "https://w3id.org/security#revoked",
+                    "@type": "http://www.w3.org/2001/XMLSchema#dateTime"
+                },
+                "publicKeyMultibase": {
+                    "@id": "https://w3id.org/security#publicKeyMultibase",
+                    "@type": "https://w3id.org/security#multibase"
+                },
+                "blockchainAccountId": {
+                    "@id": "https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld#blockchainAccountId",
+                    "@type": "https://w3id.org/security#blockchainAccountId"
+                }
+            }
+        }
+    }
+}

@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -27,117 +31,82 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var constants = __importStar(require("./constants"));
-var _a = require("base58-universal"), encode = _a.encode, decode = _a.decode;
-var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
-var Utils = /** @class */ (function () {
-    function Utils() {
-    }
-    Utils.getUUID = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var edKeyPair, exportedKp, publicKeyMultibase1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate()];
-                    case 1:
-                        edKeyPair = _a.sent();
-                        return [4 /*yield*/, edKeyPair.export({ publicKey: true })];
-                    case 2:
-                        exportedKp = _a.sent();
-                        publicKeyMultibase1 = this.convertEd25519verificationkey2020toStableLibKeysInto({
-                            publicKey: exportedKp.publicKeyMultibase,
-                        }).publicKeyMultibase;
-                        return [2 /*return*/, publicKeyMultibase1];
-                }
+const constants = __importStar(require("./constants"));
+const { encode, decode } = require('base58-universal');
+const ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
+class Utils {
+    static getUUID() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const edKeyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate();
+            const exportedKp = yield edKeyPair.export({ publicKey: true });
+            const { publicKeyMultibase: publicKeyMultibase1 } = this.convertEd25519verificationkey2020toStableLibKeysInto({
+                publicKey: exportedKp.publicKeyMultibase,
             });
+            return publicKeyMultibase1;
         });
-    };
-    Utils.checkUrl = function (url) {
+    }
+    static checkUrl(url) {
         // TODO: check if the url is a valid url
-        if (url.charAt(url.length - 1) === "/") {
+        if (url.charAt(url.length - 1) === '/') {
             return url;
         }
         else {
-            return (url = url + "/");
+            return (url = url + '/');
         }
-    };
-    Utils._encodeMbKey = function (header, key) {
-        var mbKey = new Uint8Array(header.length + key.length);
+    }
+    static _encodeMbKey(header, key) {
+        const mbKey = new Uint8Array(header.length + key.length);
         mbKey.set(header);
         mbKey.set(key, header.length);
-        return "z" + encode(mbKey);
-    };
-    Utils._decodeMbKey = function (header, key) {
-        var mbKey = new Uint8Array(key); //header + orginaley
+        return 'z' + encode(mbKey);
+    }
+    static _decodeMbKey(header, key) {
+        let mbKey = new Uint8Array(key); //header + orginaley
         mbKey = mbKey.slice(header.length);
         return mbKey; //Buffer.from(mbKey).toString('base64');
-    };
-    Utils._decodeMbPubKey = function (header, key) {
-        var mbKey = new Uint8Array(key); //header + orginaley
+    }
+    static _decodeMbPubKey(header, key) {
+        let mbKey = new Uint8Array(key); //header + orginaley
         mbKey = mbKey.slice(header.length);
-        return "z" + encode(mbKey); //Buffer.from(mbKey).toString('base64');
-    };
-    // Converting 45byte public key to 48 by padding header 
+        return 'z' + encode(mbKey); //Buffer.from(mbKey).toString('base64');
+    }
+    static _bufToMultibase(pubKeyBuf) {
+        return 'z' + encode(pubKeyBuf);
+    }
+    // Converting 45byte public key to 48 by padding header
     // Converting 88byte private key to 91 by padding header
-    Utils.convertedStableLibKeysIntoEd25519verificationkey2020 = function (stableLibKp) {
-        var result = {};
+    static convertedStableLibKeysIntoEd25519verificationkey2020(stableLibKp) {
+        const result = {};
         if (stableLibKp.publicKey) {
-            var stableLibPubKeyWithoutZ = stableLibKp.publicKey.substr(1);
-            var stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
+            const stableLibPubKeyWithoutZ = stableLibKp.publicKey.substr(1);
+            const stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
             result['publicKeyMultibase'] = Utils._encodeMbKey(constants.KEY_HEADERS.MULTICODEC_ED25519_PUB_HEADER, stableLibPubKeyWithoutZDecode);
         }
         if (stableLibKp.privKey) {
             result['privateKeyMultibase'] = Utils._encodeMbKey(constants.KEY_HEADERS.MULTICODEC_ED25519_PRIV_HEADER, stableLibKp.privKey);
         }
         return result;
-    };
-    Utils.convertEd25519verificationkey2020toStableLibKeysInto = function (ed255192020VerKeys) {
-        var result = {};
+    }
+    static convertEd25519verificationkey2020toStableLibKeysInto(ed255192020VerKeys) {
+        const result = {};
         if (ed255192020VerKeys.publicKey) {
-            var stableLibPubKeyWithoutZ = ed255192020VerKeys.publicKey.substr(1);
-            var stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
+            const stableLibPubKeyWithoutZ = ed255192020VerKeys.publicKey.substr(1);
+            const stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
             result['publicKeyMultibase'] = Utils._decodeMbPubKey(constants.KEY_HEADERS.MULTICODEC_ED25519_PUB_HEADER, stableLibPubKeyWithoutZDecode);
         }
         // privateKeyMultibase = z + encode(header+original)
         if (ed255192020VerKeys.privKey) {
-            var stableLibPrivKeyWithoutZ = ed255192020VerKeys.privKey.substr(1);
-            var stableLibPrivKeyWithoutZDecode = decode(stableLibPrivKeyWithoutZ);
+            const stableLibPrivKeyWithoutZ = ed255192020VerKeys.privKey.substr(1);
+            const stableLibPrivKeyWithoutZDecode = decode(stableLibPrivKeyWithoutZ);
             result['privateKeyMultibase'] = Utils._decodeMbKey(constants.KEY_HEADERS.MULTICODEC_ED25519_PRIV_HEADER, stableLibPrivKeyWithoutZDecode);
         }
         return result;
-    };
-    Utils.jsonToLdConvertor = function (json) {
-        var ld = {};
-        for (var key in json) {
-            if (key === "context") {
+    }
+    static jsonToLdConvertor(json) {
+        const ld = {};
+        for (const key in json) {
+            if (key === 'context') {
                 ld['@' + key] = json[key];
             }
             else {
@@ -145,11 +114,11 @@ var Utils = /** @class */ (function () {
             }
         }
         return ld;
-    };
-    Utils.ldToJsonConvertor = function (ld) {
-        var json = {};
-        for (var key in ld) {
-            if (key === "@context") {
+    }
+    static ldToJsonConvertor(ld) {
+        const json = {};
+        for (const key in ld) {
+            if (key === '@context') {
                 json['context'] = ld[key];
             }
             else {
@@ -157,11 +126,10 @@ var Utils = /** @class */ (function () {
             }
         }
         return json;
-    };
+    }
     // TODO: need to find a way to make it dynamic
-    Utils.getFee = function () {
-        return "auto";
-    };
-    return Utils;
-}());
+    static getFee() {
+        return 'auto';
+    }
+}
 exports.default = Utils;

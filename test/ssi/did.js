@@ -23,14 +23,14 @@ createWallet(mnemonic)
         console.log("===============GENERATE DID-KEYS=======================")
             // const param = "blade sting surge cube valid scr"; // 32 bytes
         const seed=Bip39.decode(mnemonic)
-        const kp = await hsSdk.did.generateKeys({seed});
+        const kp = await hsSdk.did.generateKeys();
         console.log("kp", kp);
         writeDataInFile('../mock/public/keys.json', JSON.stringify(kp))
         privateKeyMultibase = kp.privateKeyMultibase
         const publicKeyMultibase = kp.publicKeyMultibase
         console.log(kp)
         console.log("===============GENERATE DID&DIDDoc=======================")
-        return hsSdk.did.generate({ publicKeyMultibase });
+        return hsSdk.did.generate({ publicKeyMultibase});
         
     })
     .then((res) => {
@@ -60,10 +60,10 @@ createWallet(mnemonic)
     .then((resTx) => {
         console.log(resTx)
         console.log("===============RESOLVE DID=======================")
-        return hsSdk.did.resolve({ did: didDoc["id"] })
+        return hsSdk.did.resolve({ did: didDoc["id"],ed25519verificationkey2020:true })
     })
     .then(res => {
-        console.log(res)
+        console.log(JSON.stringify(res, null, 2))
         const { didDocumentMetadata } = res;
         versionId = didDocumentMetadata.versionId;
 

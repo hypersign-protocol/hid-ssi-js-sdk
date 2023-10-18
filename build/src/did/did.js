@@ -1,18 +1,11 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -38,418 +31,1179 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var constant = __importStar(require("../constants"));
-var jsonld_signatures_1 = __importDefault(require("jsonld-signatures"));
-var jsonld_1 = require("jsonld");
-var AuthenticationProofPurpose = jsonld_signatures_1.default.purposes.AuthenticationProofPurpose;
-var didRPC_1 = require("./didRPC");
-var utils_1 = __importDefault(require("../utils"));
-var ed25519 = require('@stablelib/ed25519');
-var did_1 = require("../generated/ssi/did");
-var ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
-var ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
-var DIDDocument = /** @class */ (function () {
-    function DIDDocument(publicKey, id) {
-        this.context = [constant.DID.DID_BASE_CONTEXT];
-        this.id = id;
-        this.controller = [this.id];
-        this.alsoKnownAs = [this.id];
-        var verificationMethod = {
-            id: this.id + '#key-1',
-            type: constant.DID.VERIFICATION_METHOD_TYPE,
-            controller: this.id,
-            publicKeyMultibase: publicKey,
-        };
-        this.verificationMethod = [verificationMethod];
-        this.authentication = [verificationMethod.id];
-        this.assertionMethod = [verificationMethod.id];
-        this.keyAgreement = [verificationMethod.id];
-        this.capabilityInvocation = [verificationMethod.id];
-        this.capabilityDelegation = [verificationMethod.id];
-        // TODO: we should take services object in consntructor
-        this.service = [];
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+const constant = __importStar(require("../constants"));
+const jsonld_signatures_1 = __importDefault(require("jsonld-signatures"));
+const { AuthenticationProofPurpose } = jsonld_signatures_1.default.purposes;
+const didRPC_1 = require("./didRPC");
+const utils_1 = __importDefault(require("../utils"));
+const ed25519 = require('@stablelib/ed25519');
+const did_1 = require("../../libs/generated/ssi/did");
+const ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
+const ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
+const web3_1 = __importDefault(require("web3"));
+const did_service_1 = __importDefault(require("../ssiApi/services/did/did.service"));
+const IDID_1 = require("./IDID");
+const v1_1 = __importDefault(require("../../libs/w3cache/v1"));
+class DIDDocument {
+    constructor(publicKey, blockchainAccountId, id, keyType, verificationRelationships) {
+        let vm;
+        switch (keyType) {
+            case IDID_1.IKeyType.Ed25519VerificationKey2020: {
+                this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
+                this.id = id;
+                this.controller = [this.id];
+                this.alsoKnownAs = [this.id];
+                vm = {
+                    id: this.id + '#key-1',
+                    type: constant['DID_' + keyType].VERIFICATION_METHOD_TYPE,
+                    controller: this.id,
+                    publicKeyMultibase: publicKey,
+                    blockchainAccountId: '',
+                };
+                const verificationMethod = vm;
+                this.verificationMethod = [verificationMethod];
+                this.authentication = [];
+                this.assertionMethod = [];
+                this.keyAgreement = [];
+                this.capabilityInvocation = [];
+                this.capabilityDelegation = [];
+                verificationRelationships === null || verificationRelationships === void 0 ? void 0 : verificationRelationships.forEach((value) => {
+                    this[value] = [verificationMethod.id];
+                });
+                // TODO: we should take services object in consntructor
+                this.service = [];
+                break;
+            }
+            case IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020: {
+                this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
+                this.id = id;
+                this.controller = [this.id];
+                this.alsoKnownAs = [this.id];
+                vm = {
+                    id: this.id + '#key-1',
+                    type: constant['DID_' + keyType].VERIFICATION_METHOD_TYPE,
+                    controller: this.id,
+                    blockchainAccountId: blockchainAccountId,
+                };
+                const verificationMethod = vm;
+                this.verificationMethod = [verificationMethod];
+                this.authentication = [];
+                this.assertionMethod = [];
+                this.keyAgreement = [];
+                this.capabilityInvocation = [];
+                this.capabilityDelegation = [];
+                verificationRelationships === null || verificationRelationships === void 0 ? void 0 : verificationRelationships.forEach((value) => {
+                    this[value] = [verificationMethod.id];
+                });
+                // TODO: we should take services object in consntructor
+                this.service = [];
+                break;
+            }
+            case IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019: {
+                this.context = [constant['DID_' + keyType].DID_BASE_CONTEXT];
+                this.id = id;
+                this.controller = [this.id];
+                this.alsoKnownAs = [];
+                vm = {
+                    id: this.id + '#key-1',
+                    type: constant['DID_' + keyType].VERIFICATION_METHOD_TYPE,
+                    controller: this.id,
+                    publicKeyMultibase: publicKey,
+                    blockchainAccountId: blockchainAccountId,
+                };
+                const verificationMethod = vm;
+                this.verificationMethod = [verificationMethod];
+                this.authentication = [];
+                this.assertionMethod = [];
+                this.keyAgreement = [];
+                this.capabilityInvocation = [];
+                this.capabilityDelegation = [];
+                verificationRelationships === null || verificationRelationships === void 0 ? void 0 : verificationRelationships.forEach((value) => {
+                    this[value] = [verificationMethod.id];
+                });
+                // TODO: we should take services object in consntructor
+                this.service = [];
+                break;
+            }
+            default:
+                throw new Error('Invalid');
+        }
     }
-    return DIDDocument;
-}());
-var HypersignDID = /** @class */ (function () {
-    function HypersignDID(namespace) {
-        var _this = this;
-        this.getId = function (methodSpecificId) {
-            var did = '';
+}
+/** Class representing HypersignDID */
+class HypersignDID {
+    /**
+     * Creates instance of HypersignDID class
+     * @constructor
+     * @params
+     *  - params.namespace        : namespace of did id, Default 'did:hid'
+     *  - params.offlineSigner    : signer of type OfflineSigner
+     *  - params.nodeRpcEndpoint  : RPC endpoint of the Hypersign blockchain, Default 'TEST'
+     *  - params.nodeRestEndpoint : REST endpoint of the Hypersign blockchain
+     */
+    constructor(params = {}) {
+        this._getId = (methodSpecificId) => {
+            if (methodSpecificId && methodSpecificId.length < 32) {
+                throw new Error('HID-SSI-SDK:: Error: methodSpecificId should be of minimum size 32');
+            }
+            let did = '';
             did =
-                _this.namespace && _this.namespace != ''
-                    ? "".concat(constant.DID.SCHEME, ":").concat(constant.DID.METHOD, ":").concat(_this.namespace, ":").concat(methodSpecificId)
-                    : "".concat(constant.DID.SCHEME, ":").concat(constant.DID.METHOD, ":").concat(methodSpecificId);
+                this.namespace && this.namespace != ''
+                    ? `${constant.DID.SCHEME}:${constant.DID.METHOD}:${this.namespace}:${methodSpecificId}`
+                    : `${constant.DID.SCHEME}:${constant.DID.METHOD}:${methodSpecificId}`;
             return did;
         };
-        this.didrpc = new didRPC_1.DIDRpc();
+        this._isValidMultibaseBase58String = (str) => {
+            const multibaseBase58Regex = /^z([1-9A-HJ-NP-Za-km-z]+)$/;
+            return multibaseBase58Regex.test(str);
+        };
+        const { offlineSigner, namespace, nodeRpcEndpoint, nodeRestEndpoint, entityApiSecretKey } = params;
+        const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
+        const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
+        const rpcConstructorParams = {
+            offlineSigner,
+            nodeRpcEndpoint: nodeRPCEp,
+            nodeRestEndpoint: nodeRestEp,
+        };
+        this.didrpc = new didRPC_1.DIDRpc(rpcConstructorParams);
+        if (entityApiSecretKey && entityApiSecretKey != '') {
+            this.didAPIService = new did_service_1.default(entityApiSecretKey);
+            this.didrpc = null;
+        }
+        else {
+            this.didAPIService = null;
+        }
         this.namespace = namespace ? namespace : '';
     }
-    // Sign the doc
-    HypersignDID.prototype.sign = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var privateKeyMultibaseConverted, didDocString, did, didBytes, signed;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        privateKeyMultibaseConverted = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
-                            privKey: params.privateKeyMultibase,
-                        }).privateKeyMultibase;
-                        didDocString = params.didDocString;
-                        did = JSON.parse(didDocString);
-                        return [4 /*yield*/, did_1.Did.encode(did)];
-                    case 1:
-                        didBytes = (_a.sent()).finish();
-                        signed = ed25519.sign(privateKeyMultibaseConverted, didBytes);
-                        return [2 /*return*/, Buffer.from(signed).toString('base64')];
-                }
+    _sign(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { privateKeyMultibase: privateKeyMultibaseConverted } = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
+                privKey: params.privateKeyMultibase,
             });
+            const { didDocString } = params;
+            // TODO:  do proper checck of paramaters
+            const did = JSON.parse(didDocString);
+            const didBytes = (yield did_1.Did.encode(did)).finish();
+            const signed = ed25519.sign(privateKeyMultibaseConverted, didBytes);
+            return Buffer.from(signed).toString('base64');
         });
-    };
-    // Generate a new key pair of type Ed25519VerificationKey2020
-    HypersignDID.prototype.generateKeys = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var edKeyPair, seedBytes, exportedKp;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!(params && params.seed)) return [3 /*break*/, 2];
-                        seedBytes = new Uint8Array(Buffer.from(params.seed));
-                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate({ seed: seedBytes })];
-                    case 1:
-                        edKeyPair = _a.sent();
-                        return [3 /*break*/, 4];
-                    case 2: return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate()];
-                    case 3:
-                        edKeyPair = _a.sent();
-                        _a.label = 4;
-                    case 4: return [4 /*yield*/, edKeyPair.export({ publicKey: true, privateKey: true })];
-                    case 5:
-                        exportedKp = _a.sent();
-                        return [2 /*return*/, {
-                                privateKeyMultibase: exportedKp.privateKeyMultibase,
-                                publicKeyMultibase: exportedKp.publicKeyMultibase, //48 bytes
-                            }];
-                }
-            });
-        });
-    };
-    /// Generate Did Document
-    HypersignDID.prototype.generate = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var publicKeyMultibase1, methodSpecificId, did, newDid;
-            return __generator(this, function (_a) {
-                if (!params.publicKeyMultibase) {
-                    throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
-                }
-                publicKeyMultibase1 = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
-                    publicKey: params.publicKeyMultibase,
-                }).publicKeyMultibase;
-                methodSpecificId = publicKeyMultibase1;
-                did = this.getId(methodSpecificId);
-                newDid = new DIDDocument(publicKeyMultibase1, did);
-                return [2 /*return*/, utils_1.default.jsonToLdConvertor(__assign({}, newDid))];
-            });
-        });
-    };
-    // TODO:  this method MUST also accept signature/proof
-    HypersignDID.prototype.register = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var didDocument, privateKeyMultibase, verificationMethodId, didDocStringJson, signature, didDoc;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!params.didDocument) {
-                            throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
-                        }
-                        if (!params.privateKeyMultibase) {
-                            throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to register a did');
-                        }
-                        if (!params.privateKeyMultibase) {
-                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
-                        }
-                        didDocument = params.didDocument, privateKeyMultibase = params.privateKeyMultibase, verificationMethodId = params.verificationMethodId;
-                        didDocStringJson = utils_1.default.ldToJsonConvertor(didDocument);
-                        return [4 /*yield*/, this.sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase: privateKeyMultibase })];
-                    case 1:
-                        signature = _a.sent();
-                        didDoc = didDocStringJson;
-                        return [4 /*yield*/, this.didrpc.registerDID(didDoc, signature, verificationMethodId)];
-                    case 2: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
-    };
+    }
+    _filterVerificationRelationships(verificationRelationships) {
+        let vR = [
+            IDID_1.IVerificationRelationships.assertionMethod,
+            IDID_1.IVerificationRelationships.authentication,
+            IDID_1.IVerificationRelationships.capabilityDelegation,
+            IDID_1.IVerificationRelationships.capabilityInvocation,
+        ];
+        if (verificationRelationships && verificationRelationships.length > 0) {
+            const set1 = new Set(vR);
+            const set2 = new Set(verificationRelationships);
+            vR = Array.from(set1).filter((value) => set2.has(value));
+        }
+        return vR;
+    }
     /**
-     * @param params params: { did?: string  }
-     *
-     *  if did is provided then it will resolve the did doc from the blockchain
-     *
-     * @returns  Promise : {context ,didDocument, VerificationResult , didDocumentMetadata}
+     * Creates a new DID Document from wallet address
+     * @params
+     *  - params.blockChainAccountId  :
+     *  - params.methodSpecificId   : methodSpecificId (min 32 bit alhanumeric) else it will generate new random methodSpecificId or may be walletaddress
+     * @returns {Promise<object>} DidDocument object
      */
-    HypersignDID.prototype.resolve = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var result;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!params.did) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.didrpc.resolveDID(params.did)];
-                    case 1:
-                        result = _a.sent();
-                        return [2 /*return*/, {
-                                didDocument: utils_1.default.jsonToLdConvertor(result.didDocument),
-                                didDocumentMetadata: result.didDocumentMetadata,
-                            }];
-                    case 2: throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
-                }
-            });
+    _getBlockChainAccountID(chainId, address) {
+        try {
+            const web3 = new web3_1.default();
+            const inDecimelChainId = web3.utils.hexToNumber(chainId);
+            const blockChainAccountId = constant.CAIP_10_PREFIX.eip155 + ':' + inDecimelChainId + ':' + address;
+            return blockChainAccountId;
+        }
+        catch (error) {
+            throw new Error('HID-SSI-SDK:: Error: unsupported chain Id');
+        }
+    }
+    init() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.didrpc && !this.didAPIService) {
+                throw new Error('HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized with entityApiSecretKey');
+            }
+            if (this.didrpc) {
+                yield this.didrpc.init();
+            }
+            if (this.didAPIService) {
+                yield this.didAPIService.auth();
+            }
         });
-    };
-    // Update DID Document
-    HypersignDID.prototype.update = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var didDocument, privateKeyMultibase, verificationMethodId, versionId, didDocStringJson, signature, didDoc;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!params.didDocument) {
-                            throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to update a did');
-                        }
-                        if (!params.privateKeyMultibase) {
-                            throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to update a did');
-                        }
-                        if (!params.privateKeyMultibase) {
-                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update a did');
-                        }
-                        if (!params.versionId) {
-                            throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
-                        }
-                        didDocument = params.didDocument, privateKeyMultibase = params.privateKeyMultibase, verificationMethodId = params.verificationMethodId, versionId = params.versionId;
-                        didDocStringJson = utils_1.default.ldToJsonConvertor(didDocument);
-                        return [4 /*yield*/, this.sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase: privateKeyMultibase })];
-                    case 1:
-                        signature = _a.sent();
-                        didDoc = didDocStringJson;
-                        return [4 /*yield*/, this.didrpc.updateDID(didDoc, signature, verificationMethodId, versionId)];
-                    case 2: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
-    };
-    HypersignDID.prototype.deactivate = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var didDocument, privateKeyMultibase, verificationMethodId, versionId, didDocStringJson, signature, didDoc;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!params.didDocument) {
-                            throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to deactivate a did');
-                        }
-                        if (!params.privateKeyMultibase) {
-                            throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to deactivate a did');
-                        }
-                        if (!params.privateKeyMultibase) {
-                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to deactivate a did');
-                        }
-                        if (!params.versionId) {
-                            throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
-                        }
-                        didDocument = params.didDocument, privateKeyMultibase = params.privateKeyMultibase, verificationMethodId = params.verificationMethodId, versionId = params.versionId;
-                        didDocStringJson = utils_1.default.ldToJsonConvertor(didDocument);
-                        return [4 /*yield*/, this.sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase: privateKeyMultibase })];
-                    case 1:
-                        signature = _a.sent();
-                        didDoc = didDocStringJson;
-                        return [4 /*yield*/, this.didrpc.deactivateDID(didDoc.id, signature, verificationMethodId, versionId)];
-                    case 2: return [2 /*return*/, _a.sent()];
-                }
-            });
-        });
-    };
-    /// Did Auth
+    }
     /**
-     *
-     * @param params
-     * -    params { privateKey, challenge, domain, did}
-     * -    privateKey  :   private key in multibase format (base58 digitalbazar format)
-     * -    challenge   :   challenge is a random string generated by the client
-     * -    did         :   did of the user
-     * -    domain      :   domain is the domain of the DID Document that is being authenticated
-     * @returns signed {signedDidDocument}
+     * Generate a new key pair of type Ed25519VerificationKey2020
+     * @params params.seed - Optional, Seed to generate the key pair, if not passed, random seed will be taken
+     * @params params.controller - Optional, controller field
+     * @returns {Promise<object>} The key pair of type Ed25519
      */
-    HypersignDID.prototype.signDid = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var privateKey, challenge, domain, did, doc, verificationMethodId, resolveddoc, error_1, publicKeyId, pubkey, publicKeyMultibase1, keyPair, suite, didDocumentLd, signedDidDocument;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        privateKey = params.privateKey, challenge = params.challenge, domain = params.domain, did = params.did, doc = params.doc, verificationMethodId = params.verificationMethodId;
-                        if (!privateKey) {
-                            throw new Error('HID-SSI-SDK:: Error: params.privateKey is required to sign a did');
-                        }
-                        if (!challenge) {
-                            throw new Error('HID-SSI-SDK:: Error: params.challenge is required to sign a did');
-                        }
-                        if (!domain) {
-                            throw new Error('HID-SSI-SDK:: Error: params.domain is required to sign a did');
-                        }
-                        _a.label = 1;
-                    case 1:
-                        _a.trys.push([1, 5, , 6]);
-                        if (!did) return [3 /*break*/, 3];
-                        return [4 /*yield*/, this.didrpc.resolveDID(did)];
-                    case 2:
-                        resolveddoc = _a.sent();
-                        return [3 /*break*/, 4];
-                    case 3:
-                        if (doc) {
-                            resolveddoc = {};
-                            resolveddoc.didDocument = doc;
-                        }
-                        else {
-                            throw new Error('HID-SSI-SDK:: Error: params.did or params.doc is required to sign a did');
-                        }
-                        _a.label = 4;
-                    case 4: return [3 /*break*/, 6];
-                    case 5:
-                        error_1 = _a.sent();
-                        throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a public did');
-                    case 6:
-                        publicKeyId = verificationMethodId;
-                        pubkey = resolveddoc.didDocument.verificationMethod.find(function (item) { return item.id === publicKeyId; });
-                        if (!pubkey) {
-                            throw new Error('HID-SSI-SDK:: Incorrect verification method id');
-                        }
-                        publicKeyMultibase1 = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
-                            publicKey: pubkey.publicKeyMultibase,
-                        }).publicKeyMultibase;
-                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from({
-                                id: publicKeyId,
-                                privateKeyMultibase: privateKey,
-                                publicKeyMultibase: publicKeyMultibase1,
-                            })];
-                    case 7:
-                        keyPair = _a.sent();
-                        suite = new ed25519_signature_2020_1.Ed25519Signature2020({
-                            verificationMethod: publicKeyId,
-                            key: keyPair,
-                        });
-                        didDocumentLd = utils_1.default.jsonToLdConvertor(resolveddoc.didDocument);
-                        didDocumentLd['@context'].push(constant.VC.CREDENTAIL_SECURITY_SUITE);
-                        return [4 /*yield*/, jsonld_signatures_1.default.sign(didDocumentLd, {
-                                suite: suite,
-                                purpose: new AuthenticationProofPurpose({
-                                    challenge: challenge,
-                                    domain: domain,
-                                }),
-                                documentLoader: jsonld_1.documentLoader,
-                                compactProof: constant.compactProof,
-                            })];
-                    case 8:
-                        signedDidDocument = _a.sent();
-                        return [2 /*return*/, { signedDidDocument: signedDidDocument }];
-                }
-            });
+    generateKeys(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let edKeyPair;
+            if (params && params.seed && params.controller) {
+                const seedBytes = params.seed instanceof Uint8Array ? params.seed : new Uint8Array(Buffer.from(params.seed));
+                edKeyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate({ seed: seedBytes, id: params.controller });
+            }
+            else if (params && params.controller) {
+                edKeyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate({ id: params.controller });
+            }
+            else if (params && params.seed) {
+                const seedBytes = params.seed instanceof Uint8Array ? params.seed : new Uint8Array(Buffer.from(params.seed));
+                edKeyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate({ seed: seedBytes });
+            }
+            else {
+                edKeyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate();
+            }
+            const exportedKp = yield edKeyPair.export({ publicKey: true, privateKey: true });
+            return Object.assign({}, exportedKp);
         });
-    };
-    // verify the signature
+    }
     /**
-     *
-     * @param params IParams
-     * -    params { doc: signedDidDocument}
-     * -    doc  :   signed did document
-     *
-     * @returns VerificationResult {VerificationResult}
+     * Generates a new DID Document
+     * @params
+     *  - params.publicKeyMultibase : public key
+     *  - params.methodSpecificId   : Optional methodSpecificId (min 32 bit alhanumeric) else it will generate new random methodSpecificId
+     *  - params.verificationRelationships: Optional, verification relationships where you want to add your verificaiton method ids
+     * @returns {Promise<object>} DidDocument object
      */
-    HypersignDID.prototype.verify = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
-            var doc, verificationMethodId, challenge, domain, didDoc, publicKeyId, pubkey, result, publicKeyMultibase1, keyPair, suite, controller, purpose;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        doc = params.doc, verificationMethodId = params.verificationMethodId, challenge = params.challenge, domain = params.domain;
-                        if (!doc) {
-                            throw new Error('HID-SSI-SDK:: Error: params.doc is required to verify a did');
-                        }
-                        if (!verificationMethodId) {
-                            throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify a did');
-                        }
-                        if (!challenge) {
-                            throw new Error('HID-SSI-SDK:: Error: params.challenge is required to verify a did');
-                        }
-                        didDoc = doc;
-                        publicKeyId = verificationMethodId;
-                        pubkey = didDoc.verificationMethod.find(function (item) { return item.id === publicKeyId; });
-                        if (!pubkey) return [3 /*break*/, 3];
-                        publicKeyMultibase1 = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
-                            publicKey: pubkey.publicKeyMultibase,
-                        }).publicKeyMultibase;
-                        return [4 /*yield*/, ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from({
-                                id: publicKeyId,
-                                publicKeyMultibase: publicKeyMultibase1,
-                            })];
-                    case 1:
-                        keyPair = _a.sent();
-                        suite = new ed25519_signature_2020_1.Ed25519Signature2020({
-                            key: keyPair,
-                        });
-                        suite.date = new Date(new Date().getTime() - 100000).toISOString();
-                        controller = {
-                            '@context': constant.DID.CONTROLLER_CONTEXT,
-                            id: publicKeyId,
-                            authentication: didDoc.authentication,
-                        };
-                        purpose = new AuthenticationProofPurpose({
-                            controller: controller,
-                            challenge: challenge,
-                            domain: domain,
-                        });
-                        return [4 /*yield*/, jsonld_signatures_1.default.verify(didDoc, {
-                                suite: suite,
-                                purpose: purpose,
-                                documentLoader: jsonld_1.documentLoader,
-                                compactProof: constant.compactProof,
-                            })];
-                    case 2:
-                        result = _a.sent();
-                        _a.label = 3;
-                    case 3: return [2 /*return*/, { verificationResult: result }];
+    generate(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let verificationRelationships = [];
+            if (params.verificationRelationships && params.verificationRelationships.length > 0) {
+                if (params.verificationRelationships.includes(IDID_1.IVerificationRelationships.keyAgreement)) {
+                    throw new Error('HID-SSI-SDK:: Error: keyAgreement is not allowed in verificationRelationships');
                 }
+                verificationRelationships = this._filterVerificationRelationships(params.verificationRelationships);
+            }
+            else {
+                verificationRelationships = this._filterVerificationRelationships([]);
+            }
+            if (!params.publicKeyMultibase) {
+                throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to generate new did didoc');
+            }
+            const { publicKeyMultibase: publicKeyMultibase1 } = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
+                publicKey: params.publicKeyMultibase,
+            });
+            const methodSpecificId = publicKeyMultibase1;
+            let didId;
+            if (params.methodSpecificId) {
+                didId = this._getId(params.methodSpecificId);
+            }
+            else {
+                didId = this._getId(methodSpecificId);
+            }
+            const newDid = new DIDDocument(publicKeyMultibase1, '', didId, IDID_1.IKeyType.Ed25519VerificationKey2020, verificationRelationships);
+            return utils_1.default.jsonToLdConvertor(Object.assign({}, newDid));
+        });
+    }
+    /**
+     * Register a new DID and Document in Hypersign blockchain - an onchain activity
+     * @params
+     *  - params.didDocument          : LD did document
+     *  - params.privateKeyMultibase  : Private Key to sign the doc
+     *  - params.verificationMethodId : VerificationMethodId of the document
+     * @returns {Promise<object>} Result of the registration
+     */
+    register(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = {};
+            // TODO:  this method MUST also accept signature/proof
+            if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
+                throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
+            }
+            if (!this.didrpc && !this.didAPIService) {
+                throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
+            }
+            const { didDocument } = params;
+            const didDocStringJson = utils_1.default.ldToJsonConvertor(didDocument);
+            const didDoc = didDocStringJson;
+            const signInfos = [];
+            if (!params.signData) {
+                if (!params.privateKeyMultibase) {
+                    throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to register a did');
+                }
+                if (!params.verificationMethodId) {
+                    throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
+                }
+                const { privateKeyMultibase, verificationMethodId } = params;
+                const signature = yield this._sign({
+                    didDocString: JSON.stringify(didDocStringJson),
+                    privateKeyMultibase,
+                });
+                signInfos.push({
+                    signature,
+                    verification_method_id: verificationMethodId,
+                    clientSpec: undefined,
+                });
+            }
+            else {
+                if (params.signData.length < 1) {
+                    throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
+                }
+                for (const i in params.signData) {
+                    if (!params.signData[i].verificationMethodId) {
+                        throw new Error(`HID-SSI-SDK:: Error: params.signData[${i}].verificationMethodId is required to register a did`);
+                    }
+                    if (!params.signData[i].privateKeyMultibase) {
+                        throw new Error(`HID-SSI-SDK:: Error: params.signData[${i}].privateKeyMultibase is required to register a did`);
+                    }
+                    if (!params.signData[i].type) {
+                        throw new Error(`HID-SSI-SDK:: Error: params.signData[${i}].type is required to register a did`);
+                    }
+                    const { type, privateKeyMultibase, verificationMethodId } = params.signData[i];
+                    if (type !== IDID_1.IKeyType.X25519KeyAgreementKey2020 && type !== IDID_1.IKeyType.X25519KeyAgreementKeyEIP5630) {
+                        const signature = yield this._sign({
+                            didDocString: JSON.stringify(didDocStringJson),
+                            privateKeyMultibase,
+                        });
+                        signInfos.push({
+                            signature,
+                            verification_method_id: verificationMethodId,
+                            clientSpec: undefined,
+                        });
+                    }
+                }
+            }
+            if (this.didrpc) {
+                const result = yield this.didrpc.registerDID(didDoc, signInfos);
+                response.didDocument = params.didDocument;
+                response.transactionHash = result.transactionHash;
+            }
+            else if (this.didAPIService) {
+                const newSignInfos = signInfos;
+                const result = yield this.didAPIService.registerDid({
+                    didDocument,
+                    signInfos: newSignInfos,
+                });
+                response.didDocument = didDocument;
+                response.transactionHash = result.transactionHash;
+            }
+            return response;
+        });
+    }
+    createSignInfos(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { didDocument } = params;
+            const didDocStringJson = utils_1.default.ldToJsonConvertor(didDocument);
+            const didDoc = didDocStringJson;
+            const signInfos = [];
+            const { privateKeyMultibase, verificationMethodId } = params;
+            const signature = yield this._sign({
+                didDocString: JSON.stringify(didDocStringJson),
+                privateKeyMultibase,
+            });
+            signInfos.push({
+                signature,
+                verification_method_id: verificationMethodId,
+                clientSpec: undefined,
+            });
+            return signInfos;
+        });
+    }
+    /**
+     * Resolves a DID into DIDDocument from Hypersign blockchain - an onchain activity
+     * @params
+     *  - params.did                        : DID
+     *  - params.ed25519verificationkey2020 : *Optional* True/False
+     * @returns  {Promise<IDIDResolve>} didDocument and didDocumentMetadata
+     */
+    resolve(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = {};
+            if (!params.did) {
+                throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
+            }
+            if (this.didrpc) {
+                result = yield this.didrpc.resolveDID(params.did);
+                if (params.ed25519verificationkey2020) {
+                    const didDoc = result.didDocument;
+                    const verificationMethods = didDoc.verificationMethod;
+                    verificationMethods.forEach((verificationMethod) => {
+                        if (verificationMethod.type === constant.DID.VERIFICATION_METHOD_TYPE) {
+                            const ed25519PublicKey = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
+                                publicKey: verificationMethod.publicKeyMultibase,
+                            });
+                            verificationMethod.publicKeyMultibase = ed25519PublicKey.publicKeyMultibase;
+                        }
+                    });
+                    didDoc.verificationMethod = verificationMethods;
+                }
+            }
+            else if (this.didAPIService) {
+                result = yield this.didAPIService.resolveDid({ did: params.did });
+            }
+            return {
+                didDocument: utils_1.default.jsonToLdConvertor(result.didDocument),
+                didDocumentMetadata: result.didDocumentMetadata,
+            };
+        });
+    }
+    /**
+     * Update a DIDDocument in Hypersign blockchain - an onchain activity
+     * @params
+     *  - params.didDocument          : LD did document
+     *  - params.privateKeyMultibase  : Private Key to sign the doc
+     *  - params.verificationMethodId : VerificationMethodId of the document
+     *  - params.versionId            : Version of the document
+     * @returns {Promise<{ transactionHash: string }>} Result of the update operation
+     */
+    update(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = {};
+            if (!params.didDocument) {
+                throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to update a did');
+            }
+            if (!params.privateKeyMultibase) {
+                throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to update a did');
+            }
+            if (!params.verificationMethodId) {
+                throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update a did');
+            }
+            if (!params.versionId) {
+                throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
+            }
+            if (!this.didrpc && !this.didAPIService) {
+                throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
+            }
+            const { didDocument, privateKeyMultibase, verificationMethodId, versionId } = params;
+            const didDocStringJson = utils_1.default.ldToJsonConvertor(didDocument);
+            const signature = yield this._sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase });
+            const didDoc = didDocStringJson;
+            const signInfos = [
+                {
+                    signature,
+                    verification_method_id: verificationMethodId,
+                    clientSpec: undefined,
+                },
+            ];
+            if (this.didrpc) {
+                const result = yield this.didrpc.updateDID(didDoc, signInfos, versionId);
+                response.transactionHash = result.transactionHash;
+            }
+            else if (this.didAPIService) {
+                const newSignInfos = signInfos;
+                const result = yield this.didAPIService.updateDid({
+                    didDocument: didDoc,
+                    signInfos: newSignInfos,
+                    deactivate: false,
+                });
+                response.transactionHash = result.transactionHash;
+            }
+            return response;
+        });
+    }
+    /**
+     * Deactivate a DIDDocument in Hypersign blockchain - an onchain activity
+     * @params
+     *  - params.didDocument          : LD did document
+     *  - params.privateKeyMultibase  : Private Key to sign the doc
+     *  - params.verificationMethodId : VerificationMethodId of the document
+     *  - params.versionId            : Version of the document
+     * @returns {Promise<object>} Result of the deactivatee operation
+     */
+    deactivate(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = {};
+            if (!params.didDocument) {
+                throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to deactivate a did');
+            }
+            if (!params.privateKeyMultibase) {
+                throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to deactivate a did');
+            }
+            if (!params.verificationMethodId) {
+                throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to deactivate a did');
+            }
+            if (!params.versionId) {
+                throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
+            }
+            if (!this.didrpc && !this.didAPIService) {
+                throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
+            }
+            const { didDocument, privateKeyMultibase, verificationMethodId, versionId } = params;
+            const didDocStringJson = utils_1.default.ldToJsonConvertor(didDocument);
+            const signature = yield this._sign({ didDocString: JSON.stringify(didDocStringJson), privateKeyMultibase });
+            const didDoc = didDocStringJson;
+            const signInfos = [
+                {
+                    signature,
+                    verification_method_id: verificationMethodId,
+                    clientSpec: undefined,
+                },
+            ];
+            if (this.didrpc) {
+                const result = yield this.didrpc.deactivateDID(didDoc.id, signInfos, versionId);
+                response.transactionHash = result.transactionHash;
+            }
+            else if (this.didAPIService) {
+                const newSignInfos = signInfos;
+                const result = yield this.didAPIService.updateDid({
+                    didDocument: didDocument,
+                    signInfos: newSignInfos,
+                    deactivate: true,
+                });
+                response.transactionHash = result.transactionHash;
+            }
+            return response;
+        });
+    }
+    /**
+     * Signs a DIDDocument
+     * @params
+     *  - params.didDocument               :   Did document to be signed
+     *  - params.privateKeyMultibase       :   private key in multibase format (base58 digitalbazar format)
+     *  - params.challenge                 :   challenge is a random string generated by the client
+     *  - params.did                       :   did of the user
+     *  - params.domain                    :   domain is the domain of the DID Document that is being authenticated
+     *  - params.verificationMethodId      :   verificationMethodId of the DID
+     * @returns {Promise<object>} Signed DID Document
+     */
+    sign(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { privateKeyMultibase, challenge, domain, did, didDocument, verificationMethodId } = params;
+            let resolveddoc;
+            if (!privateKeyMultibase) {
+                throw new Error('HID-SSI-SDK:: Error: params.privateKey is required to sign a did');
+            }
+            if (!challenge) {
+                throw new Error('HID-SSI-SDK:: Error: params.challenge is required to sign a did');
+            }
+            if (!domain) {
+                throw new Error('HID-SSI-SDK:: Error: params.domain is required to sign a did');
+            }
+            try {
+                // if did is prvovided then resolve the did doc from the blockchain or else use the did doc provided in the params object to sign the did doc with the proof
+                if (did && this.didrpc) {
+                    resolveddoc = yield this.didrpc.resolveDID(did);
+                }
+                else if (didDocument) {
+                    resolveddoc = {};
+                    resolveddoc.didDocument = didDocument;
+                }
+                else {
+                    throw new Error('HID-SSI-SDK:: Error: params.did or params.didDocument is required to sign a did');
+                }
+            }
+            catch (error) {
+                throw new Error(`HID-SSI-SDK:: Error: could not resolve did ${did}`);
+            }
+            const publicKeyId = verificationMethodId;
+            const pubkey = resolveddoc.didDocument.verificationMethod.find((item) => item.id === publicKeyId);
+            if (!pubkey) {
+                throw new Error('HID-SSI-SDK:: Error: Incorrect verification method id');
+            }
+            const { publicKeyMultibase: publicKeyMultibase1 } = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
+                publicKey: pubkey.publicKeyMultibase,
+            });
+            const keyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from({
+                id: publicKeyId,
+                privateKeyMultibase,
+                publicKeyMultibase: publicKeyMultibase1,
+            });
+            const suite = new ed25519_signature_2020_1.Ed25519Signature2020({
+                verificationMethod: publicKeyId,
+                key: keyPair,
+            });
+            const didDocumentLd = utils_1.default.jsonToLdConvertor(resolveddoc.didDocument);
+            didDocumentLd['@context'].push(constant.VC.CREDENTAIL_SECURITY_SUITE);
+            // didDocumentLd['@context'].push(constant.VC.CREDENTAIL_ECDSA_SECURITY_SUITE)
+            const signedDidDocument = (yield jsonld_signatures_1.default.sign(didDocumentLd, {
+                suite,
+                purpose: new AuthenticationProofPurpose({
+                    challenge,
+                    domain,
+                }),
+                documentLoader: v1_1.default,
+                compactProof: constant.compactProof,
+            }));
+            return signedDidDocument;
+        });
+    }
+    /**
+     * Verifies a signed DIDDocument
+     * @params
+     *  - params.didDocument :   Signed DID Document
+     *  - params.privateKey  :   private key in multibase format (base58 digitalbazar format)
+     *  - params.challenge   :   challenge is a random string generated by the client
+     *  - params.did         :   did of the user
+     *  - params.domain      :   domain is the domain of the DID Document that is being authenticated
+     * @returns Promise<{ verificationResult }> Verification Result
+     */
+    verify(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { didDocument, verificationMethodId, challenge, domain } = params;
+            if (!didDocument) {
+                throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to verify a did');
+            }
+            if (!didDocument['proof']) {
+                throw new Error('HID-SSI-SDK:: Error: params.didDocument.proof is not present in the signed did document');
+            }
+            if (!verificationMethodId) {
+                throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify a did');
+            }
+            if (!challenge) {
+                throw new Error('HID-SSI-SDK:: Error: params.challenge is required to verify a did');
+            }
+            const didDoc = didDocument;
+            const publicKeyId = verificationMethodId;
+            const pubkey = didDoc.verificationMethod.find((item) => item.id === publicKeyId);
+            if (!pubkey) {
+                throw new Error('HID-SSI-SDK:: Error: could not find verification method for verificationMethodId: ' +
+                    verificationMethodId +
+                    ' in did document');
+            }
+            const { publicKeyMultibase: publicKeyMultibase1 } = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
+                publicKey: pubkey.publicKeyMultibase,
+            });
+            const keyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from({
+                id: publicKeyId,
+                publicKeyMultibase: publicKeyMultibase1,
+            });
+            const suite = new ed25519_signature_2020_1.Ed25519Signature2020({
+                key: keyPair,
+            });
+            suite.date = new Date(new Date().getTime() - 100000).toISOString();
+            const controller = {
+                '@context': constant.DID.CONTROLLER_CONTEXT,
+                id: publicKeyId,
+                authentication: didDoc.authentication,
+            };
+            const purpose = new AuthenticationProofPurpose({
+                controller,
+                challenge,
+                domain,
+            });
+            const result = yield jsonld_signatures_1.default.verify(didDoc, {
+                suite,
+                purpose: purpose,
+                documentLoader: v1_1.default,
+                compactProof: constant.compactProof,
+            });
+            return result;
+        });
+    }
+    // using in API
+    /**
+     * Create DIDDocument using metamask or kepler
+     * @param
+     *  - params.methodSpecificId           : methodSpecificId (min 32 bit alhanumeric) else it will generate new random methodSpecificId or may be walletaddress
+     *  - params.publicKey                  : Optional, Used for cosmos-ADR036
+     *  - params.address                    : Checksum address from web3 wallet
+     *  - params.chainId                    : Chain Id
+     *  - params.clientSpec                 : ClientSpec either it is eth-personalSign or cosmos-ADR036\
+     *  - params.verificationRelationships  : Optional, verification relationships where you want to add your verificaiton method ids
+     * @returns {Promise<Did>}  DidDocument object
+     */
+    createByClientSpec(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this['window'] === 'undefined') {
+                console.log('HID-SSI-SDK:: Warning:  Running in non browser mode');
+            }
+            if (!params.methodSpecificId) {
+                throw new Error('HID-SSI-SDK:: Error: params.methodSpecificId is required to create didoc');
+            }
+            if (!params.chainId) {
+                throw new Error('HID-SSI-SDK:: Error: params.chainId is required to create didoc');
+            }
+            if (!params.address) {
+                throw new Error('HID-SSI-SDK:: Error: params.address is required to create didoc');
+            }
+            if (!params.clientSpec) {
+                throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to create didoc');
+            }
+            if (!(params.clientSpec in IDID_1.IClientSpec)) {
+                throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
+            }
+            let didDoc;
+            let verificationRelationships = [];
+            if (params.verificationRelationships && params.verificationRelationships.length > 0) {
+                if (params.verificationRelationships.includes(IDID_1.IVerificationRelationships.keyAgreement)) {
+                    throw new Error('HID-SSI-SDK:: Error: keyAgreement is not allowed in verificationRelationships');
+                }
+                verificationRelationships = this._filterVerificationRelationships(params.verificationRelationships);
+            }
+            else {
+                verificationRelationships = this._filterVerificationRelationships([]);
+            }
+            switch (params.clientSpec) {
+                case IDID_1.IClientSpec['eth-personalSign']: {
+                    const blockChainAccountId = this._getBlockChainAccountID(params.chainId, params.address);
+                    const didId = this._getId(params.methodSpecificId);
+                    const newDid = new DIDDocument('', blockChainAccountId, didId, IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020, verificationRelationships);
+                    didDoc = utils_1.default.jsonToLdConvertor(Object.assign({}, newDid));
+                    delete didDoc.service;
+                    break;
+                }
+                case IDID_1.IClientSpec['cosmos-ADR036']: {
+                    if (!params.publicKey) {
+                        throw new Error('HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
+                            IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
+                    }
+                    if (!this._isValidMultibaseBase58String(params.publicKey)) {
+                        throw new Error('HID-SSI-SDK:: Error: params.publicKey mustbe multibase encoded base58 string for ' +
+                            IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
+                    }
+                    const multibasePublicKey = params.publicKey;
+                    const didId = this._getId(params.methodSpecificId);
+                    const blockChainAccountId = 'cosmos:' + params.chainId + ':' + params.address;
+                    const newDid = new DIDDocument(multibasePublicKey, blockChainAccountId, didId, IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
+                    didDoc = utils_1.default.jsonToLdConvertor(Object.assign({}, newDid));
+                    break;
+                }
+                default: {
+                    throw new Error('HID-SSI-SDK:: Error: params.clientSpec is invalid use object.generate() method');
+                }
+            }
+            return didDoc;
+        });
+    }
+    // using in API
+    /**
+     * Register did on chain generated using wallet
+     * @param
+     * - params.didDocument      : DidDocument to register
+     * - params.signInfos        : Array of signature, verificationMethodId and clientSpec
+     * @returns {Promise<{didDocument: Did,transactionHash: string }>}
+     */
+    registerByClientSpec(params) {
+        var _a, _b, _c, _d;
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = {};
+            if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
+                throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
+            }
+            if (!this.didrpc && !this.didAPIService) {
+                throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
+            }
+            if (!params.signInfos) {
+                throw new Error('HID-SSI-SDK:: Error: params.signInfos is required to register a did');
+            }
+            if (params.signInfos.length < 1) {
+                throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
+            }
+            if (!params.signInfos) {
+                throw new Error('HID-SSI-SDK:: Error: params.signInfos is required to register a did');
+            }
+            if (params.signInfos.length < 1) {
+                throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
+            }
+            for (const i in params.signInfos) {
+                if (!params.signInfos[i].verification_method_id) {
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`);
+                }
+                const clientSpec = params.signInfos[i].clientSpec;
+                if (clientSpec && clientSpec.type && !(clientSpec.type in IDID_1.IClientSpec)) {
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${0}].clientSpec is invalid`);
+                }
+                if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
+                    if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
+                        ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
+                        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].adr036SignerAddress is required to register a did, when clientSpec type is${(_d = params.signInfos[i].clientSpec) === null || _d === void 0 ? void 0 : _d.type} `);
+                    }
+                }
+                if (!params.signInfos[i].signature) {
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].signature is required to register a did`);
+                }
+            }
+            const didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
+            const didDoc = didDocStringJson;
+            const { signInfos } = params;
+            if (this.didrpc) {
+                const result = yield this.didrpc.registerDID(didDoc, signInfos);
+                response.didDocument = didDoc;
+                response.transactionHash = result.transactionHash;
+            }
+            else if (this.didAPIService) {
+                const newSignInfos = signInfos;
+                const result = yield this.didAPIService.registerDid({
+                    didDocument: didDoc,
+                    signInfos: newSignInfos,
+                });
+                response.didDocument = didDoc;
+                response.transactionHash = result.transactionHash;
+            }
+            return response;
+        });
+    }
+    // using in API
+    /**
+     * Update a didDocument in Hypersign blockchain
+     * @param
+     * - params.didDocument      : LD DidDocument to updated
+     * - params.versionId        : Version of the document. See the didDocumentMetadata when DID resolves
+     * - params.signInfos        : Array of signature, verificationMethodId and clientSpec
+     * @returns {Promise<{ transactionHash: string }>}  Result of the update operation
+     */
+    updateByClientSpec(params) {
+        var _a, _b, _c, _d;
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = {};
+            if (!this.didrpc && !this.didAPIService) {
+                throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
+            }
+            if (!params.didDocument) {
+                throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to update a did');
+            }
+            if (!params.signInfos) {
+                throw new Error('HID-SSI-SDK:: Error: params.signInfos is required to register a did');
+            }
+            if (params.signInfos.length < 1) {
+                throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
+            }
+            for (const i in params.signInfos) {
+                if (!params.signInfos[i].verification_method_id) {
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`);
+                }
+                const clientSpec = params.signInfos[i].clientSpec;
+                if (clientSpec && clientSpec.type && !(clientSpec.type in IDID_1.IClientSpec)) {
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${0}].clientSpec is invalid`);
+                }
+                if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
+                    if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
+                        ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
+                        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].adr036SignerAddress is required to register a did, when clientSpec type is${(_d = params.signInfos[i].clientSpec) === null || _d === void 0 ? void 0 : _d.type} `);
+                    }
+                }
+                if (!params.signInfos[i].signature) {
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].signature is required to register a did`);
+                }
+            }
+            if (!params.versionId) {
+                throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
+            }
+            const { didDocument, signInfos, versionId } = params;
+            if (this.didrpc) {
+                const result = yield this.didrpc.updateDID(didDocument, signInfos, versionId);
+                response.transactionHash = result.transactionHash;
+            }
+            else if (this.didAPIService) {
+                const newSignInfos = signInfos;
+                const result = yield this.didAPIService.updateDid({
+                    didDocument: didDocument,
+                    signInfos: newSignInfos,
+                    deactivate: false,
+                });
+                response.transactionHash = result.transactionHash;
+            }
+            return response;
+        });
+    }
+    // using in API
+    /**
+     * Deactivate a didDocument in Hypersign blockchain - an onchain activity
+     * @param
+     * - params.didDocument      : LD DidDocument to updated
+     * - params.versionId        : Version of the document. See the didDocumentMetadata when DID resolves
+     * - params.signInfos        : Array of signature, verificationMethodId and clientSpec
+     * @returns {Promise<{ transactionHash: string }>}  Result of the update operation
+     */
+    deactivateByClientSpec(params) {
+        var _a, _b, _c, _d;
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = {};
+            if (!this.didrpc && !this.didAPIService) {
+                throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
+            }
+            if (!params.didDocument) {
+                throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to deactivate a did');
+            }
+            if (!params.signInfos) {
+                throw new Error('HID-SSI-SDK:: Error: params.signInfos is required to deactivate a did');
+            }
+            if (params.signInfos.length < 1) {
+                throw new Error('HID-SSI-SDK:: Error: params.signInfos must be a non empty array');
+            }
+            for (const i in params.signInfos) {
+                if (!params.signInfos[i].verification_method_id) {
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to deactivate a did`);
+                }
+                const clientSpec = params.signInfos[i].clientSpec;
+                if (clientSpec && clientSpec.type && !(clientSpec.type in IDID_1.IClientSpec)) {
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${0}].clientSpec is invalid`);
+                }
+                if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
+                    if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
+                        ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
+                        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].adr036SignerAddress is required to deactivate a did, when clientSpec type is${(_d = params.signInfos[i].clientSpec) === null || _d === void 0 ? void 0 : _d.type} `);
+                    }
+                }
+                if (!params.signInfos[i].signature) {
+                    throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].signature is required to deactivate a did`);
+                }
+            }
+            if (!params.versionId) {
+                throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
+            }
+            const { didDocument, signInfos, versionId } = params;
+            const didDoc = didDocument;
+            if (this.didrpc) {
+                const result = yield this.didrpc.deactivateDID(didDoc.id, signInfos, versionId);
+                response.transactionHash = result.transactionHash;
+            }
+            else if (this.didAPIService) {
+                const newSignInfos = signInfos;
+                const result = yield this.didAPIService.updateDid({
+                    didDocument: didDocument,
+                    signInfos: newSignInfos,
+                    deactivate: true,
+                });
+                response.transactionHash = result.transactionHash;
+            }
+            return response;
+        });
+    }
+    /**
+     * Sign and Register a DIDDocument
+     * @param
+     * - params.didDocument           : DidDocument to be signed and register
+     * - params.address               : Checksum address from web3 wallet
+     * - params.verificationMethodId  : verificationMethodId of the DID
+     * - params.web3                  : Web3 object
+     * - params.clientSpec            : ClientSpec either it is eth-personalSign or cosmos-ADR036
+     * - params.chainId               : OPtional, ChainId
+     * @returns {Promise<{ didDocument: Did; transactionHash: string }>}
+     */
+    signAndRegisterByClientSpec(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
+                throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
+            }
+            if (!params.clientSpec) {
+                throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
+            }
+            if (!(params.clientSpec in IDID_1.IClientSpec)) {
+                throw new Error('HID-SSI-SDK:: Error: invalid clientSpec');
+            }
+            if (!this.didrpc) {
+                throw new Error('HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized');
+            }
+            if (!params.verificationMethodId) {
+                throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
+            }
+            if (!params.web3) {
+                throw new Error('HID-SSI-SDK:: Error: params.web should be passed');
+            }
+            if (!params.address) {
+                throw new Error('HID-SSI-SDK:: Error: params.address is required to sign a did');
+            }
+            const { didDocument, signature } = yield this.signByClientSpec({
+                didDocument: params.didDocument,
+                clientSpec: params.clientSpec,
+                address: params.address,
+                web3: params.web3,
+                chainId: params.chainId,
+            });
+            const signInfos = [
+                {
+                    signature,
+                    verification_method_id: params.verificationMethodId,
+                    clientSpec: {
+                        type: params.clientSpec,
+                        adr036SignerAddress: params.clientSpec === IDID_1.IClientSpec['cosmos-ADR036'] ? params.address : '',
+                    },
+                },
+            ];
+            return yield this.registerByClientSpec({
+                didDocument,
+                signInfos,
+                // only for [cosmos-ADR036]
             });
         });
-    };
-    return HypersignDID;
-}());
+    }
+    /**
+     * Signs a DIDDocument
+     * @param
+     * - params.didDocument          : Did document to be signed
+     * - params.clientSpec           : ClientSpec either it is eth-personalSign or cosmos-ADR036
+     * - params.address              : Checksum address from web3 wallet
+     * - params.web3                 : web3 object
+     * - params.chainId              : Optional, chainId
+     * @returns {Promise<{ didDocument: Did; signature: string }>}
+     */
+    signByClientSpec(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this['window'] === 'undefined') {
+                throw new Error('HID-SSI-SDK:: Error:  Running in non browser mode');
+            }
+            if (!params.didDocument) {
+                throw Error('HID-SSI-SDK:: Error: params.didDocument is required to sign');
+            }
+            if (!params.address) {
+                throw new Error('HID-SSI-SDK:: Error: params.address is required to sign a did');
+            }
+            if (!params.clientSpec) {
+                throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is required to sign');
+            }
+            if (!(params.clientSpec in IDID_1.IClientSpec)) {
+                throw new Error('HID-SSI-SDK:: Error:  params.clientSpec is invalid');
+            }
+            if (!params.web3) {
+                throw new Error('HID-SSI-SDK:: Error: params.web3 is required to sign');
+            }
+            switch (params.clientSpec) {
+                case IDID_1.IClientSpec['eth-personalSign']: {
+                    const didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
+                    const didDoc = didDocStringJson;
+                    const signature = yield params.web3.eth.personal.sign(JSON.stringify(didDoc, (key, value) => {
+                        if (value === '' || (Array.isArray(value) && value.length === 0)) {
+                            return undefined;
+                        }
+                        return value;
+                    }), params.address);
+                    return { didDocument: didDoc, signature };
+                }
+                case IDID_1.IClientSpec['cosmos-ADR036']: {
+                    if (!params.chainId) {
+                        throw new Error('HID-SSI-SDK:: Error:  params.chainId is required to sign for clientSpec ' +
+                            IDID_1.IClientSpec['cosmos-ADR036'] +
+                            ' and keyType ' +
+                            IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019);
+                    }
+                    const didDocStringJson = utils_1.default.ldToJsonConvertor(params.didDocument);
+                    const didDoc = didDocStringJson;
+                    const didDocBytes = (yield did_1.Did.encode(didDoc)).finish();
+                    const signRespObj = yield params.web3.requestMethod('signArbitrary', [
+                        params.chainId,
+                        params.address,
+                        didDocBytes,
+                    ]);
+                    return { didDocument: didDoc, signature: signRespObj['signature'] };
+                }
+                default:
+                    throw Error('HID-SSI-SDK:: Error: Invalid clientSpec');
+                    break;
+            }
+        });
+    }
+    /**
+     * Add verification method
+     * @param
+     * - params.didDocument          : Optional, unregistered Did document
+     * - params.did                  : Optional, didDoc Id of registered didDoc
+     * - params.type                 : key type
+     * - params.id                   : Optional, verificationMethodId
+     * - params.controller           : Optional, controller field
+     * - params.publicKeyMultibase   : public key
+     * - params.blockchainAccountId  : Optional, blockchain accountId
+     * @return {Promise<Did>}  DidDocument object
+     */
+    addVerificationMethod(params) {
+        var _a, _b, _c;
+        return __awaiter(this, void 0, void 0, function* () {
+            let resolvedDidDoc;
+            if (!params.did && (!params.didDocument || Object.keys(params.didDocument).length === 0)) {
+                throw new Error('HID-SSI_SDK:: Error: params.did or params.didDocument is required to addVerificationMethod');
+            }
+            if (!params.type) {
+                throw new Error('HID-SSI-SDK:: Error: params.type is required to addVerificationMethod');
+            }
+            const { type } = params;
+            if (!(type in IDID_1.IKeyType)) {
+                throw new Error('HID-SSI-SDK:: Error: params.type is invalid');
+            }
+            try {
+                if (params.did) {
+                    if (!this.didrpc) {
+                        throw new Error('HID-SSI-SDK:: Error: HID-SSI-SDK:: Error: HypersignDID class is not instantiated with Offlinesigner or have not been initilized');
+                    }
+                    resolvedDidDoc = yield this.didrpc.resolveDID(params.did);
+                    if (!resolvedDidDoc.didDocument) {
+                        if (!params.didDocument) {
+                            throw new Error('HID-SSI_SDK:: Error: can not able to resolve did please send didDocument');
+                        }
+                    }
+                }
+                else if (params.didDocument) {
+                    resolvedDidDoc = {};
+                    resolvedDidDoc.didDocument = params.didDocument;
+                }
+                else {
+                    throw new Error('HID-SSI-SDK:: Error: params.did or params.didDocument is required to addVerificationMethod');
+                }
+            }
+            catch (e) {
+                throw new Error(`HID-SSI-SDK:: Error: could not resolve did ${params.did}`);
+            }
+            if (type === IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020 &&
+                (!params.blockchainAccountId || params.blockchainAccountId.trim() === '')) {
+                throw new Error(`HID-SSI-SDK:: Error: params.blockchainAccountId is required for keyType ${params.type}`);
+            }
+            if (type === IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020 && (!params.id || params.id.trim() === '')) {
+                throw new Error(`HID-SSI-SDK:: Error: params.id is required for keyType ${params.type}`);
+            }
+            if (type === IDID_1.IKeyType.EcdsaSecp256k1VerificationKey2019 &&
+                (!params.blockchainAccountId ||
+                    params.blockchainAccountId.trim() === '' ||
+                    !params.publicKeyMultibase ||
+                    params.publicKeyMultibase.trim() === '')) {
+                throw new Error(`HID-SSI-SDK:: Error: params.blockchainAccountId and params.publicKeyMultibase is required for keyType ${params.type}`);
+            }
+            if ((type === IDID_1.IKeyType.Ed25519VerificationKey2020 ||
+                type === IDID_1.IKeyType.X25519KeyAgreementKey2020 ||
+                type === IDID_1.IKeyType.X25519KeyAgreementKeyEIP5630) &&
+                !params.publicKeyMultibase) {
+                throw new Error('HID-SSI-SDK:: Error: params.publicKeyMultibase is required to addVerificationMethod');
+            }
+            const verificationMethod = {};
+            let { didDocument } = resolvedDidDoc;
+            didDocument = utils_1.default.ldToJsonConvertor(didDocument);
+            if (params.id) {
+                const checkIfVmIdExists = didDocument.verificationMethod.some((vm) => vm.id === params.id);
+                if (checkIfVmIdExists) {
+                    throw new Error(`HID-SSI-SDK:: Error: verificationMethod ${params.id} already exists`);
+                }
+            }
+            const VMLength = didDocument.verificationMethod.length;
+            verificationMethod['id'] = (_a = params === null || params === void 0 ? void 0 : params.id) !== null && _a !== void 0 ? _a : `${didDocument.id}#key-${VMLength + 1}`;
+            verificationMethod['type'] = type;
+            verificationMethod['controller'] = didDocument.id;
+            if (type !== IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020) {
+                if (type === IDID_1.IKeyType.Ed25519VerificationKey2020) {
+                    const { publicKeyMultibase: publicKeyMultibase1 } = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
+                        publicKey: params.publicKeyMultibase,
+                    });
+                    verificationMethod['publicKeyMultibase'] = publicKeyMultibase1;
+                }
+                else {
+                    verificationMethod['publicKeyMultibase'] = (_b = params === null || params === void 0 ? void 0 : params.publicKeyMultibase) !== null && _b !== void 0 ? _b : '';
+                }
+            }
+            verificationMethod['blockchainAccountId'] = (_c = params === null || params === void 0 ? void 0 : params.blockchainAccountId) !== null && _c !== void 0 ? _c : '';
+            didDocument.verificationMethod.push(verificationMethod);
+            if (verificationMethod['type'] === IDID_1.IKeyType.X25519KeyAgreementKey2020 ||
+                verificationMethod['type'] === IDID_1.IKeyType.X25519KeyAgreementKeyEIP5630) {
+                didDocument.keyAgreement.push(verificationMethod['id']);
+            }
+            else {
+                didDocument.authentication.push(verificationMethod['id']);
+                didDocument.assertionMethod.push(verificationMethod['id']);
+                didDocument.capabilityDelegation.push(verificationMethod['id']);
+                didDocument.capabilityInvocation.push(verificationMethod['id']);
+            }
+            if (verificationMethod['type'] === IDID_1.IKeyType.X25519KeyAgreementKey2020) {
+                const newContext = constant['DID_' + IDID_1.IKeyType.Ed25519VerificationKey2020].DID_KEYAGREEMENT_CONTEXT;
+                if (!didDocument['context'].includes(newContext)) {
+                    didDocument['context'].push(newContext);
+                }
+            }
+            if (verificationMethod['type'] === IDID_1.IKeyType.X25519KeyAgreementKeyEIP5630) {
+                const newContext = constant['DID_' + IDID_1.IKeyType.EcdsaSecp256k1RecoveryMethod2020].DID_KEYAGREEMENT_CONTEXT;
+                if (!didDocument['context'].includes(newContext)) {
+                    didDocument['context'].push(newContext);
+                }
+            }
+            return didDocument;
+        });
+    }
+}
 exports.default = HypersignDID;

@@ -1,4 +1,10 @@
-import { Schema as ISchemaProto, Schema } from '../generated/ssi/schema';
+/**
+ * Copyright (c) 2023, Hypermine Pvt. Ltd.
+ * All rights reserved.
+ * Author: Hypermine Core Team
+ */
+
+import { Schema as ISchemaProto, Schema, SchemaDocument } from '../../libs/generated/ssi/schema';
 export interface ISchemaFields {
   type: string;
   format?: string;
@@ -7,17 +13,17 @@ export interface ISchemaFields {
 }
 
 export interface ISchemaMethods {
-  getSchema(params: {
+  generate(params: {
     name: string;
     description?: string;
     author: string;
     fields?: Array<ISchemaFields>;
     additionalProperties: boolean;
-  }): Schema;
+  }): Promise<SchemaDocument>;
 
-  signSchema(params: { privateKey: string; schema: ISchemaProto }): Promise<string>;
+  sign(params: { privateKeyMultibase: string; schema: SchemaDocument; verificationMethodId: string }): Promise<Schema>;
 
-  registerSchema(params: { schema: Schema; signature: string; verificationMethodId: string }): Promise<any>;
+  register(params: { schema: Schema }): Promise<{ transactionHash: string }>;
 
   resolve(params: { schemaId: string }): Promise<Schema>;
 }
