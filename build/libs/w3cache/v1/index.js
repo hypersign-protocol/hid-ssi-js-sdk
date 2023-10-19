@@ -39,6 +39,8 @@ const CONTEXTS = Object.freeze({
     "https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld": Object.assign({}, vc_data_integrety_json_1.default),
     "https://w3id.org/security/suites/secp256k1recovery-2020/v2": Object.assign({}, lds_ecdsa_secp256k1_recovery2020_json_1.default),
     "https://schema.org": Object.assign({}, schema_org_json_1.default),
+    "https://digitalbazaar.github.io/x25519-key-agreement-2020-context/contexts/x25519-key-agreement-2020-v1.jsonld": Object.assign({}, x25519_key_agreement_2020_v1_json_1.default),
+    "https://identity.foundation/.well-known/did-configuration/v1": Object.assign({}, did_wellknown_json_1.default),
     "https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/libs/w3cache/v1/X25519KeyAgreementKeyEIP5630.json": Object.assign({}, X25519KeyAgreementKeyEIP5630_json_1.default)
 });
 exports.default = (url, options) => __awaiter(void 0, void 0, void 0, function* () {
