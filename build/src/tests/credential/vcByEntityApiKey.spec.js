@@ -38,7 +38,6 @@ const schemaBody = {
     fields: [{ name: 'name', type: 'string', isRequired: false }],
     additionalProperties: false,
 };
-const entityApiSecret = "69b91e007904228e3313e586ba695.bc7705956989e43bbd7060e845c2763a381cbc80f935ac848119b8c2d7d00616346eeb74efe22a0ff140506a0c6157ef6";
 beforeEach(function () {
     return __awaiter(this, void 0, void 0, function* () {
         offlineSigner = yield (0, config_1.createWallet)(config_1.mnemonic);
@@ -264,7 +263,7 @@ describe('Verifiable credential operation', function () {
     describe('#registerCredentialStatus() method to register credential status on chain', () => {
         it('Should be able to register credential using entityApiSecretKey', () => __awaiter(this, void 0, void 0, function* () {
             const hypersignVC = new index_1.HypersignVerifiableCredential({
-                entityApiSecretKey: entityApiSecret,
+                entityApiSecretKey: config_1.entityApiSecret,
                 nodeRestEndpoint: config_1.hidNodeEp.rest,
                 nodeRpcEndpoint: config_1.hidNodeEp.rpc,
                 namespace: config_1.hidNodeEp.namespace,

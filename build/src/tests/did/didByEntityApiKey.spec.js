@@ -12,9 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
 const index_1 = require("../../index");
 const config_1 = require("../config");
-// const entityApiSecretKey =
-//   '8fc3d16ce8f040fd2fc4e5ccc1d73.6b6e55d4d54cd90c85bbcc92d9469873e60c0d7878681223e2fe63fca3abafb63390f939a77b3d73bf2eb58a654810b38';
-const entityApiSecret = "69b91e007904228e3313e586ba695.bc7705956989e43bbd7060e845c2763a381cbc80f935ac848119b8c2d7d00616346eeb74efe22a0ff140506a0c6157ef6";
 // with local edv
 let offlineSigner;
 let hypersignDID;
@@ -145,7 +142,7 @@ describe('DID Test Scenarios using entiAPiSecretKey', () => {
         }));
         it('should be able to registr did using entityApiSecret', () => __awaiter(this, void 0, void 0, function* () {
             const HypersignDid = new index_1.HypersignDID({
-                entityApiSecretKey: entityApiSecret,
+                entityApiSecretKey: config_1.entityApiSecret,
                 nodeRestEndpoint: config_1.hidNodeEp.rest,
                 nodeRpcEndpoint: config_1.hidNodeEp.rpc,
                 namespace: config_1.hidNodeEp.namespace,
@@ -173,7 +170,7 @@ describe('DID Test Scenarios using entiAPiSecretKey', () => {
                 did: didDocId
             };
             const HypersignDid = new index_1.HypersignDID({
-                entityApiSecretKey: entityApiSecret,
+                entityApiSecretKey: config_1.entityApiSecret,
                 nodeRestEndpoint: config_1.hidNodeEp.rest,
                 nodeRpcEndpoint: config_1.hidNodeEp.rpc,
                 namespace: config_1.hidNodeEp.namespace,
@@ -216,7 +213,7 @@ describe('DID Test Scenarios using entiAPiSecretKey', () => {
         });
         it('should be able to update did document using entityApiSecret', () => __awaiter(this, void 0, void 0, function* () {
             const HypersignDid = new index_1.HypersignDID({
-                entityApiSecretKey: entityApiSecret,
+                entityApiSecretKey: config_1.entityApiSecret,
                 nodeRestEndpoint: config_1.hidNodeEp.rest,
                 nodeRpcEndpoint: config_1.hidNodeEp.rpc,
                 namespace: config_1.hidNodeEp.namespace,
@@ -250,7 +247,7 @@ describe('DID Test Scenarios using entiAPiSecretKey', () => {
     describe('#deactivate() this is to deactivate didDocument', function () {
         it('should not be able to deactivate did document using entityApiSecretKey as privateKeyMultibase is null or empty', () => __awaiter(this, void 0, void 0, function* () {
             const HypersignDid = new index_1.HypersignDID({
-                entityApiSecretKey: entityApiSecret,
+                entityApiSecretKey: config_1.entityApiSecret,
                 nodeRestEndpoint: config_1.hidNodeEp.rest,
                 nodeRpcEndpoint: config_1.hidNodeEp.rpc,
                 namespace: config_1.hidNodeEp.namespace,
@@ -267,7 +264,7 @@ describe('DID Test Scenarios using entiAPiSecretKey', () => {
         it('should not be able to deactivate did document as verificationMethodId is null or empty', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 const HypersignDid = new index_1.HypersignDID({
-                    entityApiSecretKey: entityApiSecret,
+                    entityApiSecretKey: config_1.entityApiSecret,
                     nodeRestEndpoint: config_1.hidNodeEp.rest,
                     nodeRpcEndpoint: config_1.hidNodeEp.rpc,
                     namespace: config_1.hidNodeEp.namespace,
@@ -293,7 +290,7 @@ describe('DID Test Scenarios using entiAPiSecretKey', () => {
         });
         it('Should be able to deactivate did document using entityApiSecretKey', () => __awaiter(this, void 0, void 0, function* () {
             const HypersignDid = new index_1.HypersignDID({
-                entityApiSecretKey: entityApiSecret,
+                entityApiSecretKey: config_1.entityApiSecret,
                 nodeRestEndpoint: config_1.hidNodeEp.rest,
                 nodeRpcEndpoint: config_1.hidNodeEp.rpc,
                 namespace: config_1.hidNodeEp.namespace,
@@ -312,7 +309,7 @@ describe('DID Test Scenarios using entiAPiSecretKey', () => {
                 did: didDocId
             };
             const HypersignDid = new index_1.HypersignDID({
-                entityApiSecretKey: entityApiSecret,
+                entityApiSecretKey: config_1.entityApiSecret,
                 nodeRestEndpoint: config_1.hidNodeEp.rest,
                 nodeRpcEndpoint: config_1.hidNodeEp.rpc,
                 namespace: config_1.hidNodeEp.namespace,

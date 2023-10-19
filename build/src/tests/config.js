@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createWallet = exports.makeCosmoshubPath = exports.hidNodeEp = exports.mnemonic = void 0;
+exports.entityApiSecret = exports.createWallet = exports.makeCosmoshubPath = exports.hidNodeEp = exports.mnemonic = void 0;
 const proto_signing_1 = require("@cosmjs/proto-signing");
 const crypto_1 = require("@cosmjs/crypto");
 exports.mnemonic = 'verify sustain lumber boat demise parade special soft bargain scout spoil there addict move badge rebuild horn achieve hollow acquire glide bundle curious present';
@@ -49,4 +49,5 @@ const createWallet = (mnemonic) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.createWallet = createWallet;
+exports.entityApiSecret = '29a393a5d70094e409824359fc5d5.befc6c6f32d622e1c29ca900299a5695251b2407ca7cf6db8e6b2569dc13f937a4b83f4fa78738715d6267d3733e4f139';
 // wallet address: hid1rh5h603fv9dneqm422uvl4xk3fc77a4uheleq5

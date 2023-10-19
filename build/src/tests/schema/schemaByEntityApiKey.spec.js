@@ -28,9 +28,6 @@ let hypersignDID;
 let hypersignSchema;
 let verificationMethod;
 let schemaDoc;
-// const entityApiSecretKey =
-//   '8fc3d16ce8f040fd2fc4e5ccc1d73.6b6e55d4d54cd90c85bbcc92d9469873e60c0d7878681223e2fe63fca3abafb63390f939a77b3d73bf2eb58a654810b38';
-const entityApiSecret = "69b91e007904228e3313e586ba695.bc7705956989e43bbd7060e845c2763a381cbc80f935ac848119b8c2d7d00616346eeb74efe22a0ff140506a0c6157ef6";
 const schemaBody = {
     name: 'schema for university student registration',
     description: 'This is a test schema generated for student registration',
@@ -276,7 +273,7 @@ describe('Schema test scenario with entityApiSecretKey', () => {
         }));
         it('Should be able to register schema using entitApiSecretKey', () => __awaiter(void 0, void 0, void 0, function* () {
             const hypersignSchema = new schema_1.default({
-                entityApiSecretKey: entityApiSecret,
+                entityApiSecretKey: config_1.entityApiSecret,
                 nodeRestEndpoint: config_1.hidNodeEp.rest,
                 nodeRpcEndpoint: config_1.hidNodeEp.rpc,
                 namespace: config_1.hidNodeEp.namespace,
