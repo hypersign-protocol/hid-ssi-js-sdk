@@ -8,7 +8,7 @@ import { JCS } from 'jcs';
 import vc from 'vc-js';
 import jsonSigs from 'jsonld-signatures';
 import HypersignDID from '../did/did';
-import { Did, VerificationMethod } from '../../libs/generated/ssi/did';
+import { DidDocument as Did, VerificationMethod } from '../../libs/generated/ssi/did';
 import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import Utils from '../utils';
@@ -146,12 +146,6 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       (x) => x.id == publicKeyId
     ) as VerificationMethod;
 
-    const convertedKeyPair = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
-      publicKey: publicKeyVerMethod.publicKeyMultibase,
-    });
-
-    publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
-
     const keyPair = await Ed25519VerificationKey2020.from({
       privateKeyMultibase: params.privateKeyMultibase,
       ...publicKeyVerMethod,
@@ -243,17 +237,9 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     const holderDidDoc: Did = holderDID as Did;
     const holderPublicKeyId = params.holderVerificationMethodId;
 
-    const holderPublicKeyVerMethod: VerificationMethod = holderDidDoc.verificationMethod.find(
+    const holderPublicKeyVerMethod: VerificationMethod = (holderDidDoc.verificationMethod as VerificationMethod[]).find(
       (x) => x.id == holderPublicKeyId
     ) as VerificationMethod;
-
-    // Connvert the 45 byte pub key of holder into 48 byte
-    const { publicKeyMultibase: holderPublicKeyMultibase } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020(
-      {
-        publicKey: holderPublicKeyVerMethod.publicKeyMultibase,
-      }
-    );
-    holderPublicKeyVerMethod.publicKeyMultibase = holderPublicKeyMultibase;
 
     const holderController = {
       '@context': DID.CONTROLLER_CONTEXT,
@@ -285,7 +271,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     }
 
     const issuerDidDoc: Did = issuerDID as Did;
-    const issuerDidDocController = issuerDidDoc.controller;
+    const issuerDidDocController = issuerDidDoc.controller as string[];
     const issuerDidDocControllerVerificationMethod = params.issuerVerificationMethodId.split('#')[0];
 
     if (!issuerDidDocController.includes(issuerDidDocControllerVerificationMethod)) {
@@ -294,7 +280,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
 
     const issuerPublicKeyId = params.issuerVerificationMethodId;
 
-    let issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+    let issuerPublicKeyVerMethod: VerificationMethod = (issuerDidDoc.verificationMethod as VerificationMethod[]).find(
       (x) => x.id == issuerPublicKeyId
     ) as VerificationMethod;
 
@@ -303,17 +289,10 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
         did: issuerDidDocControllerVerificationMethod,
       });
       const controllerDidDoc: Did = controllerDidDocT as Did;
-      issuerPublicKeyVerMethod = controllerDidDoc.verificationMethod.find(
+      issuerPublicKeyVerMethod = (controllerDidDoc.verificationMethod as VerificationMethod[]).find(
         (x) => x.id == issuerPublicKeyId
       ) as VerificationMethod;
     }
-    // Connvert the 45 byte pub key of issuer into 48 byte
-    const { publicKeyMultibase: issuerPublicKeyMultibase } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020(
-      {
-        publicKey: issuerPublicKeyVerMethod.publicKeyMultibase,
-      }
-    );
-    issuerPublicKeyVerMethod.publicKeyMultibase = issuerPublicKeyMultibase;
 
     const issuerController = {
       '@context': DID.CONTROLLER_CONTEXT,
@@ -502,17 +481,9 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       const publicKeyId = params.issuerVerificationMethodId;
       const issuerDidDoc: Did = issuerDID as Did;
 
-      const publicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
+      const publicKeyVerMethod: VerificationMethod = (issuerDidDoc.verificationMethod as VerificationMethod[]).find(
         (x) => x.id == publicKeyId
       ) as VerificationMethod;
-
-      // TODO: Get rid of this hack later.
-      // Convert 45 byte publick key into 48
-      const { publicKeyMultibase } = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
-        publicKey: publicKeyVerMethod.publicKeyMultibase,
-      });
-
-      publicKeyVerMethod.publicKeyMultibase = publicKeyMultibase;
 
       const assertionController = {
         '@context': ['DID.CONTROLLER_CONTEXT'],
