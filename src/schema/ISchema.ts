@@ -4,7 +4,11 @@
  * Author: Hypermine Core Team
  */
 
-import { Schema as ISchemaProto, Schema, SchemaDocument } from '../../libs/generated/ssi/schema';
+import {
+  CredentialSchemaState as Schema,
+  CredentialSchemaDocument as SchemaDocument,
+} from '../../libs/generated/ssi/credential_schema';
+import { DocumentProof } from '../../libs/generated/ssi/proof';
 export interface ISchemaFields {
   type: string;
   format?: string;
@@ -21,9 +25,17 @@ export interface ISchemaMethods {
     additionalProperties: boolean;
   }): Promise<SchemaDocument>;
 
-  sign(params: { privateKeyMultibase: string; schema: SchemaDocument; verificationMethodId: string }): Promise<Schema>;
+  sign(params: {
+    privateKeyMultibase: string;
+    schema: SchemaDocument;
+    verificationMethodId: string;
+  }): Promise<IResolveSchema>;
 
   register(params: { schema: Schema }): Promise<{ transactionHash: string }>;
 
-  resolve(params: { schemaId: string }): Promise<Schema>;
+  resolve(params: { schemaId: string }): Promise<IResolveSchema>;
+}
+
+export interface IResolveSchema extends SchemaDocument {
+  proof: DocumentProof;
 }

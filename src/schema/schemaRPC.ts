@@ -9,11 +9,13 @@ import * as generatedProto from '../../libs/generated/ssi/tx';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
-import { Schema, SchemaProof } from '../../libs/generated/ssi/schema';
+import { CredentialSchemaDocument, CredentialSchemaState as Schema } from '../../libs/generated/ssi/credential_schema';
+import { DocumentProof as SchemaProof } from '../../libs/generated/ssi/proof';
 import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate';
+import { CredentialSchemaDocument as SchemaDocument } from '../../libs/generated/ssi/credential_schema';
 
 export interface ISchemaRPC {
-  createSchema(schema: Schema, proof: SchemaProof): Promise<object>;
+  createSchema(schema: SchemaDocument, proof: SchemaProof): Promise<object>;
   resolveSchema(schemaId: string): Promise<object>;
 }
 
@@ -45,19 +47,17 @@ export class SchemaRpc implements ISchemaRPC {
     await this.hidClient.init();
   }
 
-  async createSchema(schema: Schema, proof: SchemaProof): Promise<DeliverTxResponse> {
+  async createSchema(schema: CredentialSchemaDocument, proof: SchemaProof): Promise<DeliverTxResponse> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: SchemaRpc class is not initialise with offlinesigner');
     }
-
-    const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateSchema}`;
-
+    const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgRegisterCredentialSchema}`;
     const txMessage = {
       typeUrl, // Same as above
-      value: generatedProto[HIDRpcEnums.MsgCreateSchema].fromJSON({
-        schemaDoc: schema,
-        schemaProof: proof,
-        creator: HIDClient.getHidWalletAddress(),
+      value: generatedProto[HIDRpcEnums.MsgRegisterCredentialSchema].fromPartial({
+        credentialSchemaDocument: schema,
+        credentialSchemaProof: proof,
+        txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
 
@@ -71,7 +71,7 @@ export class SchemaRpc implements ISchemaRPC {
   async resolveSchema(schemaId: string): Promise<Array<object>> {
     const getSchemaUrl = `${this.schemaRestEp}/${schemaId}:`;
     const response = await axios.get(getSchemaUrl);
-    const { schema } = response.data;
-    return schema;
+    const { credentialSchemas } = response.data;
+    return credentialSchemas;
   }
 }
