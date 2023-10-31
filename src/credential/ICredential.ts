@@ -5,7 +5,12 @@
  */
 import { TypedDataField } from '@ethersproject/abstract-signer';
 
-import { CredentialStatus, CredentialProof, Credential } from '../../libs/generated/ssi/credential';
+import {
+  CredentialStatusDocument as CredentialStatus,
+  CredentialStatusState as Credential,
+} from '../../libs/generated/ssi/credential_status';
+import { DocumentProof as CredentialProof } from '../../libs/generated/ssi/proof';
+
 import { DeliverTxResponse } from '@cosmjs/stargate';
 
 // interface ICredStatus {
@@ -96,8 +101,12 @@ export interface ICredentialMethods {
     statusReason?: string;
   }): Promise<DeliverTxResponse>;
 
-  resolveCredentialStatus(params: { credentialId: string }): Promise<CredentialStatus>;
+  resolveCredentialStatus(params: { credentialId: string }): Promise<IResolveCredential>;
   checkCredentialStatus(params: { credentialId: string }): Promise<{ verified: boolean }>;
+}
+
+export interface IResolveCredential extends CredentialStatus {
+  proof: CredentialProof;
 }
 
 export interface ICredentialRPC {

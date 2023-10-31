@@ -1,6 +1,6 @@
 import { DeliverTxResponse } from "@cosmjs/stargate";
-import { CredentialProof, CredentialStatus } from "../../../../libs/generated/ssi/credential";
-
+import { CredentialStatusDocument as CredentialStatus } from "../../../../libs/generated/ssi/credential_status";
+import { DocumentProof as CredentialProof } from "../../../../libs/generated/ssi/proof";
 export interface IRegisterCredStatus {
     credentialStatus: CredentialStatus;
     credentialStatusProof: CredentialProof;
