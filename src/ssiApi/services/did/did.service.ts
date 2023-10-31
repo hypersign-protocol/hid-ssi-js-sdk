@@ -1,4 +1,4 @@
-import { Did, SignInfo } from '../../../../libs/generated/ssi/did';
+import { DidDocument as Did } from '../../../../libs/generated/ssi/did';
 import { IClientSpec, IDIDResolve } from '../../../did/IDID';
 import { APIENDPOINT } from '../../api-constant';
 import { IAuth, IValidateAccesstokenResp } from '../../apiAuth/IAuth';

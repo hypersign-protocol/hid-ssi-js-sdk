@@ -913,13 +913,13 @@ export default class HypersignDID implements IDID {
         if (!params.publicKey) {
           throw new Error(
             'HID-SSI-SDK:: Error: params.publicKey is required to create didoc for ' +
-            VerificationMethodTypes.EcdsaSecp256k1VerificationKey2019
+              VerificationMethodTypes.EcdsaSecp256k1VerificationKey2019
           );
         }
         if (!this._isValidMultibaseBase58String(params.publicKey)) {
           throw new Error(
             'HID-SSI-SDK:: Error: params.publicKey mustbe multibase encoded base58 string for ' +
-            VerificationMethodTypes.EcdsaSecp256k1VerificationKey2019
+              VerificationMethodTypes.EcdsaSecp256k1VerificationKey2019
           );
         }
 
@@ -1310,7 +1310,7 @@ export default class HypersignDID implements IDID {
             'HID-SSI-SDK:: Error:  params.chainId is required to sign for clientSpec ' +
               IClientSpec['cosmos-ADR036'] +
               ' and keyType ' +
-            VerificationMethodTypes.EcdsaSecp256k1VerificationKey2019
+              VerificationMethodTypes.EcdsaSecp256k1VerificationKey2019
           );
         }
         const didDocStringJson = Utils.ldToJsonConvertor(params.didDocument);
