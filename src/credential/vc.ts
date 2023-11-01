@@ -186,7 +186,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   //
   // TODO: https://www.w3.org/TR/vc-data-model/#data-schemas
   // TODO: handle schemaUrl variable properly later.
-  private _getCredentialContext = (schemaId: string, schemaProperties: object) => {
+  private _getCredentialContext = (schemaId: string, schemaProperties: object, schemaName: string) => {
     const context: any = [];
 
     let schemaUrl;
@@ -197,18 +197,21 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     }
 
     context.push(VC.CREDENTAIL_BASE_CONTEXT);
-    //context.push(VC.CREDENTAIL_SECURITY_SUITE);
+    // context.push(VC.CREDENTAIL_SECURITY_SUITE);
 
     context.push({
       hs: schemaUrl,
     });
-
+    context.push({
+      [schemaName]: `hs:${schemaName}`,
+    });
     const props: Array<string> = Object.keys(schemaProperties);
     props.forEach((x) => {
       const obj = {};
       obj[x] = `hs:${x}`;
       context.push(obj);
     });
+    context.push(VC.CONTEXT_HypersignCredentialStatus2023);
 
     return context;
   };
@@ -270,7 +273,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     const subjectDid = params.subjectDid;
     let resolvedsubjectDidDoc;
     const { didDocument: issuerDidDoc } = await this.hsDid.resolve({ did: issuerDid });
-    //
     if (params.subjectDid) {
       resolvedsubjectDidDoc = await this.hsDid.resolve({ did: params.subjectDid });
     } else if (params.subjectDidDocSigned) {
@@ -344,9 +346,9 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const schemaInternal = schemaDoc.schema as SchemaProperty;
     const schemaProperties = JSON.parse(schemaInternal.properties as string);
+    const schemaName = schemaDoc.name as string;
     // context
-    vc['@context'] = this._getCredentialContext(params.schemaId, schemaProperties);
-
+    vc['@context'] = this._getCredentialContext(params.schemaId, schemaProperties, schemaName);
     /// TODO:  need to implement this properly
     vc.id = await this._getId();
 
@@ -448,12 +450,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       );
     }
 
-    // const convertedKeyPair = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
-    //   publicKey: publicKeyVerMethod.publicKeyMultibase,
-    // });
-    // const  publicKeyVerMethod.publicKeyMultibase
-    // publicKeyVerMethod['publicKeyMultibase'] = publicKeyVerMethod.publicKeyMultibase;
-
     const keyPair = await Ed25519VerificationKey2020.from({
       privateKeyMultibase: params.privateKeyMultibase,
       ...publicKeyVerMethod,
@@ -469,12 +465,10 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     //  Let us generate credentialHash first
 
     // generating hash using merkelroot hash
-    // need to change CREDENTAIL_SCHEMA_VALIDATOR_TYPE to custom value that we will use for our context
 
-    // const merkelizerObj = await Merklizer.merklizeJSONLD(JSON.stringify(params.credential));
-    // let credentialHash = await merkelizerObj.mt.root();
-    // credentialHash = Buffer.from(credentialHash.bytes).toString('hex');
-    const credentialHash = this._sha256Hash(JSON.stringify(params.credential));
+    const merkelizerObj = await Merklizer.merklizeJSONLD(JSON.stringify(params.credential));
+    let credentialHash = await merkelizerObj.mt.root();
+    credentialHash = Buffer.from(credentialHash.bytes).toString('hex');
 
     const credentialStatus: CredentialStatus = {
       id: params.credential.id,

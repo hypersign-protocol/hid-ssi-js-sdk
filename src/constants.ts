@@ -61,6 +61,7 @@ export const DID_EcdsaSecp256k1RecoveryMethod2020 = {
   DID_KEYAGREEMENT_CONTEXT: "https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/libs/w3cache/v1/X25519KeyAgreementKeyEIP5630.json",
   BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
   VERIFICATION_METHOD_TYPE: VerificationMethodTypes.EcdsaSecp256k1RecoveryMethod2020,
+  SIGNATURE_TYPE: ProofTypes.EcdsaSecp256k1RecoverySignature2020,
 };
 
 
@@ -72,7 +73,8 @@ export const DID_EcdsaSecp256k1VerificationKey2019 = {
   NAMESPACE: 'testnet', // this is not used
   DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
   BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
-  VERIFICATION_METHOD_TYPE: VerificationMethodTypes.EcdsaSecp256k1VerificationKey2019
+  VERIFICATION_METHOD_TYPE: VerificationMethodTypes.EcdsaSecp256k1VerificationKey2019,
+  SIGNATURE_TYPE: ProofTypes.EcdsaSecp256k1Signature2019,
 };
 
 
@@ -101,7 +103,18 @@ export const VC = {
   NAMESPACE: "testnet",
   PREFIX: "vc:" + DID.METHOD + ":" + DID.NAMESPACE + ":",
   CREDENTAIL_SCHEMA_VALIDATOR_TYPE: "JsonSchemaValidator2018",
-  CREDENTAIL_STATUS_TYPE: "CredentialStatusList2017",
+  CREDENTAIL_STATUS_TYPE: "HypersignCredentialStatus2023",
+  CONTEXT_HypersignCredentialStatus2023: {
+    "@protected": true,
+    "HypersignCredentialStatus2023": {
+      "@id": "https://hypersign.id#HypersignCredentialStatus2023",
+      "@context": {
+        "@protected": true,
+        "id": "@id",
+        "type": "@type"
+      }
+    }
+  },// will change this to url later
   CREDENTAIL_BASE_CONTEXT: "https://www.w3.org/2018/credentials/v1",
   CREDENTAIL_SECURITY_CONTEXT_V2: "https://w3id.org/security/v2",
   CREDENTAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1",
