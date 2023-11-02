@@ -173,12 +173,13 @@ describe('DID Opearations', () => {
       authentication: [],
     };
     it('should able to sign did document', async function () {
+      const didDoc = JSON.parse(JSON.stringify(didDocument));
       const params = {
         privateKeyMultibase: privateKeyMultibase as string,
         challenge: challenge as string,
         domain: domain as string,
         did: '',
-        didDocument: didDocument as object,
+        didDocument: didDoc as object,
         verificationMethodId: verificationMethodId as string,
         controller,
       };
@@ -292,7 +293,6 @@ describe('Verifiable Credential Opearations', () => {
       tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
       //console.log(JSON.stringify(tempIssueCredentialBody, null, 2));
       const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);
-
       const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
         issuedCredResult;
 
@@ -324,21 +324,21 @@ describe('Verifiable Credential Opearations', () => {
       expect(signedCredential['id']).to.be.equal(tempIssueCredentialBody.credential.id);
 
       expect(credentialStatus).to.be.a('object');
-      should().exist(credentialStatus['claim']);
       should().exist(credentialStatus['issuer']);
       should().exist(credentialStatus['issuanceDate']);
-      should().exist(credentialStatus['expirationDate']);
-      should().exist(credentialStatus['credentialHash']);
-
+      should().exist(credentialStatus['revoked']);
+      should().exist(credentialStatus['suspended']);
+      should().exist(credentialStatus['remarks']);
+      should().exist(credentialStatus['credentialMerkleRootHash']);
       expect(credentialStatusProof).to.be.a('object');
       should().exist(credentialStatusProof['type']);
       should().exist(credentialStatusProof['created']);
-      should().exist(credentialStatusProof['updated']);
       should().exist(credentialStatusProof['verificationMethod']);
       should().exist(credentialStatusProof['proofPurpose']);
       should().exist(credentialStatusProof['proofValue']);
 
       expect(credentialStatusRegistrationResult).to.be.a('object');
+      should().exist(credentialStatusRegistrationResult['code']);
       should().exist(credentialStatusRegistrationResult['height']);
       should().exist(credentialStatusRegistrationResult['transactionHash']);
       should().exist(credentialStatusRegistrationResult['gasUsed']);

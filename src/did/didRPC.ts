@@ -6,12 +6,14 @@
 
 import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_DID_PATH } from '../constants';
 import * as generatedProto from '../../libs/generated/ssi/tx';
-import { Did as IDidProto, SignInfo } from '../../libs/generated/ssi/did';
+import { DidDocument as IDidProto } from '../../libs/generated/ssi/did';
+import { DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
+
 import { SigningStargateClient } from '@cosmjs/stargate';
 
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
-import { IClientSpec, IDIDResolve, IDIDRpc, IKeyType, DeliverTxResponse } from './IDID';
+import { IDIDResolve, IDIDRpc, DeliverTxResponse } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 
 export class DIDRpc implements IDIDRpc {
@@ -46,15 +48,15 @@ export class DIDRpc implements IDIDRpc {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
-
-    const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
+    delete didDoc['proof'];
+    const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgRegisterDID}`;
 
     const txMessage = {
       typeUrl, // Same as above
-      value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
-        didDocString: didDoc,
-        signatures: signInfos,
-        creator: HIDClient.getHidWalletAddress(),
+      value: generatedProto[HIDRpcEnums.MsgRegisterDID].fromPartial({
+        didDocument: didDoc,
+        didDocumentProofs: signInfos,
+        txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
     const fee = 'auto';
@@ -73,10 +75,10 @@ export class DIDRpc implements IDIDRpc {
     const txMessage = {
       typeUrl, // Same as above
       value: generatedProto[HIDRpcEnums.MsgUpdateDID].fromPartial({
-        didDocString: didDoc,
-        signatures: signInfos,
-        creator: HIDClient.getHidWalletAddress(),
-        version_id: versionId,
+        didDocument: didDoc,
+        didDocumentProofs: signInfos,
+        txAuthor: HIDClient.getHidWalletAddress(),
+        versionId: versionId,
       }),
     };
 
@@ -98,10 +100,10 @@ export class DIDRpc implements IDIDRpc {
     const txMessage = {
       typeUrl, // Same as above
       value: generatedProto[HIDRpcEnums.MsgDeactivateDID].fromPartial({
-        didId: did,
-        signatures: signInfos,
-        creator: HIDClient.getHidWalletAddress(),
-        version_id: versionId,
+        didDocumentId: did,
+        didDocumentProofs: signInfos,
+        txAuthor: HIDClient.getHidWalletAddress(),
+        versionId: versionId,
       }),
     };
 

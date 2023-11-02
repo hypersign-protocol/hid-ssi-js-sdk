@@ -1,4 +1,4 @@
-import { Did } from '../libs/generated/ssi/did';
+import { DidDocument as Did } from '../libs/generated/ssi/did';
 import * as constants from './constants';
 const { encode, decode } = require('base58-universal');
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';

@@ -1,16 +1,16 @@
 import { expect, should } from 'chai';
-import { HypersignSSISdk, HypersignDID, HypersignSchema } from '../../index';
+import { HypersignDID, HypersignSchema } from '../../index';
 import { createWallet, mnemonic, hidNodeEp } from '../config';
-import { Schema, SchemaProof, SchemaDocument } from '../../../libs/generated/ssi/schema';
+import { CredentialSchemaState as Schema } from '../../../libs/generated/ssi/credential_schema';
+import { DocumentProof as SchemaProof } from '../../../libs/generated/ssi/proof';
 
-let hsSdk;
+
 let privateKeyMultibase;
 let publicKeyMultibase;
 let verificationMethodId;
 let didDocument;
 let didDocId;
 let offlineSigner;
-let schemaSignature;
 let hypersignSchema;
 let schemaObject;
 let schemaId;
@@ -18,7 +18,7 @@ let verificationMethod;
 let hypersignDID;
 let signedSchema;
 const signSchema = {} as Schema;
-signSchema.proof = {} as SchemaProof;
+signSchema['proof'] = {} as SchemaProof;
 const schemaBody = {
   name: 'testSchema',
   description: 'This is a test schema generation',
@@ -31,8 +31,6 @@ const schemaBody = {
 
 beforeEach(async function () {
   offlineSigner = await createWallet(mnemonic);
-  // hsSdk = new HypersignSSISdk(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest, hidNodeEp.namespace);
-  // await hsSdk.init();
 
   hypersignSchema = new HypersignSchema({
     // entityApiSecretKey,
@@ -160,7 +158,6 @@ describe('#sign() function to sign schema', function () {
       schema: schemaObject,
       verificationMethodId: didDocument['assertionMethod'][0],
     });
-    //onsole.log(JSON.stringify(signedSchema, null, 2))
     expect(signedSchema).to.be.a('object');
     should().exist(signedSchema.proof);
     should().exist(signedSchema.proof.type);

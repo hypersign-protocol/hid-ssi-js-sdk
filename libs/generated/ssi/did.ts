@@ -1,946 +1,739 @@
 /* eslint-disable */
-import { ClientSpec } from "./clientSpec";
-import { Writer, Reader } from "protobufjs/minimal";
+import _m0 from "protobufjs/minimal";
 
-export const protobufPackage = "hypersignprotocol.hidnode.ssi";
+export const protobufPackage = "hypersign.ssi.v1";
 
-export interface Did {
-  context: string[];
-  id: string;
-  controller: string[];
-  alsoKnownAs: string[];
-  verificationMethod: VerificationMethod[];
-  authentication: string[];
-  assertionMethod: string[];
-  keyAgreement: string[];
-  capabilityInvocation: string[];
-  capabilityDelegation: string[];
-  service: Service[];
+export interface DidDocument {
+  "@context"?: string[] | undefined;
+  id?: string | undefined;
+  controller?: string[] | undefined;
+  alsoKnownAs?: string[] | undefined;
+  verificationMethod?: VerificationMethod[] | undefined;
+  authentication?: string[] | undefined;
+  assertionMethod?: string[] | undefined;
+  keyAgreement?: string[] | undefined;
+  capabilityInvocation?: string[] | undefined;
+  capabilityDelegation?: string[] | undefined;
+  service?: Service[] | undefined;
 }
 
-export interface Metadata {
-  created: string;
-  updated: string;
-  deactivated: boolean;
-  versionId: string;
+export interface DidDocumentMetadata {
+  created?: string | undefined;
+  updated?: string | undefined;
+  deactivated?: boolean | undefined;
+  versionId?: string | undefined;
 }
 
 export interface VerificationMethod {
-  id: string;
-  type: string;
-  controller: string;
+  id?: string | undefined;
+  type?: string | undefined;
+  controller?:
+  | string
+  | undefined;
   /** If value is provided, `blockchainAccountId` must be empty */
-  publicKeyMultibase: string;
+  publicKeyMultibase?:
+  | string
+  | undefined;
   /** If value is provided, `publicKeyMultibase` must be empty */
-  blockchainAccountId: string;
+  blockchainAccountId?: string | undefined;
 }
 
 export interface Service {
-  id: string;
-  type: string;
-  serviceEndpoint: string;
-}
-
-export interface SignInfo {
-  verification_method_id: string;
-  signature: string;
-  clientSpec: ClientSpec | undefined;
+  id?: string | undefined;
+  type?: string | undefined;
+  serviceEndpoint?: string | undefined;
 }
 
 export interface DidDocumentState {
-  didDocument: Did | undefined;
-  didDocumentMetadata: Metadata | undefined;
+  didDocument?: DidDocument | undefined;
+  didDocumentMetadata?: DidDocumentMetadata | undefined;
 }
 
-const baseDid: object = {
-  context: "",
-  id: "",
-  controller: "",
-  alsoKnownAs: "",
-  authentication: "",
-  assertionMethod: "",
-  keyAgreement: "",
-  capabilityInvocation: "",
-  capabilityDelegation: "",
-};
+function createBaseDidDocument(): DidDocument {
+  return {};
+}
 
-export const Did = {
-  encode(message: Did, writer: Writer = Writer.create()): Writer {
-    for (const v of message.context) {
-      writer.uint32(10).string(v!);
+export const DidDocument = {
+  encode(message: DidDocument, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message["@context"] !== undefined && message["@context"].length !== 0) {
+      for (const v of message["@context"]) {
+        writer.uint32(10).string(v!);
+      }
     }
-    if (message.id !== "") {
+    if (message.id !== undefined && message.id !== "") {
       writer.uint32(18).string(message.id);
     }
-    for (const v of message.controller) {
-      writer.uint32(26).string(v!);
+    if (message.controller !== undefined && message.controller.length !== 0) {
+      for (const v of message.controller) {
+        writer.uint32(26).string(v!);
+      }
     }
-    for (const v of message.alsoKnownAs) {
-      writer.uint32(34).string(v!);
+    if (message.alsoKnownAs !== undefined && message.alsoKnownAs.length !== 0) {
+      for (const v of message.alsoKnownAs) {
+        writer.uint32(34).string(v!);
+      }
     }
-    for (const v of message.verificationMethod) {
-      VerificationMethod.encode(v!, writer.uint32(42).fork()).ldelim();
+    if (message.verificationMethod !== undefined && message.verificationMethod.length !== 0) {
+      for (const v of message.verificationMethod) {
+        VerificationMethod.encode(v!, writer.uint32(42).fork()).ldelim();
+      }
     }
-    for (const v of message.authentication) {
-      writer.uint32(50).string(v!);
+    if (message.authentication !== undefined && message.authentication.length !== 0) {
+      for (const v of message.authentication) {
+        writer.uint32(50).string(v!);
+      }
     }
-    for (const v of message.assertionMethod) {
-      writer.uint32(58).string(v!);
+    if (message.assertionMethod !== undefined && message.assertionMethod.length !== 0) {
+      for (const v of message.assertionMethod) {
+        writer.uint32(58).string(v!);
+      }
     }
-    for (const v of message.keyAgreement) {
-      writer.uint32(66).string(v!);
+    if (message.keyAgreement !== undefined && message.keyAgreement.length !== 0) {
+      for (const v of message.keyAgreement) {
+        writer.uint32(66).string(v!);
+      }
     }
-    for (const v of message.capabilityInvocation) {
-      writer.uint32(74).string(v!);
+    if (message.capabilityInvocation !== undefined && message.capabilityInvocation.length !== 0) {
+      for (const v of message.capabilityInvocation) {
+        writer.uint32(74).string(v!);
+      }
     }
-    for (const v of message.capabilityDelegation) {
-      writer.uint32(82).string(v!);
+    if (message.capabilityDelegation !== undefined && message.capabilityDelegation.length !== 0) {
+      for (const v of message.capabilityDelegation) {
+        writer.uint32(82).string(v!);
+      }
     }
-    for (const v of message.service) {
-      Service.encode(v!, writer.uint32(90).fork()).ldelim();
+    if (message.service !== undefined && message.service.length !== 0) {
+      for (const v of message.service) {
+        Service.encode(v!, writer.uint32(90).fork()).ldelim();
+      }
     }
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): Did {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): DidDocument {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseDid } as Did;
-    message.context = [];
-    message.controller = [];
-    message.alsoKnownAs = [];
-    message.verificationMethod = [];
-    message.authentication = [];
-    message.assertionMethod = [];
-    message.keyAgreement = [];
-    message.capabilityInvocation = [];
-    message.capabilityDelegation = [];
-    message.service = [];
+    const message = createBaseDidDocument();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.context.push(reader.string());
-          break;
+          if (tag !== 10) {
+            break;
+          }
+
+          if (message["@context"] === undefined) {
+            message["@context"] = [];
+          }
+          message["@context"]!.push(reader.string());
+          continue;
         case 2:
+          if (tag !== 18) {
+            break;
+          }
+
           message.id = reader.string();
-          break;
+          continue;
         case 3:
-          message.controller.push(reader.string());
-          break;
+          if (tag !== 26) {
+            break;
+          }
+
+          if (message.controller === undefined) {
+            message.controller = [];
+          }
+          message.controller!.push(reader.string());
+          continue;
         case 4:
-          message.alsoKnownAs.push(reader.string());
-          break;
+          if (tag !== 34) {
+            break;
+          }
+
+          if (message.alsoKnownAs === undefined) {
+            message.alsoKnownAs = [];
+          }
+          message.alsoKnownAs!.push(reader.string());
+          continue;
         case 5:
-          message.verificationMethod.push(
-            VerificationMethod.decode(reader, reader.uint32())
-          );
-          break;
+          if (tag !== 42) {
+            break;
+          }
+
+          if (message.verificationMethod === undefined) {
+            message.verificationMethod = [];
+          }
+          message.verificationMethod!.push(VerificationMethod.decode(reader, reader.uint32()));
+          continue;
         case 6:
-          message.authentication.push(reader.string());
-          break;
+          if (tag !== 50) {
+            break;
+          }
+
+          if (message.authentication === undefined) {
+            message.authentication = [];
+          }
+          message.authentication!.push(reader.string());
+          continue;
         case 7:
-          message.assertionMethod.push(reader.string());
-          break;
+          if (tag !== 58) {
+            break;
+          }
+
+          if (message.assertionMethod === undefined) {
+            message.assertionMethod = [];
+          }
+          message.assertionMethod!.push(reader.string());
+          continue;
         case 8:
-          message.keyAgreement.push(reader.string());
-          break;
+          if (tag !== 66) {
+            break;
+          }
+
+          if (message.keyAgreement === undefined) {
+            message.keyAgreement = [];
+          }
+          message.keyAgreement!.push(reader.string());
+          continue;
         case 9:
-          message.capabilityInvocation.push(reader.string());
-          break;
+          if (tag !== 74) {
+            break;
+          }
+
+          if (message.capabilityInvocation === undefined) {
+            message.capabilityInvocation = [];
+          }
+          message.capabilityInvocation!.push(reader.string());
+          continue;
         case 10:
-          message.capabilityDelegation.push(reader.string());
-          break;
+          if (tag !== 82) {
+            break;
+          }
+
+          if (message.capabilityDelegation === undefined) {
+            message.capabilityDelegation = [];
+          }
+          message.capabilityDelegation!.push(reader.string());
+          continue;
         case 11:
-          message.service.push(Service.decode(reader, reader.uint32()));
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          if (tag !== 90) {
+            break;
+          }
+
+          if (message.service === undefined) {
+            message.service = [];
+          }
+          message.service!.push(Service.decode(reader, reader.uint32()));
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
 
-  fromJSON(object: any): Did {
-    const message = { ...baseDid } as Did;
-    message.context = [];
-    message.controller = [];
-    message.alsoKnownAs = [];
-    message.verificationMethod = [];
-    message.authentication = [];
-    message.assertionMethod = [];
-    message.keyAgreement = [];
-    message.capabilityInvocation = [];
-    message.capabilityDelegation = [];
-    message.service = [];
-    if (object.context !== undefined && object.context !== null) {
-      for (const e of object.context) {
-        message.context.push(String(e));
-      }
-    }
-    if (object.id !== undefined && object.id !== null) {
-      message.id = String(object.id);
-    } else {
-      message.id = "";
-    }
-    if (object.controller !== undefined && object.controller !== null) {
-      for (const e of object.controller) {
-        message.controller.push(String(e));
-      }
-    }
-    if (object.alsoKnownAs !== undefined && object.alsoKnownAs !== null) {
-      for (const e of object.alsoKnownAs) {
-        message.alsoKnownAs.push(String(e));
-      }
-    }
-    if (
-      object.verificationMethod !== undefined &&
-      object.verificationMethod !== null
-    ) {
-      for (const e of object.verificationMethod) {
-        message.verificationMethod.push(VerificationMethod.fromJSON(e));
-      }
-    }
-    if (object.authentication !== undefined && object.authentication !== null) {
-      for (const e of object.authentication) {
-        message.authentication.push(String(e));
-      }
-    }
-    if (
-      object.assertionMethod !== undefined &&
-      object.assertionMethod !== null
-    ) {
-      for (const e of object.assertionMethod) {
-        message.assertionMethod.push(String(e));
-      }
-    }
-    if (object.keyAgreement !== undefined && object.keyAgreement !== null) {
-      for (const e of object.keyAgreement) {
-        message.keyAgreement.push(String(e));
-      }
-    }
-    if (
-      object.capabilityInvocation !== undefined &&
-      object.capabilityInvocation !== null
-    ) {
-      for (const e of object.capabilityInvocation) {
-        message.capabilityInvocation.push(String(e));
-      }
-    }
-    if (
-      object.capabilityDelegation !== undefined &&
-      object.capabilityDelegation !== null
-    ) {
-      for (const e of object.capabilityDelegation) {
-        message.capabilityDelegation.push(String(e));
-      }
-    }
-    if (object.service !== undefined && object.service !== null) {
-      for (const e of object.service) {
-        message.service.push(Service.fromJSON(e));
-      }
-    }
-    return message;
+  fromJSON(object: any): DidDocument {
+    return {
+      "@context": globalThis.Array.isArray(object?.["@context"])
+        ? object["@context"].map((e: any) => globalThis.String(e))
+        : undefined,
+      id: isSet(object.id) ? globalThis.String(object.id) : undefined,
+      controller: globalThis.Array.isArray(object?.controller)
+        ? object.controller.map((e: any) => globalThis.String(e))
+        : undefined,
+      alsoKnownAs: globalThis.Array.isArray(object?.alsoKnownAs)
+        ? object.alsoKnownAs.map((e: any) => globalThis.String(e))
+        : undefined,
+      verificationMethod: globalThis.Array.isArray(object?.verificationMethod)
+        ? object.verificationMethod.map((e: any) => VerificationMethod.fromJSON(e))
+        : undefined,
+      authentication: globalThis.Array.isArray(object?.authentication)
+        ? object.authentication.map((e: any) => globalThis.String(e))
+        : undefined,
+      assertionMethod: globalThis.Array.isArray(object?.assertionMethod)
+        ? object.assertionMethod.map((e: any) => globalThis.String(e))
+        : undefined,
+      keyAgreement: globalThis.Array.isArray(object?.keyAgreement)
+        ? object.keyAgreement.map((e: any) => globalThis.String(e))
+        : undefined,
+      capabilityInvocation: globalThis.Array.isArray(object?.capabilityInvocation)
+        ? object.capabilityInvocation.map((e: any) => globalThis.String(e))
+        : undefined,
+      capabilityDelegation: globalThis.Array.isArray(object?.capabilityDelegation)
+        ? object.capabilityDelegation.map((e: any) => globalThis.String(e))
+        : undefined,
+      service: globalThis.Array.isArray(object?.service)
+        ? object.service.map((e: any) => Service.fromJSON(e))
+        : undefined,
+    };
   },
 
-  toJSON(message: Did): unknown {
+  toJSON(message: DidDocument): unknown {
     const obj: any = {};
-    if (message.context) {
-      obj.context = message.context.map((e) => e);
-    } else {
-      obj.context = [];
+    if (message["@context"]?.length) {
+      obj["@context"] = message["@context"];
     }
-    message.id !== undefined && (obj.id = message.id);
-    if (message.controller) {
-      obj.controller = message.controller.map((e) => e);
-    } else {
-      obj.controller = [];
+    if (message.id !== undefined && message.id !== "") {
+      obj.id = message.id;
     }
-    if (message.alsoKnownAs) {
-      obj.alsoKnownAs = message.alsoKnownAs.map((e) => e);
-    } else {
-      obj.alsoKnownAs = [];
+    if (message.controller?.length) {
+      obj.controller = message.controller;
     }
-    if (message.verificationMethod) {
-      obj.verificationMethod = message.verificationMethod.map((e) =>
-        e ? VerificationMethod.toJSON(e) : undefined
-      );
-    } else {
-      obj.verificationMethod = [];
+    if (message.alsoKnownAs?.length) {
+      obj.alsoKnownAs = message.alsoKnownAs;
     }
-    if (message.authentication) {
-      obj.authentication = message.authentication.map((e) => e);
-    } else {
-      obj.authentication = [];
+    if (message.verificationMethod?.length) {
+      obj.verificationMethod = message.verificationMethod.map((e) => VerificationMethod.toJSON(e));
     }
-    if (message.assertionMethod) {
-      obj.assertionMethod = message.assertionMethod.map((e) => e);
-    } else {
-      obj.assertionMethod = [];
+    if (message.authentication?.length) {
+      obj.authentication = message.authentication;
     }
-    if (message.keyAgreement) {
-      obj.keyAgreement = message.keyAgreement.map((e) => e);
-    } else {
-      obj.keyAgreement = [];
+    if (message.assertionMethod?.length) {
+      obj.assertionMethod = message.assertionMethod;
     }
-    if (message.capabilityInvocation) {
-      obj.capabilityInvocation = message.capabilityInvocation.map((e) => e);
-    } else {
-      obj.capabilityInvocation = [];
+    if (message.keyAgreement?.length) {
+      obj.keyAgreement = message.keyAgreement;
     }
-    if (message.capabilityDelegation) {
-      obj.capabilityDelegation = message.capabilityDelegation.map((e) => e);
-    } else {
-      obj.capabilityDelegation = [];
+    if (message.capabilityInvocation?.length) {
+      obj.capabilityInvocation = message.capabilityInvocation;
     }
-    if (message.service) {
-      obj.service = message.service.map((e) =>
-        e ? Service.toJSON(e) : undefined
-      );
-    } else {
-      obj.service = [];
+    if (message.capabilityDelegation?.length) {
+      obj.capabilityDelegation = message.capabilityDelegation;
+    }
+    if (message.service?.length) {
+      obj.service = message.service.map((e) => Service.toJSON(e));
     }
     return obj;
   },
 
-  fromPartial(object: DeepPartial<Did>): Did {
-    const message = { ...baseDid } as Did;
-    message.context = [];
-    message.controller = [];
-    message.alsoKnownAs = [];
-    message.verificationMethod = [];
-    message.authentication = [];
-    message.assertionMethod = [];
-    message.keyAgreement = [];
-    message.capabilityInvocation = [];
-    message.capabilityDelegation = [];
-    message.service = [];
-    if (object.context !== undefined && object.context !== null) {
-      for (const e of object.context) {
-        message.context.push(e);
-      }
-    }
-    if (object.id !== undefined && object.id !== null) {
-      message.id = object.id;
-    } else {
-      message.id = "";
-    }
-    if (object.controller !== undefined && object.controller !== null) {
-      for (const e of object.controller) {
-        message.controller.push(e);
-      }
-    }
-    if (object.alsoKnownAs !== undefined && object.alsoKnownAs !== null) {
-      for (const e of object.alsoKnownAs) {
-        message.alsoKnownAs.push(e);
-      }
-    }
-    if (
-      object.verificationMethod !== undefined &&
-      object.verificationMethod !== null
-    ) {
-      for (const e of object.verificationMethod) {
-        message.verificationMethod.push(VerificationMethod.fromPartial(e));
-      }
-    }
-    if (object.authentication !== undefined && object.authentication !== null) {
-      for (const e of object.authentication) {
-        message.authentication.push(e);
-      }
-    }
-    if (
-      object.assertionMethod !== undefined &&
-      object.assertionMethod !== null
-    ) {
-      for (const e of object.assertionMethod) {
-        message.assertionMethod.push(e);
-      }
-    }
-    if (object.keyAgreement !== undefined && object.keyAgreement !== null) {
-      for (const e of object.keyAgreement) {
-        message.keyAgreement.push(e);
-      }
-    }
-    if (
-      object.capabilityInvocation !== undefined &&
-      object.capabilityInvocation !== null
-    ) {
-      for (const e of object.capabilityInvocation) {
-        message.capabilityInvocation.push(e);
-      }
-    }
-    if (
-      object.capabilityDelegation !== undefined &&
-      object.capabilityDelegation !== null
-    ) {
-      for (const e of object.capabilityDelegation) {
-        message.capabilityDelegation.push(e);
-      }
-    }
-    if (object.service !== undefined && object.service !== null) {
-      for (const e of object.service) {
-        message.service.push(Service.fromPartial(e));
-      }
-    }
+  create<I extends Exact<DeepPartial<DidDocument>, I>>(base?: I): DidDocument {
+    return DidDocument.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<DidDocument>, I>>(object: I): DidDocument {
+    const message = createBaseDidDocument();
+    message["@context"] = object["@context"]?.map((e) => e) || undefined;
+    message.id = object.id ?? undefined;
+    message.controller = object.controller?.map((e) => e) || undefined;
+    message.alsoKnownAs = object.alsoKnownAs?.map((e) => e) || undefined;
+    message.verificationMethod = object.verificationMethod?.map((e) => VerificationMethod.fromPartial(e)) || undefined;
+    message.authentication = object.authentication?.map((e) => e) || undefined;
+    message.assertionMethod = object.assertionMethod?.map((e) => e) || undefined;
+    message.keyAgreement = object.keyAgreement?.map((e) => e) || undefined;
+    message.capabilityInvocation = object.capabilityInvocation?.map((e) => e) || undefined;
+    message.capabilityDelegation = object.capabilityDelegation?.map((e) => e) || undefined;
+    message.service = object.service?.map((e) => Service.fromPartial(e)) || undefined;
     return message;
   },
 };
 
-const baseMetadata: object = {
-  created: "",
-  updated: "",
-  deactivated: false,
-  versionId: "",
-};
+function createBaseDidDocumentMetadata(): DidDocumentMetadata {
+  return {};
+}
 
-export const Metadata = {
-  encode(message: Metadata, writer: Writer = Writer.create()): Writer {
-    if (message.created !== "") {
+export const DidDocumentMetadata = {
+  encode(message: DidDocumentMetadata, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.created !== undefined && message.created !== "") {
       writer.uint32(10).string(message.created);
     }
-    if (message.updated !== "") {
+    if (message.updated !== undefined && message.updated !== "") {
       writer.uint32(18).string(message.updated);
     }
     if (message.deactivated === true) {
       writer.uint32(24).bool(message.deactivated);
     }
-    if (message.versionId !== "") {
+    if (message.versionId !== undefined && message.versionId !== "") {
       writer.uint32(34).string(message.versionId);
     }
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): Metadata {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): DidDocumentMetadata {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseMetadata } as Metadata;
+    const message = createBaseDidDocumentMetadata();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
+          if (tag !== 10) {
+            break;
+          }
+
           message.created = reader.string();
-          break;
+          continue;
         case 2:
+          if (tag !== 18) {
+            break;
+          }
+
           message.updated = reader.string();
-          break;
+          continue;
         case 3:
+          if (tag !== 24) {
+            break;
+          }
+
           message.deactivated = reader.bool();
-          break;
+          continue;
         case 4:
+          if (tag !== 34) {
+            break;
+          }
+
           message.versionId = reader.string();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
 
-  fromJSON(object: any): Metadata {
-    const message = { ...baseMetadata } as Metadata;
-    if (object.created !== undefined && object.created !== null) {
-      message.created = String(object.created);
-    } else {
-      message.created = "";
-    }
-    if (object.updated !== undefined && object.updated !== null) {
-      message.updated = String(object.updated);
-    } else {
-      message.updated = "";
-    }
-    if (object.deactivated !== undefined && object.deactivated !== null) {
-      message.deactivated = Boolean(object.deactivated);
-    } else {
-      message.deactivated = false;
-    }
-    if (object.versionId !== undefined && object.versionId !== null) {
-      message.versionId = String(object.versionId);
-    } else {
-      message.versionId = "";
-    }
-    return message;
+  fromJSON(object: any): DidDocumentMetadata {
+    return {
+      created: isSet(object.created) ? globalThis.String(object.created) : undefined,
+      updated: isSet(object.updated) ? globalThis.String(object.updated) : undefined,
+      deactivated: isSet(object.deactivated) ? globalThis.Boolean(object.deactivated) : undefined,
+      versionId: isSet(object.versionId) ? globalThis.String(object.versionId) : undefined,
+    };
   },
 
-  toJSON(message: Metadata): unknown {
+  toJSON(message: DidDocumentMetadata): unknown {
     const obj: any = {};
-    message.created !== undefined && (obj.created = message.created);
-    message.updated !== undefined && (obj.updated = message.updated);
-    message.deactivated !== undefined &&
-      (obj.deactivated = message.deactivated);
-    message.versionId !== undefined && (obj.versionId = message.versionId);
+    if (message.created !== undefined && message.created !== "") {
+      obj.created = message.created;
+    }
+    if (message.updated !== undefined && message.updated !== "") {
+      obj.updated = message.updated;
+    }
+    if (message.deactivated === true) {
+      obj.deactivated = message.deactivated;
+    }
+    if (message.versionId !== undefined && message.versionId !== "") {
+      obj.versionId = message.versionId;
+    }
     return obj;
   },
 
-  fromPartial(object: DeepPartial<Metadata>): Metadata {
-    const message = { ...baseMetadata } as Metadata;
-    if (object.created !== undefined && object.created !== null) {
-      message.created = object.created;
-    } else {
-      message.created = "";
-    }
-    if (object.updated !== undefined && object.updated !== null) {
-      message.updated = object.updated;
-    } else {
-      message.updated = "";
-    }
-    if (object.deactivated !== undefined && object.deactivated !== null) {
-      message.deactivated = object.deactivated;
-    } else {
-      message.deactivated = false;
-    }
-    if (object.versionId !== undefined && object.versionId !== null) {
-      message.versionId = object.versionId;
-    } else {
-      message.versionId = "";
-    }
+  create<I extends Exact<DeepPartial<DidDocumentMetadata>, I>>(base?: I): DidDocumentMetadata {
+    return DidDocumentMetadata.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<DidDocumentMetadata>, I>>(object: I): DidDocumentMetadata {
+    const message = createBaseDidDocumentMetadata();
+    message.created = object.created ?? undefined;
+    message.updated = object.updated ?? undefined;
+    message.deactivated = object.deactivated ?? undefined;
+    message.versionId = object.versionId ?? undefined;
     return message;
   },
 };
 
-const baseVerificationMethod: object = {
-  id: "",
-  type: "",
-  controller: "",
-  publicKeyMultibase: "",
-  blockchainAccountId: "",
-};
+function createBaseVerificationMethod(): VerificationMethod {
+  return {};
+}
 
 export const VerificationMethod = {
-  encode(
-    message: VerificationMethod,
-    writer: Writer = Writer.create()
-  ): Writer {
-    if (message.id !== "") {
+  encode(message: VerificationMethod, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== undefined && message.id !== "") {
       writer.uint32(10).string(message.id);
     }
-    if (message.type !== "") {
+    if (message.type !== undefined && message.type !== "") {
       writer.uint32(18).string(message.type);
     }
-    if (message.controller !== "") {
+    if (message.controller !== undefined && message.controller !== "") {
       writer.uint32(26).string(message.controller);
     }
-    if (message.publicKeyMultibase !== "") {
+    if (message.publicKeyMultibase !== undefined && message.publicKeyMultibase !== "") {
       writer.uint32(34).string(message.publicKeyMultibase);
     }
-    if (message.blockchainAccountId !== "") {
+    if (message.blockchainAccountId !== undefined && message.blockchainAccountId !== "") {
       writer.uint32(42).string(message.blockchainAccountId);
     }
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): VerificationMethod {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): VerificationMethod {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseVerificationMethod } as VerificationMethod;
+    const message = createBaseVerificationMethod();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
+          if (tag !== 10) {
+            break;
+          }
+
           message.id = reader.string();
-          break;
+          continue;
         case 2:
+          if (tag !== 18) {
+            break;
+          }
+
           message.type = reader.string();
-          break;
+          continue;
         case 3:
+          if (tag !== 26) {
+            break;
+          }
+
           message.controller = reader.string();
-          break;
+          continue;
         case 4:
+          if (tag !== 34) {
+            break;
+          }
+
           message.publicKeyMultibase = reader.string();
-          break;
+          continue;
         case 5:
+          if (tag !== 42) {
+            break;
+          }
+
           message.blockchainAccountId = reader.string();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
 
   fromJSON(object: any): VerificationMethod {
-    const message = { ...baseVerificationMethod } as VerificationMethod;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = String(object.id);
-    } else {
-      message.id = "";
-    }
-    if (object.type !== undefined && object.type !== null) {
-      message.type = String(object.type);
-    } else {
-      message.type = "";
-    }
-    if (object.controller !== undefined && object.controller !== null) {
-      message.controller = String(object.controller);
-    } else {
-      message.controller = "";
-    }
-    if (
-      object.publicKeyMultibase !== undefined &&
-      object.publicKeyMultibase !== null
-    ) {
-      message.publicKeyMultibase = String(object.publicKeyMultibase);
-    } else {
-      message.publicKeyMultibase = "";
-    }
-    if (
-      object.blockchainAccountId !== undefined &&
-      object.blockchainAccountId !== null
-    ) {
-      message.blockchainAccountId = String(object.blockchainAccountId);
-    } else {
-      message.blockchainAccountId = "";
-    }
-    return message;
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : undefined,
+      type: isSet(object.type) ? globalThis.String(object.type) : undefined,
+      controller: isSet(object.controller) ? globalThis.String(object.controller) : undefined,
+      publicKeyMultibase: isSet(object.publicKeyMultibase) ? globalThis.String(object.publicKeyMultibase) : undefined,
+      blockchainAccountId: isSet(object.blockchainAccountId)
+        ? globalThis.String(object.blockchainAccountId)
+        : undefined,
+    };
   },
 
   toJSON(message: VerificationMethod): unknown {
     const obj: any = {};
-    message.id !== undefined && (obj.id = message.id);
-    message.type !== undefined && (obj.type = message.type);
-    message.controller !== undefined && (obj.controller = message.controller);
-    message.publicKeyMultibase !== undefined &&
-      (obj.publicKeyMultibase = message.publicKeyMultibase);
-    message.blockchainAccountId !== undefined &&
-      (obj.blockchainAccountId = message.blockchainAccountId);
+    if (message.id !== undefined && message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.type !== undefined && message.type !== "") {
+      obj.type = message.type;
+    }
+    if (message.controller !== undefined && message.controller !== "") {
+      obj.controller = message.controller;
+    }
+    if (message.publicKeyMultibase !== undefined && message.publicKeyMultibase !== "") {
+      obj.publicKeyMultibase = message.publicKeyMultibase;
+    }
+    if (message.blockchainAccountId !== undefined && message.blockchainAccountId !== "") {
+      obj.blockchainAccountId = message.blockchainAccountId;
+    }
     return obj;
   },
 
-  fromPartial(object: DeepPartial<VerificationMethod>): VerificationMethod {
-    const message = { ...baseVerificationMethod } as VerificationMethod;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = object.id;
-    } else {
-      message.id = "";
-    }
-    if (object.type !== undefined && object.type !== null) {
-      message.type = object.type;
-    } else {
-      message.type = "";
-    }
-    if (object.controller !== undefined && object.controller !== null) {
-      message.controller = object.controller;
-    } else {
-      message.controller = "";
-    }
-    if (
-      object.publicKeyMultibase !== undefined &&
-      object.publicKeyMultibase !== null
-    ) {
-      message.publicKeyMultibase = object.publicKeyMultibase;
-    } else {
-      message.publicKeyMultibase = "";
-    }
-    if (
-      object.blockchainAccountId !== undefined &&
-      object.blockchainAccountId !== null
-    ) {
-      message.blockchainAccountId = object.blockchainAccountId;
-    } else {
-      message.blockchainAccountId = "";
-    }
+  create<I extends Exact<DeepPartial<VerificationMethod>, I>>(base?: I): VerificationMethod {
+    return VerificationMethod.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<VerificationMethod>, I>>(object: I): VerificationMethod {
+    const message = createBaseVerificationMethod();
+    message.id = object.id ?? undefined;
+    message.type = object.type ?? undefined;
+    message.controller = object.controller ?? undefined;
+    message.publicKeyMultibase = object.publicKeyMultibase ?? undefined;
+    message.blockchainAccountId = object.blockchainAccountId ?? undefined;
     return message;
   },
 };
 
-const baseService: object = { id: "", type: "", serviceEndpoint: "" };
+function createBaseService(): Service {
+  return {};
+}
 
 export const Service = {
-  encode(message: Service, writer: Writer = Writer.create()): Writer {
-    if (message.id !== "") {
+  encode(message: Service, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.id !== undefined && message.id !== "") {
       writer.uint32(10).string(message.id);
     }
-    if (message.type !== "") {
+    if (message.type !== undefined && message.type !== "") {
       writer.uint32(18).string(message.type);
     }
-    if (message.serviceEndpoint !== "") {
+    if (message.serviceEndpoint !== undefined && message.serviceEndpoint !== "") {
       writer.uint32(26).string(message.serviceEndpoint);
     }
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): Service {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): Service {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseService } as Service;
+    const message = createBaseService();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
+          if (tag !== 10) {
+            break;
+          }
+
           message.id = reader.string();
-          break;
+          continue;
         case 2:
+          if (tag !== 18) {
+            break;
+          }
+
           message.type = reader.string();
-          break;
+          continue;
         case 3:
+          if (tag !== 26) {
+            break;
+          }
+
           message.serviceEndpoint = reader.string();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
 
   fromJSON(object: any): Service {
-    const message = { ...baseService } as Service;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = String(object.id);
-    } else {
-      message.id = "";
-    }
-    if (object.type !== undefined && object.type !== null) {
-      message.type = String(object.type);
-    } else {
-      message.type = "";
-    }
-    if (
-      object.serviceEndpoint !== undefined &&
-      object.serviceEndpoint !== null
-    ) {
-      message.serviceEndpoint = String(object.serviceEndpoint);
-    } else {
-      message.serviceEndpoint = "";
-    }
-    return message;
+    return {
+      id: isSet(object.id) ? globalThis.String(object.id) : undefined,
+      type: isSet(object.type) ? globalThis.String(object.type) : undefined,
+      serviceEndpoint: isSet(object.serviceEndpoint) ? globalThis.String(object.serviceEndpoint) : undefined,
+    };
   },
 
   toJSON(message: Service): unknown {
     const obj: any = {};
-    message.id !== undefined && (obj.id = message.id);
-    message.type !== undefined && (obj.type = message.type);
-    message.serviceEndpoint !== undefined &&
-      (obj.serviceEndpoint = message.serviceEndpoint);
+    if (message.id !== undefined && message.id !== "") {
+      obj.id = message.id;
+    }
+    if (message.type !== undefined && message.type !== "") {
+      obj.type = message.type;
+    }
+    if (message.serviceEndpoint !== undefined && message.serviceEndpoint !== "") {
+      obj.serviceEndpoint = message.serviceEndpoint;
+    }
     return obj;
   },
 
-  fromPartial(object: DeepPartial<Service>): Service {
-    const message = { ...baseService } as Service;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = object.id;
-    } else {
-      message.id = "";
-    }
-    if (object.type !== undefined && object.type !== null) {
-      message.type = object.type;
-    } else {
-      message.type = "";
-    }
-    if (
-      object.serviceEndpoint !== undefined &&
-      object.serviceEndpoint !== null
-    ) {
-      message.serviceEndpoint = object.serviceEndpoint;
-    } else {
-      message.serviceEndpoint = "";
-    }
+  create<I extends Exact<DeepPartial<Service>, I>>(base?: I): Service {
+    return Service.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<Service>, I>>(object: I): Service {
+    const message = createBaseService();
+    message.id = object.id ?? undefined;
+    message.type = object.type ?? undefined;
+    message.serviceEndpoint = object.serviceEndpoint ?? undefined;
     return message;
   },
 };
 
-const baseSignInfo: object = { verification_method_id: "", signature: "" };
-
-export const SignInfo = {
-  encode(message: SignInfo, writer: Writer = Writer.create()): Writer {
-    if (message.verification_method_id !== "") {
-      writer.uint32(10).string(message.verification_method_id);
-    }
-    if (message.signature !== "") {
-      writer.uint32(18).string(message.signature);
-    }
-    if (message.clientSpec !== undefined) {
-      ClientSpec.encode(message.clientSpec, writer.uint32(26).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: Reader | Uint8Array, length?: number): SignInfo {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseSignInfo } as SignInfo;
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.verification_method_id = reader.string();
-          break;
-        case 2:
-          message.signature = reader.string();
-          break;
-        case 3:
-          message.clientSpec = ClientSpec.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): SignInfo {
-    const message = { ...baseSignInfo } as SignInfo;
-    if (
-      object.verification_method_id !== undefined &&
-      object.verification_method_id !== null
-    ) {
-      message.verification_method_id = String(object.verification_method_id);
-    } else {
-      message.verification_method_id = "";
-    }
-    if (object.signature !== undefined && object.signature !== null) {
-      message.signature = String(object.signature);
-    } else {
-      message.signature = "";
-    }
-    if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = ClientSpec.fromJSON(object.clientSpec);
-    } else {
-      message.clientSpec = undefined;
-    }
-    return message;
-  },
-
-  toJSON(message: SignInfo): unknown {
-    const obj: any = {};
-    message.verification_method_id !== undefined &&
-      (obj.verification_method_id = message.verification_method_id);
-    message.signature !== undefined && (obj.signature = message.signature);
-    message.clientSpec !== undefined &&
-      (obj.clientSpec = message.clientSpec
-        ? ClientSpec.toJSON(message.clientSpec)
-        : undefined);
-    return obj;
-  },
-
-  fromPartial(object: DeepPartial<SignInfo>): SignInfo {
-    const message = { ...baseSignInfo } as SignInfo;
-    if (
-      object.verification_method_id !== undefined &&
-      object.verification_method_id !== null
-    ) {
-      message.verification_method_id = object.verification_method_id;
-    } else {
-      message.verification_method_id = "";
-    }
-    if (object.signature !== undefined && object.signature !== null) {
-      message.signature = object.signature;
-    } else {
-      message.signature = "";
-    }
-    if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = ClientSpec.fromPartial(object.clientSpec);
-    } else {
-      message.clientSpec = undefined;
-    }
-    return message;
-  },
-};
-
-const baseDidDocumentState: object = {};
+function createBaseDidDocumentState(): DidDocumentState {
+  return {};
+}
 
 export const DidDocumentState = {
-  encode(message: DidDocumentState, writer: Writer = Writer.create()): Writer {
+  encode(message: DidDocumentState, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     if (message.didDocument !== undefined) {
-      Did.encode(message.didDocument, writer.uint32(10).fork()).ldelim();
+      DidDocument.encode(message.didDocument, writer.uint32(10).fork()).ldelim();
     }
     if (message.didDocumentMetadata !== undefined) {
-      Metadata.encode(
-        message.didDocumentMetadata,
-        writer.uint32(18).fork()
-      ).ldelim();
+      DidDocumentMetadata.encode(message.didDocumentMetadata, writer.uint32(18).fork()).ldelim();
     }
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): DidDocumentState {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): DidDocumentState {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseDidDocumentState } as DidDocumentState;
+    const message = createBaseDidDocumentState();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.didDocument = Did.decode(reader, reader.uint32());
-          break;
+          if (tag !== 10) {
+            break;
+          }
+
+          message.didDocument = DidDocument.decode(reader, reader.uint32());
+          continue;
         case 2:
-          message.didDocumentMetadata = Metadata.decode(
-            reader,
-            reader.uint32()
-          );
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          if (tag !== 18) {
+            break;
+          }
+
+          message.didDocumentMetadata = DidDocumentMetadata.decode(reader, reader.uint32());
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
 
   fromJSON(object: any): DidDocumentState {
-    const message = { ...baseDidDocumentState } as DidDocumentState;
-    if (object.didDocument !== undefined && object.didDocument !== null) {
-      message.didDocument = Did.fromJSON(object.didDocument);
-    } else {
-      message.didDocument = undefined;
-    }
-    if (
-      object.didDocumentMetadata !== undefined &&
-      object.didDocumentMetadata !== null
-    ) {
-      message.didDocumentMetadata = Metadata.fromJSON(
-        object.didDocumentMetadata
-      );
-    } else {
-      message.didDocumentMetadata = undefined;
-    }
-    return message;
+    return {
+      didDocument: isSet(object.didDocument) ? DidDocument.fromJSON(object.didDocument) : undefined,
+      didDocumentMetadata: isSet(object.didDocumentMetadata)
+        ? DidDocumentMetadata.fromJSON(object.didDocumentMetadata)
+        : undefined,
+    };
   },
 
   toJSON(message: DidDocumentState): unknown {
     const obj: any = {};
-    message.didDocument !== undefined &&
-      (obj.didDocument = message.didDocument
-        ? Did.toJSON(message.didDocument)
-        : undefined);
-    message.didDocumentMetadata !== undefined &&
-      (obj.didDocumentMetadata = message.didDocumentMetadata
-        ? Metadata.toJSON(message.didDocumentMetadata)
-        : undefined);
+    if (message.didDocument !== undefined) {
+      obj.didDocument = DidDocument.toJSON(message.didDocument);
+    }
+    if (message.didDocumentMetadata !== undefined) {
+      obj.didDocumentMetadata = DidDocumentMetadata.toJSON(message.didDocumentMetadata);
+    }
     return obj;
   },
 
-  fromPartial(object: DeepPartial<DidDocumentState>): DidDocumentState {
-    const message = { ...baseDidDocumentState } as DidDocumentState;
-    if (object.didDocument !== undefined && object.didDocument !== null) {
-      message.didDocument = Did.fromPartial(object.didDocument);
-    } else {
-      message.didDocument = undefined;
-    }
-    if (
-      object.didDocumentMetadata !== undefined &&
-      object.didDocumentMetadata !== null
-    ) {
-      message.didDocumentMetadata = Metadata.fromPartial(
-        object.didDocumentMetadata
-      );
-    } else {
-      message.didDocumentMetadata = undefined;
-    }
+  create<I extends Exact<DeepPartial<DidDocumentState>, I>>(base?: I): DidDocumentState {
+    return DidDocumentState.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<DidDocumentState>, I>>(object: I): DidDocumentState {
+    const message = createBaseDidDocumentState();
+    message.didDocument = (object.didDocument !== undefined && object.didDocument !== null)
+      ? DidDocument.fromPartial(object.didDocument)
+      : undefined;
+    message.didDocumentMetadata = (object.didDocumentMetadata !== undefined && object.didDocumentMetadata !== null)
+      ? DidDocumentMetadata.fromPartial(object.didDocumentMetadata)
+      : undefined;
     return message;
   },
 };
 
-type Builtin = Date | Function | Uint8Array | string | number | undefined;
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepPartial<U>>
-  : T extends {}
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
+type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
+
+export type DeepPartial<T> = T extends Builtin ? T
+  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
+
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+export type Exact<P, I extends P> = P extends Builtin ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
+
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}
