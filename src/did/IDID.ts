@@ -28,7 +28,6 @@ export enum IClientSpec {
   'cosmos-ADR036' = 'cosmos-ADR036',
 }
 
-
 export interface ISignInfo {
   verification_method_id: string;
   signature: string;

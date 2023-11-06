@@ -61,10 +61,7 @@ class DIDDocument implements Did {
     let vm;
     switch (keyType) {
       case VerificationMethodTypes.Ed25519VerificationKey2020: {
-        this['@context'] = [
-          constant['DID_' + keyType].DID_BASE_CONTEXT,
-          constant.VC.CREDENTIAIL_SECURITY_SUITE,
-        ];
+        this['@context'] = [constant['DID_' + keyType].DID_BASE_CONTEXT, constant.VC.CREDENTIAIL_SECURITY_SUITE];
         this.id = id;
         this.controller = [this.id];
         this.alsoKnownAs = [this.id];
