@@ -1,7 +1,7 @@
 import { DidDocument as Did } from '../../libs/generated/ssi/did';
 import { DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
 import Web3 from 'web3';
-import { IDID, IDIDResolve, ISignedDIDDocument, IClientSpec, ISignData } from './IDID';
+import { IDID, IDIDResolve, ISignedDIDDocument, IClientSpec, ISignData, ISignInfo } from './IDID';
 import { VerificationMethodRelationships, VerificationMethodTypes } from '../../libs/generated/ssi/client/enums';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 /** Class representing HypersignDID */
@@ -198,7 +198,7 @@ export default class HypersignDID implements IDID {
      */
     registerByClientSpec(params: {
         didDocument: Did;
-        signInfos: SignInfo[];
+        signInfos: ISignInfo[];
     }): Promise<{
         didDocument: Did;
         transactionHash: string;

@@ -520,18 +520,30 @@ export default class HypersignDID implements IDID {
     privateKeyMultibase: string;
     verificationMethodId: string;
   }): Promise<Array<SignInfo>> {
-    const { didDocument } = params;
-    const didDocStringJson = Utils.ldToJsonConvertor(didDocument);
-    const didDoc: Did = didDocStringJson as Did;
+    let { didDocument } = params;
     const signInfos: Array<SignInfo> = [];
     const { privateKeyMultibase, verificationMethodId } = params;
-    const signature: string = await this._sign({
-      didDocString: JSON.stringify(didDocStringJson),
-      privateKeyMultibase,
-    });
+    let signature;
+    let createdAt;
+    if (!didDocument['@context']) {
+      signature = await this._sign({
+        didDocString: JSON.stringify(didDocument),
+        privateKeyMultibase,
+      });
+    } else {
+      didDocument = Utils.removeEmptyString(didDocument);
+      const proof = await this._jsonLdSign({
+        didDocument,
+        privateKeyMultibase,
+        verificationMethodId,
+      });
+      signature = proof.proofValue;
+      createdAt = proof.created;
+    }
     signInfos.push({
       proofValue: signature,
       verificationMethod: verificationMethodId,
+      created: createdAt,
     });
     return signInfos;
   }
@@ -975,7 +987,7 @@ export default class HypersignDID implements IDID {
 
   public async registerByClientSpec(params: {
     didDocument: Did; // Ld document
-    signInfos: SignInfo[];
+    signInfos: ISignInfo[]; // type should be documentProof type. will change it later
   }): Promise<{ didDocument: Did; transactionHash: string }> {
     const response = {} as { didDocument: Did; transactionHash: string };
     if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
@@ -1023,10 +1035,10 @@ export default class HypersignDID implements IDID {
       signInfos.forEach((sign) => {
         let type;
         let clientSpec;
-        if (sign['clientSpec'].type === IClientSpec['eth-personalSign']) {
+        if (sign.clientSpec?.type === IClientSpec['eth-personalSign']) {
           type = constant['DID_EcdsaSecp256k1RecoveryMethod2020'].SIGNATURE_TYPE;
           clientSpec = ClientSpecType.CLIENT_SPEC_TYPE_ETH_PERSONAL_SIGN;
-        } else if (sign['clientSpec'].type === IClientSpec['cosmos-ADR036']) {
+        } else if (sign['clientSpec']?.type === IClientSpec['cosmos-ADR036']) {
           type = constant['DID_EcdsaSecp256k1VerificationKey2019'].SIGNATURE_TYPE;
           clientSpec = ClientSpecType.CLIENT_SPEC_TYPE_COSMOS_ADR036;
         } else {
@@ -1289,22 +1301,22 @@ export default class HypersignDID implements IDID {
       chainId: params.chainId,
       verificationMethodId: params.verificationMethodId,
     });
-
-    const signInfos: Array<SignInfo> = [
+    const signInfos = [
       {
-        proofValue: signedDidDoc.proof.proofValue,
-        verificationMethod: params.verificationMethodId,
-        created: signedDidDoc.proof.proofValue,
-        clientSpecType:
-          params.clientSpec === IClientSpec['cosmos-ADR036']
-            ? ClientSpecType.CLIENT_SPEC_TYPE_COSMOS_ADR036
-            : ClientSpecType.CLIENT_SPEC_TYPE_ETH_PERSONAL_SIGN,
+        signature: signedDidDoc.proof.proofValue,
+        verification_method_id: params.verificationMethodId,
+        created: signedDidDoc.proof.created,
+        clientSpec: {
+          type:
+            params.clientSpec === IClientSpec['cosmos-ADR036']
+              ? IClientSpec['cosmos-ADR036']
+              : IClientSpec['eth-personalSign'],
+        },
       },
     ];
     return await this.registerByClientSpec({
       didDocument: params.didDocument,
       signInfos,
-      // only for [cosmos-ADR036]
     });
   }
   /**

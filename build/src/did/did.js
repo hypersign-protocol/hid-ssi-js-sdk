@@ -477,18 +477,31 @@ class HypersignDID {
     }
     createSignInfos(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { didDocument } = params;
-            const didDocStringJson = utils_1.default.ldToJsonConvertor(didDocument);
-            const didDoc = didDocStringJson;
+            let { didDocument } = params;
             const signInfos = [];
             const { privateKeyMultibase, verificationMethodId } = params;
-            const signature = yield this._sign({
-                didDocString: JSON.stringify(didDocStringJson),
-                privateKeyMultibase,
-            });
+            let signature;
+            let createdAt;
+            if (!didDocument['@context']) {
+                signature = yield this._sign({
+                    didDocString: JSON.stringify(didDocument),
+                    privateKeyMultibase,
+                });
+            }
+            else {
+                didDocument = utils_1.default.removeEmptyString(didDocument);
+                const proof = yield this._jsonLdSign({
+                    didDocument,
+                    privateKeyMultibase,
+                    verificationMethodId,
+                });
+                signature = proof.proofValue;
+                createdAt = proof.created;
+            }
             signInfos.push({
                 proofValue: signature,
                 verificationMethod: verificationMethodId,
+                created: createdAt,
             });
             return signInfos;
         });
@@ -900,13 +913,14 @@ class HypersignDID {
             if (this.didrpc) {
                 const proofs = [];
                 signInfos.forEach((sign) => {
+                    var _a, _b;
                     let type;
                     let clientSpec;
-                    if (sign['clientSpec'].type === IDID_1.IClientSpec['eth-personalSign']) {
+                    if (((_a = sign.clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['eth-personalSign']) {
                         type = constant['DID_EcdsaSecp256k1RecoveryMethod2020'].SIGNATURE_TYPE;
                         clientSpec = client_spec_1.ClientSpecType.CLIENT_SPEC_TYPE_ETH_PERSONAL_SIGN;
                     }
-                    else if (sign['clientSpec'].type === IDID_1.IClientSpec['cosmos-ADR036']) {
+                    else if (((_b = sign['clientSpec']) === null || _b === void 0 ? void 0 : _b.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
                         type = constant['DID_EcdsaSecp256k1VerificationKey2019'].SIGNATURE_TYPE;
                         clientSpec = client_spec_1.ClientSpecType.CLIENT_SPEC_TYPE_COSMOS_ADR036;
                     }
@@ -1146,18 +1160,19 @@ class HypersignDID {
             });
             const signInfos = [
                 {
-                    proofValue: signedDidDoc.proof.proofValue,
-                    verificationMethod: params.verificationMethodId,
-                    created: signedDidDoc.proof.proofValue,
-                    clientSpecType: params.clientSpec === IDID_1.IClientSpec['cosmos-ADR036']
-                        ? client_spec_1.ClientSpecType.CLIENT_SPEC_TYPE_COSMOS_ADR036
-                        : client_spec_1.ClientSpecType.CLIENT_SPEC_TYPE_ETH_PERSONAL_SIGN,
+                    signature: signedDidDoc.proof.proofValue,
+                    verification_method_id: params.verificationMethodId,
+                    created: signedDidDoc.proof.created,
+                    clientSpec: {
+                        type: params.clientSpec === IDID_1.IClientSpec['cosmos-ADR036']
+                            ? IDID_1.IClientSpec['cosmos-ADR036']
+                            : IDID_1.IClientSpec['eth-personalSign'],
+                    },
                 },
             ];
             return yield this.registerByClientSpec({
                 didDocument: params.didDocument,
                 signInfos,
-                // only for [cosmos-ADR036]
             });
         });
     }
