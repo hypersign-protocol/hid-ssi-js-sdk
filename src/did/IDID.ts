@@ -12,7 +12,7 @@ import {
   DidDocument,
 } from '../../libs/generated/ssi/did';
 import { DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
-import { ClientSpec } from '../../libs/generated/ssi/clientSpec';
+import { ClientSpecType as ClientSpec } from '../../libs/generated/ssi/client_spec';
 import Web3 from 'web3';
 import { VerificationMethodRelationships, VerificationMethodTypes } from '../../libs/generated/ssi/client/enums';
 
@@ -28,15 +28,11 @@ export enum IClientSpec {
   'cosmos-ADR036' = 'cosmos-ADR036',
 }
 
-export interface ExtendedClientSpec extends ClientSpec {
-  type: IClientSpec;
-  adr036SignerAddress: string;
-}
 
 export interface ISignInfo {
   verification_method_id: string;
   signature: string;
-  clientSpec?: ExtendedClientSpec | undefined;
+  clientSpec?: ClientSpec | undefined;
 }
 
 export interface IController {
@@ -174,8 +170,9 @@ export interface IDID {
     clientSpec: IClientSpec;
     address: string;
     web3: Web3 | any;
-    chainId?: string; // only for [cosmos-ADR036]
-  }): Promise<{ didDocument: DidDocument; signature: string }>;
+    chainId?: string; // only for [cosmos-ADR036],
+    verificationMethodId;
+  }): Promise<ISignedDIDDocument>;
 }
 
 export interface IDIDResolve {

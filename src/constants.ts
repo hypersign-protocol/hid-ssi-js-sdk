@@ -45,7 +45,8 @@ export const DID_Ed25519VerificationKey2020 = {
   METHOD: 'hid',
   NAMESPACE: 'testnet', // this is not used
   DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
-  DID_KEYAGREEMENT_CONTEXT: "https://digitalbazaar.github.io/x25519-key-agreement-2020-context/contexts/x25519-key-agreement-2020-v1.jsonld",
+  DID_KEYAGREEMENT_CONTEXT: "https://ns.did.ai/suites/x25519-2020/v1",
+  DID_Ed25519_CONTEXT_2020: "https://w3id.org/security/suites/ed25519-2020/v1",
   VERIFICATION_METHOD_TYPE: 'Ed25519VerificationKey2020',
   BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
   SIGNATURE_TYPE: ProofTypes.Ed25519Signature2020,
@@ -58,8 +59,9 @@ export const DID_EcdsaSecp256k1RecoveryMethod2020 = {
   METHOD: 'hid',
   NAMESPACE: 'testnet', // this is not used
   DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
-  DID_KEYAGREEMENT_CONTEXT: "https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/libs/w3cache/v1/X25519KeyAgreementKeyEIP5630.json",
+  DID_KEYAGREEMENT_CONTEXT: "https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/X25519KeyAgreementKeyEIP5630.jsonld",
   BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
+  SECP256K12020_RECOVERY_CONTEXT: "https://ns.did.ai/suites/secp256k1-2020/v1",
   VERIFICATION_METHOD_TYPE: VerificationMethodTypes.EcdsaSecp256k1RecoveryMethod2020,
   SIGNATURE_TYPE: ProofTypes.EcdsaSecp256k1RecoverySignature2020,
 };
@@ -73,6 +75,7 @@ export const DID_EcdsaSecp256k1VerificationKey2019 = {
   NAMESPACE: 'testnet', // this is not used
   DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
   BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
+  SECP256K12020_VERIFICATION_CONTEXT: "https://ns.did.ai/suites/secp256k1-2019/v1",
   VERIFICATION_METHOD_TYPE: VerificationMethodTypes.EcdsaSecp256k1VerificationKey2019,
   SIGNATURE_TYPE: ProofTypes.EcdsaSecp256k1Signature2019,
 };
@@ -117,7 +120,7 @@ export const VC = {
   },// will change this to url later
   CREDENTAIL_BASE_CONTEXT: "https://www.w3.org/2018/credentials/v1",
   CREDENTAIL_SECURITY_CONTEXT_V2: "https://w3id.org/security/v2",
-  CREDENTAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1",
+  CREDENTIAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1",
   CREDENTAIL_ECDSA_SECURITY_SUITE: "https://w3id.org/security/suites/secp256k1recovery-2020/v2",
   PROOF_PURPOSE: VerificationMethodRelationships.assertionMethod,
   VERIFICATION_METHOD_TYPE: ProofTypes.Ed25519Signature2020,
