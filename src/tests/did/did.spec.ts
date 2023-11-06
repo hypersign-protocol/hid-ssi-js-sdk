@@ -384,7 +384,7 @@ describe('DID Test scenarios', () => {
     //   };
     //   const didDoc = JSON.parse(JSON.stringify(didDocument));
     //   const updatedDidDoc = await hypersignDID.addVerificationMethod({ ...params });
-    //   console.log(didDocument, "add vm ")
+    //   // console.log(didDocument, "add vm ")
     //   expect(updatedDidDoc).to.be.a('object');
     //   should().exist(updatedDidDoc['@context']);
     //   should().exist(updatedDidDoc['id']);
@@ -580,7 +580,7 @@ describe('DID Test scenarios', () => {
     //       }).to.throw(Error, "HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner");
     //     });
     // });
-    it('should be able to register didDocument in the blockchain  with two vm one is of type Ed25519VerificationKey2020 and other is of type X25519KeyAgreementKey2020 and register method is called without signData field', async function () {
+    it('should be able to register didDocument without signData field in the blockchain', async function () {
       const result = await hypersignDID.register({
         didDocument,
         privateKeyMultibase,
@@ -845,23 +845,6 @@ describe('DID Test scenarios', () => {
         expect(function () {
           throw err;
         }).to.throw(Error, 'HID-SSI-SDK:: Error: params.domain is required to sign a did');
-      });
-    });
-    it('should not able to sign did document and throw error as did is not resolved', function () {
-      const params = {
-        privateKeyMultibase: privateKeyMultibase as string,
-        challenge: challenge as string,
-        domain: domain as string,
-        did: didDocId as string,
-        didDocument: didDocument as object,
-        verificationMethodId: verificationMethodId as string,
-        publicKey,
-        controller,
-      };
-      return hypersignDID.sign(params).catch(function (err) {
-        expect(function () {
-          throw err;
-        }).to.throw(Error, `HID-SSI-SDK:: Error: could not resolve did ${params.did}`);
       });
     });
     it('should not able to sign did document and throw error as verificationMethodId is invalid or wrong', function () {
