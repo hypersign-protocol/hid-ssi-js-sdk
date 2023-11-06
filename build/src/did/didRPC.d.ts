@@ -3,7 +3,8 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
-import { Did as IDidProto, SignInfo } from '../../libs/generated/ssi/did';
+import { DidDocument as IDidProto } from '../../libs/generated/ssi/did';
+import { DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
 import { IDIDResolve, IDIDRpc, DeliverTxResponse } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 export declare class DIDRpc implements IDIDRpc {

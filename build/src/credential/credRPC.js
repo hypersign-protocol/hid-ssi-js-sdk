@@ -80,9 +80,9 @@ class CredentialRPC {
             const txMessage = {
                 typeUrl,
                 value: generatedProto[constants_1.HIDRpcEnums.MsgRegisterCredentialStatus].fromPartial({
-                    credentialStatus,
-                    proof,
-                    creator: client_1.HIDClient.getHidWalletAddress(),
+                    credentialStatusDocument: credentialStatus,
+                    credentialStatusProof: proof,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
                 }),
             };
             const fee = 'auto';
@@ -103,9 +103,9 @@ class CredentialRPC {
             const txMessage = {
                 typeUrl,
                 value: generatedProto[constants_1.HIDRpcEnums.MsgRegisterCredentialStatus].fromPartial({
-                    credentialStatus,
-                    proof,
-                    creator: client_1.HIDClient.getHidWalletAddress(),
+                    credentialStatusDocument: credentialStatus,
+                    credentialStatusProof: proof,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
                 }),
             };
             return txMessage;
@@ -132,8 +132,8 @@ class CredentialRPC {
                 if (!response.data) {
                     throw new Error('Could not resolve credential status of credentialId ' + credentialId);
                 }
-                const credStatus = response.data.credStatus;
-                if (!credStatus || !credStatus.claim || !credStatus.proof) {
+                const credStatus = response.data.credentialStatus;
+                if (!credStatus || !credStatus.credentialStatusDocument || !credStatus.credentialStatusProof) {
                     throw new Error('No credential status found. Probably invalid credentialId');
                 }
                 return credStatus;
@@ -147,11 +147,37 @@ class CredentialRPC {
                     credentialHash: '',
                     proof: null,
                 };
-                if (!credStatus || !credStatus.claim || !credStatus.proof) {
+                if (!credStatus || !credStatus.credentialStatusDocument || !credStatus.credentialStatusProof) {
                     throw new Error('No credential status found. Probably invalid credentialId');
                 }
                 return credStatus;
             }
+        });
+    }
+    updateCredentialStatus(credentialStatus, proof) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!credentialStatus) {
+                throw new Error('CredentialStatus must be passed as a param while registerting credential status');
+            }
+            if (!proof) {
+                throw new Error('Proof must be passed as a param while registering crdential status');
+            }
+            if (!this.hidClient) {
+                throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
+            }
+            const typeUrl = `${constants_1.HID_COSMOS_MODULE}.${constants_1.HIDRpcEnums.MsgUpdateCredentialStatus}`;
+            const txMessage = {
+                typeUrl,
+                value: generatedProto[constants_1.HIDRpcEnums.MsgUpdateCredentialStatus].fromPartial({
+                    credentialStatusDocument: credentialStatus,
+                    credentialStatusProof: proof,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
+                }),
+            };
+            const fee = 'auto';
+            const hidClient = client_1.HIDClient.getHidClient();
+            const txResult = yield hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee);
+            return txResult;
         });
     }
 }

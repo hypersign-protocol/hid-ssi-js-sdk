@@ -1,882 +1,988 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MsgClientImpl = exports.MsgRegisterCredentialStatusResponse = exports.MsgRegisterCredentialStatus = exports.MsgDeactivateDIDResponse = exports.MsgDeactivateDID = exports.MsgCreateSchemaResponse = exports.MsgCreateSchema = exports.MsgUpdateDIDResponse = exports.MsgUpdateDID = exports.MsgCreateDIDResponse = exports.MsgCreateDID = exports.protobufPackage = void 0;
+exports.MsgClientImpl = exports.MsgServiceName = exports.MsgUpdateCredentialStatusResponse = exports.MsgUpdateCredentialStatus = exports.MsgRegisterCredentialStatusResponse = exports.MsgRegisterCredentialStatus = exports.MsgUpdateCredentialSchemaResponse = exports.MsgUpdateCredentialSchema = exports.MsgRegisterCredentialSchemaResponse = exports.MsgRegisterCredentialSchema = exports.MsgDeactivateDIDResponse = exports.MsgDeactivateDID = exports.MsgUpdateDIDResponse = exports.MsgUpdateDID = exports.MsgRegisterDIDResponse = exports.MsgRegisterDID = exports.protobufPackage = void 0;
 /* eslint-disable */
-const minimal_1 = require("protobufjs/minimal");
+const minimal_1 = __importDefault(require("protobufjs/minimal"));
+const credential_schema_1 = require("./credential_schema");
+const credential_status_1 = require("./credential_status");
 const did_1 = require("./did");
-const schema_1 = require("./schema");
-const clientSpec_1 = require("./clientSpec");
-const credential_1 = require("./credential");
-exports.protobufPackage = "hypersignprotocol.hidnode.ssi";
-const baseMsgCreateDID = { creator: "" };
-exports.MsgCreateDID = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.didDocString !== undefined) {
-            did_1.Did.encode(message.didDocString, writer.uint32(10).fork()).ldelim();
+const proof_1 = require("./proof");
+exports.protobufPackage = "hypersign.ssi.v1";
+function createBaseMsgRegisterDID() {
+    return {};
+}
+exports.MsgRegisterDID = {
+    encode(message, writer = minimal_1.default.Writer.create()) {
+        if (message.didDocument !== undefined) {
+            did_1.DidDocument.encode(message.didDocument, writer.uint32(10).fork()).ldelim();
         }
-        for (const v of message.signatures) {
-            did_1.SignInfo.encode(v, writer.uint32(18).fork()).ldelim();
+        if (message.didDocumentProofs !== undefined && message.didDocumentProofs.length !== 0) {
+            for (const v of message.didDocumentProofs) {
+                proof_1.DocumentProof.encode(v, writer.uint32(18).fork()).ldelim();
+            }
         }
-        if (message.creator !== "") {
-            writer.uint32(26).string(message.creator);
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            writer.uint32(26).string(message.txAuthor);
         }
         return writer;
     },
     decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
         let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseMsgCreateDID);
-        message.signatures = [];
+        const message = createBaseMsgRegisterDID();
         while (reader.pos < end) {
             const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
-                    message.didDocString = did_1.Did.decode(reader, reader.uint32());
-                    break;
+                    if (tag !== 10) {
+                        break;
+                    }
+                    message.didDocument = did_1.DidDocument.decode(reader, reader.uint32());
+                    continue;
                 case 2:
-                    message.signatures.push(did_1.SignInfo.decode(reader, reader.uint32()));
-                    break;
+                    if (tag !== 18) {
+                        break;
+                    }
+                    if (message.didDocumentProofs === undefined) {
+                        message.didDocumentProofs = [];
+                    }
+                    message.didDocumentProofs.push(proof_1.DocumentProof.decode(reader, reader.uint32()));
+                    continue;
                 case 3:
-                    message.creator = reader.string();
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
+                    if (tag !== 26) {
+                        break;
+                    }
+                    message.txAuthor = reader.string();
+                    continue;
             }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
         }
         return message;
     },
     fromJSON(object) {
-        const message = Object.assign({}, baseMsgCreateDID);
-        message.signatures = [];
-        if (object.didDocString !== undefined && object.didDocString !== null) {
-            message.didDocString = did_1.Did.fromJSON(object.didDocString);
-        }
-        else {
-            message.didDocString = undefined;
-        }
-        if (object.signatures !== undefined && object.signatures !== null) {
-            for (const e of object.signatures) {
-                message.signatures.push(did_1.SignInfo.fromJSON(e));
-            }
-        }
-        if (object.creator !== undefined && object.creator !== null) {
-            message.creator = String(object.creator);
-        }
-        else {
-            message.creator = "";
-        }
-        return message;
+        return {
+            didDocument: isSet(object.didDocument) ? did_1.DidDocument.fromJSON(object.didDocument) : undefined,
+            didDocumentProofs: globalThis.Array.isArray(object === null || object === void 0 ? void 0 : object.didDocumentProofs)
+                ? object.didDocumentProofs.map((e) => proof_1.DocumentProof.fromJSON(e))
+                : undefined,
+            txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+        };
     },
     toJSON(message) {
+        var _a;
         const obj = {};
-        message.didDocString !== undefined &&
-            (obj.didDocString = message.didDocString
-                ? did_1.Did.toJSON(message.didDocString)
-                : undefined);
-        if (message.signatures) {
-            obj.signatures = message.signatures.map((e) => e ? did_1.SignInfo.toJSON(e) : undefined);
+        if (message.didDocument !== undefined) {
+            obj.didDocument = did_1.DidDocument.toJSON(message.didDocument);
         }
-        else {
-            obj.signatures = [];
+        if ((_a = message.didDocumentProofs) === null || _a === void 0 ? void 0 : _a.length) {
+            obj.didDocumentProofs = message.didDocumentProofs.map((e) => proof_1.DocumentProof.toJSON(e));
         }
-        message.creator !== undefined && (obj.creator = message.creator);
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            obj.txAuthor = message.txAuthor;
+        }
         return obj;
     },
+    create(base) {
+        return exports.MsgRegisterDID.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
     fromPartial(object) {
-        const message = Object.assign({}, baseMsgCreateDID);
-        message.signatures = [];
-        if (object.didDocString !== undefined && object.didDocString !== null) {
-            message.didDocString = did_1.Did.fromPartial(object.didDocString);
-        }
-        else {
-            message.didDocString = undefined;
-        }
-        if (object.signatures !== undefined && object.signatures !== null) {
-            for (const e of object.signatures) {
-                message.signatures.push(did_1.SignInfo.fromPartial(e));
-            }
-        }
-        if (object.creator !== undefined && object.creator !== null) {
-            message.creator = object.creator;
-        }
-        else {
-            message.creator = "";
-        }
+        var _a, _b;
+        const message = createBaseMsgRegisterDID();
+        message.didDocument = (object.didDocument !== undefined && object.didDocument !== null)
+            ? did_1.DidDocument.fromPartial(object.didDocument)
+            : undefined;
+        message.didDocumentProofs = ((_a = object.didDocumentProofs) === null || _a === void 0 ? void 0 : _a.map((e) => proof_1.DocumentProof.fromPartial(e))) || undefined;
+        message.txAuthor = (_b = object.txAuthor) !== null && _b !== void 0 ? _b : undefined;
         return message;
     },
 };
-const baseMsgCreateDIDResponse = { id: 0 };
-exports.MsgCreateDIDResponse = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.id !== 0) {
-            writer.uint32(8).uint64(message.id);
-        }
+function createBaseMsgRegisterDIDResponse() {
+    return {};
+}
+exports.MsgRegisterDIDResponse = {
+    encode(_, writer = minimal_1.default.Writer.create()) {
         return writer;
     },
     decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
         let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseMsgCreateDIDResponse);
+        const message = createBaseMsgRegisterDIDResponse();
         while (reader.pos < end) {
             const tag = reader.uint32();
             switch (tag >>> 3) {
-                case 1:
-                    message.id = longToNumber(reader.uint64());
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
             }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
         }
         return message;
     },
-    fromJSON(object) {
-        const message = Object.assign({}, baseMsgCreateDIDResponse);
-        if (object.id !== undefined && object.id !== null) {
-            message.id = Number(object.id);
-        }
-        else {
-            message.id = 0;
-        }
-        return message;
+    fromJSON(_) {
+        return {};
     },
-    toJSON(message) {
+    toJSON(_) {
         const obj = {};
-        message.id !== undefined && (obj.id = message.id);
         return obj;
     },
-    fromPartial(object) {
-        const message = Object.assign({}, baseMsgCreateDIDResponse);
-        if (object.id !== undefined && object.id !== null) {
-            message.id = object.id;
-        }
-        else {
-            message.id = 0;
-        }
+    create(base) {
+        return exports.MsgRegisterDIDResponse.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
+    fromPartial(_) {
+        const message = createBaseMsgRegisterDIDResponse();
         return message;
     },
 };
-const baseMsgUpdateDID = { version_id: "", creator: "" };
+function createBaseMsgUpdateDID() {
+    return {};
+}
 exports.MsgUpdateDID = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.didDocString !== undefined) {
-            did_1.Did.encode(message.didDocString, writer.uint32(10).fork()).ldelim();
+    encode(message, writer = minimal_1.default.Writer.create()) {
+        if (message.didDocument !== undefined) {
+            did_1.DidDocument.encode(message.didDocument, writer.uint32(10).fork()).ldelim();
         }
-        if (message.version_id !== "") {
-            writer.uint32(18).string(message.version_id);
+        if (message.didDocumentProofs !== undefined && message.didDocumentProofs.length !== 0) {
+            for (const v of message.didDocumentProofs) {
+                proof_1.DocumentProof.encode(v, writer.uint32(18).fork()).ldelim();
+            }
         }
-        for (const v of message.signatures) {
-            did_1.SignInfo.encode(v, writer.uint32(26).fork()).ldelim();
+        if (message.versionId !== undefined && message.versionId !== "") {
+            writer.uint32(26).string(message.versionId);
         }
-        if (message.creator !== "") {
-            writer.uint32(34).string(message.creator);
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            writer.uint32(34).string(message.txAuthor);
         }
         return writer;
     },
     decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
         let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseMsgUpdateDID);
-        message.signatures = [];
+        const message = createBaseMsgUpdateDID();
         while (reader.pos < end) {
             const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
-                    message.didDocString = did_1.Did.decode(reader, reader.uint32());
-                    break;
+                    if (tag !== 10) {
+                        break;
+                    }
+                    message.didDocument = did_1.DidDocument.decode(reader, reader.uint32());
+                    continue;
                 case 2:
-                    message.version_id = reader.string();
-                    break;
+                    if (tag !== 18) {
+                        break;
+                    }
+                    if (message.didDocumentProofs === undefined) {
+                        message.didDocumentProofs = [];
+                    }
+                    message.didDocumentProofs.push(proof_1.DocumentProof.decode(reader, reader.uint32()));
+                    continue;
                 case 3:
-                    message.signatures.push(did_1.SignInfo.decode(reader, reader.uint32()));
-                    break;
+                    if (tag !== 26) {
+                        break;
+                    }
+                    message.versionId = reader.string();
+                    continue;
                 case 4:
-                    message.creator = reader.string();
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
+                    if (tag !== 34) {
+                        break;
+                    }
+                    message.txAuthor = reader.string();
+                    continue;
             }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
         }
         return message;
     },
     fromJSON(object) {
-        const message = Object.assign({}, baseMsgUpdateDID);
-        message.signatures = [];
-        if (object.didDocString !== undefined && object.didDocString !== null) {
-            message.didDocString = did_1.Did.fromJSON(object.didDocString);
-        }
-        else {
-            message.didDocString = undefined;
-        }
-        if (object.version_id !== undefined && object.version_id !== null) {
-            message.version_id = String(object.version_id);
-        }
-        else {
-            message.version_id = "";
-        }
-        if (object.signatures !== undefined && object.signatures !== null) {
-            for (const e of object.signatures) {
-                message.signatures.push(did_1.SignInfo.fromJSON(e));
-            }
-        }
-        if (object.creator !== undefined && object.creator !== null) {
-            message.creator = String(object.creator);
-        }
-        else {
-            message.creator = "";
-        }
-        return message;
+        return {
+            didDocument: isSet(object.didDocument) ? did_1.DidDocument.fromJSON(object.didDocument) : undefined,
+            didDocumentProofs: globalThis.Array.isArray(object === null || object === void 0 ? void 0 : object.didDocumentProofs)
+                ? object.didDocumentProofs.map((e) => proof_1.DocumentProof.fromJSON(e))
+                : undefined,
+            versionId: isSet(object.versionId) ? globalThis.String(object.versionId) : undefined,
+            txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+        };
     },
     toJSON(message) {
+        var _a;
         const obj = {};
-        message.didDocString !== undefined &&
-            (obj.didDocString = message.didDocString
-                ? did_1.Did.toJSON(message.didDocString)
-                : undefined);
-        message.version_id !== undefined && (obj.version_id = message.version_id);
-        if (message.signatures) {
-            obj.signatures = message.signatures.map((e) => e ? did_1.SignInfo.toJSON(e) : undefined);
+        if (message.didDocument !== undefined) {
+            obj.didDocument = did_1.DidDocument.toJSON(message.didDocument);
         }
-        else {
-            obj.signatures = [];
+        if ((_a = message.didDocumentProofs) === null || _a === void 0 ? void 0 : _a.length) {
+            obj.didDocumentProofs = message.didDocumentProofs.map((e) => proof_1.DocumentProof.toJSON(e));
         }
-        message.creator !== undefined && (obj.creator = message.creator);
+        if (message.versionId !== undefined && message.versionId !== "") {
+            obj.versionId = message.versionId;
+        }
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            obj.txAuthor = message.txAuthor;
+        }
         return obj;
     },
+    create(base) {
+        return exports.MsgUpdateDID.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
     fromPartial(object) {
-        const message = Object.assign({}, baseMsgUpdateDID);
-        message.signatures = [];
-        if (object.didDocString !== undefined && object.didDocString !== null) {
-            message.didDocString = did_1.Did.fromPartial(object.didDocString);
-        }
-        else {
-            message.didDocString = undefined;
-        }
-        if (object.version_id !== undefined && object.version_id !== null) {
-            message.version_id = object.version_id;
-        }
-        else {
-            message.version_id = "";
-        }
-        if (object.signatures !== undefined && object.signatures !== null) {
-            for (const e of object.signatures) {
-                message.signatures.push(did_1.SignInfo.fromPartial(e));
-            }
-        }
-        if (object.creator !== undefined && object.creator !== null) {
-            message.creator = object.creator;
-        }
-        else {
-            message.creator = "";
-        }
+        var _a, _b, _c;
+        const message = createBaseMsgUpdateDID();
+        message.didDocument = (object.didDocument !== undefined && object.didDocument !== null)
+            ? did_1.DidDocument.fromPartial(object.didDocument)
+            : undefined;
+        message.didDocumentProofs = ((_a = object.didDocumentProofs) === null || _a === void 0 ? void 0 : _a.map((e) => proof_1.DocumentProof.fromPartial(e))) || undefined;
+        message.versionId = (_b = object.versionId) !== null && _b !== void 0 ? _b : undefined;
+        message.txAuthor = (_c = object.txAuthor) !== null && _c !== void 0 ? _c : undefined;
         return message;
     },
 };
-const baseMsgUpdateDIDResponse = { updateId: "" };
+function createBaseMsgUpdateDIDResponse() {
+    return {};
+}
 exports.MsgUpdateDIDResponse = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.updateId !== "") {
-            writer.uint32(10).string(message.updateId);
-        }
+    encode(_, writer = minimal_1.default.Writer.create()) {
         return writer;
     },
     decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
         let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseMsgUpdateDIDResponse);
+        const message = createBaseMsgUpdateDIDResponse();
         while (reader.pos < end) {
             const tag = reader.uint32();
             switch (tag >>> 3) {
-                case 1:
-                    message.updateId = reader.string();
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
             }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
         }
         return message;
     },
-    fromJSON(object) {
-        const message = Object.assign({}, baseMsgUpdateDIDResponse);
-        if (object.updateId !== undefined && object.updateId !== null) {
-            message.updateId = String(object.updateId);
-        }
-        else {
-            message.updateId = "";
-        }
-        return message;
+    fromJSON(_) {
+        return {};
     },
-    toJSON(message) {
+    toJSON(_) {
         const obj = {};
-        message.updateId !== undefined && (obj.updateId = message.updateId);
         return obj;
     },
-    fromPartial(object) {
-        const message = Object.assign({}, baseMsgUpdateDIDResponse);
-        if (object.updateId !== undefined && object.updateId !== null) {
-            message.updateId = object.updateId;
-        }
-        else {
-            message.updateId = "";
-        }
+    create(base) {
+        return exports.MsgUpdateDIDResponse.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
+    fromPartial(_) {
+        const message = createBaseMsgUpdateDIDResponse();
         return message;
     },
 };
-const baseMsgCreateSchema = { creator: "" };
-exports.MsgCreateSchema = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.creator !== "") {
-            writer.uint32(10).string(message.creator);
-        }
-        if (message.schemaDoc !== undefined) {
-            schema_1.SchemaDocument.encode(message.schemaDoc, writer.uint32(18).fork()).ldelim();
-        }
-        if (message.schemaProof !== undefined) {
-            schema_1.SchemaProof.encode(message.schemaProof, writer.uint32(26).fork()).ldelim();
-        }
-        if (message.clientSpec !== undefined) {
-            clientSpec_1.ClientSpec.encode(message.clientSpec, writer.uint32(34).fork()).ldelim();
-        }
-        return writer;
-    },
-    decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseMsgCreateSchema);
-        while (reader.pos < end) {
-            const tag = reader.uint32();
-            switch (tag >>> 3) {
-                case 1:
-                    message.creator = reader.string();
-                    break;
-                case 2:
-                    message.schemaDoc = schema_1.SchemaDocument.decode(reader, reader.uint32());
-                    break;
-                case 3:
-                    message.schemaProof = schema_1.SchemaProof.decode(reader, reader.uint32());
-                    break;
-                case 4:
-                    message.clientSpec = clientSpec_1.ClientSpec.decode(reader, reader.uint32());
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
-            }
-        }
-        return message;
-    },
-    fromJSON(object) {
-        const message = Object.assign({}, baseMsgCreateSchema);
-        if (object.creator !== undefined && object.creator !== null) {
-            message.creator = String(object.creator);
-        }
-        else {
-            message.creator = "";
-        }
-        if (object.schemaDoc !== undefined && object.schemaDoc !== null) {
-            message.schemaDoc = schema_1.SchemaDocument.fromJSON(object.schemaDoc);
-        }
-        else {
-            message.schemaDoc = undefined;
-        }
-        if (object.schemaProof !== undefined && object.schemaProof !== null) {
-            message.schemaProof = schema_1.SchemaProof.fromJSON(object.schemaProof);
-        }
-        else {
-            message.schemaProof = undefined;
-        }
-        if (object.clientSpec !== undefined && object.clientSpec !== null) {
-            message.clientSpec = clientSpec_1.ClientSpec.fromJSON(object.clientSpec);
-        }
-        else {
-            message.clientSpec = undefined;
-        }
-        return message;
-    },
-    toJSON(message) {
-        const obj = {};
-        message.creator !== undefined && (obj.creator = message.creator);
-        message.schemaDoc !== undefined &&
-            (obj.schemaDoc = message.schemaDoc
-                ? schema_1.SchemaDocument.toJSON(message.schemaDoc)
-                : undefined);
-        message.schemaProof !== undefined &&
-            (obj.schemaProof = message.schemaProof
-                ? schema_1.SchemaProof.toJSON(message.schemaProof)
-                : undefined);
-        message.clientSpec !== undefined &&
-            (obj.clientSpec = message.clientSpec
-                ? clientSpec_1.ClientSpec.toJSON(message.clientSpec)
-                : undefined);
-        return obj;
-    },
-    fromPartial(object) {
-        const message = Object.assign({}, baseMsgCreateSchema);
-        if (object.creator !== undefined && object.creator !== null) {
-            message.creator = object.creator;
-        }
-        else {
-            message.creator = "";
-        }
-        if (object.schemaDoc !== undefined && object.schemaDoc !== null) {
-            message.schemaDoc = schema_1.SchemaDocument.fromPartial(object.schemaDoc);
-        }
-        else {
-            message.schemaDoc = undefined;
-        }
-        if (object.schemaProof !== undefined && object.schemaProof !== null) {
-            message.schemaProof = schema_1.SchemaProof.fromPartial(object.schemaProof);
-        }
-        else {
-            message.schemaProof = undefined;
-        }
-        if (object.clientSpec !== undefined && object.clientSpec !== null) {
-            message.clientSpec = clientSpec_1.ClientSpec.fromPartial(object.clientSpec);
-        }
-        else {
-            message.clientSpec = undefined;
-        }
-        return message;
-    },
-};
-const baseMsgCreateSchemaResponse = { id: 0 };
-exports.MsgCreateSchemaResponse = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.id !== 0) {
-            writer.uint32(8).uint64(message.id);
-        }
-        return writer;
-    },
-    decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseMsgCreateSchemaResponse);
-        while (reader.pos < end) {
-            const tag = reader.uint32();
-            switch (tag >>> 3) {
-                case 1:
-                    message.id = longToNumber(reader.uint64());
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
-            }
-        }
-        return message;
-    },
-    fromJSON(object) {
-        const message = Object.assign({}, baseMsgCreateSchemaResponse);
-        if (object.id !== undefined && object.id !== null) {
-            message.id = Number(object.id);
-        }
-        else {
-            message.id = 0;
-        }
-        return message;
-    },
-    toJSON(message) {
-        const obj = {};
-        message.id !== undefined && (obj.id = message.id);
-        return obj;
-    },
-    fromPartial(object) {
-        const message = Object.assign({}, baseMsgCreateSchemaResponse);
-        if (object.id !== undefined && object.id !== null) {
-            message.id = object.id;
-        }
-        else {
-            message.id = 0;
-        }
-        return message;
-    },
-};
-const baseMsgDeactivateDID = { creator: "", didId: "", version_id: "" };
+function createBaseMsgDeactivateDID() {
+    return {};
+}
 exports.MsgDeactivateDID = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.creator !== "") {
-            writer.uint32(10).string(message.creator);
+    encode(message, writer = minimal_1.default.Writer.create()) {
+        if (message.didDocumentId !== undefined && message.didDocumentId !== "") {
+            writer.uint32(10).string(message.didDocumentId);
         }
-        if (message.didId !== "") {
-            writer.uint32(18).string(message.didId);
+        if (message.didDocumentProofs !== undefined && message.didDocumentProofs.length !== 0) {
+            for (const v of message.didDocumentProofs) {
+                proof_1.DocumentProof.encode(v, writer.uint32(18).fork()).ldelim();
+            }
         }
-        if (message.version_id !== "") {
-            writer.uint32(26).string(message.version_id);
+        if (message.versionId !== undefined && message.versionId !== "") {
+            writer.uint32(26).string(message.versionId);
         }
-        for (const v of message.signatures) {
-            did_1.SignInfo.encode(v, writer.uint32(34).fork()).ldelim();
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            writer.uint32(34).string(message.txAuthor);
         }
         return writer;
     },
     decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
         let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseMsgDeactivateDID);
-        message.signatures = [];
+        const message = createBaseMsgDeactivateDID();
         while (reader.pos < end) {
             const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
-                    message.creator = reader.string();
-                    break;
+                    if (tag !== 10) {
+                        break;
+                    }
+                    message.didDocumentId = reader.string();
+                    continue;
                 case 2:
-                    message.didId = reader.string();
-                    break;
+                    if (tag !== 18) {
+                        break;
+                    }
+                    if (message.didDocumentProofs === undefined) {
+                        message.didDocumentProofs = [];
+                    }
+                    message.didDocumentProofs.push(proof_1.DocumentProof.decode(reader, reader.uint32()));
+                    continue;
                 case 3:
-                    message.version_id = reader.string();
-                    break;
+                    if (tag !== 26) {
+                        break;
+                    }
+                    message.versionId = reader.string();
+                    continue;
                 case 4:
-                    message.signatures.push(did_1.SignInfo.decode(reader, reader.uint32()));
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
+                    if (tag !== 34) {
+                        break;
+                    }
+                    message.txAuthor = reader.string();
+                    continue;
             }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
         }
         return message;
     },
     fromJSON(object) {
-        const message = Object.assign({}, baseMsgDeactivateDID);
-        message.signatures = [];
-        if (object.creator !== undefined && object.creator !== null) {
-            message.creator = String(object.creator);
-        }
-        else {
-            message.creator = "";
-        }
-        if (object.didId !== undefined && object.didId !== null) {
-            message.didId = String(object.didId);
-        }
-        else {
-            message.didId = "";
-        }
-        if (object.version_id !== undefined && object.version_id !== null) {
-            message.version_id = String(object.version_id);
-        }
-        else {
-            message.version_id = "";
-        }
-        if (object.signatures !== undefined && object.signatures !== null) {
-            for (const e of object.signatures) {
-                message.signatures.push(did_1.SignInfo.fromJSON(e));
-            }
-        }
-        return message;
+        return {
+            didDocumentId: isSet(object.didDocumentId) ? globalThis.String(object.didDocumentId) : undefined,
+            didDocumentProofs: globalThis.Array.isArray(object === null || object === void 0 ? void 0 : object.didDocumentProofs)
+                ? object.didDocumentProofs.map((e) => proof_1.DocumentProof.fromJSON(e))
+                : undefined,
+            versionId: isSet(object.versionId) ? globalThis.String(object.versionId) : undefined,
+            txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+        };
     },
     toJSON(message) {
+        var _a;
         const obj = {};
-        message.creator !== undefined && (obj.creator = message.creator);
-        message.didId !== undefined && (obj.didId = message.didId);
-        message.version_id !== undefined && (obj.version_id = message.version_id);
-        if (message.signatures) {
-            obj.signatures = message.signatures.map((e) => e ? did_1.SignInfo.toJSON(e) : undefined);
+        if (message.didDocumentId !== undefined && message.didDocumentId !== "") {
+            obj.didDocumentId = message.didDocumentId;
         }
-        else {
-            obj.signatures = [];
+        if ((_a = message.didDocumentProofs) === null || _a === void 0 ? void 0 : _a.length) {
+            obj.didDocumentProofs = message.didDocumentProofs.map((e) => proof_1.DocumentProof.toJSON(e));
+        }
+        if (message.versionId !== undefined && message.versionId !== "") {
+            obj.versionId = message.versionId;
+        }
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            obj.txAuthor = message.txAuthor;
         }
         return obj;
     },
+    create(base) {
+        return exports.MsgDeactivateDID.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
     fromPartial(object) {
-        const message = Object.assign({}, baseMsgDeactivateDID);
-        message.signatures = [];
-        if (object.creator !== undefined && object.creator !== null) {
-            message.creator = object.creator;
-        }
-        else {
-            message.creator = "";
-        }
-        if (object.didId !== undefined && object.didId !== null) {
-            message.didId = object.didId;
-        }
-        else {
-            message.didId = "";
-        }
-        if (object.version_id !== undefined && object.version_id !== null) {
-            message.version_id = object.version_id;
-        }
-        else {
-            message.version_id = "";
-        }
-        if (object.signatures !== undefined && object.signatures !== null) {
-            for (const e of object.signatures) {
-                message.signatures.push(did_1.SignInfo.fromPartial(e));
-            }
-        }
+        var _a, _b, _c, _d;
+        const message = createBaseMsgDeactivateDID();
+        message.didDocumentId = (_a = object.didDocumentId) !== null && _a !== void 0 ? _a : undefined;
+        message.didDocumentProofs = ((_b = object.didDocumentProofs) === null || _b === void 0 ? void 0 : _b.map((e) => proof_1.DocumentProof.fromPartial(e))) || undefined;
+        message.versionId = (_c = object.versionId) !== null && _c !== void 0 ? _c : undefined;
+        message.txAuthor = (_d = object.txAuthor) !== null && _d !== void 0 ? _d : undefined;
         return message;
     },
 };
-const baseMsgDeactivateDIDResponse = { id: 0 };
+function createBaseMsgDeactivateDIDResponse() {
+    return {};
+}
 exports.MsgDeactivateDIDResponse = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.id !== 0) {
-            writer.uint32(8).uint64(message.id);
-        }
+    encode(_, writer = minimal_1.default.Writer.create()) {
         return writer;
     },
     decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
         let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseMsgDeactivateDIDResponse);
+        const message = createBaseMsgDeactivateDIDResponse();
         while (reader.pos < end) {
             const tag = reader.uint32();
             switch (tag >>> 3) {
-                case 1:
-                    message.id = longToNumber(reader.uint64());
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
             }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
         }
         return message;
     },
-    fromJSON(object) {
-        const message = Object.assign({}, baseMsgDeactivateDIDResponse);
-        if (object.id !== undefined && object.id !== null) {
-            message.id = Number(object.id);
-        }
-        else {
-            message.id = 0;
-        }
-        return message;
+    fromJSON(_) {
+        return {};
     },
-    toJSON(message) {
+    toJSON(_) {
         const obj = {};
-        message.id !== undefined && (obj.id = message.id);
         return obj;
     },
-    fromPartial(object) {
-        const message = Object.assign({}, baseMsgDeactivateDIDResponse);
-        if (object.id !== undefined && object.id !== null) {
-            message.id = object.id;
-        }
-        else {
-            message.id = 0;
-        }
+    create(base) {
+        return exports.MsgDeactivateDIDResponse.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
+    fromPartial(_) {
+        const message = createBaseMsgDeactivateDIDResponse();
         return message;
     },
 };
-const baseMsgRegisterCredentialStatus = { creator: "" };
-exports.MsgRegisterCredentialStatus = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.creator !== "") {
-            writer.uint32(10).string(message.creator);
+function createBaseMsgRegisterCredentialSchema() {
+    return {};
+}
+exports.MsgRegisterCredentialSchema = {
+    encode(message, writer = minimal_1.default.Writer.create()) {
+        if (message.credentialSchemaDocument !== undefined) {
+            credential_schema_1.CredentialSchemaDocument.encode(message.credentialSchemaDocument, writer.uint32(10).fork()).ldelim();
         }
-        if (message.credentialStatus !== undefined) {
-            credential_1.CredentialStatus.encode(message.credentialStatus, writer.uint32(18).fork()).ldelim();
+        if (message.credentialSchemaProof !== undefined) {
+            proof_1.DocumentProof.encode(message.credentialSchemaProof, writer.uint32(18).fork()).ldelim();
         }
-        if (message.proof !== undefined) {
-            credential_1.CredentialProof.encode(message.proof, writer.uint32(26).fork()).ldelim();
-        }
-        if (message.clientSpec !== undefined) {
-            clientSpec_1.ClientSpec.encode(message.clientSpec, writer.uint32(34).fork()).ldelim();
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            writer.uint32(26).string(message.txAuthor);
         }
         return writer;
     },
     decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
         let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseMsgRegisterCredentialStatus);
+        const message = createBaseMsgRegisterCredentialSchema();
         while (reader.pos < end) {
             const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
-                    message.creator = reader.string();
-                    break;
+                    if (tag !== 10) {
+                        break;
+                    }
+                    message.credentialSchemaDocument = credential_schema_1.CredentialSchemaDocument.decode(reader, reader.uint32());
+                    continue;
                 case 2:
-                    message.credentialStatus = credential_1.CredentialStatus.decode(reader, reader.uint32());
-                    break;
+                    if (tag !== 18) {
+                        break;
+                    }
+                    message.credentialSchemaProof = proof_1.DocumentProof.decode(reader, reader.uint32());
+                    continue;
                 case 3:
-                    message.proof = credential_1.CredentialProof.decode(reader, reader.uint32());
-                    break;
-                case 4:
-                    message.clientSpec = clientSpec_1.ClientSpec.decode(reader, reader.uint32());
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
+                    if (tag !== 26) {
+                        break;
+                    }
+                    message.txAuthor = reader.string();
+                    continue;
             }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
         }
         return message;
     },
     fromJSON(object) {
-        const message = Object.assign({}, baseMsgRegisterCredentialStatus);
-        if (object.creator !== undefined && object.creator !== null) {
-            message.creator = String(object.creator);
-        }
-        else {
-            message.creator = "";
-        }
-        if (object.credentialStatus !== undefined &&
-            object.credentialStatus !== null) {
-            message.credentialStatus = credential_1.CredentialStatus.fromJSON(object.credentialStatus);
-        }
-        else {
-            message.credentialStatus = undefined;
-        }
-        if (object.proof !== undefined && object.proof !== null) {
-            message.proof = credential_1.CredentialProof.fromJSON(object.proof);
-        }
-        else {
-            message.proof = undefined;
-        }
-        if (object.clientSpec !== undefined && object.clientSpec !== null) {
-            message.clientSpec = clientSpec_1.ClientSpec.fromJSON(object.clientSpec);
-        }
-        else {
-            message.clientSpec = undefined;
-        }
-        return message;
+        return {
+            credentialSchemaDocument: isSet(object.credentialSchemaDocument)
+                ? credential_schema_1.CredentialSchemaDocument.fromJSON(object.credentialSchemaDocument)
+                : undefined,
+            credentialSchemaProof: isSet(object.credentialSchemaProof)
+                ? proof_1.DocumentProof.fromJSON(object.credentialSchemaProof)
+                : undefined,
+            txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+        };
     },
     toJSON(message) {
         const obj = {};
-        message.creator !== undefined && (obj.creator = message.creator);
-        message.credentialStatus !== undefined &&
-            (obj.credentialStatus = message.credentialStatus
-                ? credential_1.CredentialStatus.toJSON(message.credentialStatus)
-                : undefined);
-        message.proof !== undefined &&
-            (obj.proof = message.proof
-                ? credential_1.CredentialProof.toJSON(message.proof)
-                : undefined);
-        message.clientSpec !== undefined &&
-            (obj.clientSpec = message.clientSpec
-                ? clientSpec_1.ClientSpec.toJSON(message.clientSpec)
-                : undefined);
+        if (message.credentialSchemaDocument !== undefined) {
+            obj.credentialSchemaDocument = credential_schema_1.CredentialSchemaDocument.toJSON(message.credentialSchemaDocument);
+        }
+        if (message.credentialSchemaProof !== undefined) {
+            obj.credentialSchemaProof = proof_1.DocumentProof.toJSON(message.credentialSchemaProof);
+        }
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            obj.txAuthor = message.txAuthor;
+        }
         return obj;
     },
+    create(base) {
+        return exports.MsgRegisterCredentialSchema.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
     fromPartial(object) {
-        const message = Object.assign({}, baseMsgRegisterCredentialStatus);
-        if (object.creator !== undefined && object.creator !== null) {
-            message.creator = object.creator;
-        }
-        else {
-            message.creator = "";
-        }
-        if (object.credentialStatus !== undefined &&
-            object.credentialStatus !== null) {
-            message.credentialStatus = credential_1.CredentialStatus.fromPartial(object.credentialStatus);
-        }
-        else {
-            message.credentialStatus = undefined;
-        }
-        if (object.proof !== undefined && object.proof !== null) {
-            message.proof = credential_1.CredentialProof.fromPartial(object.proof);
-        }
-        else {
-            message.proof = undefined;
-        }
-        if (object.clientSpec !== undefined && object.clientSpec !== null) {
-            message.clientSpec = clientSpec_1.ClientSpec.fromPartial(object.clientSpec);
-        }
-        else {
-            message.clientSpec = undefined;
-        }
+        var _a;
+        const message = createBaseMsgRegisterCredentialSchema();
+        message.credentialSchemaDocument =
+            (object.credentialSchemaDocument !== undefined && object.credentialSchemaDocument !== null)
+                ? credential_schema_1.CredentialSchemaDocument.fromPartial(object.credentialSchemaDocument)
+                : undefined;
+        message.credentialSchemaProof =
+            (object.credentialSchemaProof !== undefined && object.credentialSchemaProof !== null)
+                ? proof_1.DocumentProof.fromPartial(object.credentialSchemaProof)
+                : undefined;
+        message.txAuthor = (_a = object.txAuthor) !== null && _a !== void 0 ? _a : undefined;
         return message;
     },
 };
-const baseMsgRegisterCredentialStatusResponse = { id: 0 };
-exports.MsgRegisterCredentialStatusResponse = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.id !== 0) {
-            writer.uint32(8).uint64(message.id);
+function createBaseMsgRegisterCredentialSchemaResponse() {
+    return {};
+}
+exports.MsgRegisterCredentialSchemaResponse = {
+    encode(_, writer = minimal_1.default.Writer.create()) {
+        return writer;
+    },
+    decode(input, length) {
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = createBaseMsgRegisterCredentialSchemaResponse();
+        while (reader.pos < end) {
+            const tag = reader.uint32();
+            switch (tag >>> 3) {
+            }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
+        }
+        return message;
+    },
+    fromJSON(_) {
+        return {};
+    },
+    toJSON(_) {
+        const obj = {};
+        return obj;
+    },
+    create(base) {
+        return exports.MsgRegisterCredentialSchemaResponse.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
+    fromPartial(_) {
+        const message = createBaseMsgRegisterCredentialSchemaResponse();
+        return message;
+    },
+};
+function createBaseMsgUpdateCredentialSchema() {
+    return {};
+}
+exports.MsgUpdateCredentialSchema = {
+    encode(message, writer = minimal_1.default.Writer.create()) {
+        if (message.credentialSchemaDocument !== undefined) {
+            credential_schema_1.CredentialSchemaDocument.encode(message.credentialSchemaDocument, writer.uint32(10).fork()).ldelim();
+        }
+        if (message.credentialSchemaProof !== undefined) {
+            proof_1.DocumentProof.encode(message.credentialSchemaProof, writer.uint32(18).fork()).ldelim();
+        }
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            writer.uint32(26).string(message.txAuthor);
         }
         return writer;
     },
     decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
         let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseMsgRegisterCredentialStatusResponse);
+        const message = createBaseMsgUpdateCredentialSchema();
         while (reader.pos < end) {
             const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
-                    message.id = longToNumber(reader.uint64());
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
+                    if (tag !== 10) {
+                        break;
+                    }
+                    message.credentialSchemaDocument = credential_schema_1.CredentialSchemaDocument.decode(reader, reader.uint32());
+                    continue;
+                case 2:
+                    if (tag !== 18) {
+                        break;
+                    }
+                    message.credentialSchemaProof = proof_1.DocumentProof.decode(reader, reader.uint32());
+                    continue;
+                case 3:
+                    if (tag !== 26) {
+                        break;
+                    }
+                    message.txAuthor = reader.string();
+                    continue;
             }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
         }
         return message;
     },
     fromJSON(object) {
-        const message = Object.assign({}, baseMsgRegisterCredentialStatusResponse);
-        if (object.id !== undefined && object.id !== null) {
-            message.id = Number(object.id);
-        }
-        else {
-            message.id = 0;
-        }
-        return message;
+        return {
+            credentialSchemaDocument: isSet(object.credentialSchemaDocument)
+                ? credential_schema_1.CredentialSchemaDocument.fromJSON(object.credentialSchemaDocument)
+                : undefined,
+            credentialSchemaProof: isSet(object.credentialSchemaProof)
+                ? proof_1.DocumentProof.fromJSON(object.credentialSchemaProof)
+                : undefined,
+            txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+        };
     },
     toJSON(message) {
         const obj = {};
-        message.id !== undefined && (obj.id = message.id);
+        if (message.credentialSchemaDocument !== undefined) {
+            obj.credentialSchemaDocument = credential_schema_1.CredentialSchemaDocument.toJSON(message.credentialSchemaDocument);
+        }
+        if (message.credentialSchemaProof !== undefined) {
+            obj.credentialSchemaProof = proof_1.DocumentProof.toJSON(message.credentialSchemaProof);
+        }
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            obj.txAuthor = message.txAuthor;
+        }
         return obj;
     },
+    create(base) {
+        return exports.MsgUpdateCredentialSchema.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
     fromPartial(object) {
-        const message = Object.assign({}, baseMsgRegisterCredentialStatusResponse);
-        if (object.id !== undefined && object.id !== null) {
-            message.id = object.id;
-        }
-        else {
-            message.id = 0;
-        }
+        var _a;
+        const message = createBaseMsgUpdateCredentialSchema();
+        message.credentialSchemaDocument =
+            (object.credentialSchemaDocument !== undefined && object.credentialSchemaDocument !== null)
+                ? credential_schema_1.CredentialSchemaDocument.fromPartial(object.credentialSchemaDocument)
+                : undefined;
+        message.credentialSchemaProof =
+            (object.credentialSchemaProof !== undefined && object.credentialSchemaProof !== null)
+                ? proof_1.DocumentProof.fromPartial(object.credentialSchemaProof)
+                : undefined;
+        message.txAuthor = (_a = object.txAuthor) !== null && _a !== void 0 ? _a : undefined;
         return message;
     },
 };
+function createBaseMsgUpdateCredentialSchemaResponse() {
+    return {};
+}
+exports.MsgUpdateCredentialSchemaResponse = {
+    encode(_, writer = minimal_1.default.Writer.create()) {
+        return writer;
+    },
+    decode(input, length) {
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = createBaseMsgUpdateCredentialSchemaResponse();
+        while (reader.pos < end) {
+            const tag = reader.uint32();
+            switch (tag >>> 3) {
+            }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
+        }
+        return message;
+    },
+    fromJSON(_) {
+        return {};
+    },
+    toJSON(_) {
+        const obj = {};
+        return obj;
+    },
+    create(base) {
+        return exports.MsgUpdateCredentialSchemaResponse.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
+    fromPartial(_) {
+        const message = createBaseMsgUpdateCredentialSchemaResponse();
+        return message;
+    },
+};
+function createBaseMsgRegisterCredentialStatus() {
+    return {};
+}
+exports.MsgRegisterCredentialStatus = {
+    encode(message, writer = minimal_1.default.Writer.create()) {
+        if (message.credentialStatusDocument !== undefined) {
+            credential_status_1.CredentialStatusDocument.encode(message.credentialStatusDocument, writer.uint32(10).fork()).ldelim();
+        }
+        if (message.credentialStatusProof !== undefined) {
+            proof_1.DocumentProof.encode(message.credentialStatusProof, writer.uint32(18).fork()).ldelim();
+        }
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            writer.uint32(26).string(message.txAuthor);
+        }
+        return writer;
+    },
+    decode(input, length) {
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = createBaseMsgRegisterCredentialStatus();
+        while (reader.pos < end) {
+            const tag = reader.uint32();
+            switch (tag >>> 3) {
+                case 1:
+                    if (tag !== 10) {
+                        break;
+                    }
+                    message.credentialStatusDocument = credential_status_1.CredentialStatusDocument.decode(reader, reader.uint32());
+                    continue;
+                case 2:
+                    if (tag !== 18) {
+                        break;
+                    }
+                    message.credentialStatusProof = proof_1.DocumentProof.decode(reader, reader.uint32());
+                    continue;
+                case 3:
+                    if (tag !== 26) {
+                        break;
+                    }
+                    message.txAuthor = reader.string();
+                    continue;
+            }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
+        }
+        return message;
+    },
+    fromJSON(object) {
+        return {
+            credentialStatusDocument: isSet(object.credentialStatusDocument)
+                ? credential_status_1.CredentialStatusDocument.fromJSON(object.credentialStatusDocument)
+                : undefined,
+            credentialStatusProof: isSet(object.credentialStatusProof)
+                ? proof_1.DocumentProof.fromJSON(object.credentialStatusProof)
+                : undefined,
+            txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+        };
+    },
+    toJSON(message) {
+        const obj = {};
+        if (message.credentialStatusDocument !== undefined) {
+            obj.credentialStatusDocument = credential_status_1.CredentialStatusDocument.toJSON(message.credentialStatusDocument);
+        }
+        if (message.credentialStatusProof !== undefined) {
+            obj.credentialStatusProof = proof_1.DocumentProof.toJSON(message.credentialStatusProof);
+        }
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            obj.txAuthor = message.txAuthor;
+        }
+        return obj;
+    },
+    create(base) {
+        return exports.MsgRegisterCredentialStatus.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
+    fromPartial(object) {
+        var _a;
+        const message = createBaseMsgRegisterCredentialStatus();
+        message.credentialStatusDocument =
+            (object.credentialStatusDocument !== undefined && object.credentialStatusDocument !== null)
+                ? credential_status_1.CredentialStatusDocument.fromPartial(object.credentialStatusDocument)
+                : undefined;
+        message.credentialStatusProof =
+            (object.credentialStatusProof !== undefined && object.credentialStatusProof !== null)
+                ? proof_1.DocumentProof.fromPartial(object.credentialStatusProof)
+                : undefined;
+        message.txAuthor = (_a = object.txAuthor) !== null && _a !== void 0 ? _a : undefined;
+        return message;
+    },
+};
+function createBaseMsgRegisterCredentialStatusResponse() {
+    return {};
+}
+exports.MsgRegisterCredentialStatusResponse = {
+    encode(_, writer = minimal_1.default.Writer.create()) {
+        return writer;
+    },
+    decode(input, length) {
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = createBaseMsgRegisterCredentialStatusResponse();
+        while (reader.pos < end) {
+            const tag = reader.uint32();
+            switch (tag >>> 3) {
+            }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
+        }
+        return message;
+    },
+    fromJSON(_) {
+        return {};
+    },
+    toJSON(_) {
+        const obj = {};
+        return obj;
+    },
+    create(base) {
+        return exports.MsgRegisterCredentialStatusResponse.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
+    fromPartial(_) {
+        const message = createBaseMsgRegisterCredentialStatusResponse();
+        return message;
+    },
+};
+function createBaseMsgUpdateCredentialStatus() {
+    return {};
+}
+exports.MsgUpdateCredentialStatus = {
+    encode(message, writer = minimal_1.default.Writer.create()) {
+        if (message.credentialStatusDocument !== undefined) {
+            credential_status_1.CredentialStatusDocument.encode(message.credentialStatusDocument, writer.uint32(10).fork()).ldelim();
+        }
+        if (message.credentialStatusProof !== undefined) {
+            proof_1.DocumentProof.encode(message.credentialStatusProof, writer.uint32(18).fork()).ldelim();
+        }
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            writer.uint32(26).string(message.txAuthor);
+        }
+        return writer;
+    },
+    decode(input, length) {
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = createBaseMsgUpdateCredentialStatus();
+        while (reader.pos < end) {
+            const tag = reader.uint32();
+            switch (tag >>> 3) {
+                case 1:
+                    if (tag !== 10) {
+                        break;
+                    }
+                    message.credentialStatusDocument = credential_status_1.CredentialStatusDocument.decode(reader, reader.uint32());
+                    continue;
+                case 2:
+                    if (tag !== 18) {
+                        break;
+                    }
+                    message.credentialStatusProof = proof_1.DocumentProof.decode(reader, reader.uint32());
+                    continue;
+                case 3:
+                    if (tag !== 26) {
+                        break;
+                    }
+                    message.txAuthor = reader.string();
+                    continue;
+            }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
+        }
+        return message;
+    },
+    fromJSON(object) {
+        return {
+            credentialStatusDocument: isSet(object.credentialStatusDocument)
+                ? credential_status_1.CredentialStatusDocument.fromJSON(object.credentialStatusDocument)
+                : undefined,
+            credentialStatusProof: isSet(object.credentialStatusProof)
+                ? proof_1.DocumentProof.fromJSON(object.credentialStatusProof)
+                : undefined,
+            txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+        };
+    },
+    toJSON(message) {
+        const obj = {};
+        if (message.credentialStatusDocument !== undefined) {
+            obj.credentialStatusDocument = credential_status_1.CredentialStatusDocument.toJSON(message.credentialStatusDocument);
+        }
+        if (message.credentialStatusProof !== undefined) {
+            obj.credentialStatusProof = proof_1.DocumentProof.toJSON(message.credentialStatusProof);
+        }
+        if (message.txAuthor !== undefined && message.txAuthor !== "") {
+            obj.txAuthor = message.txAuthor;
+        }
+        return obj;
+    },
+    create(base) {
+        return exports.MsgUpdateCredentialStatus.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
+    fromPartial(object) {
+        var _a;
+        const message = createBaseMsgUpdateCredentialStatus();
+        message.credentialStatusDocument =
+            (object.credentialStatusDocument !== undefined && object.credentialStatusDocument !== null)
+                ? credential_status_1.CredentialStatusDocument.fromPartial(object.credentialStatusDocument)
+                : undefined;
+        message.credentialStatusProof =
+            (object.credentialStatusProof !== undefined && object.credentialStatusProof !== null)
+                ? proof_1.DocumentProof.fromPartial(object.credentialStatusProof)
+                : undefined;
+        message.txAuthor = (_a = object.txAuthor) !== null && _a !== void 0 ? _a : undefined;
+        return message;
+    },
+};
+function createBaseMsgUpdateCredentialStatusResponse() {
+    return {};
+}
+exports.MsgUpdateCredentialStatusResponse = {
+    encode(_, writer = minimal_1.default.Writer.create()) {
+        return writer;
+    },
+    decode(input, length) {
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
+        let end = length === undefined ? reader.len : reader.pos + length;
+        const message = createBaseMsgUpdateCredentialStatusResponse();
+        while (reader.pos < end) {
+            const tag = reader.uint32();
+            switch (tag >>> 3) {
+            }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
+        }
+        return message;
+    },
+    fromJSON(_) {
+        return {};
+    },
+    toJSON(_) {
+        const obj = {};
+        return obj;
+    },
+    create(base) {
+        return exports.MsgUpdateCredentialStatusResponse.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
+    fromPartial(_) {
+        const message = createBaseMsgUpdateCredentialStatusResponse();
+        return message;
+    },
+};
+exports.MsgServiceName = "hypersign.ssi.v1.Msg";
 class MsgClientImpl {
-    constructor(rpc) {
+    constructor(rpc, opts) {
+        this.service = (opts === null || opts === void 0 ? void 0 : opts.service) || exports.MsgServiceName;
         this.rpc = rpc;
+        this.RegisterDID = this.RegisterDID.bind(this);
+        this.UpdateDID = this.UpdateDID.bind(this);
+        this.DeactivateDID = this.DeactivateDID.bind(this);
+        this.RegisterCredentialSchema = this.RegisterCredentialSchema.bind(this);
+        this.UpdateCredentialSchema = this.UpdateCredentialSchema.bind(this);
+        this.RegisterCredentialStatus = this.RegisterCredentialStatus.bind(this);
+        this.UpdateCredentialStatus = this.UpdateCredentialStatus.bind(this);
     }
-    CreateDID(request) {
-        const data = exports.MsgCreateDID.encode(request).finish();
-        const promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "CreateDID", data);
-        return promise.then((data) => exports.MsgCreateDIDResponse.decode(new minimal_1.Reader(data)));
+    RegisterDID(request) {
+        const data = exports.MsgRegisterDID.encode(request).finish();
+        const promise = this.rpc.request(this.service, "RegisterDID", data);
+        return promise.then((data) => exports.MsgRegisterDIDResponse.decode(minimal_1.default.Reader.create(data)));
     }
     UpdateDID(request) {
         const data = exports.MsgUpdateDID.encode(request).finish();
-        const promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "UpdateDID", data);
-        return promise.then((data) => exports.MsgUpdateDIDResponse.decode(new minimal_1.Reader(data)));
-    }
-    CreateSchema(request) {
-        const data = exports.MsgCreateSchema.encode(request).finish();
-        const promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "CreateSchema", data);
-        return promise.then((data) => exports.MsgCreateSchemaResponse.decode(new minimal_1.Reader(data)));
+        const promise = this.rpc.request(this.service, "UpdateDID", data);
+        return promise.then((data) => exports.MsgUpdateDIDResponse.decode(minimal_1.default.Reader.create(data)));
     }
     DeactivateDID(request) {
         const data = exports.MsgDeactivateDID.encode(request).finish();
-        const promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "DeactivateDID", data);
-        return promise.then((data) => exports.MsgDeactivateDIDResponse.decode(new minimal_1.Reader(data)));
+        const promise = this.rpc.request(this.service, "DeactivateDID", data);
+        return promise.then((data) => exports.MsgDeactivateDIDResponse.decode(minimal_1.default.Reader.create(data)));
+    }
+    RegisterCredentialSchema(request) {
+        const data = exports.MsgRegisterCredentialSchema.encode(request).finish();
+        const promise = this.rpc.request(this.service, "RegisterCredentialSchema", data);
+        return promise.then((data) => exports.MsgRegisterCredentialSchemaResponse.decode(minimal_1.default.Reader.create(data)));
+    }
+    UpdateCredentialSchema(request) {
+        const data = exports.MsgUpdateCredentialSchema.encode(request).finish();
+        const promise = this.rpc.request(this.service, "UpdateCredentialSchema", data);
+        return promise.then((data) => exports.MsgUpdateCredentialSchemaResponse.decode(minimal_1.default.Reader.create(data)));
     }
     RegisterCredentialStatus(request) {
         const data = exports.MsgRegisterCredentialStatus.encode(request).finish();
-        const promise = this.rpc.request("hypersignprotocol.hidnode.ssi.Msg", "RegisterCredentialStatus", data);
-        return promise.then((data) => exports.MsgRegisterCredentialStatusResponse.decode(new minimal_1.Reader(data)));
+        const promise = this.rpc.request(this.service, "RegisterCredentialStatus", data);
+        return promise.then((data) => exports.MsgRegisterCredentialStatusResponse.decode(minimal_1.default.Reader.create(data)));
+    }
+    UpdateCredentialStatus(request) {
+        const data = exports.MsgUpdateCredentialStatus.encode(request).finish();
+        const promise = this.rpc.request(this.service, "UpdateCredentialStatus", data);
+        return promise.then((data) => exports.MsgUpdateCredentialStatusResponse.decode(minimal_1.default.Reader.create(data)));
     }
 }
 exports.MsgClientImpl = MsgClientImpl;
-var globalThis = (() => {
-    if (typeof globalThis !== "undefined")
-        return globalThis;
-    if (typeof self !== "undefined")
-        return self;
-    if (typeof window !== "undefined")
-        return window;
-    if (typeof global !== "undefined")
-        return global;
-    throw "Unable to locate global object";
-})();
-function longToNumber(long) {
-    if (long.gt(Number.MAX_SAFE_INTEGER)) {
-        throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-    }
-    return long.toNumber();
+function isSet(value) {
+    return value !== null && value !== undefined;
 }
-// if (util.Long !== Long) {
-//   util.Long = Long as any;
-//   configure();
-// }

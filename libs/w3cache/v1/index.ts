@@ -39,13 +39,13 @@ const CONTEXTS = Object.freeze({
     "https://schema.org": {
         ...schema_org
     },
-    "https://digitalbazaar.github.io/x25519-key-agreement-2020-context/contexts/x25519-key-agreement-2020-v1.jsonld":{
+    "https://ns.did.ai/suites/x25519-2020/v1": {
         ...x25519VerificationKey2020
     },
     "https://identity.foundation/.well-known/did-configuration/v1": {
         ...wellknown
-    },  
-    "https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/libs/w3cache/v1/X25519KeyAgreementKeyEIP5630.json":{
+    }, 
+    "https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/X25519KeyAgreementKeyEIP5630.jsonld": {
         ...X25519KeyAgreementKeyEIP5630
     }
 });

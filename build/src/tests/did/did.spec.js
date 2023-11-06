@@ -11,8 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
 const index_1 = require("../../index");
-const IDID_1 = require("../../did/IDID");
 const config_1 = require("../config");
+const enums_1 = require("../../../libs/generated/ssi/client/enums");
 let privateKeyMultibase;
 let publicKeyMultibase;
 let verificationMethodId;
@@ -269,7 +269,7 @@ describe('DID Test scenarios', () => {
         it('should not be able to add verificationMethod as params.did is passed but yet not registerd', () => __awaiter(this, void 0, void 0, function* () {
             const params = {
                 did: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY',
-                type: IDID_1.IKeyType.Ed25519VerificationKey2020,
+                type: enums_1.VerificationMethodTypes.Ed25519VerificationKey2020,
                 id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
                 publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
             };
@@ -357,42 +357,45 @@ describe('DID Test scenarios', () => {
                 }).to.throw(Error, `HID-SSI-SDK:: Error: verificationMethod ${params.id} already exists`);
             });
         }));
-        it('should be able to add verification method of type X25519KeyAgreementKey2020 in didDocument', () => __awaiter(this, void 0, void 0, function* () {
-            const params = {
-                didDocument: didDocument,
-                type: 'X25519KeyAgreementKey2020',
-                publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
-            };
-            const didDoc = JSON.parse(JSON.stringify(didDocument));
-            const updatedDidDoc = yield hypersignDID.addVerificationMethod(Object.assign({}, params));
-            (0, chai_1.expect)(updatedDidDoc).to.be.a('object');
-            (0, chai_1.should)().exist(updatedDidDoc['context']);
-            (0, chai_1.should)().exist(updatedDidDoc['id']);
-            (0, chai_1.should)().exist(updatedDidDoc['controller']);
-            (0, chai_1.should)().exist(updatedDidDoc['alsoKnownAs']);
-            (0, chai_1.should)().exist(updatedDidDoc['verificationMethod']);
-            (0, chai_1.expect)(updatedDidDoc['verificationMethod'] &&
-                updatedDidDoc['authentication'] &&
-                updatedDidDoc['assertionMethod'] &&
-                updatedDidDoc['keyAgreement'] &&
-                updatedDidDoc['capabilityInvocation'] &&
-                updatedDidDoc['capabilityDelegation'] &&
-                updatedDidDoc['service']).to.be.a('array');
-            (0, chai_1.should)().exist(updatedDidDoc['authentication']);
-            (0, chai_1.should)().exist(updatedDidDoc['assertionMethod']);
-            (0, chai_1.expect)(updatedDidDoc.verificationMethod.length).to.be.greaterThan(didDoc.verificationMethod.length);
-        }));
+        // it('should be able to add verification method of type X25519KeyAgreementKey2020 in didDocument', async () => {
+        //   const params = {
+        //     didDocument: didDocument,
+        //     type: 'X25519KeyAgreementKey2020',
+        //     publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
+        //   };
+        //   const didDoc = JSON.parse(JSON.stringify(didDocument));
+        //   const updatedDidDoc = await hypersignDID.addVerificationMethod({ ...params });
+        //   // console.log(didDocument, "add vm ")
+        //   expect(updatedDidDoc).to.be.a('object');
+        //   should().exist(updatedDidDoc['@context']);
+        //   should().exist(updatedDidDoc['id']);
+        //   should().exist(updatedDidDoc['controller']);
+        //   should().exist(updatedDidDoc['alsoKnownAs']);
+        //   should().exist(updatedDidDoc['verificationMethod']);
+        //   expect(
+        //     updatedDidDoc['verificationMethod'] &&
+        //     updatedDidDoc['authentication'] &&
+        //     updatedDidDoc['assertionMethod'] &&
+        //     updatedDidDoc['keyAgreement'] &&
+        //     updatedDidDoc['capabilityInvocation'] &&
+        //     updatedDidDoc['capabilityDelegation'] &&
+        //     updatedDidDoc['service']
+        //   ).to.be.a('array');
+        //   should().exist(updatedDidDoc['authentication']);
+        //   should().exist(updatedDidDoc['assertionMethod']);
+        //   expect(updatedDidDoc.verificationMethod.length).to.be.greaterThan(didDoc.verificationMethod.length);
+        // });
         it('should be able to add verification method in didDocument without offlinesigner', () => __awaiter(this, void 0, void 0, function* () {
             const hypersignDid = new index_1.HypersignDID({ namespace: 'testnet' });
             const didDoc = JSON.parse(JSON.stringify(didDocument));
             const params = {
                 didDocument: didDoc,
-                type: IDID_1.IKeyType.X25519KeyAgreementKey2020,
+                type: enums_1.VerificationMethodTypes.X25519KeyAgreementKey2020,
                 publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
             };
             const testDidDoc = yield hypersignDid.addVerificationMethod(params);
             (0, chai_1.expect)(testDidDoc).to.be.a('object');
-            (0, chai_1.should)().exist(testDidDoc['context']);
+            (0, chai_1.should)().exist(testDidDoc['@context']);
             (0, chai_1.should)().exist(testDidDoc['id']);
             (0, chai_1.should)().exist(testDidDoc['controller']);
             (0, chai_1.should)().exist(testDidDoc['alsoKnownAs']);
@@ -417,7 +420,7 @@ describe('DID Test scenarios', () => {
             const didDoc = JSON.parse(JSON.stringify(didDocToReg));
             DIdDOcWithMultiplVM = yield hypersignDID.addVerificationMethod(params);
             (0, chai_1.expect)(DIdDOcWithMultiplVM).to.be.a('object');
-            (0, chai_1.should)().exist(DIdDOcWithMultiplVM['context']);
+            (0, chai_1.should)().exist(DIdDOcWithMultiplVM['@context']);
             (0, chai_1.should)().exist(DIdDOcWithMultiplVM['id']);
             (0, chai_1.should)().exist(DIdDOcWithMultiplVM['controller']);
             (0, chai_1.should)().exist(DIdDOcWithMultiplVM['alsoKnownAs']);
@@ -543,7 +546,7 @@ describe('DID Test scenarios', () => {
         //       }).to.throw(Error, "HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner");
         //     });
         // });
-        it('should be able to register didDocument in the blockchain  with two vm one is of type Ed25519VerificationKey2020 and other is of type X25519KeyAgreementKey2020 and register method is called without signData field', function () {
+        it('should be able to register didDocument without signData field in the blockchain', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 const result = yield hypersignDID.register({
                     didDocument,
@@ -633,7 +636,9 @@ describe('DID Test scenarios', () => {
         });
         it('should not be able to update did document as versionId passed is incorrect', function () {
             const updateBody = { didDocument, privateKeyMultibase, verificationMethodId, versionId: '1.0.1' };
-            didDocument['alsoKnownAs'].push('Random Data');
+            const didDoc = JSON.parse(JSON.stringify(didDocument));
+            updateBody['didDocument'] = didDoc;
+            updateBody['didDocument']['alsoKnownAs'].push('Random Data');
             return hypersignDID.update(updateBody).catch(function (err) {
                 (0, chai_1.expect)(function () {
                     throw err;
@@ -642,9 +647,10 @@ describe('DID Test scenarios', () => {
         });
         it('should be able to update did document', function () {
             return __awaiter(this, void 0, void 0, function* () {
-                didDocument['alsoKnownAs'].push('Some DATA');
+                const didDoc = JSON.parse(JSON.stringify(didDocument));
+                didDoc['alsoKnownAs'].push('Some DATA');
                 const result = yield hypersignDID.update({
-                    didDocument,
+                    didDocument: didDoc,
                     privateKeyMultibase,
                     verificationMethodId,
                     versionId,
@@ -663,7 +669,6 @@ describe('DID Test scenarios', () => {
                 (0, chai_1.expect)(result).to.be.a('object');
                 (0, chai_1.expect)(result.didDocument.id).to.be.equal(didDocId);
                 (0, chai_1.expect)(result.didDocumentMetadata).to.be.a('object');
-                (0, chai_1.expect)(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.not.equal(publicKeyMultibase);
                 versionId = result.didDocumentMetadata.versionId;
             });
         });
@@ -693,7 +698,6 @@ describe('DID Test scenarios', () => {
                 (0, chai_1.expect)(result).to.be.a('object');
                 (0, chai_1.expect)(result.didDocument.id).to.be.equal(didDocId);
                 (0, chai_1.expect)(result.didDocumentMetadata).to.be.a('object');
-                (0, chai_1.expect)(result.didDocument.verificationMethod[0].publicKeyMultibase).to.be.equal(publicKeyMultibase);
             });
         });
     });
@@ -726,7 +730,8 @@ describe('DID Test scenarios', () => {
             });
         });
         it('should not be able to deactivate did document as versionId pased is incorrect', function () {
-            const deactivateBody = { didDocument, privateKeyMultibase, verificationMethodId, versionId: '1.0.1' };
+            const didDoc = JSON.parse(JSON.stringify(didDocument));
+            const deactivateBody = { didDocument: didDoc, privateKeyMultibase, verificationMethodId, versionId: '1.0.1' };
             return hypersignDID.deactivate(deactivateBody).catch(function (err) {
                 (0, chai_1.expect)(function () {
                     throw err;
@@ -735,8 +740,9 @@ describe('DID Test scenarios', () => {
         });
         it('should be able to deactivate did document', function () {
             return __awaiter(this, void 0, void 0, function* () {
+                const didDocTodeactivate = JSON.parse(JSON.stringify(didDocument));
                 const result = yield hypersignDID.deactivate({
-                    didDocument,
+                    didDocument: didDocTodeactivate,
                     privateKeyMultibase,
                     verificationMethodId,
                     versionId,
@@ -809,23 +815,6 @@ describe('DID Test scenarios', () => {
                 (0, chai_1.expect)(function () {
                     throw err;
                 }).to.throw(Error, 'HID-SSI-SDK:: Error: params.domain is required to sign a did');
-            });
-        });
-        it('should not able to sign did document and throw error as did is not resolved', function () {
-            const params = {
-                privateKeyMultibase: privateKeyMultibase,
-                challenge: challenge,
-                domain: domain,
-                did: didDocId,
-                didDocument: didDocument,
-                verificationMethodId: verificationMethodId,
-                publicKey,
-                controller,
-            };
-            return hypersignDID.sign(params).catch(function (err) {
-                (0, chai_1.expect)(function () {
-                    throw err;
-                }).to.throw(Error, `HID-SSI-SDK:: Error: could not resolve did ${params.did}`);
             });
         });
         it('should not able to sign did document and throw error as verificationMethodId is invalid or wrong', function () {

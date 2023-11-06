@@ -1,11 +1,11 @@
-import { Did } from "../../../../libs/generated/ssi/did";
-import { IDIDResolve, IKeyType, IVerificationRelationships } from "../../../did/IDID";
-import { ISignInfo } from '../../../did/IDID';
+import { DidDocument as Did } from "../../../../libs/generated/ssi/did";
+import { IDIDResolve, ISignInfo } from "../../../did/IDID";
+import { VerificationMethodTypes, VerificationMethodRelationships as IVerificationRelationships } from "../../../../libs/generated/ssi/client/enums";
 export interface IGenerateDid {
     namespace: string;
     methodSpecificId?: string;
     options?: {
-        keyType: IKeyType;
+        keyType: VerificationMethodTypes;
         chainId: string;
         publicKey: string;
         walletAddress: string;

@@ -165,12 +165,13 @@ describe('DID Opearations', () => {
         };
         it('should able to sign did document', function () {
             return __awaiter(this, void 0, void 0, function* () {
+                const didDoc = JSON.parse(JSON.stringify(didDocument));
                 const params = {
                     privateKeyMultibase: privateKeyMultibase,
                     challenge: challenge,
                     domain: domain,
                     did: '',
-                    didDocument: didDocument,
+                    didDocument: didDoc,
                     verificationMethodId: verificationMethodId,
                     controller,
                 };
@@ -314,19 +315,20 @@ describe('Verifiable Credential Opearations', () => {
                 // });
                 (0, chai_1.expect)(signedCredential['id']).to.be.equal(tempIssueCredentialBody.credential.id);
                 (0, chai_1.expect)(credentialStatus).to.be.a('object');
-                (0, chai_1.should)().exist(credentialStatus['claim']);
                 (0, chai_1.should)().exist(credentialStatus['issuer']);
                 (0, chai_1.should)().exist(credentialStatus['issuanceDate']);
-                (0, chai_1.should)().exist(credentialStatus['expirationDate']);
-                (0, chai_1.should)().exist(credentialStatus['credentialHash']);
+                (0, chai_1.should)().exist(credentialStatus['revoked']);
+                (0, chai_1.should)().exist(credentialStatus['suspended']);
+                (0, chai_1.should)().exist(credentialStatus['remarks']);
+                (0, chai_1.should)().exist(credentialStatus['credentialMerkleRootHash']);
                 (0, chai_1.expect)(credentialStatusProof).to.be.a('object');
                 (0, chai_1.should)().exist(credentialStatusProof['type']);
                 (0, chai_1.should)().exist(credentialStatusProof['created']);
-                (0, chai_1.should)().exist(credentialStatusProof['updated']);
                 (0, chai_1.should)().exist(credentialStatusProof['verificationMethod']);
                 (0, chai_1.should)().exist(credentialStatusProof['proofPurpose']);
                 (0, chai_1.should)().exist(credentialStatusProof['proofValue']);
                 (0, chai_1.expect)(credentialStatusRegistrationResult).to.be.a('object');
+                (0, chai_1.should)().exist(credentialStatusRegistrationResult['code']);
                 (0, chai_1.should)().exist(credentialStatusRegistrationResult['height']);
                 (0, chai_1.should)().exist(credentialStatusRegistrationResult['transactionHash']);
                 (0, chai_1.should)().exist(credentialStatusRegistrationResult['gasUsed']);

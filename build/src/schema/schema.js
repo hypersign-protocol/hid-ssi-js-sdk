@@ -40,12 +40,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const schema_1 = require("../../libs/generated/ssi/schema");
+const credential_schema_1 = require("../../libs/generated/ssi/credential_schema");
 const schemaRPC_1 = require("./schemaRPC");
 const constants = __importStar(require("../constants"));
 const utils_1 = __importDefault(require("../utils"));
 const schema_service_1 = __importDefault(require("../ssiApi/services/schema/schema.service"));
 const ed25519 = require('@stablelib/ed25519');
+const base58_1 = require("multiformats/bases/base58");
 class HyperSignSchema {
     constructor(params = {}) {
         const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, entityApiSecretKey } = params;
@@ -182,18 +183,19 @@ class HyperSignSchema {
                 privKey: params.privateKeyMultibase,
             });
             const schemaDoc = params.schema;
-            const dataBytes = (yield schema_1.Schema.encode(schemaDoc)).finish();
+            const dataBytes = (yield credential_schema_1.CredentialSchemaDocument.encode(schemaDoc)).finish();
             const signed = ed25519.sign(privateKeyMultibaseConverted, dataBytes);
             const proof = {
                 type: constants.SCHEMA.SIGNATURE_TYPE,
                 created: this._getDateTime(),
                 verificationMethod: params.verificationMethodId,
                 proofPurpose: constants.SCHEMA.PROOF_PURPOSE,
-                proofValue: Buffer.from(signed).toString('base64'),
+                proofValue: base58_1.base58btc.encode(signed),
             };
-            schemaDoc.proof = {};
-            Object.assign(schemaDoc.proof, Object.assign({}, proof));
-            return schemaDoc;
+            schemaDoc['proof'] = {};
+            const schemaToReturn = schemaDoc;
+            Object.assign(schemaToReturn['proof'], Object.assign({}, proof));
+            return schemaToReturn;
         });
     }
     /**
@@ -206,30 +208,33 @@ class HyperSignSchema {
         return __awaiter(this, void 0, void 0, function* () {
             if (!params.schema)
                 throw new Error('HID-SSI-SDK:: Error: schema must be passed');
-            if (!params.schema.proof)
+            if (!params.schema['proof'])
                 throw new Error('HID-SSI-SDK:: Error: schema.proof must be passed');
-            if (!params.schema.proof.created)
+            if (!params.schema['proof'].created)
                 throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain created');
-            if (!params.schema.proof.proofPurpose)
+            if (!params.schema['proof'].proofPurpose)
                 throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain proofPurpose');
-            if (!params.schema.proof.proofValue)
+            if (!params.schema['proof'].proofValue)
                 throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain proofValue');
-            if (!params.schema.proof.type)
+            if (!params.schema['proof'].type)
                 throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain type');
-            if (!params.schema.proof.verificationMethod)
+            if (!params.schema['proof'].verificationMethod)
                 throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain verificationMethod');
             if (!this.schemaRpc && !this.schemaApiService) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignSchema class is not instantiated with Offlinesigner or have not been initilized with entityApiSecret');
             }
             const response = {};
+            const schemaDoc = params.schema;
+            const proof = schemaDoc['proof'];
+            delete schemaDoc['proof'];
             if (this.schemaRpc) {
-                const result = yield this.schemaRpc.createSchema(params.schema, params.schema.proof);
+                const result = yield this.schemaRpc.createSchema(schemaDoc, proof);
                 response.transactionHash = result.transactionHash;
             }
             else if (this.schemaApiService) {
                 const result = yield this.schemaApiService.registerSchema({
                     schemaDocument: params.schema,
-                    schemaProof: params.schema.proof,
+                    schemaProof: params.schema['proof'],
                 });
                 response.transactionHash = result.transactionHash;
             }
@@ -240,7 +245,7 @@ class HyperSignSchema {
      * Resolves a schema document with schemId from Hypersign blockchain - an onchain activity
      * @params
      *  - params.schemaId             : Id of the schema document
-     * @returns {Promise<Schema>} Returns schema document
+     * @returns {Promise<IResolveSchema>} Returns schema document
      */
     resolve(params) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -254,7 +259,8 @@ class HyperSignSchema {
                 throw new Error('HID-SSI-SDK:: Error: No schema found, id = ' + params.schemaId);
             }
             const schema = schemaArr[0];
-            return schema;
+            const response = Object.assign(Object.assign({}, schema.credentialSchemaDocument), { proof: schema.credentialSchemaProof });
+            return response;
         });
     }
 }

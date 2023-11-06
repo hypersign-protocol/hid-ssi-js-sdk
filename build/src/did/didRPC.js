@@ -69,13 +69,14 @@ class DIDRpc {
             if (!this.hidClient) {
                 throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
             }
-            const typeUrl = `${constants_1.HID_COSMOS_MODULE}.${constants_1.HIDRpcEnums.MsgCreateDID}`;
+            delete didDoc['proof'];
+            const typeUrl = `${constants_1.HID_COSMOS_MODULE}.${constants_1.HIDRpcEnums.MsgRegisterDID}`;
             const txMessage = {
                 typeUrl,
-                value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
-                    didDocString: didDoc,
-                    signatures: signInfos,
-                    creator: client_1.HIDClient.getHidWalletAddress(),
+                value: generatedProto[constants_1.HIDRpcEnums.MsgRegisterDID].fromPartial({
+                    didDocument: didDoc,
+                    didDocumentProofs: signInfos,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
                 }),
             };
             const fee = 'auto';
@@ -86,6 +87,7 @@ class DIDRpc {
     }
     updateDID(didDoc, signInfos, versionId) {
         return __awaiter(this, void 0, void 0, function* () {
+            delete didDoc['proof'];
             if (!this.hidClient) {
                 throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
             }
@@ -93,10 +95,10 @@ class DIDRpc {
             const txMessage = {
                 typeUrl,
                 value: generatedProto[constants_1.HIDRpcEnums.MsgUpdateDID].fromPartial({
-                    didDocString: didDoc,
-                    signatures: signInfos,
-                    creator: client_1.HIDClient.getHidWalletAddress(),
-                    version_id: versionId,
+                    didDocument: didDoc,
+                    didDocumentProofs: signInfos,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
+                    versionId: versionId,
                 }),
             };
             // TODO: need to find a way to make it dynamic
@@ -115,10 +117,10 @@ class DIDRpc {
             const txMessage = {
                 typeUrl,
                 value: generatedProto[constants_1.HIDRpcEnums.MsgDeactivateDID].fromPartial({
-                    didId: did,
-                    signatures: signInfos,
-                    creator: client_1.HIDClient.getHidWalletAddress(),
-                    version_id: versionId,
+                    didDocumentId: did,
+                    didDocumentProofs: signInfos,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
+                    versionId: versionId,
                 }),
             };
             // TODO: need to find a way to make it dynamic

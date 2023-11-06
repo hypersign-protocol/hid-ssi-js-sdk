@@ -28,7 +28,9 @@ let credenStatus: ICredentialStatus;
 let credentialStatusProof2 = {};
 let credentialStatus2 = {};
 let credentialStatus;
-let didDocument2;
+let holderDidDocument;
+let holderSignedDidDoc;
+let holdersPrivateKeyMultibase
 const entityApiSecretKey =
   '57ed4af5b3f51428250e76a769ce8.d8f70a64e3d060b377c85eb75b60ae25011ecebb63f28a27f72183e5bcba140222f8628f17a72eee4833a9174f5ae8309';
 const credentialBody = {
@@ -120,7 +122,8 @@ describe('DID Opearations', () => {
     });
     it('should be able to generate didDocument', async function () {
       const kp = await hypersignDID.generateKeys();
-      didDocument2 = await hypersignDID.generate({ publicKeyMultibase: kp.publicKeyMultibase });
+      holdersPrivateKeyMultibase = kp.privateKeyMultibase
+      holderDidDocument = await hypersignDID.generate({ publicKeyMultibase: kp.publicKeyMultibase });
       expect(didDocument).to.be.a('object');
       should().exist(didDocument['@context']);
       should().exist(didDocument['id']);
@@ -163,6 +166,32 @@ describe('DID Opearations', () => {
         controller,
       };
       signedDocument = await hypersignDID.sign(params);
+      expect(signedDocument).to.be.a('object');
+      should().exist(signedDocument['@context']);
+      should().exist(signedDocument['id']);
+      expect(didDocId).to.be.equal(signedDocument['id']);
+      should().exist(signedDocument['controller']);
+      should().exist(signedDocument['alsoKnownAs']);
+      should().exist(signedDocument['verificationMethod']);
+      should().exist(signedDocument['authentication']);
+      should().exist(signedDocument['assertionMethod']);
+      should().exist(signedDocument['keyAgreement']);
+      should().exist(signedDocument['capabilityInvocation']);
+      should().exist(signedDocument['capabilityDelegation']);
+      should().exist(signedDocument['service']);
+      should().exist(signedDocument['proof']);
+    });
+    it('should able to sign did document for holder', async function () {
+      const params = {
+        privateKeyMultibase: holdersPrivateKeyMultibase as string,
+        challenge: challenge as string,
+        domain: domain as string,
+        did: '',
+        didDocument: holderDidDocument as object,
+        verificationMethodId: holderDidDocument.verificationMethod[0].id as string,
+        controller,
+      };
+      holderSignedDidDoc = await hypersignDID.sign(params);
       expect(signedDocument).to.be.a('object');
       should().exist(signedDocument['@context']);
       should().exist(signedDocument['id']);
@@ -240,7 +269,7 @@ describe('Verifiable Credential Opearations', () => {
     it('should not be able to generate new credential for a schema as both subjectDid and subjectDidDocSigned is passed', async function () {
       const tempCredentialBody = { ...credentialBody };
       tempCredentialBody.issuerDid = didDocId;
-      tempCredentialBody.subjectDid = didDocument2.id;
+      tempCredentialBody.subjectDid = holderDidDocument.id;
       tempCredentialBody['subjectDidDocSigned'] = signedDocument;
       return hypersignVC.generate(tempCredentialBody).catch(function (err) {
         expect(function () {
@@ -285,7 +314,7 @@ describe('Verifiable Credential Opearations', () => {
       const tempCredentialBody = { ...credentialBody };
       tempCredentialBody.schemaId = schemaId;
       tempCredentialBody.issuerDid = didDocId;
-      tempCredentialBody['subjectDid'] = didDocument2.id;
+      tempCredentialBody['subjectDid'] = holderDidDocument.id;
       return hypersignVC.generate(tempCredentialBody).catch(function (err) {
         expect(function () {
           throw err;
@@ -334,7 +363,7 @@ describe('Verifiable Credential Opearations', () => {
       const expirationDate = new Date('12/11/2027');
       const tempCredentialBody = { ...credentialBody };
       tempCredentialBody.schemaId = schemaId;
-      tempCredentialBody.subjectDid = didDocument2.id;
+      tempCredentialBody.subjectDid = holderDidDocument.id;
       tempCredentialBody['expirationDate'] = expirationDate.toString();
       tempCredentialBody.issuerDid = didDocId;
       tempCredentialBody.fields = { name: 'varsha' };
@@ -351,14 +380,14 @@ describe('Verifiable Credential Opearations', () => {
       should().exist(credentialDetail['issuer']);
       should().exist(credentialDetail['credentialSubject']);
       should().exist(credentialDetail['credentialStatus']);
-      expect(credentialDetail['credentialStatus'].type).to.be.equal('CredentialStatusList2017');
+      expect(credentialDetail['credentialStatus'].type).to.be.equal('HypersignCredentialStatus2023');
     });
 
     it('should be able to generate new credential even without offlinesigner passed to constructor', async function () {
       const expirationDate = new Date('12/11/2027');
       const tempCredentialBody = { ...credentialBody };
       tempCredentialBody.schemaId = schemaId;
-      tempCredentialBody.subjectDid = didDocument2.id;
+      tempCredentialBody.subjectDid = holderDidDocument.id;
       tempCredentialBody['expirationDate'] = expirationDate.toString();
       tempCredentialBody.issuerDid = didDocId;
       tempCredentialBody.fields = { name: 'varsha' };
@@ -375,7 +404,7 @@ describe('Verifiable Credential Opearations', () => {
       should().exist(credentialDetail['credentialSubject']);
       should().exist(credentialDetail['credentialSchema']);
       should().exist(credentialDetail['credentialStatus']);
-      expect(credentialDetail['credentialStatus'].type).to.be.equal('CredentialStatusList2017');
+      expect(credentialDetail['credentialStatus'].type).to.be.equal('HypersignCredentialStatus2023');
     });
 
     it('should be able to generate new credential for a schema with signed subject DID doc', async function () {
@@ -389,7 +418,7 @@ describe('Verifiable Credential Opearations', () => {
 
       // console.log(tempCredentialBody)
       const credentialDetail = await hypersignVC.generate(tempCredentialBody);
-      // console.log(JSON.stringify(credentialDetail));
+      // console.log(JSON.stringify(credentialDetail, null, 2));
       expect(credentialDetail).to.be.a('object');
       should().exist(credentialDetail['@context']);
       should().exist(credentialDetail['id']);
@@ -399,7 +428,7 @@ describe('Verifiable Credential Opearations', () => {
       should().exist(credentialDetail['credentialSubject']);
       should().exist(credentialDetail['credentialSchema']);
       should().exist(credentialDetail['credentialStatus']);
-      expect(credentialDetail['credentialStatus'].type).to.be.equal('CredentialStatusList2017');
+      expect(credentialDetail['credentialStatus'].type).to.be.equal('HypersignCredentialStatus2023');
     });
   });
 
@@ -513,7 +542,7 @@ describe('Verifiable Credential Opearations', () => {
       const expirationDate = new Date('12/11/2027');
       const tempCredentialBody = { ...credentialBody };
       tempCredentialBody.schemaId = schemaId;
-      tempCredentialBody['subjectDidDocSigned'] = signedDocument;
+      tempCredentialBody['subjectDidDocSigned'] = holderSignedDidDoc;
       tempCredentialBody['expirationDate'] = expirationDate.toString();
       tempCredentialBody.issuerDid = didDocId;
       tempCredentialBody.fields = { name: 'varsha' };

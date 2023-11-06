@@ -68,13 +68,13 @@ class SchemaRpc {
             if (!this.hidClient) {
                 throw new Error('HID-SSI-SDK:: Error: SchemaRpc class is not initialise with offlinesigner');
             }
-            const typeUrl = `${constants_1.HID_COSMOS_MODULE}.${constants_1.HIDRpcEnums.MsgCreateSchema}`;
+            const typeUrl = `${constants_1.HID_COSMOS_MODULE}.${constants_1.HIDRpcEnums.MsgRegisterCredentialSchema}`;
             const txMessage = {
                 typeUrl,
-                value: generatedProto[constants_1.HIDRpcEnums.MsgCreateSchema].fromJSON({
-                    schemaDoc: schema,
-                    schemaProof: proof,
-                    creator: client_1.HIDClient.getHidWalletAddress(),
+                value: generatedProto[constants_1.HIDRpcEnums.MsgRegisterCredentialSchema].fromPartial({
+                    credentialSchemaDocument: schema,
+                    credentialSchemaProof: proof,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
                 }),
             };
             // TODO: need to find a way to make it dynamic
@@ -88,8 +88,8 @@ class SchemaRpc {
         return __awaiter(this, void 0, void 0, function* () {
             const getSchemaUrl = `${this.schemaRestEp}/${schemaId}:`;
             const response = yield axios_1.default.get(getSchemaUrl);
-            const { schema } = response.data;
-            return schema;
+            const { credentialSchemas } = response.data;
+            return credentialSchemas;
         });
     }
 }

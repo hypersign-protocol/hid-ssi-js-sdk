@@ -90,24 +90,6 @@ export default class DidApiService implements IDidApiService {
             `HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`
           );
         }
-        // if (!params.signInfos[i].clientSpec) {
-        //   throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to register a did`);
-        // }
-
-        // if (params.signInfos[i].clientSpec && !(params.signInfos[i].clientSpec.type in IClientSpec)) {
-        //   throw new Error('HID-SSI-SDK:: Error: params.clientSpec is invalid');
-        // }          
-        if (params.signInfos[i].clientSpec?.type === IClientSpec['cosmos-ADR036']) {
-          if (
-            params.signInfos[i].clientSpec?.adr036SignerAddress === '' ||
-            params.signInfos[i].clientSpec?.adr036SignerAddress === undefined
-          ) {
-            throw new Error(
-              `HID-SSI-SDK:: Error: params.signInfos[${i}].adr036SignerAddress is required to register a did, when clientSpec type is${params.signInfos[i].clientSpec?.type} `
-            );
-          }
-        }
-
         if (!params.signInfos[i].signature) {
           throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].signature is required to register a did`);
         }
@@ -196,16 +178,6 @@ export default class DidApiService implements IDidApiService {
           throw new Error(
             `HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to update a did`
           );
-        }
-        if (params.signInfos[i].clientSpec?.type === IClientSpec['cosmos-ADR036']) {
-          if (
-            params.signInfos[i].clientSpec?.adr036SignerAddress === '' ||
-            params.signInfos[i].clientSpec?.adr036SignerAddress === undefined
-          ) {
-            throw new Error(
-              `HID-SSI-SDK:: Error: params.signInfos[${i}].adr036SignerAddress is required to update a did, when clientSpec type is${params.signInfos[i].clientSpec?.type} `
-            );
-          }
         }
 
         if (!params.signInfos[i].signature) {

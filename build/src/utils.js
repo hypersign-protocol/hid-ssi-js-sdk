@@ -131,5 +131,33 @@ class Utils {
     static getFee() {
         return 'auto';
     }
+    static removeEmptyString(obj) {
+        if (Array.isArray(obj)) {
+            for (let i = obj.length - 1; i >= 0; i--) {
+                if (obj[i] === '' || (typeof obj[i] === 'object' && Object.keys(obj[i]).length === 0)) {
+                    obj.splice(i, 1);
+                }
+                else if (typeof obj[i] === 'object') {
+                    this.removeEmptyString(obj[i]);
+                }
+            }
+        }
+        else if (typeof obj === 'object' && obj !== null) {
+            for (const key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                    if (obj[key] === '') {
+                        delete obj[key];
+                    }
+                    else if (Array.isArray(obj[key])) {
+                        this.removeEmptyString(obj[key]);
+                    }
+                    else if (typeof obj[key] === 'object') {
+                        this.removeEmptyString(obj[key]);
+                    }
+                }
+            }
+        }
+        return obj;
+    }
 }
 exports.default = Utils;
