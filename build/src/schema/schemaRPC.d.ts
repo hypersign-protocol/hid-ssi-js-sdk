@@ -4,10 +4,12 @@
  * Author: Hypermine Core Team
  */
 import { OfflineSigner } from '@cosmjs/proto-signing';
-import { Schema, SchemaProof } from '../../libs/generated/ssi/schema';
+import { CredentialSchemaDocument } from '../../libs/generated/ssi/credential_schema';
+import { DocumentProof as SchemaProof } from '../../libs/generated/ssi/proof';
 import { DeliverTxResponse } from '@cosmjs/stargate';
+import { CredentialSchemaDocument as SchemaDocument } from '../../libs/generated/ssi/credential_schema';
 export interface ISchemaRPC {
-    createSchema(schema: Schema, proof: SchemaProof): Promise<object>;
+    createSchema(schema: SchemaDocument, proof: SchemaProof): Promise<object>;
     resolveSchema(schemaId: string): Promise<object>;
 }
 export declare class SchemaRpc implements ISchemaRPC {
@@ -19,7 +21,7 @@ export declare class SchemaRpc implements ISchemaRPC {
         nodeRestEndpoint: string;
     });
     init(): Promise<void>;
-    createSchema(schema: Schema, proof: SchemaProof): Promise<DeliverTxResponse>;
+    createSchema(schema: CredentialSchemaDocument, proof: SchemaProof): Promise<DeliverTxResponse>;
     resolveSchema(schemaId: string): Promise<Array<object>>;
 }
 //# sourceMappingURL=schemaRPC.d.ts.map

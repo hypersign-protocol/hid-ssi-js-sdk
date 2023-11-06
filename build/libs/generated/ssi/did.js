@@ -1,844 +1,635 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.DidDocumentState = exports.SignInfo = exports.Service = exports.VerificationMethod = exports.Metadata = exports.Did = exports.protobufPackage = void 0;
-/* eslint-disable */
-const clientSpec_1 = require("./clientSpec");
-const minimal_1 = require("protobufjs/minimal");
-exports.protobufPackage = "hypersignprotocol.hidnode.ssi";
-const baseDid = {
-    context: "",
-    id: "",
-    controller: "",
-    alsoKnownAs: "",
-    authentication: "",
-    assertionMethod: "",
-    keyAgreement: "",
-    capabilityInvocation: "",
-    capabilityDelegation: "",
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-exports.Did = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        for (const v of message.context) {
-            writer.uint32(10).string(v);
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DidDocumentState = exports.Service = exports.VerificationMethod = exports.DidDocumentMetadata = exports.DidDocument = exports.protobufPackage = void 0;
+/* eslint-disable */
+const minimal_1 = __importDefault(require("protobufjs/minimal"));
+exports.protobufPackage = "hypersign.ssi.v1";
+function createBaseDidDocument() {
+    return {};
+}
+exports.DidDocument = {
+    encode(message, writer = minimal_1.default.Writer.create()) {
+        if (message["@context"] !== undefined && message["@context"].length !== 0) {
+            for (const v of message["@context"]) {
+                writer.uint32(10).string(v);
+            }
         }
-        if (message.id !== "") {
+        if (message.id !== undefined && message.id !== "") {
             writer.uint32(18).string(message.id);
         }
-        for (const v of message.controller) {
-            writer.uint32(26).string(v);
+        if (message.controller !== undefined && message.controller.length !== 0) {
+            for (const v of message.controller) {
+                writer.uint32(26).string(v);
+            }
         }
-        for (const v of message.alsoKnownAs) {
-            writer.uint32(34).string(v);
+        if (message.alsoKnownAs !== undefined && message.alsoKnownAs.length !== 0) {
+            for (const v of message.alsoKnownAs) {
+                writer.uint32(34).string(v);
+            }
         }
-        for (const v of message.verificationMethod) {
-            exports.VerificationMethod.encode(v, writer.uint32(42).fork()).ldelim();
+        if (message.verificationMethod !== undefined && message.verificationMethod.length !== 0) {
+            for (const v of message.verificationMethod) {
+                exports.VerificationMethod.encode(v, writer.uint32(42).fork()).ldelim();
+            }
         }
-        for (const v of message.authentication) {
-            writer.uint32(50).string(v);
+        if (message.authentication !== undefined && message.authentication.length !== 0) {
+            for (const v of message.authentication) {
+                writer.uint32(50).string(v);
+            }
         }
-        for (const v of message.assertionMethod) {
-            writer.uint32(58).string(v);
+        if (message.assertionMethod !== undefined && message.assertionMethod.length !== 0) {
+            for (const v of message.assertionMethod) {
+                writer.uint32(58).string(v);
+            }
         }
-        for (const v of message.keyAgreement) {
-            writer.uint32(66).string(v);
+        if (message.keyAgreement !== undefined && message.keyAgreement.length !== 0) {
+            for (const v of message.keyAgreement) {
+                writer.uint32(66).string(v);
+            }
         }
-        for (const v of message.capabilityInvocation) {
-            writer.uint32(74).string(v);
+        if (message.capabilityInvocation !== undefined && message.capabilityInvocation.length !== 0) {
+            for (const v of message.capabilityInvocation) {
+                writer.uint32(74).string(v);
+            }
         }
-        for (const v of message.capabilityDelegation) {
-            writer.uint32(82).string(v);
+        if (message.capabilityDelegation !== undefined && message.capabilityDelegation.length !== 0) {
+            for (const v of message.capabilityDelegation) {
+                writer.uint32(82).string(v);
+            }
         }
-        for (const v of message.service) {
-            exports.Service.encode(v, writer.uint32(90).fork()).ldelim();
+        if (message.service !== undefined && message.service.length !== 0) {
+            for (const v of message.service) {
+                exports.Service.encode(v, writer.uint32(90).fork()).ldelim();
+            }
         }
         return writer;
     },
     decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
         let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseDid);
-        message.context = [];
-        message.controller = [];
-        message.alsoKnownAs = [];
-        message.verificationMethod = [];
-        message.authentication = [];
-        message.assertionMethod = [];
-        message.keyAgreement = [];
-        message.capabilityInvocation = [];
-        message.capabilityDelegation = [];
-        message.service = [];
+        const message = createBaseDidDocument();
         while (reader.pos < end) {
             const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
-                    message.context.push(reader.string());
-                    break;
+                    if (tag !== 10) {
+                        break;
+                    }
+                    if (message["@context"] === undefined) {
+                        message["@context"] = [];
+                    }
+                    message["@context"].push(reader.string());
+                    continue;
                 case 2:
+                    if (tag !== 18) {
+                        break;
+                    }
                     message.id = reader.string();
-                    break;
+                    continue;
                 case 3:
+                    if (tag !== 26) {
+                        break;
+                    }
+                    if (message.controller === undefined) {
+                        message.controller = [];
+                    }
                     message.controller.push(reader.string());
-                    break;
+                    continue;
                 case 4:
+                    if (tag !== 34) {
+                        break;
+                    }
+                    if (message.alsoKnownAs === undefined) {
+                        message.alsoKnownAs = [];
+                    }
                     message.alsoKnownAs.push(reader.string());
-                    break;
+                    continue;
                 case 5:
+                    if (tag !== 42) {
+                        break;
+                    }
+                    if (message.verificationMethod === undefined) {
+                        message.verificationMethod = [];
+                    }
                     message.verificationMethod.push(exports.VerificationMethod.decode(reader, reader.uint32()));
-                    break;
+                    continue;
                 case 6:
+                    if (tag !== 50) {
+                        break;
+                    }
+                    if (message.authentication === undefined) {
+                        message.authentication = [];
+                    }
                     message.authentication.push(reader.string());
-                    break;
+                    continue;
                 case 7:
+                    if (tag !== 58) {
+                        break;
+                    }
+                    if (message.assertionMethod === undefined) {
+                        message.assertionMethod = [];
+                    }
                     message.assertionMethod.push(reader.string());
-                    break;
+                    continue;
                 case 8:
+                    if (tag !== 66) {
+                        break;
+                    }
+                    if (message.keyAgreement === undefined) {
+                        message.keyAgreement = [];
+                    }
                     message.keyAgreement.push(reader.string());
-                    break;
+                    continue;
                 case 9:
+                    if (tag !== 74) {
+                        break;
+                    }
+                    if (message.capabilityInvocation === undefined) {
+                        message.capabilityInvocation = [];
+                    }
                     message.capabilityInvocation.push(reader.string());
-                    break;
+                    continue;
                 case 10:
+                    if (tag !== 82) {
+                        break;
+                    }
+                    if (message.capabilityDelegation === undefined) {
+                        message.capabilityDelegation = [];
+                    }
                     message.capabilityDelegation.push(reader.string());
-                    break;
+                    continue;
                 case 11:
+                    if (tag !== 90) {
+                        break;
+                    }
+                    if (message.service === undefined) {
+                        message.service = [];
+                    }
                     message.service.push(exports.Service.decode(reader, reader.uint32()));
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
+                    continue;
             }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
         }
         return message;
     },
     fromJSON(object) {
-        const message = Object.assign({}, baseDid);
-        message.context = [];
-        message.controller = [];
-        message.alsoKnownAs = [];
-        message.verificationMethod = [];
-        message.authentication = [];
-        message.assertionMethod = [];
-        message.keyAgreement = [];
-        message.capabilityInvocation = [];
-        message.capabilityDelegation = [];
-        message.service = [];
-        if (object.context !== undefined && object.context !== null) {
-            for (const e of object.context) {
-                message.context.push(String(e));
-            }
-        }
-        if (object.id !== undefined && object.id !== null) {
-            message.id = String(object.id);
-        }
-        else {
-            message.id = "";
-        }
-        if (object.controller !== undefined && object.controller !== null) {
-            for (const e of object.controller) {
-                message.controller.push(String(e));
-            }
-        }
-        if (object.alsoKnownAs !== undefined && object.alsoKnownAs !== null) {
-            for (const e of object.alsoKnownAs) {
-                message.alsoKnownAs.push(String(e));
-            }
-        }
-        if (object.verificationMethod !== undefined &&
-            object.verificationMethod !== null) {
-            for (const e of object.verificationMethod) {
-                message.verificationMethod.push(exports.VerificationMethod.fromJSON(e));
-            }
-        }
-        if (object.authentication !== undefined && object.authentication !== null) {
-            for (const e of object.authentication) {
-                message.authentication.push(String(e));
-            }
-        }
-        if (object.assertionMethod !== undefined &&
-            object.assertionMethod !== null) {
-            for (const e of object.assertionMethod) {
-                message.assertionMethod.push(String(e));
-            }
-        }
-        if (object.keyAgreement !== undefined && object.keyAgreement !== null) {
-            for (const e of object.keyAgreement) {
-                message.keyAgreement.push(String(e));
-            }
-        }
-        if (object.capabilityInvocation !== undefined &&
-            object.capabilityInvocation !== null) {
-            for (const e of object.capabilityInvocation) {
-                message.capabilityInvocation.push(String(e));
-            }
-        }
-        if (object.capabilityDelegation !== undefined &&
-            object.capabilityDelegation !== null) {
-            for (const e of object.capabilityDelegation) {
-                message.capabilityDelegation.push(String(e));
-            }
-        }
-        if (object.service !== undefined && object.service !== null) {
-            for (const e of object.service) {
-                message.service.push(exports.Service.fromJSON(e));
-            }
-        }
-        return message;
+        return {
+            "@context": globalThis.Array.isArray(object === null || object === void 0 ? void 0 : object["@context"])
+                ? object["@context"].map((e) => globalThis.String(e))
+                : undefined,
+            id: isSet(object.id) ? globalThis.String(object.id) : undefined,
+            controller: globalThis.Array.isArray(object === null || object === void 0 ? void 0 : object.controller)
+                ? object.controller.map((e) => globalThis.String(e))
+                : undefined,
+            alsoKnownAs: globalThis.Array.isArray(object === null || object === void 0 ? void 0 : object.alsoKnownAs)
+                ? object.alsoKnownAs.map((e) => globalThis.String(e))
+                : undefined,
+            verificationMethod: globalThis.Array.isArray(object === null || object === void 0 ? void 0 : object.verificationMethod)
+                ? object.verificationMethod.map((e) => exports.VerificationMethod.fromJSON(e))
+                : undefined,
+            authentication: globalThis.Array.isArray(object === null || object === void 0 ? void 0 : object.authentication)
+                ? object.authentication.map((e) => globalThis.String(e))
+                : undefined,
+            assertionMethod: globalThis.Array.isArray(object === null || object === void 0 ? void 0 : object.assertionMethod)
+                ? object.assertionMethod.map((e) => globalThis.String(e))
+                : undefined,
+            keyAgreement: globalThis.Array.isArray(object === null || object === void 0 ? void 0 : object.keyAgreement)
+                ? object.keyAgreement.map((e) => globalThis.String(e))
+                : undefined,
+            capabilityInvocation: globalThis.Array.isArray(object === null || object === void 0 ? void 0 : object.capabilityInvocation)
+                ? object.capabilityInvocation.map((e) => globalThis.String(e))
+                : undefined,
+            capabilityDelegation: globalThis.Array.isArray(object === null || object === void 0 ? void 0 : object.capabilityDelegation)
+                ? object.capabilityDelegation.map((e) => globalThis.String(e))
+                : undefined,
+            service: globalThis.Array.isArray(object === null || object === void 0 ? void 0 : object.service)
+                ? object.service.map((e) => exports.Service.fromJSON(e))
+                : undefined,
+        };
     },
     toJSON(message) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         const obj = {};
-        if (message.context) {
-            obj.context = message.context.map((e) => e);
+        if ((_a = message["@context"]) === null || _a === void 0 ? void 0 : _a.length) {
+            obj["@context"] = message["@context"];
         }
-        else {
-            obj.context = [];
+        if (message.id !== undefined && message.id !== "") {
+            obj.id = message.id;
         }
-        message.id !== undefined && (obj.id = message.id);
-        if (message.controller) {
-            obj.controller = message.controller.map((e) => e);
+        if ((_b = message.controller) === null || _b === void 0 ? void 0 : _b.length) {
+            obj.controller = message.controller;
         }
-        else {
-            obj.controller = [];
+        if ((_c = message.alsoKnownAs) === null || _c === void 0 ? void 0 : _c.length) {
+            obj.alsoKnownAs = message.alsoKnownAs;
         }
-        if (message.alsoKnownAs) {
-            obj.alsoKnownAs = message.alsoKnownAs.map((e) => e);
+        if ((_d = message.verificationMethod) === null || _d === void 0 ? void 0 : _d.length) {
+            obj.verificationMethod = message.verificationMethod.map((e) => exports.VerificationMethod.toJSON(e));
         }
-        else {
-            obj.alsoKnownAs = [];
+        if ((_e = message.authentication) === null || _e === void 0 ? void 0 : _e.length) {
+            obj.authentication = message.authentication;
         }
-        if (message.verificationMethod) {
-            obj.verificationMethod = message.verificationMethod.map((e) => e ? exports.VerificationMethod.toJSON(e) : undefined);
+        if ((_f = message.assertionMethod) === null || _f === void 0 ? void 0 : _f.length) {
+            obj.assertionMethod = message.assertionMethod;
         }
-        else {
-            obj.verificationMethod = [];
+        if ((_g = message.keyAgreement) === null || _g === void 0 ? void 0 : _g.length) {
+            obj.keyAgreement = message.keyAgreement;
         }
-        if (message.authentication) {
-            obj.authentication = message.authentication.map((e) => e);
+        if ((_h = message.capabilityInvocation) === null || _h === void 0 ? void 0 : _h.length) {
+            obj.capabilityInvocation = message.capabilityInvocation;
         }
-        else {
-            obj.authentication = [];
+        if ((_j = message.capabilityDelegation) === null || _j === void 0 ? void 0 : _j.length) {
+            obj.capabilityDelegation = message.capabilityDelegation;
         }
-        if (message.assertionMethod) {
-            obj.assertionMethod = message.assertionMethod.map((e) => e);
-        }
-        else {
-            obj.assertionMethod = [];
-        }
-        if (message.keyAgreement) {
-            obj.keyAgreement = message.keyAgreement.map((e) => e);
-        }
-        else {
-            obj.keyAgreement = [];
-        }
-        if (message.capabilityInvocation) {
-            obj.capabilityInvocation = message.capabilityInvocation.map((e) => e);
-        }
-        else {
-            obj.capabilityInvocation = [];
-        }
-        if (message.capabilityDelegation) {
-            obj.capabilityDelegation = message.capabilityDelegation.map((e) => e);
-        }
-        else {
-            obj.capabilityDelegation = [];
-        }
-        if (message.service) {
-            obj.service = message.service.map((e) => e ? exports.Service.toJSON(e) : undefined);
-        }
-        else {
-            obj.service = [];
+        if ((_k = message.service) === null || _k === void 0 ? void 0 : _k.length) {
+            obj.service = message.service.map((e) => exports.Service.toJSON(e));
         }
         return obj;
     },
+    create(base) {
+        return exports.DidDocument.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
     fromPartial(object) {
-        const message = Object.assign({}, baseDid);
-        message.context = [];
-        message.controller = [];
-        message.alsoKnownAs = [];
-        message.verificationMethod = [];
-        message.authentication = [];
-        message.assertionMethod = [];
-        message.keyAgreement = [];
-        message.capabilityInvocation = [];
-        message.capabilityDelegation = [];
-        message.service = [];
-        if (object.context !== undefined && object.context !== null) {
-            for (const e of object.context) {
-                message.context.push(e);
-            }
-        }
-        if (object.id !== undefined && object.id !== null) {
-            message.id = object.id;
-        }
-        else {
-            message.id = "";
-        }
-        if (object.controller !== undefined && object.controller !== null) {
-            for (const e of object.controller) {
-                message.controller.push(e);
-            }
-        }
-        if (object.alsoKnownAs !== undefined && object.alsoKnownAs !== null) {
-            for (const e of object.alsoKnownAs) {
-                message.alsoKnownAs.push(e);
-            }
-        }
-        if (object.verificationMethod !== undefined &&
-            object.verificationMethod !== null) {
-            for (const e of object.verificationMethod) {
-                message.verificationMethod.push(exports.VerificationMethod.fromPartial(e));
-            }
-        }
-        if (object.authentication !== undefined && object.authentication !== null) {
-            for (const e of object.authentication) {
-                message.authentication.push(e);
-            }
-        }
-        if (object.assertionMethod !== undefined &&
-            object.assertionMethod !== null) {
-            for (const e of object.assertionMethod) {
-                message.assertionMethod.push(e);
-            }
-        }
-        if (object.keyAgreement !== undefined && object.keyAgreement !== null) {
-            for (const e of object.keyAgreement) {
-                message.keyAgreement.push(e);
-            }
-        }
-        if (object.capabilityInvocation !== undefined &&
-            object.capabilityInvocation !== null) {
-            for (const e of object.capabilityInvocation) {
-                message.capabilityInvocation.push(e);
-            }
-        }
-        if (object.capabilityDelegation !== undefined &&
-            object.capabilityDelegation !== null) {
-            for (const e of object.capabilityDelegation) {
-                message.capabilityDelegation.push(e);
-            }
-        }
-        if (object.service !== undefined && object.service !== null) {
-            for (const e of object.service) {
-                message.service.push(exports.Service.fromPartial(e));
-            }
-        }
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+        const message = createBaseDidDocument();
+        message["@context"] = ((_a = object["@context"]) === null || _a === void 0 ? void 0 : _a.map((e) => e)) || undefined;
+        message.id = (_b = object.id) !== null && _b !== void 0 ? _b : undefined;
+        message.controller = ((_c = object.controller) === null || _c === void 0 ? void 0 : _c.map((e) => e)) || undefined;
+        message.alsoKnownAs = ((_d = object.alsoKnownAs) === null || _d === void 0 ? void 0 : _d.map((e) => e)) || undefined;
+        message.verificationMethod = ((_e = object.verificationMethod) === null || _e === void 0 ? void 0 : _e.map((e) => exports.VerificationMethod.fromPartial(e))) || undefined;
+        message.authentication = ((_f = object.authentication) === null || _f === void 0 ? void 0 : _f.map((e) => e)) || undefined;
+        message.assertionMethod = ((_g = object.assertionMethod) === null || _g === void 0 ? void 0 : _g.map((e) => e)) || undefined;
+        message.keyAgreement = ((_h = object.keyAgreement) === null || _h === void 0 ? void 0 : _h.map((e) => e)) || undefined;
+        message.capabilityInvocation = ((_j = object.capabilityInvocation) === null || _j === void 0 ? void 0 : _j.map((e) => e)) || undefined;
+        message.capabilityDelegation = ((_k = object.capabilityDelegation) === null || _k === void 0 ? void 0 : _k.map((e) => e)) || undefined;
+        message.service = ((_l = object.service) === null || _l === void 0 ? void 0 : _l.map((e) => exports.Service.fromPartial(e))) || undefined;
         return message;
     },
 };
-const baseMetadata = {
-    created: "",
-    updated: "",
-    deactivated: false,
-    versionId: "",
-};
-exports.Metadata = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.created !== "") {
+function createBaseDidDocumentMetadata() {
+    return {};
+}
+exports.DidDocumentMetadata = {
+    encode(message, writer = minimal_1.default.Writer.create()) {
+        if (message.created !== undefined && message.created !== "") {
             writer.uint32(10).string(message.created);
         }
-        if (message.updated !== "") {
+        if (message.updated !== undefined && message.updated !== "") {
             writer.uint32(18).string(message.updated);
         }
         if (message.deactivated === true) {
             writer.uint32(24).bool(message.deactivated);
         }
-        if (message.versionId !== "") {
+        if (message.versionId !== undefined && message.versionId !== "") {
             writer.uint32(34).string(message.versionId);
         }
         return writer;
     },
     decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
         let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseMetadata);
+        const message = createBaseDidDocumentMetadata();
         while (reader.pos < end) {
             const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
+                    if (tag !== 10) {
+                        break;
+                    }
                     message.created = reader.string();
-                    break;
+                    continue;
                 case 2:
+                    if (tag !== 18) {
+                        break;
+                    }
                     message.updated = reader.string();
-                    break;
+                    continue;
                 case 3:
+                    if (tag !== 24) {
+                        break;
+                    }
                     message.deactivated = reader.bool();
-                    break;
+                    continue;
                 case 4:
+                    if (tag !== 34) {
+                        break;
+                    }
                     message.versionId = reader.string();
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
+                    continue;
             }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
         }
         return message;
     },
     fromJSON(object) {
-        const message = Object.assign({}, baseMetadata);
-        if (object.created !== undefined && object.created !== null) {
-            message.created = String(object.created);
-        }
-        else {
-            message.created = "";
-        }
-        if (object.updated !== undefined && object.updated !== null) {
-            message.updated = String(object.updated);
-        }
-        else {
-            message.updated = "";
-        }
-        if (object.deactivated !== undefined && object.deactivated !== null) {
-            message.deactivated = Boolean(object.deactivated);
-        }
-        else {
-            message.deactivated = false;
-        }
-        if (object.versionId !== undefined && object.versionId !== null) {
-            message.versionId = String(object.versionId);
-        }
-        else {
-            message.versionId = "";
-        }
-        return message;
+        return {
+            created: isSet(object.created) ? globalThis.String(object.created) : undefined,
+            updated: isSet(object.updated) ? globalThis.String(object.updated) : undefined,
+            deactivated: isSet(object.deactivated) ? globalThis.Boolean(object.deactivated) : undefined,
+            versionId: isSet(object.versionId) ? globalThis.String(object.versionId) : undefined,
+        };
     },
     toJSON(message) {
         const obj = {};
-        message.created !== undefined && (obj.created = message.created);
-        message.updated !== undefined && (obj.updated = message.updated);
-        message.deactivated !== undefined &&
-            (obj.deactivated = message.deactivated);
-        message.versionId !== undefined && (obj.versionId = message.versionId);
+        if (message.created !== undefined && message.created !== "") {
+            obj.created = message.created;
+        }
+        if (message.updated !== undefined && message.updated !== "") {
+            obj.updated = message.updated;
+        }
+        if (message.deactivated === true) {
+            obj.deactivated = message.deactivated;
+        }
+        if (message.versionId !== undefined && message.versionId !== "") {
+            obj.versionId = message.versionId;
+        }
         return obj;
     },
+    create(base) {
+        return exports.DidDocumentMetadata.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
     fromPartial(object) {
-        const message = Object.assign({}, baseMetadata);
-        if (object.created !== undefined && object.created !== null) {
-            message.created = object.created;
-        }
-        else {
-            message.created = "";
-        }
-        if (object.updated !== undefined && object.updated !== null) {
-            message.updated = object.updated;
-        }
-        else {
-            message.updated = "";
-        }
-        if (object.deactivated !== undefined && object.deactivated !== null) {
-            message.deactivated = object.deactivated;
-        }
-        else {
-            message.deactivated = false;
-        }
-        if (object.versionId !== undefined && object.versionId !== null) {
-            message.versionId = object.versionId;
-        }
-        else {
-            message.versionId = "";
-        }
+        var _a, _b, _c, _d;
+        const message = createBaseDidDocumentMetadata();
+        message.created = (_a = object.created) !== null && _a !== void 0 ? _a : undefined;
+        message.updated = (_b = object.updated) !== null && _b !== void 0 ? _b : undefined;
+        message.deactivated = (_c = object.deactivated) !== null && _c !== void 0 ? _c : undefined;
+        message.versionId = (_d = object.versionId) !== null && _d !== void 0 ? _d : undefined;
         return message;
     },
 };
-const baseVerificationMethod = {
-    id: "",
-    type: "",
-    controller: "",
-    publicKeyMultibase: "",
-    blockchainAccountId: "",
-};
+function createBaseVerificationMethod() {
+    return {};
+}
 exports.VerificationMethod = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.id !== "") {
+    encode(message, writer = minimal_1.default.Writer.create()) {
+        if (message.id !== undefined && message.id !== "") {
             writer.uint32(10).string(message.id);
         }
-        if (message.type !== "") {
+        if (message.type !== undefined && message.type !== "") {
             writer.uint32(18).string(message.type);
         }
-        if (message.controller !== "") {
+        if (message.controller !== undefined && message.controller !== "") {
             writer.uint32(26).string(message.controller);
         }
-        if (message.publicKeyMultibase !== "") {
+        if (message.publicKeyMultibase !== undefined && message.publicKeyMultibase !== "") {
             writer.uint32(34).string(message.publicKeyMultibase);
         }
-        if (message.blockchainAccountId !== "") {
+        if (message.blockchainAccountId !== undefined && message.blockchainAccountId !== "") {
             writer.uint32(42).string(message.blockchainAccountId);
         }
         return writer;
     },
     decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
         let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseVerificationMethod);
+        const message = createBaseVerificationMethod();
         while (reader.pos < end) {
             const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
+                    if (tag !== 10) {
+                        break;
+                    }
                     message.id = reader.string();
-                    break;
+                    continue;
                 case 2:
+                    if (tag !== 18) {
+                        break;
+                    }
                     message.type = reader.string();
-                    break;
+                    continue;
                 case 3:
+                    if (tag !== 26) {
+                        break;
+                    }
                     message.controller = reader.string();
-                    break;
+                    continue;
                 case 4:
+                    if (tag !== 34) {
+                        break;
+                    }
                     message.publicKeyMultibase = reader.string();
-                    break;
+                    continue;
                 case 5:
+                    if (tag !== 42) {
+                        break;
+                    }
                     message.blockchainAccountId = reader.string();
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
+                    continue;
             }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
         }
         return message;
     },
     fromJSON(object) {
-        const message = Object.assign({}, baseVerificationMethod);
-        if (object.id !== undefined && object.id !== null) {
-            message.id = String(object.id);
-        }
-        else {
-            message.id = "";
-        }
-        if (object.type !== undefined && object.type !== null) {
-            message.type = String(object.type);
-        }
-        else {
-            message.type = "";
-        }
-        if (object.controller !== undefined && object.controller !== null) {
-            message.controller = String(object.controller);
-        }
-        else {
-            message.controller = "";
-        }
-        if (object.publicKeyMultibase !== undefined &&
-            object.publicKeyMultibase !== null) {
-            message.publicKeyMultibase = String(object.publicKeyMultibase);
-        }
-        else {
-            message.publicKeyMultibase = "";
-        }
-        if (object.blockchainAccountId !== undefined &&
-            object.blockchainAccountId !== null) {
-            message.blockchainAccountId = String(object.blockchainAccountId);
-        }
-        else {
-            message.blockchainAccountId = "";
-        }
-        return message;
+        return {
+            id: isSet(object.id) ? globalThis.String(object.id) : undefined,
+            type: isSet(object.type) ? globalThis.String(object.type) : undefined,
+            controller: isSet(object.controller) ? globalThis.String(object.controller) : undefined,
+            publicKeyMultibase: isSet(object.publicKeyMultibase) ? globalThis.String(object.publicKeyMultibase) : undefined,
+            blockchainAccountId: isSet(object.blockchainAccountId)
+                ? globalThis.String(object.blockchainAccountId)
+                : undefined,
+        };
     },
     toJSON(message) {
         const obj = {};
-        message.id !== undefined && (obj.id = message.id);
-        message.type !== undefined && (obj.type = message.type);
-        message.controller !== undefined && (obj.controller = message.controller);
-        message.publicKeyMultibase !== undefined &&
-            (obj.publicKeyMultibase = message.publicKeyMultibase);
-        message.blockchainAccountId !== undefined &&
-            (obj.blockchainAccountId = message.blockchainAccountId);
+        if (message.id !== undefined && message.id !== "") {
+            obj.id = message.id;
+        }
+        if (message.type !== undefined && message.type !== "") {
+            obj.type = message.type;
+        }
+        if (message.controller !== undefined && message.controller !== "") {
+            obj.controller = message.controller;
+        }
+        if (message.publicKeyMultibase !== undefined && message.publicKeyMultibase !== "") {
+            obj.publicKeyMultibase = message.publicKeyMultibase;
+        }
+        if (message.blockchainAccountId !== undefined && message.blockchainAccountId !== "") {
+            obj.blockchainAccountId = message.blockchainAccountId;
+        }
         return obj;
     },
+    create(base) {
+        return exports.VerificationMethod.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
     fromPartial(object) {
-        const message = Object.assign({}, baseVerificationMethod);
-        if (object.id !== undefined && object.id !== null) {
-            message.id = object.id;
-        }
-        else {
-            message.id = "";
-        }
-        if (object.type !== undefined && object.type !== null) {
-            message.type = object.type;
-        }
-        else {
-            message.type = "";
-        }
-        if (object.controller !== undefined && object.controller !== null) {
-            message.controller = object.controller;
-        }
-        else {
-            message.controller = "";
-        }
-        if (object.publicKeyMultibase !== undefined &&
-            object.publicKeyMultibase !== null) {
-            message.publicKeyMultibase = object.publicKeyMultibase;
-        }
-        else {
-            message.publicKeyMultibase = "";
-        }
-        if (object.blockchainAccountId !== undefined &&
-            object.blockchainAccountId !== null) {
-            message.blockchainAccountId = object.blockchainAccountId;
-        }
-        else {
-            message.blockchainAccountId = "";
-        }
+        var _a, _b, _c, _d, _e;
+        const message = createBaseVerificationMethod();
+        message.id = (_a = object.id) !== null && _a !== void 0 ? _a : undefined;
+        message.type = (_b = object.type) !== null && _b !== void 0 ? _b : undefined;
+        message.controller = (_c = object.controller) !== null && _c !== void 0 ? _c : undefined;
+        message.publicKeyMultibase = (_d = object.publicKeyMultibase) !== null && _d !== void 0 ? _d : undefined;
+        message.blockchainAccountId = (_e = object.blockchainAccountId) !== null && _e !== void 0 ? _e : undefined;
         return message;
     },
 };
-const baseService = { id: "", type: "", serviceEndpoint: "" };
+function createBaseService() {
+    return {};
+}
 exports.Service = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.id !== "") {
+    encode(message, writer = minimal_1.default.Writer.create()) {
+        if (message.id !== undefined && message.id !== "") {
             writer.uint32(10).string(message.id);
         }
-        if (message.type !== "") {
+        if (message.type !== undefined && message.type !== "") {
             writer.uint32(18).string(message.type);
         }
-        if (message.serviceEndpoint !== "") {
+        if (message.serviceEndpoint !== undefined && message.serviceEndpoint !== "") {
             writer.uint32(26).string(message.serviceEndpoint);
         }
         return writer;
     },
     decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
         let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseService);
+        const message = createBaseService();
         while (reader.pos < end) {
             const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
+                    if (tag !== 10) {
+                        break;
+                    }
                     message.id = reader.string();
-                    break;
+                    continue;
                 case 2:
+                    if (tag !== 18) {
+                        break;
+                    }
                     message.type = reader.string();
-                    break;
+                    continue;
                 case 3:
+                    if (tag !== 26) {
+                        break;
+                    }
                     message.serviceEndpoint = reader.string();
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
+                    continue;
             }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
         }
         return message;
     },
     fromJSON(object) {
-        const message = Object.assign({}, baseService);
-        if (object.id !== undefined && object.id !== null) {
-            message.id = String(object.id);
-        }
-        else {
-            message.id = "";
-        }
-        if (object.type !== undefined && object.type !== null) {
-            message.type = String(object.type);
-        }
-        else {
-            message.type = "";
-        }
-        if (object.serviceEndpoint !== undefined &&
-            object.serviceEndpoint !== null) {
-            message.serviceEndpoint = String(object.serviceEndpoint);
-        }
-        else {
-            message.serviceEndpoint = "";
-        }
-        return message;
+        return {
+            id: isSet(object.id) ? globalThis.String(object.id) : undefined,
+            type: isSet(object.type) ? globalThis.String(object.type) : undefined,
+            serviceEndpoint: isSet(object.serviceEndpoint) ? globalThis.String(object.serviceEndpoint) : undefined,
+        };
     },
     toJSON(message) {
         const obj = {};
-        message.id !== undefined && (obj.id = message.id);
-        message.type !== undefined && (obj.type = message.type);
-        message.serviceEndpoint !== undefined &&
-            (obj.serviceEndpoint = message.serviceEndpoint);
+        if (message.id !== undefined && message.id !== "") {
+            obj.id = message.id;
+        }
+        if (message.type !== undefined && message.type !== "") {
+            obj.type = message.type;
+        }
+        if (message.serviceEndpoint !== undefined && message.serviceEndpoint !== "") {
+            obj.serviceEndpoint = message.serviceEndpoint;
+        }
         return obj;
     },
+    create(base) {
+        return exports.Service.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
     fromPartial(object) {
-        const message = Object.assign({}, baseService);
-        if (object.id !== undefined && object.id !== null) {
-            message.id = object.id;
-        }
-        else {
-            message.id = "";
-        }
-        if (object.type !== undefined && object.type !== null) {
-            message.type = object.type;
-        }
-        else {
-            message.type = "";
-        }
-        if (object.serviceEndpoint !== undefined &&
-            object.serviceEndpoint !== null) {
-            message.serviceEndpoint = object.serviceEndpoint;
-        }
-        else {
-            message.serviceEndpoint = "";
-        }
+        var _a, _b, _c;
+        const message = createBaseService();
+        message.id = (_a = object.id) !== null && _a !== void 0 ? _a : undefined;
+        message.type = (_b = object.type) !== null && _b !== void 0 ? _b : undefined;
+        message.serviceEndpoint = (_c = object.serviceEndpoint) !== null && _c !== void 0 ? _c : undefined;
         return message;
     },
 };
-const baseSignInfo = { verification_method_id: "", signature: "" };
-exports.SignInfo = {
-    encode(message, writer = minimal_1.Writer.create()) {
-        if (message.verification_method_id !== "") {
-            writer.uint32(10).string(message.verification_method_id);
-        }
-        if (message.signature !== "") {
-            writer.uint32(18).string(message.signature);
-        }
-        if (message.clientSpec !== undefined) {
-            clientSpec_1.ClientSpec.encode(message.clientSpec, writer.uint32(26).fork()).ldelim();
-        }
-        return writer;
-    },
-    decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
-        let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseSignInfo);
-        while (reader.pos < end) {
-            const tag = reader.uint32();
-            switch (tag >>> 3) {
-                case 1:
-                    message.verification_method_id = reader.string();
-                    break;
-                case 2:
-                    message.signature = reader.string();
-                    break;
-                case 3:
-                    message.clientSpec = clientSpec_1.ClientSpec.decode(reader, reader.uint32());
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
-            }
-        }
-        return message;
-    },
-    fromJSON(object) {
-        const message = Object.assign({}, baseSignInfo);
-        if (object.verification_method_id !== undefined &&
-            object.verification_method_id !== null) {
-            message.verification_method_id = String(object.verification_method_id);
-        }
-        else {
-            message.verification_method_id = "";
-        }
-        if (object.signature !== undefined && object.signature !== null) {
-            message.signature = String(object.signature);
-        }
-        else {
-            message.signature = "";
-        }
-        if (object.clientSpec !== undefined && object.clientSpec !== null) {
-            message.clientSpec = clientSpec_1.ClientSpec.fromJSON(object.clientSpec);
-        }
-        else {
-            message.clientSpec = undefined;
-        }
-        return message;
-    },
-    toJSON(message) {
-        const obj = {};
-        message.verification_method_id !== undefined &&
-            (obj.verification_method_id = message.verification_method_id);
-        message.signature !== undefined && (obj.signature = message.signature);
-        message.clientSpec !== undefined &&
-            (obj.clientSpec = message.clientSpec
-                ? clientSpec_1.ClientSpec.toJSON(message.clientSpec)
-                : undefined);
-        return obj;
-    },
-    fromPartial(object) {
-        const message = Object.assign({}, baseSignInfo);
-        if (object.verification_method_id !== undefined &&
-            object.verification_method_id !== null) {
-            message.verification_method_id = object.verification_method_id;
-        }
-        else {
-            message.verification_method_id = "";
-        }
-        if (object.signature !== undefined && object.signature !== null) {
-            message.signature = object.signature;
-        }
-        else {
-            message.signature = "";
-        }
-        if (object.clientSpec !== undefined && object.clientSpec !== null) {
-            message.clientSpec = clientSpec_1.ClientSpec.fromPartial(object.clientSpec);
-        }
-        else {
-            message.clientSpec = undefined;
-        }
-        return message;
-    },
-};
-const baseDidDocumentState = {};
+function createBaseDidDocumentState() {
+    return {};
+}
 exports.DidDocumentState = {
-    encode(message, writer = minimal_1.Writer.create()) {
+    encode(message, writer = minimal_1.default.Writer.create()) {
         if (message.didDocument !== undefined) {
-            exports.Did.encode(message.didDocument, writer.uint32(10).fork()).ldelim();
+            exports.DidDocument.encode(message.didDocument, writer.uint32(10).fork()).ldelim();
         }
         if (message.didDocumentMetadata !== undefined) {
-            exports.Metadata.encode(message.didDocumentMetadata, writer.uint32(18).fork()).ldelim();
+            exports.DidDocumentMetadata.encode(message.didDocumentMetadata, writer.uint32(18).fork()).ldelim();
         }
         return writer;
     },
     decode(input, length) {
-        const reader = input instanceof Uint8Array ? new minimal_1.Reader(input) : input;
+        const reader = input instanceof minimal_1.default.Reader ? input : minimal_1.default.Reader.create(input);
         let end = length === undefined ? reader.len : reader.pos + length;
-        const message = Object.assign({}, baseDidDocumentState);
+        const message = createBaseDidDocumentState();
         while (reader.pos < end) {
             const tag = reader.uint32();
             switch (tag >>> 3) {
                 case 1:
-                    message.didDocument = exports.Did.decode(reader, reader.uint32());
-                    break;
+                    if (tag !== 10) {
+                        break;
+                    }
+                    message.didDocument = exports.DidDocument.decode(reader, reader.uint32());
+                    continue;
                 case 2:
-                    message.didDocumentMetadata = exports.Metadata.decode(reader, reader.uint32());
-                    break;
-                default:
-                    reader.skipType(tag & 7);
-                    break;
+                    if (tag !== 18) {
+                        break;
+                    }
+                    message.didDocumentMetadata = exports.DidDocumentMetadata.decode(reader, reader.uint32());
+                    continue;
             }
+            if ((tag & 7) === 4 || tag === 0) {
+                break;
+            }
+            reader.skipType(tag & 7);
         }
         return message;
     },
     fromJSON(object) {
-        const message = Object.assign({}, baseDidDocumentState);
-        if (object.didDocument !== undefined && object.didDocument !== null) {
-            message.didDocument = exports.Did.fromJSON(object.didDocument);
-        }
-        else {
-            message.didDocument = undefined;
-        }
-        if (object.didDocumentMetadata !== undefined &&
-            object.didDocumentMetadata !== null) {
-            message.didDocumentMetadata = exports.Metadata.fromJSON(object.didDocumentMetadata);
-        }
-        else {
-            message.didDocumentMetadata = undefined;
-        }
-        return message;
+        return {
+            didDocument: isSet(object.didDocument) ? exports.DidDocument.fromJSON(object.didDocument) : undefined,
+            didDocumentMetadata: isSet(object.didDocumentMetadata)
+                ? exports.DidDocumentMetadata.fromJSON(object.didDocumentMetadata)
+                : undefined,
+        };
     },
     toJSON(message) {
         const obj = {};
-        message.didDocument !== undefined &&
-            (obj.didDocument = message.didDocument
-                ? exports.Did.toJSON(message.didDocument)
-                : undefined);
-        message.didDocumentMetadata !== undefined &&
-            (obj.didDocumentMetadata = message.didDocumentMetadata
-                ? exports.Metadata.toJSON(message.didDocumentMetadata)
-                : undefined);
+        if (message.didDocument !== undefined) {
+            obj.didDocument = exports.DidDocument.toJSON(message.didDocument);
+        }
+        if (message.didDocumentMetadata !== undefined) {
+            obj.didDocumentMetadata = exports.DidDocumentMetadata.toJSON(message.didDocumentMetadata);
+        }
         return obj;
     },
+    create(base) {
+        return exports.DidDocumentState.fromPartial(base !== null && base !== void 0 ? base : {});
+    },
     fromPartial(object) {
-        const message = Object.assign({}, baseDidDocumentState);
-        if (object.didDocument !== undefined && object.didDocument !== null) {
-            message.didDocument = exports.Did.fromPartial(object.didDocument);
-        }
-        else {
-            message.didDocument = undefined;
-        }
-        if (object.didDocumentMetadata !== undefined &&
-            object.didDocumentMetadata !== null) {
-            message.didDocumentMetadata = exports.Metadata.fromPartial(object.didDocumentMetadata);
-        }
-        else {
-            message.didDocumentMetadata = undefined;
-        }
+        const message = createBaseDidDocumentState();
+        message.didDocument = (object.didDocument !== undefined && object.didDocument !== null)
+            ? exports.DidDocument.fromPartial(object.didDocument)
+            : undefined;
+        message.didDocumentMetadata = (object.didDocumentMetadata !== undefined && object.didDocumentMetadata !== null)
+            ? exports.DidDocumentMetadata.fromPartial(object.didDocumentMetadata)
+            : undefined;
         return message;
     },
 };
+function isSet(value) {
+    return value !== null && value !== undefined;
+}

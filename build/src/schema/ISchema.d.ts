@@ -3,7 +3,8 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
-import { Schema, SchemaDocument } from '../../libs/generated/ssi/schema';
+import { CredentialSchemaState as Schema, CredentialSchemaDocument as SchemaDocument } from '../../libs/generated/ssi/credential_schema';
+import { DocumentProof } from '../../libs/generated/ssi/proof';
 export interface ISchemaFields {
     type: string;
     format?: string;
@@ -22,7 +23,7 @@ export interface ISchemaMethods {
         privateKeyMultibase: string;
         schema: SchemaDocument;
         verificationMethodId: string;
-    }): Promise<Schema>;
+    }): Promise<IResolveSchema>;
     register(params: {
         schema: Schema;
     }): Promise<{
@@ -30,6 +31,9 @@ export interface ISchemaMethods {
     }>;
     resolve(params: {
         schemaId: string;
-    }): Promise<Schema>;
+    }): Promise<IResolveSchema>;
+}
+export interface IResolveSchema extends SchemaDocument {
+    proof: DocumentProof;
 }
 //# sourceMappingURL=ISchema.d.ts.map

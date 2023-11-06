@@ -1,4 +1,4 @@
-import { Did } from '../libs/generated/ssi/did';
+import { DidDocument as Did } from '../libs/generated/ssi/did';
 export default class Utils {
     static getUUID(): Promise<string>;
     static checkUrl(url: string): string;
@@ -23,5 +23,6 @@ export default class Utils {
     static jsonToLdConvertor(json: any): Did;
     static ldToJsonConvertor(ld: any): {};
     static getFee(): string;
+    static removeEmptyString(obj: object): object;
 }
 //# sourceMappingURL=utils.d.ts.map

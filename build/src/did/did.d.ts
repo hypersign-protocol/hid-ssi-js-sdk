@@ -1,6 +1,8 @@
-import { Did, SignInfo } from '../../libs/generated/ssi/did';
+import { DidDocument as Did } from '../../libs/generated/ssi/did';
+import { DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
 import Web3 from 'web3';
-import { IDID, IDIDResolve, ISignedDIDDocument, IKeyType, IClientSpec, IVerificationRelationships, ISignData } from './IDID';
+import { IDID, IDIDResolve, ISignedDIDDocument, IClientSpec, ISignData } from './IDID';
+import { VerificationMethodRelationships, VerificationMethodTypes } from '../../libs/generated/ssi/client/enums';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 /** Class representing HypersignDID */
 export default class HypersignDID implements IDID {
@@ -23,7 +25,11 @@ export default class HypersignDID implements IDID {
         nodeRestEndpoint?: string;
         entityApiSecretKey?: string;
     });
+    private _getDateTime;
     private _sign;
+    private _jsonLdSign;
+    private _jsonLdNormalize;
+    private _concat;
     private _getId;
     private _filterVerificationRelationships;
     /**
@@ -59,7 +65,7 @@ export default class HypersignDID implements IDID {
     generate(params: {
         methodSpecificId?: string;
         publicKeyMultibase: string;
-        verificationRelationships?: IVerificationRelationships[];
+        verificationRelationships?: VerificationMethodRelationships[];
     }): Promise<Did>;
     /**
      * Register a new DID and Document in Hypersign blockchain - an onchain activity
@@ -181,7 +187,7 @@ export default class HypersignDID implements IDID {
         address: string;
         chainId: string;
         clientSpec: IClientSpec;
-        verificationRelationships?: IVerificationRelationships[];
+        verificationRelationships?: VerificationMethodRelationships[];
     }): Promise<Did>;
     /**
      * Register did on chain generated using wallet
@@ -257,18 +263,17 @@ export default class HypersignDID implements IDID {
      * - params.address              : Checksum address from web3 wallet
      * - params.web3                 : web3 object
      * - params.chainId              : Optional, chainId
-     * @returns {Promise<{ didDocument: Did; signature: string }>}
+     * - params.verificationMethodId : verificationMEthodId for generating signature
+     * @returns {Promise<ISignedDIDDocument>}
      */
     signByClientSpec(params: {
         didDocument: Did;
         clientSpec: IClientSpec;
         address: string;
         web3: Web3 | any;
+        verificationMethodId: string;
         chainId?: string;
-    }): Promise<{
-        didDocument: Did;
-        signature: string;
-    }>;
+    }): Promise<ISignedDIDDocument>;
     /**
      * Add verification method
      * @param
@@ -284,7 +289,7 @@ export default class HypersignDID implements IDID {
     addVerificationMethod(params: {
         did?: string;
         didDocument?: Did;
-        type: IKeyType;
+        type: VerificationMethodTypes;
         id?: string;
         controller?: string;
         publicKeyMultibase?: string;

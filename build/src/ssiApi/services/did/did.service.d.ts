@@ -1,4 +1,4 @@
-import { Did } from '../../../../libs/generated/ssi/did';
+import { DidDocument as Did } from '../../../../libs/generated/ssi/did';
 import { IDIDResolve } from '../../../did/IDID';
 import { IDidApiService, IGenerateDid, IRegister, IUpdate } from './IDIDApi';
 export default class DidApiService implements IDidApiService {

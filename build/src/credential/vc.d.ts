@@ -1,5 +1,6 @@
-import { ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema, ICredentialProof } from './ICredential';
-import { CredentialStatus, CredentialProof } from '../../libs/generated/ssi/credential';
+import { ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema, ICredentialProof, IResolveCredential } from './ICredential';
+import { CredentialStatusDocument as CredentialStatus } from '../../libs/generated/ssi/credential_status';
+import { DocumentProof as CredentialProof } from '../../libs/generated/ssi/proof';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { IClientSpec } from '../did/IDID';
@@ -33,6 +34,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     private _checkIfAllRequiredPropsAreSent;
     private _getCredentialSubject;
     private _getCredentialContext;
+    private _toTitleCase;
     /**
      * Initialise the offlinesigner to interact with Hypersign blockchain
      */
@@ -102,11 +104,11 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
      * Resolves credential status from Hypersign Blokchain
      * @params
      *  - params.credentialId           : Verifiable credential id
-     * @returns {Promise<CredentialStatus>}
+     * @returns {Promise<IResolveCredential>}
      */
     resolveCredentialStatus(params: {
         credentialId: string;
-    }): Promise<CredentialStatus>;
+    }): Promise<IResolveCredential>;
     /**
      * Update credential status in blockchain Hypersign Blokchain
      * @params

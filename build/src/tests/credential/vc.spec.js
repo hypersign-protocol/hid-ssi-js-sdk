@@ -36,6 +36,9 @@ let credenStatus;
 let credentialStatusProof2 = {};
 let credentialStatus2 = {};
 let credentialStatus;
+let holderDidDocument;
+let holderSignedDidDoc;
+let holdersPrivateKeyMultibase;
 const entityApiSecretKey = '57ed4af5b3f51428250e76a769ce8.d8f70a64e3d060b377c85eb75b60ae25011ecebb63f28a27f72183e5bcba140222f8628f17a72eee4833a9174f5ae8309';
 const credentialBody = {
     schemaId: '',
@@ -98,7 +101,34 @@ describe('DID Opearations', () => {
             return __awaiter(this, void 0, void 0, function* () {
                 didDocument = yield hypersignDID.generate({ publicKeyMultibase });
                 didDocId = didDocument['id'];
+                console.log(didDocId);
                 verificationMethodId = didDocument['verificationMethod'][0].id;
+                (0, chai_1.expect)(didDocument).to.be.a('object');
+                (0, chai_1.should)().exist(didDocument['@context']);
+                (0, chai_1.should)().exist(didDocument['id']);
+                (0, chai_1.should)().exist(didDocument['controller']);
+                (0, chai_1.should)().exist(didDocument['alsoKnownAs']);
+                (0, chai_1.should)().exist(didDocument['verificationMethod']);
+                (0, chai_1.expect)(didDocument['verificationMethod'] &&
+                    didDocument['authentication'] &&
+                    didDocument['assertionMethod'] &&
+                    didDocument['keyAgreement'] &&
+                    didDocument['capabilityInvocation'] &&
+                    didDocument['capabilityDelegation'] &&
+                    didDocument['service']).to.be.a('array');
+                (0, chai_1.should)().exist(didDocument['authentication']);
+                (0, chai_1.should)().exist(didDocument['assertionMethod']);
+                (0, chai_1.should)().exist(didDocument['keyAgreement']);
+                (0, chai_1.should)().exist(didDocument['capabilityInvocation']);
+                (0, chai_1.should)().exist(didDocument['capabilityDelegation']);
+                (0, chai_1.should)().exist(didDocument['service']);
+            });
+        });
+        it('should be able to generate didDocument', function () {
+            return __awaiter(this, void 0, void 0, function* () {
+                const kp = yield hypersignDID.generateKeys();
+                holdersPrivateKeyMultibase = kp.privateKeyMultibase;
+                holderDidDocument = yield hypersignDID.generate({ publicKeyMultibase: kp.publicKeyMultibase });
                 (0, chai_1.expect)(didDocument).to.be.a('object');
                 (0, chai_1.should)().exist(didDocument['@context']);
                 (0, chai_1.should)().exist(didDocument['id']);
@@ -155,11 +185,41 @@ describe('DID Opearations', () => {
                 (0, chai_1.should)().exist(signedDocument['proof']);
             });
         });
+        it('should able to sign did document for holder', function () {
+            return __awaiter(this, void 0, void 0, function* () {
+                const params = {
+                    privateKeyMultibase: holdersPrivateKeyMultibase,
+                    challenge: challenge,
+                    domain: domain,
+                    did: '',
+                    didDocument: holderDidDocument,
+                    verificationMethodId: holderDidDocument.verificationMethod[0].id,
+                    controller,
+                };
+                holderSignedDidDoc = yield hypersignDID.sign(params);
+                (0, chai_1.expect)(signedDocument).to.be.a('object');
+                (0, chai_1.should)().exist(signedDocument['@context']);
+                (0, chai_1.should)().exist(signedDocument['id']);
+                (0, chai_1.expect)(didDocId).to.be.equal(signedDocument['id']);
+                (0, chai_1.should)().exist(signedDocument['controller']);
+                (0, chai_1.should)().exist(signedDocument['alsoKnownAs']);
+                (0, chai_1.should)().exist(signedDocument['verificationMethod']);
+                (0, chai_1.should)().exist(signedDocument['authentication']);
+                (0, chai_1.should)().exist(signedDocument['assertionMethod']);
+                (0, chai_1.should)().exist(signedDocument['keyAgreement']);
+                (0, chai_1.should)().exist(signedDocument['capabilityInvocation']);
+                (0, chai_1.should)().exist(signedDocument['capabilityDelegation']);
+                (0, chai_1.should)().exist(signedDocument['service']);
+                (0, chai_1.should)().exist(signedDocument['proof']);
+            });
+        });
     });
     describe('#register() this is to register did on the blockchain', function () {
         it('should be able to register didDocument in the blockchain', function () {
             return __awaiter(this, void 0, void 0, function* () {
-                const result = yield hypersignDID.register({ didDocument, privateKeyMultibase, verificationMethodId });
+                const didDoc = didDocument;
+                delete didDoc.proof;
+                const result = yield hypersignDID.register({ didDocument: didDoc, privateKeyMultibase, verificationMethodId });
                 (0, chai_1.should)().exist(result.transactionHash);
                 (0, chai_1.should)().exist(result.didDocument);
             });
@@ -220,7 +280,7 @@ describe('Verifiable Credential Opearations', () => {
             return __awaiter(this, void 0, void 0, function* () {
                 const tempCredentialBody = Object.assign({}, credentialBody);
                 tempCredentialBody.issuerDid = didDocId;
-                tempCredentialBody.subjectDid = didDocId;
+                tempCredentialBody.subjectDid = holderDidDocument.id;
                 tempCredentialBody['subjectDidDocSigned'] = signedDocument;
                 return hypersignVC.generate(tempCredentialBody).catch(function (err) {
                     (0, chai_1.expect)(function () {
@@ -270,7 +330,7 @@ describe('Verifiable Credential Opearations', () => {
                 const tempCredentialBody = Object.assign({}, credentialBody);
                 tempCredentialBody.schemaId = schemaId;
                 tempCredentialBody.issuerDid = didDocId;
-                tempCredentialBody['subjectDid'] = didDocId;
+                tempCredentialBody['subjectDid'] = holderDidDocument.id;
                 return hypersignVC.generate(tempCredentialBody).catch(function (err) {
                     (0, chai_1.expect)(function () {
                         throw err;
@@ -318,25 +378,22 @@ describe('Verifiable Credential Opearations', () => {
                 const expirationDate = new Date('12/11/2027');
                 const tempCredentialBody = Object.assign({}, credentialBody);
                 tempCredentialBody.schemaId = schemaId;
-                tempCredentialBody.subjectDid = didDocId;
+                tempCredentialBody.subjectDid = holderDidDocument.id;
                 tempCredentialBody['expirationDate'] = expirationDate.toString();
                 tempCredentialBody.issuerDid = didDocId;
                 tempCredentialBody.fields = { name: 'varsha' };
                 credentialDetail = yield hypersignVC.generate(tempCredentialBody);
                 // console.log('New Credential --------------------------------');
-                // console.log(JSON.stringify(credentialDetail, null, 2));
                 (0, chai_1.expect)(credentialDetail).to.be.a('object');
                 (0, chai_1.should)().exist(credentialDetail['@context']);
                 (0, chai_1.should)().exist(credentialDetail['id']);
                 credentialId = credentialDetail.id;
                 (0, chai_1.should)().exist(credentialDetail['type']);
-                (0, chai_1.should)().exist(credentialDetail['expirationDate']);
                 (0, chai_1.should)().exist(credentialDetail['issuanceDate']);
                 (0, chai_1.should)().exist(credentialDetail['issuer']);
                 (0, chai_1.should)().exist(credentialDetail['credentialSubject']);
-                (0, chai_1.should)().exist(credentialDetail['credentialSchema']);
                 (0, chai_1.should)().exist(credentialDetail['credentialStatus']);
-                (0, chai_1.expect)(credentialDetail['credentialStatus'].type).to.be.equal('CredentialStatusList2017');
+                (0, chai_1.expect)(credentialDetail['credentialStatus'].type).to.be.equal('HypersignCredentialStatus2023');
             });
         });
         it('should be able to generate new credential even without offlinesigner passed to constructor', function () {
@@ -344,7 +401,7 @@ describe('Verifiable Credential Opearations', () => {
                 const expirationDate = new Date('12/11/2027');
                 const tempCredentialBody = Object.assign({}, credentialBody);
                 tempCredentialBody.schemaId = schemaId;
-                tempCredentialBody.subjectDid = didDocId;
+                tempCredentialBody.subjectDid = holderDidDocument.id;
                 tempCredentialBody['expirationDate'] = expirationDate.toString();
                 tempCredentialBody.issuerDid = didDocId;
                 tempCredentialBody.fields = { name: 'varsha' };
@@ -354,13 +411,12 @@ describe('Verifiable Credential Opearations', () => {
                 (0, chai_1.should)().exist(credentialDetail['@context']);
                 (0, chai_1.should)().exist(credentialDetail['id']);
                 (0, chai_1.should)().exist(credentialDetail['type']);
-                (0, chai_1.should)().exist(credentialDetail['expirationDate']);
                 (0, chai_1.should)().exist(credentialDetail['issuanceDate']);
                 (0, chai_1.should)().exist(credentialDetail['issuer']);
                 (0, chai_1.should)().exist(credentialDetail['credentialSubject']);
                 (0, chai_1.should)().exist(credentialDetail['credentialSchema']);
                 (0, chai_1.should)().exist(credentialDetail['credentialStatus']);
-                (0, chai_1.expect)(credentialDetail['credentialStatus'].type).to.be.equal('CredentialStatusList2017');
+                (0, chai_1.expect)(credentialDetail['credentialStatus'].type).to.be.equal('HypersignCredentialStatus2023');
             });
         });
         it('should be able to generate new credential for a schema with signed subject DID doc', function () {
@@ -374,18 +430,17 @@ describe('Verifiable Credential Opearations', () => {
                 tempCredentialBody.fields = { name: 'varsha' };
                 // console.log(tempCredentialBody)
                 const credentialDetail = yield hypersignVC.generate(tempCredentialBody);
-                // console.log(JSON.stringify(credentialDetail));
+                // console.log(JSON.stringify(credentialDetail, null, 2));
                 (0, chai_1.expect)(credentialDetail).to.be.a('object');
                 (0, chai_1.should)().exist(credentialDetail['@context']);
                 (0, chai_1.should)().exist(credentialDetail['id']);
                 (0, chai_1.should)().exist(credentialDetail['type']);
-                (0, chai_1.should)().exist(credentialDetail['expirationDate']);
                 (0, chai_1.should)().exist(credentialDetail['issuanceDate']);
                 (0, chai_1.should)().exist(credentialDetail['issuer']);
                 (0, chai_1.should)().exist(credentialDetail['credentialSubject']);
                 (0, chai_1.should)().exist(credentialDetail['credentialSchema']);
                 (0, chai_1.should)().exist(credentialDetail['credentialStatus']);
-                (0, chai_1.expect)(credentialDetail['credentialStatus'].type).to.be.equal('CredentialStatusList2017');
+                (0, chai_1.expect)(credentialDetail['credentialStatus'].type).to.be.equal('HypersignCredentialStatus2023');
             });
         });
     });
@@ -466,7 +521,6 @@ describe('Verifiable Credential Opearations', () => {
                 (0, chai_1.should)().exist(signedCredential['@context']);
                 (0, chai_1.should)().exist(signedCredential['id']);
                 (0, chai_1.should)().exist(signedCredential['type']);
-                (0, chai_1.should)().exist(signedCredential['expirationDate']);
                 (0, chai_1.should)().exist(signedCredential['issuanceDate']);
                 (0, chai_1.should)().exist(signedCredential['issuer']);
                 (0, chai_1.should)().exist(signedCredential['credentialSubject']);
@@ -475,15 +529,16 @@ describe('Verifiable Credential Opearations', () => {
                 (0, chai_1.should)().exist(signedCredential['proof']);
                 (0, chai_1.expect)(signedCredential['id']).to.be.equal(tempIssueCredentialBody.credential.id);
                 (0, chai_1.expect)(credentialStatus).to.be.a('object');
-                (0, chai_1.should)().exist(credentialStatus['claim']);
+                (0, chai_1.should)().exist(credentialStatus['id']);
                 (0, chai_1.should)().exist(credentialStatus['issuer']);
                 (0, chai_1.should)().exist(credentialStatus['issuanceDate']);
-                (0, chai_1.should)().exist(credentialStatus['expirationDate']);
-                (0, chai_1.should)().exist(credentialStatus['credentialHash']);
+                (0, chai_1.should)().exist(credentialStatus['issuer']);
+                (0, chai_1.should)().exist(credentialStatus['issuanceDate']);
+                (0, chai_1.should)().exist(credentialStatus['revoked']);
+                (0, chai_1.should)().exist(credentialStatus['suspended']);
                 (0, chai_1.expect)(credentialStatusProof).to.be.a('object');
                 (0, chai_1.should)().exist(credentialStatusProof['type']);
                 (0, chai_1.should)().exist(credentialStatusProof['created']);
-                (0, chai_1.should)().exist(credentialStatusProof['updated']);
                 (0, chai_1.should)().exist(credentialStatusProof['verificationMethod']);
                 (0, chai_1.should)().exist(credentialStatusProof['proofPurpose']);
                 (0, chai_1.should)().exist(credentialStatusProof['proofValue']);
@@ -499,7 +554,7 @@ describe('Verifiable Credential Opearations', () => {
                 const expirationDate = new Date('12/11/2027');
                 const tempCredentialBody = Object.assign({}, credentialBody);
                 tempCredentialBody.schemaId = schemaId;
-                tempCredentialBody['subjectDidDocSigned'] = signedDocument;
+                tempCredentialBody['subjectDidDocSigned'] = holderSignedDidDoc;
                 tempCredentialBody['expirationDate'] = expirationDate.toString();
                 tempCredentialBody.issuerDid = didDocId;
                 tempCredentialBody.fields = { name: 'varsha' };
@@ -673,12 +728,13 @@ describe('Verifiable Credential Status Opearations', () => {
         it('should be able to resolve credential', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 credentialStatus = yield hypersignVC.resolveCredentialStatus({ credentialId });
-                // console.log(JSON.stringify(credentialStatus, null, 2));
                 (0, chai_1.expect)(credentialStatus).to.be.a('object');
+                (0, chai_1.should)().exist(credentialStatus.revoked);
+                (0, chai_1.should)().exist(credentialStatus.suspended);
+                (0, chai_1.should)().exist(credentialStatus.remarks);
                 (0, chai_1.should)().exist(credentialStatus.issuer);
                 (0, chai_1.should)().exist(credentialStatus.issuanceDate);
-                (0, chai_1.should)().exist(credentialStatus.expirationDate);
-                (0, chai_1.should)().exist(credentialStatus.credentialHash);
+                (0, chai_1.should)().exist(credentialStatus.credentialMerkleRootHash);
                 (0, chai_1.should)().exist(credentialStatus.proof);
             });
         });
@@ -757,6 +813,21 @@ describe('Verifiable Credential Status Opearations', () => {
                 });
             });
         });
+        it('should not be able to update credential as status passed is invalid', function () {
+            return __awaiter(this, void 0, void 0, function* () {
+                const tempParams = Object.assign({}, params);
+                tempParams.verificationMethodId = verificationMethodId;
+                tempParams.credentialStatus = credenStatus;
+                tempParams.privateKeyMultibase = privateKeyMultibase;
+                tempParams.issuerDid = didDocId;
+                tempParams.status = 'svgsdvjif';
+                return hypersignVC.updateCredentialStatus(tempParams).catch(function (err) {
+                    (0, chai_1.expect)(function () {
+                        throw err;
+                    }).to.throw(Error, `HID-SSI-SDK:: Error: params.status is invalid`);
+                });
+            });
+        });
         it('should be able to change credential status to suspended', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 const credentialStatus = yield hypersignVC.resolveCredentialStatus({ credentialId });
@@ -772,6 +843,7 @@ describe('Verifiable Credential Status Opearations', () => {
                 // console.log(updatedCredResult);
                 (0, chai_1.expect)(updatedCredResult).to.be.a('object');
                 (0, chai_1.expect)(updatedCredResult.code).to.be.equal(0);
+                (0, chai_1.expect)(updatedCredResult.transactionHash).to.be.a('string');
             });
         });
         it('should be able to change credential status to Live', function () {
@@ -782,12 +854,43 @@ describe('Verifiable Credential Status Opearations', () => {
                     issuerDid: didDocId,
                     verificationMethodId,
                     privateKeyMultibase,
-                    status: 'LIVE',
+                    status: 'SUSPENDED',
                     statusReason: 'Setting the status to LIVE',
                 };
                 const updatedCredResult = yield hypersignVC.updateCredentialStatus(params);
                 (0, chai_1.expect)(updatedCredResult).to.be.a('object');
                 (0, chai_1.expect)(updatedCredResult.code).to.be.equal(0);
+            });
+        });
+        it('should be able to change credential status to Revoked', function () {
+            return __awaiter(this, void 0, void 0, function* () {
+                const credentialStatus = yield hypersignVC.resolveCredentialStatus({ credentialId });
+                const params = {
+                    credentialStatus,
+                    issuerDid: didDocId,
+                    verificationMethodId,
+                    privateKeyMultibase,
+                    status: 'REVOKED',
+                    statusReason: 'Revoking the credential',
+                };
+                const updatedCredResult = yield hypersignVC.updateCredentialStatus(params);
+                (0, chai_1.expect)(updatedCredResult).to.be.a('object');
+                (0, chai_1.expect)(updatedCredResult.code).to.be.equal(0);
+            });
+        });
+        it('should not be able to change the status of credential as it is revoked', function () {
+            return __awaiter(this, void 0, void 0, function* () {
+                const params = {
+                    credentialStatus,
+                    issuerDid: didDocId,
+                    verificationMethodId,
+                    privateKeyMultibase,
+                    status: 'SUSPENDED',
+                    statusReason: 'Suspending this credential for some time',
+                };
+                return hypersignVC.updateCredentialStatus(params).catch(function (err) {
+                    (0, chai_1.expect)(err.message).to.include(`failed to execute message; message index: 0: credential status ${credentialId} could not be updated since it is revoked: invalid Credential Status`);
+                });
             });
         });
     });

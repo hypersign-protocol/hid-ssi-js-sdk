@@ -12,14 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
 const index_1 = require("../../index");
 const config_1 = require("../config");
-let hsSdk;
 let privateKeyMultibase;
 let publicKeyMultibase;
 let verificationMethodId;
 let didDocument;
 let didDocId;
 let offlineSigner;
-let schemaSignature;
 let hypersignSchema;
 let schemaObject;
 let schemaId;
@@ -27,7 +25,7 @@ let verificationMethod;
 let hypersignDID;
 let signedSchema;
 const signSchema = {};
-signSchema.proof = {};
+signSchema['proof'] = {};
 const schemaBody = {
     name: 'testSchema',
     description: 'This is a test schema generation',
@@ -39,8 +37,6 @@ const schemaBody = {
 beforeEach(function () {
     return __awaiter(this, void 0, void 0, function* () {
         offlineSigner = yield (0, config_1.createWallet)(config_1.mnemonic);
-        // hsSdk = new HypersignSSISdk(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest, hidNodeEp.namespace);
-        // await hsSdk.init();
         hypersignSchema = new index_1.HypersignSchema({
             // entityApiSecretKey,
             offlineSigner,
@@ -170,7 +166,6 @@ describe('#sign() function to sign schema', function () {
                 schema: schemaObject,
                 verificationMethodId: didDocument['assertionMethod'][0],
             });
-            //onsole.log(JSON.stringify(signedSchema, null, 2))
             (0, chai_1.expect)(signedSchema).to.be.a('object');
             (0, chai_1.should)().exist(signedSchema.proof);
             (0, chai_1.should)().exist(signedSchema.proof.type);

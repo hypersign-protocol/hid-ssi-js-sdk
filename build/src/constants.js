@@ -1,23 +1,25 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HID_MIN_FEE = exports.HID_MIN_GAS = exports.HID_DNOMINATION = exports.HID_DECIMAL = exports.GAS_PRICE = exports.KEY_HEADERS = exports.SCHEMA = exports.VP = exports.VC = exports.DID = exports.CAIP_10_PREFIX = exports.DID_EcdsaSecp256k1VerificationKey2019 = exports.DID_EcdsaSecp256k1RecoveryMethod2020 = exports.DID_Ed25519VerificationKey2020 = exports.CredentialStatusReasonEnums = exports.CredentialStatusEnums = exports.HIDRpcEnums = exports.HYPERSIGN_NETWORK_BANK_BALANCE_PATH = exports.HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH = exports.HYPERSIGN_NETWORK_SCHEMA_PATH = exports.HYPERSIGN_NETWORK_DID_PATH = exports.HID_COSMOS_MODULE = exports.HYPERSIGN_MAINNET_REST = exports.HYPERSIGN_MAINNET_RPC = exports.HYPERSIGN_TESTNET_REST = exports.HYPERSIGN_TESTNET_RPC = exports.compactProof = void 0;
+const enums_1 = require("../libs/generated/ssi/client/enums");
 exports.compactProof = false;
 exports.HYPERSIGN_TESTNET_RPC = 'https://rpc.jagrat.hypersign.id';
 exports.HYPERSIGN_TESTNET_REST = 'https://api.jagrat.hypersign.id';
 exports.HYPERSIGN_MAINNET_RPC = 'http://localhost:26657';
 exports.HYPERSIGN_MAINNET_REST = 'http://localhost:1317';
-exports.HID_COSMOS_MODULE = '/hypersignprotocol.hidnode.ssi';
+exports.HID_COSMOS_MODULE = '/hypersign.ssi.v1';
 exports.HYPERSIGN_NETWORK_DID_PATH = 'hypersign-protocol/hidnode/ssi/did';
 exports.HYPERSIGN_NETWORK_SCHEMA_PATH = 'hypersign-protocol/hidnode/ssi/schema';
 exports.HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH = 'hypersign-protocol/hidnode/ssi/credential';
 exports.HYPERSIGN_NETWORK_BANK_BALANCE_PATH = '/bank/balances/';
 var HIDRpcEnums;
 (function (HIDRpcEnums) {
-    HIDRpcEnums["MsgCreateDID"] = "MsgCreateDID";
+    HIDRpcEnums["MsgRegisterDID"] = "MsgRegisterDID";
     HIDRpcEnums["MsgUpdateDID"] = "MsgUpdateDID";
     HIDRpcEnums["MsgDeactivateDID"] = "MsgDeactivateDID";
-    HIDRpcEnums["MsgCreateSchema"] = "MsgCreateSchema";
+    HIDRpcEnums["MsgRegisterCredentialSchema"] = "MsgRegisterCredentialSchema";
     HIDRpcEnums["MsgRegisterCredentialStatus"] = "MsgRegisterCredentialStatus";
+    HIDRpcEnums["MsgUpdateCredentialStatus"] = "MsgUpdateCredentialStatus";
 })(HIDRpcEnums = exports.HIDRpcEnums || (exports.HIDRpcEnums = {}));
 Object.freeze(HIDRpcEnums);
 var CredentialStatusEnums;
@@ -38,9 +40,11 @@ exports.DID_Ed25519VerificationKey2020 = {
     METHOD: 'hid',
     NAMESPACE: 'testnet',
     DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
-    DID_KEYAGREEMENT_CONTEXT: "https://digitalbazaar.github.io/x25519-key-agreement-2020-context/contexts/x25519-key-agreement-2020-v1.jsonld",
+    DID_KEYAGREEMENT_CONTEXT: "https://ns.did.ai/suites/x25519-2020/v1",
+    DID_Ed25519_CONTEXT_2020: "https://w3id.org/security/suites/ed25519-2020/v1",
     VERIFICATION_METHOD_TYPE: 'Ed25519VerificationKey2020',
     BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
+    SIGNATURE_TYPE: enums_1.ProofTypes.Ed25519Signature2020,
 };
 exports.DID_EcdsaSecp256k1RecoveryMethod2020 = {
     CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
@@ -48,9 +52,11 @@ exports.DID_EcdsaSecp256k1RecoveryMethod2020 = {
     METHOD: 'hid',
     NAMESPACE: 'testnet',
     DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
-    DID_KEYAGREEMENT_CONTEXT: "https://github.com/hypersign-protocol/hid-ssi-js-sdk/blob/develop/libs/w3cache/v1/X25519KeyAgreementKeyEIP5630.json",
+    DID_KEYAGREEMENT_CONTEXT: "https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/X25519KeyAgreementKeyEIP5630.jsonld",
     BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
-    VERIFICATION_METHOD_TYPE: 'EcdsaSecp256k1RecoveryMethod2020',
+    SECP256K12020_RECOVERY_CONTEXT: "https://ns.did.ai/suites/secp256k1-2020/v1",
+    VERIFICATION_METHOD_TYPE: enums_1.VerificationMethodTypes.EcdsaSecp256k1RecoveryMethod2020,
+    SIGNATURE_TYPE: enums_1.ProofTypes.EcdsaSecp256k1RecoverySignature2020,
 };
 exports.DID_EcdsaSecp256k1VerificationKey2019 = {
     CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
@@ -59,7 +65,9 @@ exports.DID_EcdsaSecp256k1VerificationKey2019 = {
     NAMESPACE: 'testnet',
     DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
     BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
-    VERIFICATION_METHOD_TYPE: 'EcdsaSecp256k1VerificationKey2019',
+    SECP256K12020_VERIFICATION_CONTEXT: "https://ns.did.ai/suites/secp256k1-2019/v1",
+    VERIFICATION_METHOD_TYPE: enums_1.VerificationMethodTypes.EcdsaSecp256k1VerificationKey2019,
+    SIGNATURE_TYPE: enums_1.ProofTypes.EcdsaSecp256k1Signature2019,
 };
 var CAIP_10_PREFIX;
 (function (CAIP_10_PREFIX) {
@@ -71,7 +79,7 @@ exports.DID = {
     METHOD: 'hid',
     NAMESPACE: 'testnet',
     DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
-    VERIFICATION_METHOD_TYPE: 'Ed25519VerificationKey2020',
+    VERIFICATION_METHOD_TYPE: enums_1.VerificationMethodTypes.Ed25519VerificationKey2020,
     BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
 };
 Object.freeze(exports.DID);
@@ -81,13 +89,24 @@ exports.VC = {
     NAMESPACE: "testnet",
     PREFIX: "vc:" + exports.DID.METHOD + ":" + exports.DID.NAMESPACE + ":",
     CREDENTAIL_SCHEMA_VALIDATOR_TYPE: "JsonSchemaValidator2018",
-    CREDENTAIL_STATUS_TYPE: "CredentialStatusList2017",
+    CREDENTAIL_STATUS_TYPE: "HypersignCredentialStatus2023",
+    CONTEXT_HypersignCredentialStatus2023: {
+        "@protected": true,
+        "HypersignCredentialStatus2023": {
+            "@id": "https://hypersign.id#HypersignCredentialStatus2023",
+            "@context": {
+                "@protected": true,
+                "id": "@id",
+                "type": "@type"
+            }
+        }
+    },
     CREDENTAIL_BASE_CONTEXT: "https://www.w3.org/2018/credentials/v1",
     CREDENTAIL_SECURITY_CONTEXT_V2: "https://w3id.org/security/v2",
-    CREDENTAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1",
+    CREDENTIAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1",
     CREDENTAIL_ECDSA_SECURITY_SUITE: "https://w3id.org/security/suites/secp256k1recovery-2020/v2",
-    PROOF_PURPOSE: "assertion",
-    VERIFICATION_METHOD_TYPE: "Ed25519Signature2020",
+    PROOF_PURPOSE: enums_1.VerificationMethodRelationships.assertionMethod,
+    VERIFICATION_METHOD_TYPE: enums_1.ProofTypes.Ed25519Signature2020,
     CRED_STATUS_TYPES: CredentialStatusEnums,
     CRED_STATUS_REASON_TYPES: CredentialStatusReasonEnums
 };
@@ -105,8 +124,8 @@ exports.SCHEMA = {
     NAMESPACE: 'testnet',
     SCHEMA_JSON: 'http://json-schema.org/draft-07/schema',
     SCHEMA_TYPE: 'https://w3c-ccg.github.io/vc-json-schemas/v1/schema/1.0/schema.json',
-    SIGNATURE_TYPE: "Ed25519Signature2020",
-    PROOF_PURPOSE: "assertion",
+    SIGNATURE_TYPE: enums_1.ProofTypes.Ed25519Signature2020,
+    PROOF_PURPOSE: enums_1.VerificationMethodRelationships.assertionMethod,
 };
 Object.freeze(exports.SCHEMA);
 exports.KEY_HEADERS = {

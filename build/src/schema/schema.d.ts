@@ -3,9 +3,9 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
-import { Schema, SchemaDocument, SchemaProperty } from '../../libs/generated/ssi/schema';
+import { CredentialSchemaState as Schema, CredentialSchemaDocument as SchemaDocument, CredentialSchemaProperty as SchemaProperty } from '../../libs/generated/ssi/credential_schema';
 import { SchemaRpc } from './schemaRPC';
-import { ISchemaFields, ISchemaMethods } from './ISchema';
+import { ISchemaFields, ISchemaMethods, IResolveSchema } from './ISchema';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 export default class HyperSignSchema implements ISchemaMethods {
     type: string;
@@ -60,7 +60,7 @@ export default class HyperSignSchema implements ISchemaMethods {
         privateKeyMultibase: string;
         schema: SchemaDocument;
         verificationMethodId: string;
-    }): Promise<Schema>;
+    }): Promise<IResolveSchema>;
     /**
      * Register a schema Document in Hypersign blockchain - an onchain activity
      * @params
@@ -76,10 +76,10 @@ export default class HyperSignSchema implements ISchemaMethods {
      * Resolves a schema document with schemId from Hypersign blockchain - an onchain activity
      * @params
      *  - params.schemaId             : Id of the schema document
-     * @returns {Promise<Schema>} Returns schema document
+     * @returns {Promise<IResolveSchema>} Returns schema document
      */
     resolve(params: {
         schemaId: string;
-    }): Promise<Schema>;
+    }): Promise<IResolveSchema>;
 }
 //# sourceMappingURL=schema.d.ts.map
