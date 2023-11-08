@@ -90,7 +90,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
         verificationMethodId: string;
         web3Obj: any;
         domain?: string;
-        challenge?: string;
+        challenge: string;
     }): Promise<IVerifiablePresentation>;
     /**
      * Verifies signed presentation document

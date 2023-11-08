@@ -437,6 +437,48 @@ describe('DID Test scenarios', () => {
             (0, chai_1.expect)(DIdDOcWithMultiplVM.verificationMethod.length).to.be.greaterThan(didDoc.verificationMethod.length);
         }));
     });
+    describe('#createSignInfos() to generated sign array', function () {
+        it('should not able to create sign of did document and throw error as didDocument is not passed or it is empty', function () {
+            return hypersignDID
+                .createSignInfos({ didDocument: {}, privateKeyMultibase, verificationMethodId })
+                .catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.didDocument is required to create signature of a did');
+            });
+        });
+        it('should not be able to create sign of did document as privateKeyMultibase is null or empty', function () {
+            return hypersignDID
+                .createSignInfos({ didDocument, privateKeyMultibase: '', verificationMethodId })
+                .catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKeyMultibase is required to create signature of a did');
+            });
+        });
+        it('should not be able to create sign of did document as verificationMethodId is null or empty', function () {
+            return hypersignDID
+                .createSignInfos({ didDocument, privateKeyMultibase, verificationMethodId: '' })
+                .catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to create signature of a did');
+            });
+        });
+        it('should be able to generate signature array', () => __awaiter(this, void 0, void 0, function* () {
+            const tempDidDoc = JSON.parse(JSON.stringify(didDocument));
+            let signInfo = yield hypersignDID.createSignInfos({ didDocument: tempDidDoc, privateKeyMultibase, verificationMethodId });
+            console.log(signInfo, "signInfo");
+            (0, chai_1.expect)(signInfo).to.be.a('array');
+            signInfo = signInfo[0];
+            (0, chai_1.should)().exist(signInfo.signature);
+            (0, chai_1.expect)(signInfo.signature).to.be.a("string");
+            (0, chai_1.should)().exist(signInfo.verification_method_id);
+            (0, chai_1.expect)(signInfo.verification_method_id).to.be.a("string");
+            (0, chai_1.should)().exist(signInfo.created);
+            (0, chai_1.expect)(signInfo.created).to.be.a("string");
+        }));
+    });
     describe('#register() this is to register did on the blockchain', function () {
         it('should not able to register did document and throw error as didDocument is not passed or it is empty', function () {
             return hypersignDID

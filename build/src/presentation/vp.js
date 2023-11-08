@@ -273,7 +273,7 @@ class HypersignVerifiablePresentation {
     signByClientSpec(params) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!params.holderDid) {
-                throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
+                throw new Error('HID-SSI-SDK:: params.holderDid is required to sign a presentation');
             }
             if (!params.presentation) {
                 throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
@@ -283,6 +283,9 @@ class HypersignVerifiablePresentation {
             }
             if (!params.verificationMethodId) {
                 throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+            }
+            if (!params.web3Obj || Object.keys(params.web3Obj).length === 0) {
+                throw new Error('HID-SSI-SDK:: Error: params.web3Obj is required to sign a presentation');
             }
             if (!this.hsDid) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');

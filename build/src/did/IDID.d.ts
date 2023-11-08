@@ -170,6 +170,11 @@ export interface IDID {
         chainId?: string;
         verificationMethodId: any;
     }): Promise<ISignedDIDDocument>;
+    createSignInfos(params: {
+        didDocument: DidDocument;
+        privateKeyMultibase: string;
+        verificationMethodId: string;
+    }): Promise<Array<ISignInfo>>;
 }
 export interface IDIDResolve {
     didDocument: IDidDocument;
