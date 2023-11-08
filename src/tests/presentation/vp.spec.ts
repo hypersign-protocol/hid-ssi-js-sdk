@@ -1,15 +1,14 @@
 import { expect, should } from 'chai';
 import {
-  HypersignDID,
   HypersignSchema,
   HypersignVerifiableCredential,
-  HypersignVerifiablePresentation,
   HypersignSSISdk,
-} from '../index';
-import { createWallet, mnemonic, hidNodeEp } from './config';
-import { IVerifiablePresentation } from '../presentation/IPresentation';
-import { ICredentialStatus, IVerifiableCredential } from '../credential/ICredential';
-
+} from '../../index';
+import { createWallet, mnemonic, hidNodeEp } from '../config';
+import { IVerifiablePresentation } from '../../presentation/IPresentation';
+import { ICredentialStatus, IVerifiableCredential } from '../../credential/ICredential';
+let holdersPrivateKeyMultibase;
+let holderDidDocument
 let hypersignSSISDK;
 let privateKeyMultibase;
 let publicKeyMultibase;
@@ -19,7 +18,6 @@ let signedDocument;
 let verificationMethodId;
 let didDocument;
 let schemaObject;
-let schemaSignature;
 const challenge = '1231231231';
 const domain = 'www.adbv.com';
 let offlineSigner;
@@ -36,9 +34,6 @@ let hypersignVP;
 let unsignedverifiablePresentation: IVerifiablePresentation;
 let verifiableCredentialPresentationId;
 let signedVerifiablePresentation: IVerifiablePresentation;
-const MMWalletAddress = '0x7967C85D989c41cA245f1Bb54c97D42173B135E0';
-let didDocumentByClientspec;
-
 const credentialBody = {
   schemaId: '',
   subjectDid: '',
@@ -122,12 +117,12 @@ describe('DID Opearations', () => {
       should().exist(didDocument['verificationMethod']);
       expect(
         didDocument['verificationMethod'] &&
-          didDocument['authentication'] &&
-          didDocument['assertionMethod'] &&
-          didDocument['keyAgreement'] &&
-          didDocument['capabilityInvocation'] &&
-          didDocument['capabilityDelegation'] &&
-          didDocument['service']
+        didDocument['authentication'] &&
+        didDocument['assertionMethod'] &&
+        didDocument['keyAgreement'] &&
+        didDocument['capabilityInvocation'] &&
+        didDocument['capabilityDelegation'] &&
+        didDocument['service']
       ).to.be.a('array');
       should().exist(didDocument['authentication']);
       should().exist(didDocument['assertionMethod']);
@@ -136,36 +131,35 @@ describe('DID Opearations', () => {
       should().exist(didDocument['capabilityDelegation']);
       should().exist(didDocument['service']);
     });
-    it('should be able to generate new did with MMwallet address using client spec', async () => {
-      const params = {
-        methodSpecificId: MMWalletAddress,
-        address: MMWalletAddress,
-        chainId: '0x1',
-        clientSpec: 'eth-personalSign',
-      };
-      didDocumentByClientspec = await hypersignDID.createByClientSpec(params);
-      expect(didDocumentByClientspec).to.be.a('object');
-      should().exist(didDocumentByClientspec['@context']);
-      should().exist(didDocumentByClientspec['id']);
-      should().exist(didDocumentByClientspec['controller']);
-      should().exist(didDocumentByClientspec['alsoKnownAs']);
-      should().exist(didDocumentByClientspec['verificationMethod']);
+
+    it('should be able to generate didDocument for holder', async function () {
+      const kp = await hypersignDID.generateKeys();
+      holdersPrivateKeyMultibase = kp.privateKeyMultibase
+      holderDidDocument = await hypersignDID.generate({ publicKeyMultibase: kp.publicKeyMultibase });
+      expect(didDocument).to.be.a('object');
+      should().exist(didDocument['@context']);
+      should().exist(didDocument['id']);
+      should().exist(didDocument['controller']);
+      should().exist(didDocument['alsoKnownAs']);
+
+      should().exist(didDocument['verificationMethod']);
       expect(
-        didDocumentByClientspec['verificationMethod'] &&
-          didDocumentByClientspec['authentication'] &&
-          didDocumentByClientspec['assertionMethod'] &&
-          didDocumentByClientspec['keyAgreement'] &&
-          didDocumentByClientspec['capabilityInvocation'] &&
-          didDocumentByClientspec['capabilityDelegation']
+        didDocument['verificationMethod'] &&
+        didDocument['authentication'] &&
+        didDocument['assertionMethod'] &&
+        didDocument['keyAgreement'] &&
+        didDocument['capabilityInvocation'] &&
+        didDocument['capabilityDelegation'] &&
+        didDocument['service']
       ).to.be.a('array');
-      should().exist(didDocumentByClientspec['authentication']);
-      should().exist(didDocumentByClientspec['assertionMethod']);
-      should().exist(didDocumentByClientspec['keyAgreement']);
-      should().exist(didDocumentByClientspec['capabilityInvocation']);
-      should().exist(didDocumentByClientspec['capabilityDelegation']);
+      should().exist(didDocument['authentication']);
+      should().exist(didDocument['assertionMethod']);
+      should().exist(didDocument['keyAgreement']);
+      should().exist(didDocument['capabilityInvocation']);
+      should().exist(didDocument['capabilityDelegation']);
+      should().exist(didDocument['service']);
     });
   });
-
   describe('#sign() this is to sign didDoc', function () {
     const controller = {
       '@context': '',
@@ -200,18 +194,22 @@ describe('DID Opearations', () => {
       should().exist(signedDocument['proof']);
     });
   });
-
   describe('#register() this is to register did on the blockchain', function () {
     it('should be able to register didDocument in the blockchain', async function () {
       const result = await hypersignDID.register({ didDocument, privateKeyMultibase, verificationMethodId });
       should().exist(result.transactionHash);
       should().exist(result.didDocument);
     });
+    it('should be able to register holder didDocument in the blockchain', async function () {
+      const result = await hypersignDID.register({ didDocument: holderDidDocument, privateKeyMultibase: holdersPrivateKeyMultibase, verificationMethodId: holderDidDocument.verificationMethod[0].id });
+      should().exist(result.transactionHash);
+      should().exist(result.didDocument);
+    });
   });
 });
-/**
- * Schema Creation and Registration
- */
+// /**
+//  * Schema Creation and Registration
+//  */
 describe('Schema Opearations', () => {
   describe('#getSchema() method to create schema', function () {
     it('should able to create a new schema', async function () {
@@ -251,16 +249,16 @@ describe('Schema Opearations', () => {
   });
 });
 
-/**
- * Test cases related to credential
- */
+// /**
+//  * Test cases related to credential
+//  */
 describe('Verifiable Credential Opearations', () => {
   describe('#getCredential() method to generate a credential', function () {
     it('should be able to generate new credential for a schema with subject DID', async function () {
       const expirationDate = new Date('12/11/2027');
       const tempCredentialBody = { ...credentialBody };
       tempCredentialBody.schemaId = schemaId;
-      tempCredentialBody.subjectDid = didDocId;
+      tempCredentialBody.subjectDid = holderDidDocument.id;
       tempCredentialBody['expirationDate'] = expirationDate;
       tempCredentialBody.issuerDid = didDocId;
       tempCredentialBody.fields = { name: 'varsha' };
@@ -280,10 +278,9 @@ describe('Verifiable Credential Opearations', () => {
       should().exist(credentialDetail['credentialSubject']);
       should().exist(credentialDetail['credentialSchema']);
       should().exist(credentialDetail['credentialStatus']);
-      expect(credentialDetail['credentialStatus'].type).to.be.equal('CredentialStatusList2017');
+      expect(credentialDetail['credentialStatus'].type).to.be.equal('HypersignCredentialStatus2023');
     });
   });
-
   describe('#issueCredential() method for issuing credential', function () {
     it('should be able to issue credential with credential status registered on chain', async function () {
       const tempIssueCredentialBody = { ...issueCredentialBody };
@@ -299,12 +296,7 @@ describe('Verifiable Credential Opearations', () => {
       signedVC = signedCredential;
       credenStatus = credentialStatus;
       credentialId = signedVC.id;
-
-      // console.log('Signed Credential --------------------------------');
-      // console.log(JSON.stringify(signedVC, null, 2));
-
       credentialStatusId = signedCredential['credentialStatus'].id;
-
       expect(signedCredential).to.be.a('object');
       should().exist(signedCredential['@context']);
       should().exist(signedCredential['id']);
@@ -316,13 +308,7 @@ describe('Verifiable Credential Opearations', () => {
       should().exist(signedCredential['credentialSchema']);
       should().exist(signedCredential['credentialStatus']);
       should().exist(signedCredential['proof']);
-      // console.log({
-      //   signedCredentialId: signedVC ? signedVC['id'] : '',
-      //   credentialId,
-      //   id: tempIssueCredentialBody.credential.id,
-      // });
       expect(signedCredential['id']).to.be.equal(tempIssueCredentialBody.credential.id);
-
       expect(credentialStatus).to.be.a('object');
       should().exist(credentialStatus['issuer']);
       should().exist(credentialStatus['issuanceDate']);
@@ -336,7 +322,6 @@ describe('Verifiable Credential Opearations', () => {
       should().exist(credentialStatusProof['verificationMethod']);
       should().exist(credentialStatusProof['proofPurpose']);
       should().exist(credentialStatusProof['proofValue']);
-
       expect(credentialStatusRegistrationResult).to.be.a('object');
       should().exist(credentialStatusRegistrationResult['code']);
       should().exist(credentialStatusRegistrationResult['height']);
@@ -347,26 +332,21 @@ describe('Verifiable Credential Opearations', () => {
   });
 });
 
-/**
- * Test cases related to verifiable presentation
- */
+// /**
+//  * Test cases related to verifiable presentation
+//  */
 
 describe('Verifiable Presentation Operataions', () => {
   describe('#generate() method to generate new presentation document', () => {
-    const presentationBody = {
-      verifiableCredentials: [credentialDetail],
-      holderDid: didDocId,
-    };
-
     it('should be able to gnerate a new presentation document', async () => {
+      const presentationBody = {
+        verifiableCredentials: [credentialDetail],
+        holderDid: holderDidDocument.id,
+      };
       const tempPresentationBody = { ...presentationBody };
       tempPresentationBody.verifiableCredentials[0] = credentialDetail;
-      tempPresentationBody.holderDid = didDocId;
-
-      // console.log(JSON.stringify(tempPresentationBody, null, 2));
-
+      tempPresentationBody.holderDid = holderDidDocument.id;
       unsignedverifiablePresentation = await hypersignVP.generate(tempPresentationBody);
-      // console.log(JSON.stringify(unsignedverifiablePresentation, null, 2));
       should().exist(unsignedverifiablePresentation['@context']);
       should().exist(unsignedverifiablePresentation['type']);
       expect(unsignedverifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
@@ -375,24 +355,23 @@ describe('Verifiable Presentation Operataions', () => {
       should().exist(unsignedverifiablePresentation['id']);
       should().exist(unsignedverifiablePresentation['holder']);
       verifiableCredentialPresentationId = unsignedverifiablePresentation.id;
-      // expect(unsignedverifiablePresentation['verifiableCredential'][0].id).to.be.equal(credentialId);
     });
   });
   describe('#sign() method to sign presentation document', () => {
     const signPresentationBody = {
       presentation: unsignedverifiablePresentation,
-      holderDid: didDocId,
-      verificationMethodId,
-      privateKeyMultibase: privateKeyMultibase,
+      holderDid: "",
+      verificationMethodId: "",
+      privateKeyMultibase: "",
       challenge,
     };
 
     it('should not be able to sign presentation as either holderDid or holderDidDocSigned is required but passed both', async function () {
       const tempSignPresentationBody = { ...signPresentationBody };
       tempSignPresentationBody.presentation = unsignedverifiablePresentation;
-      tempSignPresentationBody.holderDid = didDocId;
-      tempSignPresentationBody.verificationMethodId = verificationMethodId;
-      tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
+      tempSignPresentationBody.holderDid = holderDidDocument.id;
+      tempSignPresentationBody.verificationMethodId = holderDidDocument.verificationMethod[0].id;
+      tempSignPresentationBody.privateKeyMultibase = holdersPrivateKeyMultibase;
       tempSignPresentationBody['holderDidDocSigned'] = signedDocument;
       return hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
         expect(function () {
@@ -409,20 +388,22 @@ describe('Verifiable Presentation Operataions', () => {
         }).to.throw(Error, 'HID-SSI-SDK:: params.privateKeyMultibase is required for signing a presentation');
       });
     });
-    // it('should not be able to sign presentation as either holderDid or holderDidDocSigned is required but passed both', async function () {
-    //   const tempSignPresentationBody = { ...signPresentationBody };
-    //   tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
-    //   tempSignPresentationBody.presentation = {} as IVerifiablePresentation;
-
-    //   return hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
-    //     expect(function () {
-    //       throw err;
-    //     }).to.throw(Error, 'HID-SSI-SDK:: params.presentation is required for signinng a presentation');
-    //   });
-    // });
-    it('should not be able to sign presentation as challenge is not passed', async function () {
+    it('should not be able to sign presentation as either holderDid or holderDidDocSigned is required but passed both', async function () {
       const tempSignPresentationBody = { ...signPresentationBody };
       tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
+      tempSignPresentationBody.presentation = {} as IVerifiablePresentation;
+      tempSignPresentationBody.verificationMethodId = holderDidDocument.verificationMethod[0].id;
+      tempSignPresentationBody.holderDid = holderDidDocument.id;
+
+      return hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, 'HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+      });
+    });
+    it('should not be able to sign presentation as challenge is not passed', async function () {
+      const tempSignPresentationBody = { ...signPresentationBody };
+      tempSignPresentationBody.privateKeyMultibase = holdersPrivateKeyMultibase;
       tempSignPresentationBody.presentation = unsignedverifiablePresentation;
       tempSignPresentationBody.challenge = '';
       return hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
@@ -433,7 +414,7 @@ describe('Verifiable Presentation Operataions', () => {
     });
     it('should not be able to sign presentation as verificationMethodId is not passed', async function () {
       const tempSignPresentationBody = { ...signPresentationBody };
-      tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
+      tempSignPresentationBody.privateKeyMultibase = holdersPrivateKeyMultibase;
       tempSignPresentationBody.presentation = unsignedverifiablePresentation;
       tempSignPresentationBody.challenge = challenge;
       tempSignPresentationBody.verificationMethodId = '';
@@ -447,13 +428,10 @@ describe('Verifiable Presentation Operataions', () => {
     it('should be able a sign presentation document', async () => {
       const tempSignPresentationBody = { ...signPresentationBody };
       tempSignPresentationBody.presentation = unsignedverifiablePresentation;
-      tempSignPresentationBody.holderDid = didDocId;
-      tempSignPresentationBody.verificationMethodId = verificationMethodId;
-      tempSignPresentationBody.privateKeyMultibase = privateKeyMultibase;
+      tempSignPresentationBody.holderDid = holderDidDocument.id;
+      tempSignPresentationBody.verificationMethodId = holderDidDocument.verificationMethod[0].id;
+      tempSignPresentationBody.privateKeyMultibase = holdersPrivateKeyMultibase;
       signedVerifiablePresentation = await hypersignVP.sign(tempSignPresentationBody);
-
-      // console.log(JSON.stringify(signedVerifiablePresentation, null, 2));
-
       should().exist(signedVerifiablePresentation['@context']);
       should().exist(signedVerifiablePresentation['type']);
       expect(signedVerifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
@@ -461,12 +439,11 @@ describe('Verifiable Presentation Operataions', () => {
       expect(signedVerifiablePresentation.id).to.be.equal(verifiableCredentialPresentationId);
     });
   });
-
   describe('#verify() method to verify a signed presentation document', () => {
     const verifyPresentationBody = {
       signedPresentation: signedVerifiablePresentation,
-      holderDid: didDocId,
-      holderVerificationMethodId: verificationMethodId,
+      holderDid: "",
+      holderVerificationMethodId: "",
       issuerVerificationMethodId: verificationMethodId,
       privateKey: privateKeyMultibase,
       challenge,
@@ -476,8 +453,8 @@ describe('Verifiable Presentation Operataions', () => {
     it('should not be able to verify presentation as either holderDid or holderDidDocSigned is required but passed both', async function () {
       const tempverifyPresentationBody = { ...verifyPresentationBody };
       tempverifyPresentationBody.signedPresentation = signedVerifiablePresentation;
-      tempverifyPresentationBody.holderDid = didDocId;
-      tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
+      tempverifyPresentationBody.holderDid = holderDidDocument.id;
+      tempverifyPresentationBody.holderVerificationMethodId = holderDidDocument.verificationMethod[0].id;
       tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
       tempverifyPresentationBody.privateKey = privateKeyMultibase;
       tempverifyPresentationBody['holderDidDocSigned'] = signedDocument;
@@ -523,7 +500,7 @@ describe('Verifiable Presentation Operataions', () => {
       const tempverifyPresentationBody = { ...verifyPresentationBody };
       tempverifyPresentationBody.issuerDid = didDocId;
       tempverifyPresentationBody.challenge = challenge;
-      tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
+      tempverifyPresentationBody.holderVerificationMethodId = holderDidDocument.verificationMethod[0].id;
       tempverifyPresentationBody.issuerVerificationMethodId = '';
 
       return hypersignVP.verify(tempverifyPresentationBody).catch(function (err) {
@@ -537,8 +514,8 @@ describe('Verifiable Presentation Operataions', () => {
       const tempverifyPresentationBody = { ...verifyPresentationBody };
       tempverifyPresentationBody.signedPresentation = signedVerifiablePresentation;
       tempverifyPresentationBody.issuerDid = didDocId;
-      tempverifyPresentationBody.holderDid = didDocId;
-      tempverifyPresentationBody.holderVerificationMethodId = verificationMethodId;
+      tempverifyPresentationBody.holderDid = holderDidDocument.id;
+      tempverifyPresentationBody.holderVerificationMethodId = holderDidDocument.verificationMethod[0].id;
       tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
       tempverifyPresentationBody.challenge = didDocId;
 

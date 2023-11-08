@@ -514,14 +514,30 @@ export default class HypersignDID implements IDID {
     }
     return response;
   }
-
+  /**
+   * Generate signature
+   * @params
+   *  - params.didDocument          : LD did document
+   *  - params.privateKeyMultibase  : Private Key to sign the doc
+   *  - params.verificationMethodId : VerificationMethodId of the document
+   * @returns {Promise<ISignInfo>} Generate Array
+   */
   public async createSignInfos(params: {
     didDocument: Did; // Ld document
     privateKeyMultibase: string;
     verificationMethodId: string;
-  }): Promise<Array<SignInfo>> {
+  }): Promise<Array<ISignInfo>> {
+    if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
+      throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to create signature of a did');
+    }
+    if (!params.privateKeyMultibase) {
+      throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase is required to create signature of a did');
+    }
+    if (!params.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to create signature of a did');
+    }
     let { didDocument } = params;
-    const signInfos: Array<SignInfo> = [];
+    const signInfos: Array<ISignInfo> = [];
     const { privateKeyMultibase, verificationMethodId } = params;
     let signature;
     let createdAt;
@@ -541,9 +557,10 @@ export default class HypersignDID implements IDID {
       createdAt = proof.created;
     }
     signInfos.push({
-      proofValue: signature,
-      verificationMethod: verificationMethodId,
+      signature,
+      verification_method_id: verificationMethodId,
       created: createdAt,
+      clientSpec: undefined,
     });
     return signInfos;
   }

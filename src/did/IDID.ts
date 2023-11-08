@@ -176,6 +176,11 @@ export interface IDID {
     chainId?: string; // only for [cosmos-ADR036],
     verificationMethodId;
   }): Promise<ISignedDIDDocument>;
+  createSignInfos(params: {
+    didDocument: DidDocument;
+    privateKeyMultibase: string;
+    verificationMethodId: string;
+  }): Promise<Array<ISignInfo>>;
 }
 
 export interface IDIDResolve {
