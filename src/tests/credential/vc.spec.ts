@@ -95,7 +95,6 @@ describe('DID Opearations', () => {
     it('should be able to generate didDocument', async function () {
       didDocument = await hypersignDID.generate({ publicKeyMultibase });
       didDocId = didDocument['id'];
-      console.log(didDocId)
       verificationMethodId = didDocument['verificationMethod'][0].id;
       expect(didDocument).to.be.a('object');
       should().exist(didDocument['@context']);
@@ -370,7 +369,6 @@ describe('Verifiable Credential Opearations', () => {
 
       credentialDetail = await hypersignVC.generate(tempCredentialBody);
       // console.log('New Credential --------------------------------');
-
       expect(credentialDetail).to.be.a('object');
       should().exist(credentialDetail['@context']);
       should().exist(credentialDetail['id']);

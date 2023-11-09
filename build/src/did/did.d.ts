@@ -26,7 +26,6 @@ export default class HypersignDID implements IDID {
         entityApiSecretKey?: string;
     });
     private _getDateTime;
-    private _sign;
     private _jsonLdSign;
     private _jsonLdNormalize;
     private _concat;
@@ -101,12 +100,10 @@ export default class HypersignDID implements IDID {
      * Resolves a DID into DIDDocument from Hypersign blockchain - an onchain activity
      * @params
      *  - params.did                        : DID
-     *  - params.ed25519verificationkey2020 : *Optional* True/False
      * @returns  {Promise<IDIDResolve>} didDocument and didDocumentMetadata
      */
     resolve(params: {
         did: string;
-        ed25519verificationkey2020?: boolean;
     }): Promise<IDIDResolve>;
     /**
      * Update a DIDDocument in Hypersign blockchain - an onchain activity

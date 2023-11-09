@@ -465,10 +465,21 @@ describe('DID Test scenarios', () => {
                 }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to create signature of a did');
             });
         });
+        it('should not be able to create sign of did document as didDocument is not in Ld-json format', function () {
+            const didDoc = JSON.parse(JSON.stringify(didDocument));
+            didDoc.context = didDoc['@context'];
+            delete didDoc['@context'];
+            return hypersignDID
+                .createSignInfos({ didDocument: didDoc, privateKeyMultibase, verificationMethodId: verificationMethodId })
+                .catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, 'HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
+            });
+        });
         it('should be able to generate signature array', () => __awaiter(this, void 0, void 0, function* () {
             const tempDidDoc = JSON.parse(JSON.stringify(didDocument));
             let signInfo = yield hypersignDID.createSignInfos({ didDocument: tempDidDoc, privateKeyMultibase, verificationMethodId });
-            console.log(signInfo, "signInfo");
             (0, chai_1.expect)(signInfo).to.be.a('array');
             signInfo = signInfo[0];
             (0, chai_1.should)().exist(signInfo.signature);
@@ -505,6 +516,19 @@ describe('DID Test scenarios', () => {
                 (0, chai_1.expect)(function () {
                     throw err;
                 }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to register a did');
+            });
+        });
+        it('should not be able to register did document as didDocument is not in Ld-json fromat', function () {
+            const didDoc = JSON.parse(JSON.stringify(didDocument));
+            // const context = didDoc['@context']
+            didDoc.context = didDoc['@context'];
+            delete didDoc['@context'];
+            return hypersignDID
+                .register({ didDocument: didDoc, privateKeyMultibase, verificationMethodId: verificationMethodId })
+                .catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, 'HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
             });
         });
         it('should not be able to register a did document as neither privateKeyMultibase nor verificationMethodId is passed and signData passed is empty array', () => __awaiter(this, void 0, void 0, function* () {

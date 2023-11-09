@@ -46,7 +46,6 @@ const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonld_signatures_
 const didRPC_1 = require("./didRPC");
 const utils_1 = __importDefault(require("../utils"));
 const ed25519 = require('@stablelib/ed25519');
-const did_1 = require("../../libs/generated/ssi/did");
 const ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
 const ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
 const web3_1 = __importDefault(require("web3"));
@@ -198,19 +197,6 @@ class HypersignDID {
     }
     _getDateTime() {
         return new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z';
-    }
-    _sign(params) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { privateKeyMultibase: privateKeyMultibaseConverted } = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
-                privKey: params.privateKeyMultibase,
-            });
-            const { didDocString } = params;
-            // TODO:  do proper checck of paramaters
-            const did = JSON.parse(didDocString);
-            const didBytes = (yield did_1.DidDocument.encode(did)).finish();
-            const signed = ed25519.sign(privateKeyMultibaseConverted, didBytes);
-            return Buffer.from(signed).toString('base64');
-        });
     }
     _jsonLdSign(params) {
         var _a;
@@ -389,10 +375,7 @@ class HypersignDID {
                 let signature;
                 let createdAt;
                 if (!didDocument['@context']) {
-                    signature = yield this._sign({
-                        didDocString: JSON.stringify(didDocument),
-                        privateKeyMultibase,
-                    });
+                    throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
                 }
                 else {
                     didDocument = utils_1.default.removeEmptyString(didDocument);
@@ -432,10 +415,7 @@ class HypersignDID {
                         type !== enums_1.VerificationMethodTypes.X25519KeyAgreementKeyEIP5630) {
                         let signature;
                         if (!didDocument['@context']) {
-                            signature = yield this._sign({
-                                didDocString: JSON.stringify(didDocument),
-                                privateKeyMultibase,
-                            });
+                            throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
                         }
                         else {
                             didDocument = utils_1.default.removeEmptyString(didDocument);
@@ -500,10 +480,7 @@ class HypersignDID {
             let signature;
             let createdAt;
             if (!didDocument['@context']) {
-                signature = yield this._sign({
-                    didDocString: JSON.stringify(didDocument),
-                    privateKeyMultibase,
-                });
+                throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
             }
             else {
                 didDocument = utils_1.default.removeEmptyString(didDocument);
@@ -528,7 +505,6 @@ class HypersignDID {
      * Resolves a DID into DIDDocument from Hypersign blockchain - an onchain activity
      * @params
      *  - params.did                        : DID
-     *  - params.ed25519verificationkey2020 : *Optional* True/False
      * @returns  {Promise<IDIDResolve>} didDocument and didDocumentMetadata
      */
     resolve(params) {
@@ -539,19 +515,6 @@ class HypersignDID {
             }
             if (this.didrpc) {
                 result = yield this.didrpc.resolveDID(params.did);
-                if (params.ed25519verificationkey2020) {
-                    const didDoc = result.didDocument;
-                    const verificationMethods = didDoc.verificationMethod;
-                    verificationMethods.forEach((verificationMethod) => {
-                        if (verificationMethod.type === constant.DID.VERIFICATION_METHOD_TYPE) {
-                            const ed25519PublicKey = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
-                                publicKey: verificationMethod.publicKeyMultibase,
-                            });
-                            verificationMethod.publicKeyMultibase = ed25519PublicKey.publicKeyMultibase;
-                        }
-                    });
-                    didDoc.verificationMethod = verificationMethods;
-                }
             }
             else if (this.didAPIService) {
                 result = yield this.didAPIService.resolveDid({ did: params.did });

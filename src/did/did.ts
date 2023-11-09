@@ -24,7 +24,6 @@ import {
   IDIDResolve,
   IDIDRpc,
   IController,
-  IDidDocument,
   ISignedDIDDocument,
   IClientSpec,
   ISignData,
@@ -201,20 +200,6 @@ export default class HypersignDID implements IDID {
 
   private _getDateTime(): string {
     return new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z';
-  }
-
-  private async _sign(params: { didDocString: string; privateKeyMultibase: string }): Promise<string> {
-    const { privateKeyMultibase: privateKeyMultibaseConverted } =
-      Utils.convertEd25519verificationkey2020toStableLibKeysInto({
-        privKey: params.privateKeyMultibase,
-      });
-
-    const { didDocString } = params;
-    // TODO:  do proper checck of paramaters
-    const did: Did = JSON.parse(didDocString);
-    const didBytes = (await Did.encode(did)).finish();
-    const signed = ed25519.sign(privateKeyMultibaseConverted, didBytes);
-    return Buffer.from(signed).toString('base64');
   }
 
   private async _jsonLdSign(params: {
@@ -426,10 +411,7 @@ export default class HypersignDID implements IDID {
       let signature;
       let createdAt;
       if (!didDocument['@context']) {
-        signature = await this._sign({
-          didDocString: JSON.stringify(didDocument),
-          privateKeyMultibase,
-        });
+        throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
       } else {
         didDocument = Utils.removeEmptyString(didDocument);
         const proof = await this._jsonLdSign({
@@ -474,10 +456,7 @@ export default class HypersignDID implements IDID {
         ) {
           let signature: string;
           if (!didDocument['@context']) {
-            signature = await this._sign({
-              didDocString: JSON.stringify(didDocument),
-              privateKeyMultibase,
-            });
+            throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
           } else {
             didDocument = Utils.removeEmptyString(didDocument);
             const proof: SignInfo = await this._jsonLdSign({
@@ -542,10 +521,7 @@ export default class HypersignDID implements IDID {
     let signature;
     let createdAt;
     if (!didDocument['@context']) {
-      signature = await this._sign({
-        didDocString: JSON.stringify(didDocument),
-        privateKeyMultibase,
-      });
+      throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
     } else {
       didDocument = Utils.removeEmptyString(didDocument);
       const proof = await this._jsonLdSign({
@@ -569,29 +545,15 @@ export default class HypersignDID implements IDID {
    * Resolves a DID into DIDDocument from Hypersign blockchain - an onchain activity
    * @params
    *  - params.did                        : DID
-   *  - params.ed25519verificationkey2020 : *Optional* True/False
    * @returns  {Promise<IDIDResolve>} didDocument and didDocumentMetadata
    */
-  public async resolve(params: { did: string; ed25519verificationkey2020?: boolean }): Promise<IDIDResolve> {
+  public async resolve(params: { did: string }): Promise<IDIDResolve> {
     let result = {} as IDIDResolve;
     if (!params.did) {
       throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
     }
     if (this.didrpc) {
       result = await this.didrpc.resolveDID(params.did);
-      if (params.ed25519verificationkey2020) {
-        const didDoc: IDidDocument = result.didDocument as IDidDocument;
-        const verificationMethods = didDoc.verificationMethod;
-        verificationMethods.forEach((verificationMethod) => {
-          if (verificationMethod.type === constant.DID.VERIFICATION_METHOD_TYPE) {
-            const ed25519PublicKey = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
-              publicKey: verificationMethod.publicKeyMultibase,
-            });
-            verificationMethod.publicKeyMultibase = ed25519PublicKey.publicKeyMultibase;
-          }
-        });
-        didDoc.verificationMethod = verificationMethods;
-      }
     } else if (this.didAPIService) {
       result = await this.didAPIService.resolveDid({ did: params.did });
     }

@@ -101,7 +101,6 @@ describe('DID Opearations', () => {
             return __awaiter(this, void 0, void 0, function* () {
                 didDocument = yield hypersignDID.generate({ publicKeyMultibase });
                 didDocId = didDocument['id'];
-                console.log(didDocId);
                 verificationMethodId = didDocument['verificationMethod'][0].id;
                 (0, chai_1.expect)(didDocument).to.be.a('object');
                 (0, chai_1.should)().exist(didDocument['@context']);

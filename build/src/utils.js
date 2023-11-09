@@ -40,10 +40,7 @@ class Utils {
         return __awaiter(this, void 0, void 0, function* () {
             const edKeyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate();
             const exportedKp = yield edKeyPair.export({ publicKey: true });
-            const { publicKeyMultibase: publicKeyMultibase1 } = this.convertEd25519verificationkey2020toStableLibKeysInto({
-                publicKey: exportedKp.publicKeyMultibase,
-            });
-            return publicKeyMultibase1;
+            return exportedKp.publicKeyMultibase;
         });
     }
     static checkUrl(url) {
@@ -73,20 +70,6 @@ class Utils {
     }
     static _bufToMultibase(pubKeyBuf) {
         return 'z' + encode(pubKeyBuf);
-    }
-    // Converting 45byte public key to 48 by padding header
-    // Converting 88byte private key to 91 by padding header
-    static convertedStableLibKeysIntoEd25519verificationkey2020(stableLibKp) {
-        const result = {};
-        if (stableLibKp.publicKey) {
-            const stableLibPubKeyWithoutZ = stableLibKp.publicKey.substr(1);
-            const stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
-            result['publicKeyMultibase'] = Utils._encodeMbKey(constants.KEY_HEADERS.MULTICODEC_ED25519_PUB_HEADER, stableLibPubKeyWithoutZDecode);
-        }
-        if (stableLibKp.privKey) {
-            result['privateKeyMultibase'] = Utils._encodeMbKey(constants.KEY_HEADERS.MULTICODEC_ED25519_PRIV_HEADER, stableLibKp.privKey);
-        }
-        return result;
     }
     static convertEd25519verificationkey2020toStableLibKeysInto(ed255192020VerKeys) {
         const result = {};

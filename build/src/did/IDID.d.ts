@@ -81,7 +81,6 @@ export interface IDID {
     }>;
     resolve(params: {
         did: string;
-        ed25519verificationkey2020?: boolean;
     }): Promise<IDIDResolve>;
     update(params: {
         didDocument: DidDocument;
