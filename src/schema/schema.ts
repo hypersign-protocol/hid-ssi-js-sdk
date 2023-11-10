@@ -271,7 +271,7 @@ export default class HyperSignSchema implements ISchemaMethods {
       proof: schema.credentialSchemaProof as SchemaProof,
     };
 
-    // Competable Schema  with https://www.w3.org/TR/vc-json-schema/#jsonschema    currently not used 
+    // Competable Schema  with https://www.w3.org/TR/vc-json-schema/#jsonschema    currently not used
     const jsonSchemaWithContext = this.vcJsonSchema(response);
     return response;
   }

@@ -260,8 +260,68 @@ class HyperSignSchema {
             }
             const schema = schemaArr[0];
             const response = Object.assign(Object.assign({}, schema.credentialSchemaDocument), { proof: schema.credentialSchemaProof });
+            // Competable Schema  with https://www.w3.org/TR/vc-json-schema/#jsonschema    currently not used
+            const jsonSchemaWithContext = this.vcJsonSchema(response);
             return response;
         });
+    }
+    vcJsonSchema(schemaResolved) {
+        var _a, _b, _c;
+        const schemaWrapper = schemaResolved;
+        const properties = JSON.parse((_a = schemaResolved.schema) === null || _a === void 0 ? void 0 : _a.properties);
+        const ld = {};
+        const schemaProp = {};
+        Object.entries(properties).forEach((elm) => {
+            ld[elm[0]] = {
+                '@id': 'https://hypersign-schema.org/' + elm[0],
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                '@type': 'xsd:' + elm[1].type,
+            };
+            schemaProp[elm[0]] = {
+                description: '',
+                title: '',
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                type: elm[1].type,
+            };
+        });
+        const jsonLdcontext = {
+            '@protected': true,
+            '@version': 1.1,
+            id: '@id',
+            type: '@type',
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            [schemaWrapper.name]: {
+                '@context': Object.assign({ '@propagate': true, '@protected': true, xsd: 'http://www.w3.org/2001/XMLSchema#' }, ld),
+                '@id': 'https://hypersign-schema.org',
+            },
+        };
+        const schemaDoc = {
+            $schema: 'https://json-schema.org/draft/2020-12/schema',
+            description: (_b = schemaWrapper.schema) === null || _b === void 0 ? void 0 : _b.description,
+            properties: {
+                credentialSubject: {
+                    description: 'Stores the data of the credential',
+                    title: 'Credential subject',
+                    properties: Object.assign({ id: {
+                            description: 'Stores the DID of the subject that owns the credential',
+                            title: 'Credential subject ID',
+                            format: 'uri',
+                            type: 'string',
+                        } }, schemaProp),
+                    required: (_c = schemaWrapper.schema) === null || _c === void 0 ? void 0 : _c.required,
+                    type: 'object',
+                },
+            },
+            type: 'object',
+        };
+        schemaDoc['$metadata'] = {
+            type: schemaWrapper.name,
+            version: 1.0,
+            jsonLdContext: { '@context': Object.assign({}, jsonLdcontext) },
+        };
     }
 }
 exports.default = HyperSignSchema;
