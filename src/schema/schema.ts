@@ -270,6 +270,78 @@ export default class HyperSignSchema implements ISchemaMethods {
       ...schema.credentialSchemaDocument,
       proof: schema.credentialSchemaProof as SchemaProof,
     };
+
+    // Competable Schema  with https://www.w3.org/TR/vc-json-schema/#jsonschema    currently not used 
+    const jsonSchemaWithContext = this.vcJsonSchema(response);
     return response;
+  }
+
+  private vcJsonSchema(schemaResolved: IResolveSchema) {
+    const schemaWrapper = schemaResolved;
+    const properties = JSON.parse(schemaResolved.schema?.properties as string);
+    const ld = {};
+    const schemaProp = {};
+    Object.entries(properties).forEach((elm) => {
+      ld[elm[0]] = {
+        '@id': 'https://hypersign-schema.org/' + elm[0],
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        '@type': 'xsd:' + elm[1].type,
+      };
+
+      schemaProp[elm[0]] = {
+        description: '',
+        title: '',
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        type: elm[1].type,
+      };
+    });
+
+    const jsonLdcontext = {
+      '@protected': true,
+      '@version': 1.1,
+      id: '@id',
+      type: '@type',
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      [schemaWrapper.name]: {
+        '@context': {
+          '@propagate': true,
+          '@protected': true,
+          xsd: 'http://www.w3.org/2001/XMLSchema#',
+          ...ld,
+        },
+        '@id': 'https://hypersign-schema.org',
+      },
+    };
+
+    const schemaDoc = {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      description: schemaWrapper.schema?.description,
+      properties: {
+        credentialSubject: {
+          description: 'Stores the data of the credential',
+          title: 'Credential subject',
+          properties: {
+            id: {
+              description: 'Stores the DID of the subject that owns the credential',
+              title: 'Credential subject ID',
+              format: 'uri',
+              type: 'string',
+            },
+            ...schemaProp,
+          },
+          required: schemaWrapper.schema?.required,
+          type: 'object',
+        },
+      },
+      type: 'object',
+    };
+    schemaDoc['$metadata'] = {
+      type: schemaWrapper.name,
+      version: 1.0,
+      jsonLdContext: { '@context': { ...jsonLdcontext } },
+    };
   }
 }
