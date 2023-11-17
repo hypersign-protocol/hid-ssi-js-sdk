@@ -23,7 +23,7 @@ const schemaBody = {
   name: 'testSchema',
   description: 'This is a test schema generation',
   author: '',
-  fields: [{ name: 'name', type: 'integer', isRequired: false }],
+  fields: [{ name: 'name', type: 'string', isRequired: false }],
   additionalProperties: false,
 };
 

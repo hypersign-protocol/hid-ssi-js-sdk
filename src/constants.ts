@@ -107,17 +107,8 @@ export const VC = {
   PREFIX: "vc:" + DID.METHOD + ":" + DID.NAMESPACE + ":",
   CREDENTAIL_SCHEMA_VALIDATOR_TYPE: "JsonSchemaValidator2018",
   CREDENTAIL_STATUS_TYPE: "HypersignCredentialStatus2023",
-  CONTEXT_HypersignCredentialStatus2023: {
-    "@protected": true,
-    "HypersignCredentialStatus2023": {
-      "@id": "https://hypersign.id#HypersignCredentialStatus2023",
-      "@context": {
-        "@protected": true,
-        "id": "@id",
-        "type": "@type"
-      }
-    }
-  },// will change this to url later
+  CREDENTIAL_STATUS_CONTEXT: "https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/CredentialStatus.jsonld",
+  CONTEXT_HypersignCredentialStatus2023: "https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/HypersignCredentialStatus2023.jsonld",
   CREDENTAIL_BASE_CONTEXT: "https://www.w3.org/2018/credentials/v1",
   CREDENTAIL_SECURITY_CONTEXT_V2: "https://w3id.org/security/v2",
   CREDENTIAIL_SECURITY_SUITE: "https://w3id.org/security/suites/ed25519-2020/v1",
@@ -145,6 +136,7 @@ export const SCHEMA = {
   SCHEMA_TYPE: 'https://w3c-ccg.github.io/vc-json-schemas/v1/schema/1.0/schema.json',
   SIGNATURE_TYPE: ProofTypes.Ed25519Signature2020,
   PROOF_PURPOSE: VerificationMethodRelationships.assertionMethod,
+  SCHEMA_CONTEXT: "https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/CredentialSchema.jsonld"
 };
 Object.freeze(SCHEMA);
 

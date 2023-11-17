@@ -1,5 +1,5 @@
 import { DeliverTxResponse } from "@cosmjs/stargate";
-import { CredentialSchemaState as SchemaDocument } from "../../../../libs/generated/ssi/credential_schema";
+import { CredentialSchemaDocument as SchemaDocument } from "../../../../libs/generated/ssi/credential_schema";
 
 import { DocumentProof as SchemaProof } from '../../../../libs/generated/ssi/proof'
 export interface IRegisterSchema {

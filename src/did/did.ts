@@ -8,7 +8,6 @@ import jsonSigs from 'jsonld-signatures';
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 import { DIDRpc } from './didRPC';
 import Utils from '../utils';
-const ed25519 = require('@stablelib/ed25519');
 import { DidDocument as Did, VerificationMethod, Service, DidDocument } from '../../libs/generated/ssi/did';
 import { DocumentProof, DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
@@ -1060,7 +1059,7 @@ export default class HypersignDID implements IDID {
   public async updateByClientSpec(params: {
     didDocument: Did;
     versionId: string;
-    signInfos: SignInfo[];
+    signInfos: ISignInfo[];
   }): Promise<{ transactionHash: string }> {
     const response = {} as { transactionHash: string };
     if (!this.didrpc && !this.didAPIService) {
@@ -1104,10 +1103,10 @@ export default class HypersignDID implements IDID {
       signInfos.forEach((sign) => {
         let type;
         let clientSpec;
-        if (sign['clientSpec'].type === IClientSpec['eth-personalSign']) {
+        if (sign['clientSpec']?.type === IClientSpec['eth-personalSign']) {
           type = constant['DID_EcdsaSecp256k1RecoveryMethod2020'].SIGNATURE_TYPE;
           clientSpec = ClientSpecType.CLIENT_SPEC_TYPE_ETH_PERSONAL_SIGN;
-        } else if (sign['clientSpec'].type === IClientSpec['cosmos-ADR036']) {
+        } else if (sign['clientSpec']?.type === IClientSpec['cosmos-ADR036']) {
           type = constant['DID_EcdsaSecp256k1VerificationKey2019'].SIGNATURE_TYPE;
           clientSpec = ClientSpecType.CLIENT_SPEC_TYPE_COSMOS_ADR036;
         } else {
@@ -1148,7 +1147,7 @@ export default class HypersignDID implements IDID {
    */
   public async deactivateByClientSpec(params: {
     didDocument: Did;
-    signInfos: SignInfo[];
+    signInfos: ISignInfo[];
     versionId: string;
   }): Promise<{ transactionHash: string }> {
     const response = {} as { transactionHash: string };
@@ -1195,10 +1194,10 @@ export default class HypersignDID implements IDID {
       signInfos.forEach((sign) => {
         let type;
         let clientSpec;
-        if (sign['clientSpec'].type === IClientSpec['eth-personalSign']) {
+        if (sign['clientSpec']?.type === IClientSpec['eth-personalSign']) {
           type = constant['DID_EcdsaSecp256k1RecoveryMethod2020'].SIGNATURE_TYPE;
           clientSpec = ClientSpecType.CLIENT_SPEC_TYPE_ETH_PERSONAL_SIGN;
-        } else if (sign['clientSpec'].type === IClientSpec['cosmos-ADR036']) {
+        } else if (sign['clientSpec']?.type === IClientSpec['cosmos-ADR036']) {
           type = constant['DID_EcdsaSecp256k1VerificationKey2019'].SIGNATURE_TYPE;
           clientSpec = ClientSpecType.CLIENT_SPEC_TYPE_COSMOS_ADR036;
         } else {

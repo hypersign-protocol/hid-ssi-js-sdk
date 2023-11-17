@@ -495,9 +495,6 @@ describe('Verifiable Credential Opearations', () => {
       credenStatus = credentialStatus;
       credentialId = signedVC.id;
 
-      // console.log('Signed Credential --------------------------------');
-      // console.log(JSON.stringify(signedVC, null, 2));
-
       credentialStatusId = signedCredential['credentialStatus'].id;
 
       expect(signedCredential).to.be.a('object');
@@ -514,13 +511,11 @@ describe('Verifiable Credential Opearations', () => {
       expect(signedCredential['id']).to.be.equal(tempIssueCredentialBody.credential.id);
 
       expect(credentialStatus).to.be.a('object');
+      should().exist(credentialStatus['@context']);
       should().exist(credentialStatus['id']);
       should().exist(credentialStatus['issuer']);
       should().exist(credentialStatus['issuanceDate']);
-      should().exist(credentialStatus['issuer']);
-      should().exist(credentialStatus['issuanceDate']);
-      should().exist(credentialStatus['revoked']);
-      should().exist(credentialStatus['suspended']);
+      should().exist(credentialStatus['credentialMerkleRootHash']);
 
       expect(credentialStatusProof).to.be.a('object');
       should().exist(credentialStatusProof['type']);
@@ -545,30 +540,17 @@ describe('Verifiable Credential Opearations', () => {
       tempCredentialBody.issuerDid = didDocId;
       tempCredentialBody.fields = { name: 'varsha' };
       const credentialDetail = await hypersignVC.generate(tempCredentialBody);
-
       const tempIssueCredentialBody = { ...issueCredentialBody };
-
       tempIssueCredentialBody.credential = credentialDetail;
       tempIssueCredentialBody.issuerDid = didDocId;
       tempIssueCredentialBody.verificationMethodId = verificationMethodId;
       tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
       tempIssueCredentialBody.registerCredential = false;
-
       const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);
-
       const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
         issuedCredResult;
-
       credentialStatus2 = credentialStatus;
       credentialStatusProof2 = credentialStatusProof;
-
-      // console.log({
-      //   signedCredential,
-      //   credentialStatusRegistrationResult,
-      //   credentialStatus2,
-      //   credentialStatusProof2,
-      // });
-
       expect(signedCredential).to.be.a('object');
       expect(credentialStatus).to.be.a('object');
       expect(credentialStatusProof).to.be.a('object');
@@ -582,12 +564,7 @@ describe('Verifiable Credential Opearations', () => {
         issuerDid: didDocId,
         verificationMethodId,
       };
-
-      // console.log('Signed vc --------------------------------');
-      // console.log(JSON.stringify(params.credential, null, 2));
       const verificationResult = await hypersignVC.verify(params);
-      // console.log('Credential Verifification result --------------------------------');
-      // console.log(JSON.stringify(verificationResult, null, 2));
       expect(verificationResult).to.be.a('object');
       should().exist(verificationResult.verified);
       expect(verificationResult.verified).to.be.equal(true);
