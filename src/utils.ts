@@ -42,32 +42,6 @@ export default class Utils {
     return 'z' + encode(pubKeyBuf);
   }
 
-  public static convertEd25519verificationkey2020toStableLibKeysInto(ed255192020VerKeys: {
-    privKey?: string;
-    publicKey?: string;
-  }): { publicKeyMultibase: string; privateKeyMultibase: string } {
-    const result = {} as { publicKeyMultibase: string; privateKeyMultibase: any };
-    if (ed255192020VerKeys.publicKey) {
-      const stableLibPubKeyWithoutZ = ed255192020VerKeys.publicKey.substr(1);
-      const stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
-      result['publicKeyMultibase'] = Utils._decodeMbPubKey(
-        constants.KEY_HEADERS.MULTICODEC_ED25519_PUB_HEADER,
-        stableLibPubKeyWithoutZDecode
-      );
-    }
-
-    // privateKeyMultibase = z + encode(header+original)
-    if (ed255192020VerKeys.privKey) {
-      const stableLibPrivKeyWithoutZ = ed255192020VerKeys.privKey.substr(1);
-      const stableLibPrivKeyWithoutZDecode = decode(stableLibPrivKeyWithoutZ);
-      result['privateKeyMultibase'] = Utils._decodeMbKey(
-        constants.KEY_HEADERS.MULTICODEC_ED25519_PRIV_HEADER,
-        stableLibPrivKeyWithoutZDecode
-      );
-    }
-
-    return result;
-  }
 
   public static jsonToLdConvertor(json: any) {
     const ld = {} as Did;

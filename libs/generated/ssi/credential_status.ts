@@ -5,6 +5,7 @@ import { DocumentProof } from "./proof";
 export const protobufPackage = "hypersign.ssi.v1";
 
 export interface CredentialStatusDocument {
+  "@context"?: string[] | undefined;
   id?: string | undefined;
   revoked?: boolean | undefined;
   suspended?: boolean | undefined;
@@ -25,26 +26,31 @@ function createBaseCredentialStatusDocument(): CredentialStatusDocument {
 
 export const CredentialStatusDocument = {
   encode(message: CredentialStatusDocument, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message["@context"] !== undefined && message["@context"].length !== 0) {
+      for (const v of message["@context"]) {
+        writer.uint32(10).string(v!);
+      }
+    }
     if (message.id !== undefined && message.id !== "") {
-      writer.uint32(10).string(message.id);
+      writer.uint32(18).string(message.id);
     }
     if (message.revoked === true) {
-      writer.uint32(16).bool(message.revoked);
+      writer.uint32(24).bool(message.revoked);
     }
     if (message.suspended === true) {
-      writer.uint32(24).bool(message.suspended);
+      writer.uint32(32).bool(message.suspended);
     }
     if (message.remarks !== undefined && message.remarks !== "") {
-      writer.uint32(34).string(message.remarks);
+      writer.uint32(42).string(message.remarks);
     }
     if (message.issuer !== undefined && message.issuer !== "") {
-      writer.uint32(42).string(message.issuer);
+      writer.uint32(50).string(message.issuer);
     }
     if (message.issuanceDate !== undefined && message.issuanceDate !== "") {
-      writer.uint32(50).string(message.issuanceDate);
+      writer.uint32(58).string(message.issuanceDate);
     }
     if (message.credentialMerkleRootHash !== undefined && message.credentialMerkleRootHash !== "") {
-      writer.uint32(58).string(message.credentialMerkleRootHash);
+      writer.uint32(66).string(message.credentialMerkleRootHash);
     }
     return writer;
   },
@@ -61,45 +67,55 @@ export const CredentialStatusDocument = {
             break;
           }
 
-          message.id = reader.string();
+          if (message["@context"] === undefined) {
+            message["@context"] = [];
+          }
+          message["@context"]!.push(reader.string());
           continue;
         case 2:
-          if (tag !== 16) {
+          if (tag !== 18) {
             break;
           }
 
-          message.revoked = reader.bool();
+          message.id = reader.string();
           continue;
         case 3:
           if (tag !== 24) {
             break;
           }
 
-          message.suspended = reader.bool();
+          message.revoked = reader.bool();
           continue;
         case 4:
-          if (tag !== 34) {
+          if (tag !== 32) {
             break;
           }
 
-          message.remarks = reader.string();
+          message.suspended = reader.bool();
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.issuer = reader.string();
+          message.remarks = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
             break;
           }
 
-          message.issuanceDate = reader.string();
+          message.issuer = reader.string();
           continue;
         case 7:
           if (tag !== 58) {
+            break;
+          }
+
+          message.issuanceDate = reader.string();
+          continue;
+        case 8:
+          if (tag !== 66) {
             break;
           }
 
@@ -116,6 +132,9 @@ export const CredentialStatusDocument = {
 
   fromJSON(object: any): CredentialStatusDocument {
     return {
+      "@context": globalThis.Array.isArray(object?.["@context"])
+        ? object["@context"].map((e: any) => globalThis.String(e))
+        : undefined,
       id: isSet(object.id) ? globalThis.String(object.id) : undefined,
       revoked: isSet(object.revoked) ? globalThis.Boolean(object.revoked) : undefined,
       suspended: isSet(object.suspended) ? globalThis.Boolean(object.suspended) : undefined,
@@ -130,6 +149,9 @@ export const CredentialStatusDocument = {
 
   toJSON(message: CredentialStatusDocument): unknown {
     const obj: any = {};
+    if (message["@context"]?.length) {
+      obj["@context"] = message["@context"];
+    }
     if (message.id !== undefined && message.id !== "") {
       obj.id = message.id;
     }
@@ -159,6 +181,7 @@ export const CredentialStatusDocument = {
   },
   fromPartial<I extends Exact<DeepPartial<CredentialStatusDocument>, I>>(object: I): CredentialStatusDocument {
     const message = createBaseCredentialStatusDocument();
+    message["@context"] = object["@context"]?.map((e) => e) || undefined;
     message.id = object.id ?? undefined;
     message.revoked = object.revoked ?? undefined;
     message.suspended = object.suspended ?? undefined;
