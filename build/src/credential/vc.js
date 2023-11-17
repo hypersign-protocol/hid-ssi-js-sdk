@@ -301,6 +301,7 @@ class HypersignVerifiableCredential {
             vc.issuanceDate = this._dateNow(); // TODO: need to remove this.
             vc.issuer = issuerDid;
             vc.credentialSubject = {};
+            // ToDo: Implement Schema validation (JSON Schema Validator)
             vc.credentialSubject = Object.assign({}, this._getCredentialSubject(schemaDoc.schema, params.fields));
             vc.credentialSubject['id'] = subjectDid && subjectDid != undefined ? subjectDid : subjectDidDoc.id;
             vc.credentialSchema = {
@@ -360,8 +361,6 @@ class HypersignVerifiableCredential {
             if (!publicKeyVerMethod) {
                 throw new Error('HID-SSI-SDK:: Error: Could not find verification method for id = ' + params.verificationMethodId);
             }
-            // change this code
-            publicKeyVerMethod.publicKeyMultibase = 'z6MkoNeBKoHzXv1MJzgWBghaiCP49G2KkaJ5boJGct6ntNPZ';
             const keyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(Object.assign({ privateKeyMultibase: params.privateKeyMultibase }, publicKeyVerMethod));
             const suite = new ed25519_signature_2020_1.Ed25519Signature2020({
                 verificationMethod: publicKeyId,
@@ -464,8 +463,6 @@ class HypersignVerifiableCredential {
                 id: issuerDidDoc.id,
                 assertionMethod: issuerDidDoc.assertionMethod,
             };
-            // remove this line
-            publicKeyVerMethod.publicKeyMultibase = 'z6MkoNeBKoHzXv1MJzgWBghaiCP49G2KkaJ5boJGct6ntNPZ';
             const keyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(Object.assign({ privateKeyMultibase: '' }, publicKeyVerMethod));
             const suite = new ed25519_signature_2020_1.Ed25519Signature2020({
                 verificationMethod: publicKeyId,
