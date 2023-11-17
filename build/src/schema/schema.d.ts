@@ -81,6 +81,26 @@ export default class HyperSignSchema implements ISchemaMethods {
     resolve(params: {
         schemaId: string;
     }): Promise<IResolveSchema>;
-    private vcJsonSchema;
+    vcJsonSchema(schemaResolved: IResolveSchema): {
+        $schema: string;
+        description: string | undefined;
+        properties: {
+            credentialSubject: {
+                description: string;
+                title: string;
+                properties: {
+                    id: {
+                        description: string;
+                        title: string;
+                        format: string;
+                        type: string;
+                    };
+                };
+                required: string[] | undefined;
+                type: string;
+            };
+        };
+        type: string;
+    };
 }
 //# sourceMappingURL=schema.d.ts.map

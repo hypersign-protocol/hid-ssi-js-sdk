@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
 const index_1 = require("../../index");
 const config_1 = require("../config");
+// import { CredentialProof, CredentialStatus } from '../../../libs/generated/ssi/credential';
 let didDocument;
 let didDocId;
 let privateKeyMultibase;
