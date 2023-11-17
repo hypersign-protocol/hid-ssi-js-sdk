@@ -151,9 +151,7 @@ export default class HyperSignSchema implements ISchemaMethods {
     additionalProperties: boolean;
   }): Promise<SchemaDocument> {
     if (!params.author) throw new Error('HID-SSI-SDK:: Error: Author must be passed');
-    this['@context'] = [
-      constants.SCHEMA.SCHEMA_CONTEXT,
-    ];
+    this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT];
     this.id = await this._getSchemaId();
     this.name = params.name;
     this.author = params.author;

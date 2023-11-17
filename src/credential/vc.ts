@@ -132,7 +132,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     }
   }
 
-
   private async _getId(): Promise<string> {
     const uuid = await Utils.getUUID();
     let id;
