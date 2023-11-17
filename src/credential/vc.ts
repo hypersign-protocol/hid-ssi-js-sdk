@@ -352,7 +352,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     // vc['@context'] = this._getCredentialContext(params.schemaId, schemaProperties, schemaName);
     vc['@context'] = [VC.CREDENTAIL_BASE_CONTEXT];
     vc['@context'].push({
-      '@context': { ...VC.CONTEXT_HypersignCredentialStatus2023 },
+      '@context': VC.CONTEXT_HypersignCredentialStatus2023,
     } as any);
     const JsonSchema = this.hsSchema.vcJsonSchema(schemaDoc);
     vc['@context'].push((JsonSchema as any).$metadata.jsonLdContext);
