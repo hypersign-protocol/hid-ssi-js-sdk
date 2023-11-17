@@ -258,10 +258,13 @@ class HyperSignSchema {
             if (!schemaArr || schemaArr.length < 0) {
                 throw new Error('HID-SSI-SDK:: Error: No schema found, id = ' + params.schemaId);
             }
-            const schema = schemaArr[0];
+            const schemaT = schemaArr[0];
+            const schema = {
+                credentialSchemaDocument: schemaArr[0].schema ? schemaArr[0] : schemaT.credentialSchemaDocument,
+                credentialSchemaProof: schemaArr[0].proof ? schemaArr[0].proof : schemaT.credentialSchemaProof,
+            };
             const response = Object.assign(Object.assign({}, schema.credentialSchemaDocument), { proof: schema.credentialSchemaProof });
             // Competable Schema  with https://www.w3.org/TR/vc-json-schema/#jsonschema    currently not used
-            const jsonSchemaWithContext = this.vcJsonSchema(response);
             return response;
         });
     }
@@ -279,8 +282,8 @@ class HyperSignSchema {
                 '@type': 'xsd:' + elm[1].type,
             };
             schemaProp[elm[0]] = {
-                description: '',
-                title: '',
+                description: `Enter value for ${elm[0]}`,
+                title: `${elm[0]}`,
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 type: elm[1].type,
@@ -322,6 +325,7 @@ class HyperSignSchema {
             version: 1.0,
             jsonLdContext: { '@context': Object.assign({}, jsonLdcontext) },
         };
+        return schemaDoc;
     }
 }
 exports.default = HyperSignSchema;

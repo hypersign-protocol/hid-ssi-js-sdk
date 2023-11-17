@@ -188,7 +188,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         issuerDid: string;
         verificationMethodId: string;
         type?: string;
-        web3Obj: any;
+        web3Obj?: any;
+        privateKey?: string;
         registerCredential?: boolean;
         domain?: string;
         clientSpec?: IClientSpec;
@@ -208,7 +209,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         credential: IVerifiableCredential;
         issuerDid: string;
         verificationMethodId: string;
-        web3Obj: any;
     }): Promise<object>;
 }
 //# sourceMappingURL=vc.d.ts.map

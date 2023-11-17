@@ -89,6 +89,10 @@ class SchemaRpc {
             const getSchemaUrl = `${this.schemaRestEp}/${schemaId}:`;
             const response = yield axios_1.default.get(getSchemaUrl);
             const { credentialSchemas } = response.data;
+            if (credentialSchemas === undefined) {
+                const { schema } = response.data;
+                return schema;
+            }
             return credentialSchemas;
         });
     }

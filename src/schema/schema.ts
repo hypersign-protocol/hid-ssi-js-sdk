@@ -262,21 +262,28 @@ export default class HyperSignSchema implements ISchemaMethods {
       );
     }
     const schemaArr: Array<object> = await this.schemaRpc.resolveSchema(params.schemaId);
+
     if (!schemaArr || schemaArr.length < 0) {
       throw new Error('HID-SSI-SDK:: Error: No schema found, id = ' + params.schemaId);
     }
-    const schema = schemaArr[0] as Schema;
+    const schemaT = schemaArr[0] as Schema;
+
+    const schema = {
+      credentialSchemaDocument: (schemaArr[0] as any).schema ? schemaArr[0] : schemaT.credentialSchemaDocument,
+      credentialSchemaProof: (schemaArr[0] as any).proof ? (schemaArr[0] as any).proof : schemaT.credentialSchemaProof,
+    } as Schema;
+
     const response: IResolveSchema = {
       ...schema.credentialSchemaDocument,
       proof: schema.credentialSchemaProof as SchemaProof,
     };
 
     // Competable Schema  with https://www.w3.org/TR/vc-json-schema/#jsonschema    currently not used
-    const jsonSchemaWithContext = this.vcJsonSchema(response);
+
     return response;
   }
 
-  private vcJsonSchema(schemaResolved: IResolveSchema) {
+  public vcJsonSchema(schemaResolved: IResolveSchema) {
     const schemaWrapper = schemaResolved;
     const properties = JSON.parse(schemaResolved.schema?.properties as string);
     const ld = {};
@@ -290,8 +297,8 @@ export default class HyperSignSchema implements ISchemaMethods {
       };
 
       schemaProp[elm[0]] = {
-        description: '',
-        title: '',
+        description: `Enter value for ${elm[0]}`,
+        title: `${elm[0]}`,
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         type: elm[1].type,
@@ -343,5 +350,6 @@ export default class HyperSignSchema implements ISchemaMethods {
       version: 1.0,
       jsonLdContext: { '@context': { ...jsonLdcontext } },
     };
+    return schemaDoc;
   }
 }
