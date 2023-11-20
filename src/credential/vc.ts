@@ -5,12 +5,13 @@
  */
 import jssig from 'jsonld-signatures';
 import { purposes } from 'jsonld-signatures';
-import vc from 'vc-js';
 import Utils from '../utils';
 import HypersignSchema from '../schema/schema';
 import { CredentialSchemaProperty as SchemaProperty } from '../../libs/generated/ssi/credential_schema';
 import HypersignDID from '../did/did';
-import { DidDocument as Did, DidDocument, VerificationMethod } from '../../libs/generated/ssi/did';
+import { DidDocument as Did, VerificationMethod } from '../../libs/generated/ssi/did';
+
+import * as jsonSchemaValidator from '@cfworker/json-schema';
 
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 
@@ -35,7 +36,6 @@ import {
 import { DocumentProof as CredentialProof } from '../../libs/generated/ssi/proof';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
-import crypto from 'crypto';
 import customLoader from '../../libs/w3cache/v1';
 import { EthereumEip712Signature2021 } from 'ethereumeip712signature2021suite';
 import { IClientSpec } from '../did/IDID';
@@ -187,35 +187,35 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   //
   // TODO: https://www.w3.org/TR/vc-data-model/#data-schemas
   // TODO: handle schemaUrl variable properly later.
-  private _getCredentialContext = (schemaId: string, schemaProperties: object, schemaName: string) => {
-    const context: any = [];
+  // private _getCredentialContext = (schemaId: string, schemaProperties: object, schemaName: string) => {
+  //   const context: any = [];
 
-    let schemaUrl;
-    if (this.hsSchema && this.hsSchema.schemaRpc) {
-      schemaUrl = `${this.hsSchema.schemaRpc.schemaRestEp}/${schemaId}:`;
-    } else {
-      throw new Error('Error: HypersigSchema object may not be initialized');
-    }
+  //   let schemaUrl;
+  //   if (this.hsSchema && this.hsSchema.schemaRpc) {
+  //     schemaUrl = `${this.hsSchema.schemaRpc.schemaRestEp}/${schemaId}:`;
+  //   } else {
+  //     throw new Error('Error: HypersigSchema object may not be initialized');
+  //   }
 
-    context.push(VC.CREDENTAIL_BASE_CONTEXT);
-    // context.push(VC.CREDENTAIL_SECURITY_SUITE);
+  //   context.push(VC.CREDENTAIL_BASE_CONTEXT);
+  //   // context.push(VC.CREDENTAIL_SECURITY_SUITE);
 
-    context.push({
-      hs: schemaUrl,
-    });
-    context.push({
-      [schemaName]: `hs:${schemaName}`,
-    });
-    const props: Array<string> = Object.keys(schemaProperties);
-    props.forEach((x) => {
-      const obj = {};
-      obj[x] = `hs:${x}`;
-      context.push(obj);
-    });
-    context.push(VC.CONTEXT_HypersignCredentialStatus2023);
+  //   context.push({
+  //     hs: schemaUrl,
+  //   });
+  //   context.push({
+  //     [schemaName]: `hs:${schemaName}`,
+  //   });
+  //   const props: Array<string> = Object.keys(schemaProperties);
+  //   props.forEach((x) => {
+  //     const obj = {};
+  //     obj[x] = `hs:${x}`;
+  //     context.push(obj);
+  //   });
+  //   context.push(VC.CONTEXT_HypersignCredentialStatus2023);
 
-    return context;
-  };
+  //   return context;
+  // };
 
   private async _toTitleCase(status: string) {
     return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
@@ -345,15 +345,13 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
     const vc: IVerifiableCredential = {} as IVerifiableCredential;
 
-    const schemaInternal = schemaDoc.schema as SchemaProperty;
+    // const schemaInternal = schemaDoc.schema as SchemaProperty;
     // const schemaProperties = JSON.parse(schemaInternal.properties as string);
     // const schemaName = schemaDoc.name as string;
     // context
     // vc['@context'] = this._getCredentialContext(params.schemaId, schemaProperties, schemaName);
     vc['@context'] = [VC.CREDENTAIL_BASE_CONTEXT];
-    vc['@context'].push({
-      '@context': VC.CONTEXT_HypersignCredentialStatus2023,
-    } as any);
+    vc['@context'].push(VC.CONTEXT_HypersignCredentialStatus2023);
     const JsonSchema = this.hsSchema.vcJsonSchema(schemaDoc);
     vc['@context'].push((JsonSchema as any).$metadata.jsonLdContext);
 
@@ -371,9 +369,22 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     vc.issuer = issuerDid;
     vc.credentialSubject = {};
     // ToDo: Implement Schema validation (JSON Schema Validator)
-    vc.credentialSubject = {
-      ...this._getCredentialSubject(schemaDoc.schema as SchemaProperty, params.fields),
-    };
+
+    const validator = new jsonSchemaValidator.Validator(JsonSchema as any, '2020-12', true);
+
+    const result = validator.validate({
+      credentialSubject: { ...params.fields },
+    });
+
+    if (!result.valid) {
+      throw result.errors;
+    }
+
+    // vc.credentialSubject = {
+    //   ...this._getCredentialSubject(schemaDoc.schema as SchemaProperty, params.fields),
+    // };
+
+    vc.credentialSubject = params.fields;
     vc.credentialSubject['id'] = subjectDid && subjectDid != undefined ? subjectDid : subjectDidDoc.id;
     vc.credentialSchema = {
       id: schemaDoc.id as string,

@@ -386,6 +386,7 @@ export default class HyperSignSchema implements ISchemaMethods {
         },
       },
       type: 'object',
+      required: ['credentialSubject'],
     };
     schemaDoc['$metadata'] = {
       type: schemaWrapper.name,
