@@ -616,7 +616,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       documentLoader,
     });
 
-    // const statusCheck = await that.checkCredentialStatus({ credentialId: params.credential.id });
+    const statusCheck = await that.checkCredentialStatus({ credentialId: params.credential.id });
+    result.statusResult = statusCheck;
 
     return result;
   }

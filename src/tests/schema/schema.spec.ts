@@ -20,7 +20,7 @@ let signedSchema;
 const signSchema = {} as Schema;
 signSchema['proof'] = {} as SchemaProof;
 const schemaBody = {
-  name: 'testSchema',
+  name: 'TestSchema',
   description: 'This is a test schema generation',
   author: '',
   fields: [{ name: 'name', type: 'string', isRequired: false }],
