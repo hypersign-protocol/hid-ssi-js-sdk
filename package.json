@@ -27,6 +27,7 @@
   "author": "Hypersign Team",
   "license": "ISC",
   "dependencies": {
+    "@cfworker/json-schema": "github:hypersign-protocol/json-schema",
     "@cosmjs/proto-signing": "^0.27.0",
     "@cosmjs/stargate": "^0.27.0",
     "@digitalbazaar/ed25519-signature-2020": "^3.0.0",
@@ -55,6 +56,7 @@
     "@typescript-eslint/parser": "^5.4.0",
     "chai": "^4.3.7",
     "eslint": "^7.32.0",
+    "eslint-plugin-import": "^2.29.0",
     "husky": "^7.0.4",
     "jest": "^28.1.0",
     "mocha": "^10.2.0",

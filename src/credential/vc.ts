@@ -10,7 +10,8 @@ import HypersignSchema from '../schema/schema';
 import { CredentialSchemaProperty as SchemaProperty } from '../../libs/generated/ssi/credential_schema';
 import HypersignDID from '../did/did';
 import { DidDocument as Did, VerificationMethod } from '../../libs/generated/ssi/did';
-import { Validator } from '@cfworker/json-schema';
+
+import * as jsonSchemaValidator from '@cfworker/json-schema';
 
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 
@@ -369,7 +370,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     vc.credentialSubject = {};
     // ToDo: Implement Schema validation (JSON Schema Validator)
 
-    const validator = new Validator(JsonSchema as any, '2020-12', true);
+    const validator = new jsonSchemaValidator.Validator(JsonSchema as any, '2020-12', true);
 
     const result = validator.validate({
       credentialSubject: { ...params.fields },
