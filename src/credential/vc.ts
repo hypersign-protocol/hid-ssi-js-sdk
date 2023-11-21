@@ -484,7 +484,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     // generating hash using merkelroot hash
 
     const merkelizerObj = await Merklizer.merklizeJSONLD(JSON.stringify(params.credential), {
-      documentLoader
+      documentLoader,
     });
     let credentialHash = await merkelizerObj.mt.root();
     credentialHash = Buffer.from(credentialHash.bytes).toString('hex');
