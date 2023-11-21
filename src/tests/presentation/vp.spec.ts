@@ -313,8 +313,6 @@ describe('Verifiable Credential Opearations', () => {
       expect(credentialStatus).to.be.a('object');
       should().exist(credentialStatus['issuer']);
       should().exist(credentialStatus['issuanceDate']);
-      // should().exist(credentialStatus['revoked']);
-      // should().exist(credentialStatus['suspended']);
       should().exist(credentialStatus['remarks']);
       should().exist(credentialStatus['credentialMerkleRootHash']);
       expect(credentialStatusProof).to.be.a('object');
