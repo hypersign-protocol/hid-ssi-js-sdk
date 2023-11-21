@@ -21,7 +21,7 @@ import customLoader from '../../libs/w3cache/v1';
 import { purposes } from 'jsonld-signatures';
 import { EthereumEip712Signature2021 } from 'ethereumeip712signature2021suite';
 
-const documentLoader = customLoader;
+const documentLoader = jsonSigs.extendContextLoader(customLoader);
 
 export default class HypersignVerifiablePresentation implements IPresentationMethods, IVerifiablePresentation {
   private hsDid: HypersignDID | null;

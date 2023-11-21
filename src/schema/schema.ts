@@ -111,7 +111,7 @@ export default class HyperSignSchema implements ISchemaMethods {
     const signedSchema = await jsonSigs.sign(schema, {
       suite,
       purpose: new AssertionProofPurpose(),
-      documentLoader: customLoader,
+      documentLoader,
     });
     return signedSchema.proof;
   }

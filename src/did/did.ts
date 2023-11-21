@@ -37,6 +37,8 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 import customLoader from '../../libs/w3cache/v1';
 import { DeliverTxResponse } from '../did/IDID';
 import { ClientSpecType } from '../../libs/generated/ssi/client_spec';
+
+const documentLoader = jsonSigs.extendContextLoader(customLoader);
 class DIDDocument implements Did {
   '@context': string[];
   id: string;
@@ -219,7 +221,7 @@ export default class HypersignDID implements IDID {
     const signedDidDocument = (await jsonSigs.sign(didDocument, {
       suite,
       purpose: new AssertionProofPurpose(),
-      documentLoader: customLoader,
+      documentLoader,
     })) as ISignedDIDDocument;
     return signedDidDocument.proof;
   }
@@ -764,7 +766,7 @@ export default class HypersignDID implements IDID {
         challenge,
         domain,
       }),
-      documentLoader: customLoader,
+      documentLoader,
       compactProof: constant.compactProof,
     })) as ISignedDIDDocument;
 
@@ -843,7 +845,7 @@ export default class HypersignDID implements IDID {
     const result = await jsonSigs.verify(didDoc, {
       suite,
       purpose: purpose,
-      documentLoader: customLoader,
+      documentLoader,
       compactProof: constant.compactProof,
     });
     return result;
