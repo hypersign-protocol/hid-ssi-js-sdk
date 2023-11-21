@@ -22,8 +22,8 @@ export const mnemonic =
 //   namespace: 'testnet',
 // };
 export const hidNodeEp = {
-  rpc: 'http://localhost:26657',
-  rest: 'http://localhost:1317',
+  rpc: 'http://127.0.0.1:26657',
+  rest: 'http://127.0.0.1:1317',
   namespace: 'testnet',
 };
 export function makeCosmoshubPath(a) {
