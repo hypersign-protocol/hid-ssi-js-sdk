@@ -71,7 +71,14 @@ export class SchemaRpc implements ISchemaRPC {
   async resolveSchema(schemaId: string): Promise<Array<object>> {
     const getSchemaUrl = `${this.schemaRestEp}/${schemaId}:`;
     const response = await axios.get(getSchemaUrl);
+
     const { credentialSchemas } = response.data;
+
+    if (credentialSchemas === undefined) {
+      const { schema } = response.data;
+
+      return schema;
+    }
     return credentialSchemas;
   }
 }

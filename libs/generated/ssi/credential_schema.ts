@@ -5,6 +5,7 @@ import { DocumentProof } from "./proof";
 export const protobufPackage = "hypersign.ssi.v1";
 
 export interface CredentialSchemaDocument {
+  "@context"?: string[] | undefined;
   type?: string | undefined;
   modelVersion?: string | undefined;
   id?: string | undefined;
@@ -34,26 +35,31 @@ function createBaseCredentialSchemaDocument(): CredentialSchemaDocument {
 
 export const CredentialSchemaDocument = {
   encode(message: CredentialSchemaDocument, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message["@context"] !== undefined && message["@context"].length !== 0) {
+      for (const v of message["@context"]) {
+        writer.uint32(10).string(v!);
+      }
+    }
     if (message.type !== undefined && message.type !== "") {
-      writer.uint32(10).string(message.type);
+      writer.uint32(18).string(message.type);
     }
     if (message.modelVersion !== undefined && message.modelVersion !== "") {
-      writer.uint32(18).string(message.modelVersion);
+      writer.uint32(26).string(message.modelVersion);
     }
     if (message.id !== undefined && message.id !== "") {
-      writer.uint32(26).string(message.id);
+      writer.uint32(34).string(message.id);
     }
     if (message.name !== undefined && message.name !== "") {
-      writer.uint32(34).string(message.name);
+      writer.uint32(42).string(message.name);
     }
     if (message.author !== undefined && message.author !== "") {
-      writer.uint32(42).string(message.author);
+      writer.uint32(50).string(message.author);
     }
     if (message.authored !== undefined && message.authored !== "") {
-      writer.uint32(50).string(message.authored);
+      writer.uint32(58).string(message.authored);
     }
     if (message.schema !== undefined) {
-      CredentialSchemaProperty.encode(message.schema, writer.uint32(58).fork()).ldelim();
+      CredentialSchemaProperty.encode(message.schema, writer.uint32(66).fork()).ldelim();
     }
     return writer;
   },
@@ -70,45 +76,55 @@ export const CredentialSchemaDocument = {
             break;
           }
 
-          message.type = reader.string();
+          if (message["@context"] === undefined) {
+            message["@context"] = [];
+          }
+          message["@context"]!.push(reader.string());
           continue;
         case 2:
           if (tag !== 18) {
             break;
           }
 
-          message.modelVersion = reader.string();
+          message.type = reader.string();
           continue;
         case 3:
           if (tag !== 26) {
             break;
           }
 
-          message.id = reader.string();
+          message.modelVersion = reader.string();
           continue;
         case 4:
           if (tag !== 34) {
             break;
           }
 
-          message.name = reader.string();
+          message.id = reader.string();
           continue;
         case 5:
           if (tag !== 42) {
             break;
           }
 
-          message.author = reader.string();
+          message.name = reader.string();
           continue;
         case 6:
           if (tag !== 50) {
             break;
           }
 
-          message.authored = reader.string();
+          message.author = reader.string();
           continue;
         case 7:
           if (tag !== 58) {
+            break;
+          }
+
+          message.authored = reader.string();
+          continue;
+        case 8:
+          if (tag !== 66) {
             break;
           }
 
@@ -125,6 +141,9 @@ export const CredentialSchemaDocument = {
 
   fromJSON(object: any): CredentialSchemaDocument {
     return {
+      "@context": globalThis.Array.isArray(object?.["@context"])
+        ? object["@context"].map((e: any) => globalThis.String(e))
+        : undefined,
       type: isSet(object.type) ? globalThis.String(object.type) : undefined,
       modelVersion: isSet(object.modelVersion) ? globalThis.String(object.modelVersion) : undefined,
       id: isSet(object.id) ? globalThis.String(object.id) : undefined,
@@ -137,6 +156,9 @@ export const CredentialSchemaDocument = {
 
   toJSON(message: CredentialSchemaDocument): unknown {
     const obj: any = {};
+    if (message["@context"]?.length) {
+      obj["@context"] = message["@context"];
+    }
     if (message.type !== undefined && message.type !== "") {
       obj.type = message.type;
     }
@@ -166,6 +188,7 @@ export const CredentialSchemaDocument = {
   },
   fromPartial<I extends Exact<DeepPartial<CredentialSchemaDocument>, I>>(object: I): CredentialSchemaDocument {
     const message = createBaseCredentialSchemaDocument();
+    message["@context"] = object["@context"]?.map((e) => e) || undefined;
     message.type = object.type ?? undefined;
     message.modelVersion = object.modelVersion ?? undefined;
     message.id = object.id ?? undefined;

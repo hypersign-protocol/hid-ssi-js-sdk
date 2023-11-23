@@ -92,7 +92,7 @@ export interface IDID {
     signData?: ISignData[];
   }): Promise<{ didDocument: DidDocument; transactionHash: string }>;
 
-  resolve(params: { did: string; ed25519verificationkey2020?: boolean }): Promise<IDIDResolve>;
+  resolve(params: { did: string }): Promise<IDIDResolve>;
 
   update(params: {
     didDocument: DidDocument;

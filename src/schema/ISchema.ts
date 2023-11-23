@@ -31,11 +31,11 @@ export interface ISchemaMethods {
     verificationMethodId: string;
   }): Promise<IResolveSchema>;
 
-  register(params: { schema: Schema }): Promise<{ transactionHash: string }>;
+  register(params: { schema: IResolveSchema }): Promise<{ transactionHash: string }>;
 
   resolve(params: { schemaId: string }): Promise<IResolveSchema>;
 }
 
 export interface IResolveSchema extends SchemaDocument {
-  proof: DocumentProof;
+  proof?: DocumentProof;
 }

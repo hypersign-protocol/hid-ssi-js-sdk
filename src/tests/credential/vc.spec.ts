@@ -30,7 +30,7 @@ let credentialStatus2 = {};
 let credentialStatus;
 let holderDidDocument;
 let holderSignedDidDoc;
-let holdersPrivateKeyMultibase
+let holdersPrivateKeyMultibase;
 const entityApiSecretKey =
   '57ed4af5b3f51428250e76a769ce8.d8f70a64e3d060b377c85eb75b60ae25011ecebb63f28a27f72183e5bcba140222f8628f17a72eee4833a9174f5ae8309';
 const credentialBody = {
@@ -42,7 +42,7 @@ const credentialBody = {
   expirationDate: '',
 };
 const schemaBody = {
-  name: 'testSchema',
+  name: 'TestSchema',
   description: 'This is a test schema generation',
   author: '',
   fields: [{ name: 'name', type: 'string', isRequired: false }],
@@ -95,7 +95,6 @@ describe('DID Opearations', () => {
     it('should be able to generate didDocument', async function () {
       didDocument = await hypersignDID.generate({ publicKeyMultibase });
       didDocId = didDocument['id'];
-      console.log(didDocId)
       verificationMethodId = didDocument['verificationMethod'][0].id;
       expect(didDocument).to.be.a('object');
       should().exist(didDocument['@context']);
@@ -106,12 +105,12 @@ describe('DID Opearations', () => {
       should().exist(didDocument['verificationMethod']);
       expect(
         didDocument['verificationMethod'] &&
-        didDocument['authentication'] &&
-        didDocument['assertionMethod'] &&
-        didDocument['keyAgreement'] &&
-        didDocument['capabilityInvocation'] &&
-        didDocument['capabilityDelegation'] &&
-        didDocument['service']
+          didDocument['authentication'] &&
+          didDocument['assertionMethod'] &&
+          didDocument['keyAgreement'] &&
+          didDocument['capabilityInvocation'] &&
+          didDocument['capabilityDelegation'] &&
+          didDocument['service']
       ).to.be.a('array');
       should().exist(didDocument['authentication']);
       should().exist(didDocument['assertionMethod']);
@@ -122,7 +121,7 @@ describe('DID Opearations', () => {
     });
     it('should be able to generate didDocument', async function () {
       const kp = await hypersignDID.generateKeys();
-      holdersPrivateKeyMultibase = kp.privateKeyMultibase
+      holdersPrivateKeyMultibase = kp.privateKeyMultibase;
       holderDidDocument = await hypersignDID.generate({ publicKeyMultibase: kp.publicKeyMultibase });
       expect(didDocument).to.be.a('object');
       should().exist(didDocument['@context']);
@@ -133,12 +132,12 @@ describe('DID Opearations', () => {
       should().exist(didDocument['verificationMethod']);
       expect(
         didDocument['verificationMethod'] &&
-        didDocument['authentication'] &&
-        didDocument['assertionMethod'] &&
-        didDocument['keyAgreement'] &&
-        didDocument['capabilityInvocation'] &&
-        didDocument['capabilityDelegation'] &&
-        didDocument['service']
+          didDocument['authentication'] &&
+          didDocument['assertionMethod'] &&
+          didDocument['keyAgreement'] &&
+          didDocument['capabilityInvocation'] &&
+          didDocument['capabilityDelegation'] &&
+          didDocument['service']
       ).to.be.a('array');
       should().exist(didDocument['authentication']);
       should().exist(didDocument['assertionMethod']);
@@ -211,8 +210,8 @@ describe('DID Opearations', () => {
 
   describe('#register() this is to register did on the blockchain', function () {
     it('should be able to register didDocument in the blockchain', async function () {
-      const didDoc = didDocument
-      delete didDoc.proof
+      const didDoc = didDocument;
+      delete didDoc.proof;
       const result = await hypersignDID.register({ didDocument: didDoc, privateKeyMultibase, verificationMethodId });
       should().exist(result.transactionHash);
       should().exist(result.didDocument);
@@ -370,7 +369,6 @@ describe('Verifiable Credential Opearations', () => {
 
       credentialDetail = await hypersignVC.generate(tempCredentialBody);
       // console.log('New Credential --------------------------------');
-
       expect(credentialDetail).to.be.a('object');
       should().exist(credentialDetail['@context']);
       should().exist(credentialDetail['id']);
@@ -488,17 +486,14 @@ describe('Verifiable Credential Opearations', () => {
       tempIssueCredentialBody.issuerDid = didDocId;
       tempIssueCredentialBody.verificationMethodId = verificationMethodId;
       tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
-      // console.log(JSON.stringify(tempIssueCredentialBody, null, 2));
       const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);
+
       const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
         issuedCredResult;
 
       signedVC = signedCredential;
       credenStatus = credentialStatus;
       credentialId = signedVC.id;
-
-      // console.log('Signed Credential --------------------------------');
-      // console.log(JSON.stringify(signedVC, null, 2));
 
       credentialStatusId = signedCredential['credentialStatus'].id;
 
@@ -516,13 +511,11 @@ describe('Verifiable Credential Opearations', () => {
       expect(signedCredential['id']).to.be.equal(tempIssueCredentialBody.credential.id);
 
       expect(credentialStatus).to.be.a('object');
+      should().exist(credentialStatus['@context']);
       should().exist(credentialStatus['id']);
       should().exist(credentialStatus['issuer']);
       should().exist(credentialStatus['issuanceDate']);
-      should().exist(credentialStatus['issuer']);
-      should().exist(credentialStatus['issuanceDate']);
-      should().exist(credentialStatus['revoked']);
-      should().exist(credentialStatus['suspended']);
+      should().exist(credentialStatus['credentialMerkleRootHash']);
 
       expect(credentialStatusProof).to.be.a('object');
       should().exist(credentialStatusProof['type']);
@@ -547,30 +540,17 @@ describe('Verifiable Credential Opearations', () => {
       tempCredentialBody.issuerDid = didDocId;
       tempCredentialBody.fields = { name: 'varsha' };
       const credentialDetail = await hypersignVC.generate(tempCredentialBody);
-
       const tempIssueCredentialBody = { ...issueCredentialBody };
-
       tempIssueCredentialBody.credential = credentialDetail;
       tempIssueCredentialBody.issuerDid = didDocId;
       tempIssueCredentialBody.verificationMethodId = verificationMethodId;
       tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
       tempIssueCredentialBody.registerCredential = false;
-
       const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);
-
       const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
         issuedCredResult;
-
       credentialStatus2 = credentialStatus;
       credentialStatusProof2 = credentialStatusProof;
-
-      // console.log({
-      //   signedCredential,
-      //   credentialStatusRegistrationResult,
-      //   credentialStatus2,
-      //   credentialStatusProof2,
-      // });
-
       expect(signedCredential).to.be.a('object');
       expect(credentialStatus).to.be.a('object');
       expect(credentialStatusProof).to.be.a('object');
@@ -584,12 +564,7 @@ describe('Verifiable Credential Opearations', () => {
         issuerDid: didDocId,
         verificationMethodId,
       };
-
-      // console.log('Signed vc --------------------------------');
-      // console.log(JSON.stringify(params.credential, null, 2));
       const verificationResult = await hypersignVC.verify(params);
-      // console.log('Credential Verifification result --------------------------------');
-      // console.log(JSON.stringify(verificationResult, null, 2));
       expect(verificationResult).to.be.a('object');
       should().exist(verificationResult.verified);
       expect(verificationResult.verified).to.be.equal(true);
@@ -852,7 +827,6 @@ describe('Verifiable Credential Status Opearations', () => {
       const updatedCredResult = await hypersignVC.updateCredentialStatus(params);
       expect(updatedCredResult).to.be.a('object');
       expect(updatedCredResult.code).to.be.equal(0);
-
     });
     it('should not be able to change the status of credential as it is revoked', async function () {
       const params = {
@@ -865,9 +839,11 @@ describe('Verifiable Credential Status Opearations', () => {
       };
 
       return hypersignVC.updateCredentialStatus(params).catch(function (err) {
-        expect(err.message).to.include(`failed to execute message; message index: 0: credential status ${credentialId} could not be updated since it is revoked: invalid Credential Status`)
+        expect(err.message).to.include(
+          `failed to execute message; message index: 0: credential status ${credentialId} could not be updated since it is revoked: invalid Credential Status`
+        );
       });
-    })
+    });
   });
 
   describe('#registerCredentialStatus() method to register credential on blockchain', function () {

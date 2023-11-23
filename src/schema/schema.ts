@@ -5,22 +5,31 @@
  */
 
 import {
+  CredentialSchemaDocument,
   CredentialSchemaState as Schema,
   CredentialSchemaDocument as SchemaDocument,
   CredentialSchemaProperty as SchemaProperty,
 } from '../../libs/generated/ssi/credential_schema';
-import { DocumentProof as SchemaProof } from '../../libs/generated/ssi/proof';
+import { DocumentProof, DocumentProof as SchemaProof } from '../../libs/generated/ssi/proof';
 import { SchemaRpc } from './schemaRPC';
 import * as constants from '../constants';
+import jsonSigs from 'jsonld-signatures';
+const { AssertionProofPurpose } = jsonSigs.purposes;
 import { ISchemaFields, ISchemaMethods, IResolveSchema } from './ISchema';
 import Utils from '../utils';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
+import { extendContextLoader } from 'jsonld-signatures';
+import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import SchemaApiService from '../ssiApi/services/schema/schema.service';
-const ed25519 = require('@stablelib/ed25519');
-import { base58btc } from 'multiformats/bases/base58';
+import customLoader from '../../libs/w3cache/v1';
+const documentLoader = extendContextLoader(customLoader);
+import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
+import HypersignDID from '../did/did';
+import { VerificationMethod } from '../../libs/generated/ssi/did';
 
 export default class HyperSignSchema implements ISchemaMethods {
+  '@context': Array<string>;
   type: string;
   modelVersion: string;
   id: string;
@@ -31,6 +40,7 @@ export default class HyperSignSchema implements ISchemaMethods {
   schemaRpc: SchemaRpc | null;
   namespace: string;
   private schemaApiService: SchemaApiService | null;
+  private hsDid: HypersignDID;
   constructor(
     params: {
       namespace?: string;
@@ -44,12 +54,14 @@ export default class HyperSignSchema implements ISchemaMethods {
     const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
     this.schemaRpc = new SchemaRpc({ offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
+    this.hsDid = new HypersignDID({ offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
     if (entityApiSecretKey && entityApiSecretKey != '') {
       this.schemaApiService = new SchemaApiService(entityApiSecretKey);
       this.schemaRpc = null;
     } else {
       this.schemaApiService = null;
     }
+    this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT];
     this.namespace = namespace && namespace != '' ? namespace : '';
     (this.type = constants.SCHEMA.SCHEMA_TYPE),
       (this.modelVersion = '1.0'),
@@ -82,6 +94,26 @@ export default class HyperSignSchema implements ISchemaMethods {
 
   private _getDateTime(): string {
     return new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z';
+  }
+  private async _jsonLdSign(params: {
+    schema: CredentialSchemaDocument;
+    privateKeyMultibase: string;
+    verificationMethodId: string;
+    publicKeyMultibase: string;
+  }) {
+    const { schema, privateKeyMultibase, verificationMethodId } = params;
+    const keyPair = await Ed25519VerificationKey2020.from({
+      id: verificationMethodId,
+      privateKeyMultibase: privateKeyMultibase,
+      publicKeyMultibase: params.publicKeyMultibase,
+    });
+    const suite = new Ed25519Signature2020({ key: keyPair });
+    const signedSchema = await jsonSigs.sign(schema, {
+      suite,
+      purpose: new AssertionProofPurpose(),
+      documentLoader,
+    });
+    return signedSchema.proof;
   }
 
   /**
@@ -119,7 +151,7 @@ export default class HyperSignSchema implements ISchemaMethods {
     additionalProperties: boolean;
   }): Promise<SchemaDocument> {
     if (!params.author) throw new Error('HID-SSI-SDK:: Error: Author must be passed');
-
+    this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT];
     this.id = await this._getSchemaId();
     this.name = params.name;
     this.author = params.author;
@@ -127,7 +159,7 @@ export default class HyperSignSchema implements ISchemaMethods {
     this.schema = {
       schema: constants.SCHEMA.SCHEMA_JSON,
       description: params.description ? params.description : '',
-      type: 'object',
+      type: 'https://schema.org/object',
       properties: '',
       required: [],
       additionalProperties: params.additionalProperties,
@@ -155,8 +187,14 @@ export default class HyperSignSchema implements ISchemaMethods {
 
       this.schema.properties = JSON.stringify(t);
     }
-
+    if (!this.schema.additionalProperties) {
+      delete this.schema.additionalProperties;
+    }
+    if (this.schema.required?.length == 0) {
+      delete this.schema.required;
+    }
     return {
+      '@context': this['@context'],
       type: this.type,
       modelVersion: this.modelVersion,
       id: this.id,
@@ -173,7 +211,7 @@ export default class HyperSignSchema implements ISchemaMethods {
    *  - params.schema               : The schema document without proof
    *  - params.privateKeyMultibase  : Private Key to sign the doc
    *  - params.verificationMethodId : VerificationMethodId of the document
-   * @returns {Promise<Schema>} Schema with proof
+   * @returns {Promise<IResolveSchema>} Schema with proof
    */
   public async sign(params: {
     privateKeyMultibase: string;
@@ -184,26 +222,31 @@ export default class HyperSignSchema implements ISchemaMethods {
     if (!params.verificationMethodId)
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId must be passed');
     if (!params.schema) throw new Error('HID-SSI-SDK:: Error: Schema must be passed');
-
-    const { privateKeyMultibase: privateKeyMultibaseConverted } =
-      Utils.convertEd25519verificationkey2020toStableLibKeysInto({
-        privKey: params.privateKeyMultibase,
-      });
-
+    const { schema, privateKeyMultibase, verificationMethodId } = params;
     const schemaDoc: SchemaDocument = params.schema;
-    const dataBytes = (await SchemaDocument.encode(schemaDoc)).finish();
-    const signed = ed25519.sign(privateKeyMultibaseConverted, dataBytes);
+    const { didDocument } = await this.hsDid.resolve({ did: schema.author as string });
+    if (!didDocument) {
+      throw new Error('HID-SSI-SDK:: Error: can not resolve the author');
+    }
+    const verificationMethod: VerificationMethod = didDocument['verificationMethod'].find(
+      (x) => x.id == verificationMethodId
+    ) as VerificationMethod;
+    if (!verificationMethod) {
+      throw new Error('HID-SSI-SDK:: Error: verificationMethod not matched');
+    }
+    const proof = await this._jsonLdSign({
+      schema,
+      privateKeyMultibase,
+      verificationMethodId,
+      publicKeyMultibase: verificationMethod.publicKeyMultibase as string,
+    });
 
-    const proof: SchemaProof = {
-      type: constants.SCHEMA.SIGNATURE_TYPE,
-      created: this._getDateTime(),
-      verificationMethod: params.verificationMethodId,
-      proofPurpose: constants.SCHEMA.PROOF_PURPOSE,
-      proofValue: base58btc.encode(signed),
-    };
     schemaDoc['proof'] = {} as SchemaProof;
     const schemaToReturn: IResolveSchema = schemaDoc as IResolveSchema;
-    Object.assign(schemaToReturn['proof'], { ...proof });
+    if (proof) {
+      schemaToReturn['proof'] = { ...schemaToReturn['proof'], ...proof };
+    }
+
     return schemaToReturn;
   }
 
@@ -213,7 +256,7 @@ export default class HyperSignSchema implements ISchemaMethods {
    *  - params.schema               : The schema document with schemaProof
    * @returns {Promise<object>} Result of the registration
    */
-  public async register(params: { schema: Schema }): Promise<{ transactionHash: string }> {
+  public async register(params: { schema: IResolveSchema }): Promise<{ transactionHash: string }> {
     if (!params.schema) throw new Error('HID-SSI-SDK:: Error: schema must be passed');
     if (!params.schema['proof']) throw new Error('HID-SSI-SDK:: Error: schema.proof must be passed');
     if (!params.schema['proof'].created) throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain created');
@@ -232,8 +275,7 @@ export default class HyperSignSchema implements ISchemaMethods {
     }
     const response = {} as { transactionHash: string };
     const schemaDoc = params.schema;
-    const proof = schemaDoc['proof'];
-    delete schemaDoc['proof'];
+    const proof = schemaDoc['proof'] as DocumentProof;
     if (this.schemaRpc) {
       const result: DeliverTxResponse = await this.schemaRpc.createSchema(schemaDoc as SchemaDocument, proof);
       response.transactionHash = result.transactionHash;
@@ -262,14 +304,95 @@ export default class HyperSignSchema implements ISchemaMethods {
       );
     }
     const schemaArr: Array<object> = await this.schemaRpc.resolveSchema(params.schemaId);
+
     if (!schemaArr || schemaArr.length < 0) {
       throw new Error('HID-SSI-SDK:: Error: No schema found, id = ' + params.schemaId);
     }
-    const schema = schemaArr[0] as Schema;
+    const schemaT = schemaArr[0] as Schema;
+
+    const schema = {
+      credentialSchemaDocument: (schemaArr[0] as any).schema ? schemaArr[0] : schemaT.credentialSchemaDocument,
+      credentialSchemaProof: (schemaArr[0] as any).proof ? (schemaArr[0] as any).proof : schemaT.credentialSchemaProof,
+    } as Schema;
+
     const response: IResolveSchema = {
       ...schema.credentialSchemaDocument,
       proof: schema.credentialSchemaProof as SchemaProof,
     };
+
+    // Competable Schema  with https://www.w3.org/TR/vc-json-schema/#jsonschema    currently not used
+
     return response;
+  }
+
+  public vcJsonSchema(schemaResolved: IResolveSchema) {
+    const schemaWrapper = schemaResolved;
+    const properties = JSON.parse(schemaResolved.schema?.properties as string);
+    const ld = {};
+    const schemaProp = {};
+    Object.entries(properties).forEach((elm) => {
+      ld[elm[0]] = {
+        '@id': 'https://hypersign-schema.org/' + elm[0],
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        '@type': 'xsd:' + elm[1].type,
+      };
+
+      schemaProp[elm[0]] = {
+        description: `Enter value for ${elm[0]}`,
+        title: `${elm[0]}`,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        type: elm[1].type,
+      };
+    });
+
+    const jsonLdcontext = {
+      '@protected': true,
+      '@version': 1.1,
+      id: '@id',
+      type: '@type',
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      [schemaWrapper.name]: {
+        '@context': {
+          '@propagate': true,
+          '@protected': true,
+          xsd: 'http://www.w3.org/2001/XMLSchema#',
+          ...ld,
+        },
+        '@id': 'https://hypersign-schema.org',
+      },
+    };
+
+    const schemaDoc = {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      description: schemaWrapper.schema?.description,
+      properties: {
+        credentialSubject: {
+          description: 'Stores the data of the credential',
+          title: 'Credential subject',
+          properties: {
+            id: {
+              description: 'Stores the DID of the subject that owns the credential',
+              title: 'Credential subject ID',
+              format: 'uri',
+              type: 'string',
+            },
+            ...schemaProp,
+          },
+          required: schemaWrapper.schema?.required,
+          type: 'object',
+        },
+      },
+      type: 'object',
+      required: ['credentialSubject'],
+    };
+    schemaDoc['$metadata'] = {
+      type: schemaWrapper.name,
+      version: 1.0,
+      jsonLdContext: { '@context': { ...jsonLdcontext } },
+    };
+    return schemaDoc;
   }
 }

@@ -8,6 +8,9 @@ import ecdsasecp2020 from './lds-ecdsa-secp256k1-recovery2020.json'
 import schema_org from './schema_org.json'
 import x25519VerificationKey2020 from "./x25519-key-agreement-2020-v1.json"
 import X25519KeyAgreementKeyEIP5630 from './X25519KeyAgreementKeyEIP5630.json'
+import credentialStatus from './credentialStatus.json'
+import credentialSchema from './credential_schema.json'
+import hypersigncredentialStatus2023 from './hypersignCredentialStatus2023.json'
 // Ref: https://github.com/digitalbazaar/jsonld.js/#custom-document-loader
 
 let nodeDocumentLoader;
@@ -47,7 +50,15 @@ const CONTEXTS = Object.freeze({
     }, 
     "https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/X25519KeyAgreementKeyEIP5630.jsonld": {
         ...X25519KeyAgreementKeyEIP5630
-    }
+    },
+    "https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/CredentialStatus.jsonld": {
+        ...credentialStatus
+    },
+    "https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/CredentialSchema.jsonld": {
+        ...credentialSchema
+    },
+    "https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/HypersignCredentialStatus2023.jsonld":
+        { ...hypersigncredentialStatus2023 }
 });
 
 export default async (url, options) => {

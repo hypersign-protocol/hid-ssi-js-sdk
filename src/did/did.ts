@@ -8,7 +8,6 @@ import jsonSigs from 'jsonld-signatures';
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 import { DIDRpc } from './didRPC';
 import Utils from '../utils';
-const ed25519 = require('@stablelib/ed25519');
 import { DidDocument as Did, VerificationMethod, Service, DidDocument } from '../../libs/generated/ssi/did';
 import { DocumentProof, DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
@@ -24,7 +23,6 @@ import {
   IDIDResolve,
   IDIDRpc,
   IController,
-  IDidDocument,
   ISignedDIDDocument,
   IClientSpec,
   ISignData,
@@ -39,6 +37,8 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 import customLoader from '../../libs/w3cache/v1';
 import { DeliverTxResponse } from '../did/IDID';
 import { ClientSpecType } from '../../libs/generated/ssi/client_spec';
+
+const documentLoader = jsonSigs.extendContextLoader(customLoader);
 class DIDDocument implements Did {
   '@context': string[];
   id: string;
@@ -203,20 +203,6 @@ export default class HypersignDID implements IDID {
     return new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z';
   }
 
-  private async _sign(params: { didDocString: string; privateKeyMultibase: string }): Promise<string> {
-    const { privateKeyMultibase: privateKeyMultibaseConverted } =
-      Utils.convertEd25519verificationkey2020toStableLibKeysInto({
-        privKey: params.privateKeyMultibase,
-      });
-
-    const { didDocString } = params;
-    // TODO:  do proper checck of paramaters
-    const did: Did = JSON.parse(didDocString);
-    const didBytes = (await Did.encode(did)).finish();
-    const signed = ed25519.sign(privateKeyMultibaseConverted, didBytes);
-    return Buffer.from(signed).toString('base64');
-  }
-
   private async _jsonLdSign(params: {
     didDocument: Did;
     privateKeyMultibase: string;
@@ -235,7 +221,7 @@ export default class HypersignDID implements IDID {
     const signedDidDocument = (await jsonSigs.sign(didDocument, {
       suite,
       purpose: new AssertionProofPurpose(),
-      documentLoader: customLoader,
+      documentLoader,
     })) as ISignedDIDDocument;
     return signedDidDocument.proof;
   }
@@ -426,10 +412,7 @@ export default class HypersignDID implements IDID {
       let signature;
       let createdAt;
       if (!didDocument['@context']) {
-        signature = await this._sign({
-          didDocString: JSON.stringify(didDocument),
-          privateKeyMultibase,
-        });
+        throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
       } else {
         didDocument = Utils.removeEmptyString(didDocument);
         const proof = await this._jsonLdSign({
@@ -474,10 +457,7 @@ export default class HypersignDID implements IDID {
         ) {
           let signature: string;
           if (!didDocument['@context']) {
-            signature = await this._sign({
-              didDocString: JSON.stringify(didDocument),
-              privateKeyMultibase,
-            });
+            throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
           } else {
             didDocument = Utils.removeEmptyString(didDocument);
             const proof: SignInfo = await this._jsonLdSign({
@@ -542,10 +522,7 @@ export default class HypersignDID implements IDID {
     let signature;
     let createdAt;
     if (!didDocument['@context']) {
-      signature = await this._sign({
-        didDocString: JSON.stringify(didDocument),
-        privateKeyMultibase,
-      });
+      throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
     } else {
       didDocument = Utils.removeEmptyString(didDocument);
       const proof = await this._jsonLdSign({
@@ -569,29 +546,15 @@ export default class HypersignDID implements IDID {
    * Resolves a DID into DIDDocument from Hypersign blockchain - an onchain activity
    * @params
    *  - params.did                        : DID
-   *  - params.ed25519verificationkey2020 : *Optional* True/False
    * @returns  {Promise<IDIDResolve>} didDocument and didDocumentMetadata
    */
-  public async resolve(params: { did: string; ed25519verificationkey2020?: boolean }): Promise<IDIDResolve> {
+  public async resolve(params: { did: string }): Promise<IDIDResolve> {
     let result = {} as IDIDResolve;
     if (!params.did) {
       throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
     }
     if (this.didrpc) {
       result = await this.didrpc.resolveDID(params.did);
-      if (params.ed25519verificationkey2020) {
-        const didDoc: IDidDocument = result.didDocument as IDidDocument;
-        const verificationMethods = didDoc.verificationMethod;
-        verificationMethods.forEach((verificationMethod) => {
-          if (verificationMethod.type === constant.DID.VERIFICATION_METHOD_TYPE) {
-            const ed25519PublicKey = Utils.convertedStableLibKeysIntoEd25519verificationkey2020({
-              publicKey: verificationMethod.publicKeyMultibase,
-            });
-            verificationMethod.publicKeyMultibase = ed25519PublicKey.publicKeyMultibase;
-          }
-        });
-        didDoc.verificationMethod = verificationMethods;
-      }
     } else if (this.didAPIService) {
       result = await this.didAPIService.resolveDid({ did: params.did });
     }
@@ -803,7 +766,7 @@ export default class HypersignDID implements IDID {
         challenge,
         domain,
       }),
-      documentLoader: customLoader,
+      documentLoader,
       compactProof: constant.compactProof,
     })) as ISignedDIDDocument;
 
@@ -882,7 +845,7 @@ export default class HypersignDID implements IDID {
     const result = await jsonSigs.verify(didDoc, {
       suite,
       purpose: purpose,
-      documentLoader: customLoader,
+      documentLoader,
       compactProof: constant.compactProof,
     });
     return result;
@@ -1098,7 +1061,7 @@ export default class HypersignDID implements IDID {
   public async updateByClientSpec(params: {
     didDocument: Did;
     versionId: string;
-    signInfos: SignInfo[];
+    signInfos: ISignInfo[];
   }): Promise<{ transactionHash: string }> {
     const response = {} as { transactionHash: string };
     if (!this.didrpc && !this.didAPIService) {
@@ -1142,10 +1105,10 @@ export default class HypersignDID implements IDID {
       signInfos.forEach((sign) => {
         let type;
         let clientSpec;
-        if (sign['clientSpec'].type === IClientSpec['eth-personalSign']) {
+        if (sign['clientSpec']?.type === IClientSpec['eth-personalSign']) {
           type = constant['DID_EcdsaSecp256k1RecoveryMethod2020'].SIGNATURE_TYPE;
           clientSpec = ClientSpecType.CLIENT_SPEC_TYPE_ETH_PERSONAL_SIGN;
-        } else if (sign['clientSpec'].type === IClientSpec['cosmos-ADR036']) {
+        } else if (sign['clientSpec']?.type === IClientSpec['cosmos-ADR036']) {
           type = constant['DID_EcdsaSecp256k1VerificationKey2019'].SIGNATURE_TYPE;
           clientSpec = ClientSpecType.CLIENT_SPEC_TYPE_COSMOS_ADR036;
         } else {
@@ -1186,7 +1149,7 @@ export default class HypersignDID implements IDID {
    */
   public async deactivateByClientSpec(params: {
     didDocument: Did;
-    signInfos: SignInfo[];
+    signInfos: ISignInfo[];
     versionId: string;
   }): Promise<{ transactionHash: string }> {
     const response = {} as { transactionHash: string };
@@ -1233,10 +1196,10 @@ export default class HypersignDID implements IDID {
       signInfos.forEach((sign) => {
         let type;
         let clientSpec;
-        if (sign['clientSpec'].type === IClientSpec['eth-personalSign']) {
+        if (sign['clientSpec']?.type === IClientSpec['eth-personalSign']) {
           type = constant['DID_EcdsaSecp256k1RecoveryMethod2020'].SIGNATURE_TYPE;
           clientSpec = ClientSpecType.CLIENT_SPEC_TYPE_ETH_PERSONAL_SIGN;
-        } else if (sign['clientSpec'].type === IClientSpec['cosmos-ADR036']) {
+        } else if (sign['clientSpec']?.type === IClientSpec['cosmos-ADR036']) {
           type = constant['DID_EcdsaSecp256k1VerificationKey2019'].SIGNATURE_TYPE;
           clientSpec = ClientSpecType.CLIENT_SPEC_TYPE_COSMOS_ADR036;
         } else {
