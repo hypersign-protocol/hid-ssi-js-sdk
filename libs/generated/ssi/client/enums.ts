@@ -75,7 +75,7 @@ export enum VerificationMethodTypes {
     X25519KeyAgreementKey2020 = "X25519KeyAgreementKey2020",
     X25519KeyAgreementKeyEIP5630 = "X25519KeyAgreementKeyEIP5630",
     Bls12381G2Key2020 = "Bls12381G2Key2020",
-    BabyJubJubVerificationKey2023 = "BabyJubJubVerificationKey2023",
+    BabyJubJubKey2021 = "BabyJubJubKey2021",
 }
 
 export function verificationMethodTypesFromJSON(object: any): VerificationMethodTypes {
@@ -99,8 +99,8 @@ export function verificationMethodTypesFromJSON(object: any): VerificationMethod
         case "Bls12381G2Key2020":
             return VerificationMethodTypes.Bls12381G2Key2020;
         case 6:
-        case "BabyJubJubVerificationKey2023":
-            return VerificationMethodTypes.BabyJubJubVerificationKey2023;
+        case "BabyJubJubKey2021":
+            return VerificationMethodTypes.BabyJubJubKey2021;
         default:
             throw new globalThis.Error("Unrecognized enum value " + object + " for enum VerificationMethodTypes");
     }
@@ -120,8 +120,8 @@ export function verificationMethodTypesToJSON(object: VerificationMethodTypes): 
             return "X25519KeyAgreementKeyEIP5630";
         case VerificationMethodTypes.Bls12381G2Key2020:
             return "Bls12381G2Key2020";
-        case VerificationMethodTypes.BabyJubJubVerificationKey2023:
-            return "BabyJubJubVerificationKey2023";
+        case VerificationMethodTypes.BabyJubJubKey2021:
+            return "BabyJubJubKey2021";
         default:
             throw new globalThis.Error("Unrecognized enum value " + object + " for enum VerificationMethodTypes");
     }
@@ -141,7 +141,7 @@ export function verificationMethodTypesToNumber(object: VerificationMethodTypes)
             return 4;
         case VerificationMethodTypes.Bls12381G2Key2020:
             return 5;
-        case VerificationMethodTypes.BabyJubJubVerificationKey2023:
+        case VerificationMethodTypes.BabyJubJubKey2021:
             return 6;
         default:
             throw new globalThis.Error("Unrecognized enum value " + object + " for enum VerificationMethodTypes");
@@ -152,7 +152,7 @@ export enum ProofTypes {
     Ed25519Signature2020 = "Ed25519Signature2020",
     EcdsaSecp256k1Signature2019 = "EcdsaSecp256k1Signature2019",
     EcdsaSecp256k1RecoverySignature2020 = "EcdsaSecp256k1RecoverySignature2020",
-    BabyJubJubSignature2023 = "BabyJubJubSignature2023",
+    BabyJubJubSignature2021 = "BJJSignature2021",
     BbsBlsSignature2020 = "BbsBlsSignature2020",
 }
 
@@ -168,8 +168,8 @@ export function proofTypesFromJSON(object: any): ProofTypes {
         case "EcdsaSecp256k1RecoverySignature2020":
             return ProofTypes.EcdsaSecp256k1RecoverySignature2020;
         case 3:
-        case "BabyJubJubSignature2023":
-            return ProofTypes.BabyJubJubSignature2023;
+        case "BabyJubJubSignature2021":
+            return ProofTypes.BabyJubJubSignature2021;
         case 4:
         case "BbsBlsSignature2020":
             return ProofTypes.BbsBlsSignature2020;
@@ -186,8 +186,8 @@ export function proofTypesToJSON(object: ProofTypes): string {
             return "EcdsaSecp256k1Signature2019";
         case ProofTypes.EcdsaSecp256k1RecoverySignature2020:
             return "EcdsaSecp256k1RecoverySignature2020";
-        case ProofTypes.BabyJubJubSignature2023:
-            return "BabyJubJubSignature2023";
+        case ProofTypes.BabyJubJubSignature2021:
+            return "BabyJubJubSignature2021";
         case ProofTypes.BbsBlsSignature2020:
             return "BbsBlsSignature2020";
         default:
@@ -203,7 +203,7 @@ export function proofTypesToNumber(object: ProofTypes): number {
             return 1;
         case ProofTypes.EcdsaSecp256k1RecoverySignature2020:
             return 2;
-        case ProofTypes.BabyJubJubSignature2023:
+        case ProofTypes.BabyJubJubSignature2021:
             return 3;
         case ProofTypes.BbsBlsSignature2020:
             return 4;

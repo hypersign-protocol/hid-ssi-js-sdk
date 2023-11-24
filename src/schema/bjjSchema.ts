@@ -20,16 +20,15 @@ import Utils from '../utils';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { extendContextLoader } from 'jsonld-signatures';
-import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
 import SchemaApiService from '../ssiApi/services/schema/schema.service';
 import customLoader from '../../libs/w3cache/v1';
 const documentLoader = extendContextLoader(customLoader);
-import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
 import HypersignDID from '../did/did';
 import { VerificationMethod } from '../../libs/generated/ssi/did';
+import { BabyJubJubKeys2021 } from '@hypersign-protocol/babyjubjub2021';
+import { BabyJubJubSignature2021Suite } from '@hypersign-protocol/babyjubjubsignature2021';
 
-import HypersignBJJSchema from './bjjSchema';
-export default class HyperSignSchema implements ISchemaMethods {
+export default class HypersignBJJSchema implements ISchemaMethods {
   '@context': Array<string>;
   type: string;
   modelVersion: string;
@@ -42,7 +41,6 @@ export default class HyperSignSchema implements ISchemaMethods {
   namespace: string;
   private schemaApiService: SchemaApiService | null;
   private hsDid: HypersignDID;
-  public hypersignBjjschema: HypersignBJJSchema;
   constructor(
     params: {
       namespace?: string;
@@ -79,7 +77,6 @@ export default class HyperSignSchema implements ISchemaMethods {
       required: [],
       additionalProperties: false,
     };
-    this.hypersignBjjschema = new HypersignBJJSchema(params);
   }
 
   // Ref:
@@ -105,12 +102,15 @@ export default class HyperSignSchema implements ISchemaMethods {
     publicKeyMultibase: string;
   }) {
     const { schema, privateKeyMultibase, verificationMethodId } = params;
-    const keyPair = await Ed25519VerificationKey2020.from({
-      id: verificationMethodId,
+    const keyPair = await BabyJubJubKeys2021.fromKeys({
+      options: {
+        controller: verificationMethodId,
+        id: verificationMethodId,
+      },
       privateKeyMultibase: privateKeyMultibase,
       publicKeyMultibase: params.publicKeyMultibase,
     });
-    const suite = new Ed25519Signature2020({ key: keyPair });
+    const suite = new BabyJubJubSignature2021Suite({ key: keyPair });
     const signedSchema = await jsonSigs.sign(schema, {
       suite,
       purpose: new AssertionProofPurpose(),

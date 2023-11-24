@@ -32,6 +32,9 @@
     "@digitalbazaar/ed25519-signature-2020": "^3.0.0",
     "@digitalbazaar/ed25519-verification-key-2018": "^3.1.2",
     "@digitalbazaar/ed25519-verification-key-2020": "^3.3.0",
+    "@hypersign-protocol/babyjubjub2021": "github:hypersign-protocol/BabyJubJubKey2021",
+    "@hypersign-protocol/babyjubjubsignature2021": "https://github.com/hypersign-protocol/BabyJubJubSignature2021Suite.git",
+
     "@iden3/js-jsonld-merklization": "^1.0.2",
     "axios": "^0.19.0",
     "crypto-ld": "^6.0.0",

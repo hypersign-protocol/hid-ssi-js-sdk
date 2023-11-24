@@ -37,7 +37,7 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 import customLoader from '../../libs/w3cache/v1';
 import { DeliverTxResponse } from '../did/IDID';
 import { ClientSpecType } from '../../libs/generated/ssi/client_spec';
-
+import HypersignBJJDId from './bjjdid';
 const documentLoader = jsonSigs.extendContextLoader(customLoader);
 class DIDDocument implements Did {
   '@context': string[];
@@ -161,6 +161,7 @@ export default class HypersignDID implements IDID {
   private didrpc: IDIDRpc | null;
   private didAPIService: IDidApiService | null;
   public namespace: string;
+  public bjjDID: HypersignBJJDId;
 
   /**
    * Creates instance of HypersignDID class
@@ -197,6 +198,8 @@ export default class HypersignDID implements IDID {
       this.didAPIService = null;
     }
     this.namespace = namespace ? namespace : '';
+
+    this.bjjDID = new HypersignBJJDId(params);
   }
 
   private _getDateTime(): string {
@@ -955,6 +958,13 @@ export default class HypersignDID implements IDID {
     }
     return didDoc;
   }
+
+  // public generateKeyPairBabyJubJub() {
+  //   return;
+  // }
+  // public async createDIDbyBabyJubJub() {
+  //   return;
+  // }
 
   // using in API
   /**

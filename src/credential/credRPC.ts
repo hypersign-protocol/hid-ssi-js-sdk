@@ -74,7 +74,15 @@ export class CredentialRPC implements ICredentialRPC {
       }),
     };
 
-    const fee = 'auto';
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount: '2000',
+        },
+      ],
+      gas: '200000',
+    };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult: DeliverTxResponse = await hidClient.signAndBroadcast(
       HIDClient.getHidWalletAddress(),
@@ -112,7 +120,15 @@ export class CredentialRPC implements ICredentialRPC {
       throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
     }
 
-    const fee = 'auto';
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount: '2000',
+        },
+      ],
+      gas: '200000',
+    };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult: DeliverTxResponse = await hidClient.signAndBroadcast(
       HIDClient.getHidWalletAddress(),
@@ -175,7 +191,15 @@ export class CredentialRPC implements ICredentialRPC {
       }),
     };
 
-    const fee = 'auto';
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount: '2000',
+        },
+      ],
+      gas: '200000',
+    };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult: DeliverTxResponse = await hidClient.signAndBroadcast(
       HIDClient.getHidWalletAddress(),

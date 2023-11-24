@@ -59,7 +59,15 @@ export class DIDRpc implements IDIDRpc {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-    const fee = 'auto';
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount: '4000',
+        },
+      ],
+      gas: '200000',
+    };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
     return txResult;
@@ -84,7 +92,15 @@ export class DIDRpc implements IDIDRpc {
     };
 
     // TODO: need to find a way to make it dynamic
-    const fee = 'auto';
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount: '1000',
+        },
+      ],
+      gas: '200000',
+    };
 
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
@@ -109,7 +125,15 @@ export class DIDRpc implements IDIDRpc {
     };
 
     // TODO: need to find a way to make it dynamic
-    const fee = 'auto';
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount: '1000',
+        },
+      ],
+      gas: '200000',
+    };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
     return txResult;
