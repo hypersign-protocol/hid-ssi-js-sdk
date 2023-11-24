@@ -22,7 +22,7 @@ import { IVerifiableCredential } from '../credential/ICredential';
 export interface IVerifiablePresentation {
   id: string;
   type: Array<string>;
-  verifiableCredential: Array<IVerifiableCredential> | Array<string>;
+  verifiableCredential: Array<IVerifiableCredential>;
   holder: string;
   proof: object;
 }

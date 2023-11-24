@@ -17,14 +17,17 @@ const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 import { VP, DID } from '../constants';
 import { IPresentationMethods, IVerifiablePresentation } from './IPresentation';
 import customLoader from '../../libs/w3cache/v1';
-import { purposes } from 'jsonld-signatures';
 import { BabyJubJubKeys2021 } from '@hypersign-protocol/babyjubjub2021';
-import { BabyJubJubSignature2021Suite, deriveProof } from '@hypersign-protocol/babyjubjubsignature2021';
+import {
+  BabyJubJubSignature2021Suite,
+  BabyJubJubSignatureProof2021,
+  deriveProof,
+} from '@hypersign-protocol/babyjubjubsignature2021';
 
 const documentLoader = jsonSigs.extendContextLoader(customLoader);
 
 export default class HyperSignBJJVP implements IPresentationMethods, IVerifiablePresentation {
-  private hsDid: HypersignDID | null;
+  private hsDid: HypersignDID;
   private vc: HypersignVerifiableCredential;
   id: string;
   type: Array<string>;
@@ -108,8 +111,12 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
 
   async generateSD(param: { verifiableCredential: IVerifiableCredential; frame: object; suite: BabyJubJubKeys2021 }) {
     param.frame['@context'] = param.verifiableCredential['@context'];
-    return await deriveProof(param.verifiableCredential, param.frame, {
-      suite: param.suite,
+    return await this.generate({
+      verifiableCredentials: await deriveProof(param.verifiableCredential, param.frame, {
+        suite: param.suite,
+        documentLoader,
+      }),
+      holderDid: param.verifiableCredential.issuer,
     });
   }
   /**
@@ -234,6 +241,8 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
     holderVerificationMethodId: string; // verificationMethodId of holder for authentication
     issuerVerificationMethodId: string; // verificationMethodId of issuer for assertion
   }): Promise<object> {
+    /* eslint-disable */
+    const that = this;
     if (params.holderDid && params.holderDidDocSigned) {
       throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
     }
@@ -275,6 +284,37 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
     } else {
       throw new Error('Either holderDid or holderDidDocSigned should be provided');
     }
+    const credentialResult = Array<any>();
+
+    params.signedPresentation.verifiableCredential.forEach(async (verifiableCredential: IVerifiableCredential) => {
+      if (((verifiableCredential.proof as any).type as string) === 'BabyJubJubSignatureProof2021') {
+        const res = await that.hsDid.resolve({ did: verifiableCredential.issuer });
+
+        const didDocument = res.didDocument;
+
+        const vm = didDocument.verificationMethod.find((x) => x.id == params.issuerVerificationMethodId);
+
+        const credentailRes = await that.verifyProof(verifiableCredential, {
+          suite: new BabyJubJubSignatureProof2021({
+            key: await BabyJubJubKeys2021.fromKeys({
+              publicKeyMultibase: vm?.publicKeyMultibase as string,
+              options: {
+                id: vm?.id,
+                controller: vm?.controller,
+              },
+            }),
+          }),
+        });
+        credentialResult.push(credentailRes);
+      } else {
+        const credentailRes = await that.vc.bjjVC.verify({
+          credential: verifiableCredential,
+          issuerDid: verifiableCredential.issuer,
+          verificationMethodId: verifiableCredential.proof?.verificationMethod as string,
+        });
+        credentialResult.push(credentailRes);
+      }
+    });
 
     const { didDocument: holderDID } = resolvedDidDoc;
 
@@ -312,62 +352,6 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
       key: keyPair,
     });
 
-    ///---------------------------------------
-    /// Issuer
-    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.issuerDid });
-    if (issuerDID === null || issuerDID === undefined) {
-      throw new Error('Issuer DID is not registered');
-    }
-
-    const issuerDidDoc: Did = issuerDID as Did;
-    const issuerDidDocController = issuerDidDoc.controller as string[];
-    const issuerDidDocControllerVerificationMethod = params.issuerVerificationMethodId.split('#')[0];
-
-    if (!issuerDidDocController.includes(issuerDidDocControllerVerificationMethod)) {
-      throw new Error(issuerDidDocControllerVerificationMethod + ' is not a controller of ' + params.issuerDid);
-    }
-
-    const issuerPublicKeyId = params.issuerVerificationMethodId;
-
-    let issuerPublicKeyVerMethod: VerificationMethod = (issuerDidDoc.verificationMethod as VerificationMethod[]).find(
-      (x) => x.id == issuerPublicKeyId
-    ) as VerificationMethod;
-
-    if (issuerPublicKeyVerMethod === null || issuerPublicKeyVerMethod === undefined) {
-      const { didDocument: controllerDidDocT } = await this.hsDid.resolve({
-        did: issuerDidDocControllerVerificationMethod,
-      });
-      const controllerDidDoc: Did = controllerDidDocT as Did;
-      issuerPublicKeyVerMethod = (controllerDidDoc.verificationMethod as VerificationMethod[]).find(
-        (x) => x.id == issuerPublicKeyId
-      ) as VerificationMethod;
-    }
-
-    const issuerController = {
-      '@context': DID.CONTROLLER_CONTEXT,
-      id: issuerDidDoc.id,
-      assertionMethod: issuerDidDoc.assertionMethod,
-    };
-
-    const purpose = new AssertionProofPurpose({
-      controller: issuerController,
-    });
-
-    const issuerKeyPair = await BabyJubJubKeys2021.fromKeys({
-      publicKeyMultibase: issuerPublicKeyVerMethod.publicKeyMultibase as string,
-      options: {
-        id: issuerPublicKeyVerMethod.id,
-        controller: issuerPublicKeyVerMethod.controller,
-      },
-    });
-
-    const vcSuite_issuer = new BabyJubJubSignature2021Suite({
-      verificationMethod: issuerPublicKeyId,
-      key: issuerKeyPair,
-    });
-
-    /* eslint-disable */
-    const that = this;
     /* eslint-enable */
     const result = await jsonSigs.verify(params.signedPresentation, {
       purpose: presentationPurpose,
@@ -377,7 +361,29 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
       //     return await that.vc.checkCredentialStatus({ credentialId: options.credential.id });
       //   },
     });
+    result.results.push({ credentialResult });
+    return result;
+  }
 
+  async verifyProof(
+    derivedProofs,
+    params: {
+      suite: BabyJubJubSignatureProof2021;
+    }
+  ) {
+    const id = derivedProofs.proof.verificationMethod;
+
+    const result = await jsonSigs.verify(derivedProofs, {
+      suite: params.suite,
+      purpose: new AssertionProofPurpose({
+        controller: {
+          '@context': ['https://www.w3.org/ns/did/v1'],
+          id,
+          assertionMethod: [id],
+        },
+      }),
+      documentLoader,
+    });
     return result;
   }
 }

@@ -386,8 +386,8 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     params.presentation.verifiableCredential.forEach((vc) => {
       return vcs.push(JCS.cannonicalize(vc));
     });
-    params.presentation.verifiableCredential = Array<string>();
-    params.presentation.verifiableCredential = vcs;
+    // params.presentation.verifiableCredential = Array<string>();
+    // params.presentation.verifiableCredential = vcs;
     const EthereumEip712Signature2021obj = new EthereumEip712Signature2021({}, params.web3Obj);
     const proof = await EthereumEip712Signature2021obj.createProof({
       document: params.presentation,
