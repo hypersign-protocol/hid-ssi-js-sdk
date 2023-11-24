@@ -36,6 +36,7 @@ export interface IPresentationMethods {
     privateKeyMultibase: string;
     challenge: string;
     verificationMethodId: string;
+    domain?: string;
   }): Promise<object>;
 
   verify(params: {

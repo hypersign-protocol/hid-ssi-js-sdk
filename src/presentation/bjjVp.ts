@@ -9,8 +9,7 @@ import vc from 'vc-js';
 import jsonSigs from 'jsonld-signatures';
 import HypersignDID from '../did/did';
 import { DidDocument as Did, VerificationMethod } from '../../libs/generated/ssi/did';
-import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
-import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
+
 import Utils from '../utils';
 import HypersignVerifiableCredential from '../credential/vc';
 import { IVerifiableCredential } from '../credential/ICredential';
@@ -19,15 +18,14 @@ import { VP, DID } from '../constants';
 import { IPresentationMethods, IVerifiablePresentation } from './IPresentation';
 import customLoader from '../../libs/w3cache/v1';
 import { purposes } from 'jsonld-signatures';
-import { EthereumEip712Signature2021 } from 'ethereumeip712signature2021suite';
-import HyperSignBJJVP from './bjjVp';
+import { BabyJubJubKeys2021 } from '@hypersign-protocol/babyjubjub2021';
+import { BabyJubJubSignature2021Suite, deriveProof } from '@hypersign-protocol/babyjubjubsignature2021';
 
 const documentLoader = jsonSigs.extendContextLoader(customLoader);
 
-export default class HypersignVerifiablePresentation implements IPresentationMethods, IVerifiablePresentation {
+export default class HyperSignBJJVP implements IPresentationMethods, IVerifiablePresentation {
   private hsDid: HypersignDID | null;
   private vc: HypersignVerifiableCredential;
-  public bjjVp: HyperSignBJJVP;
   id: string;
   type: Array<string>;
   verifiableCredential: Array<IVerifiableCredential>;
@@ -55,7 +53,29 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     this.verifiableCredential = [];
     this.holder = '';
     this.proof = {};
-    this.bjjVp = new HyperSignBJJVP(params);
+  }
+  signByClientSpec(params: {
+    presentation: IVerifiablePresentation;
+    holderDid?: string | undefined;
+    verificationMethodId: string;
+    web3Obj: any;
+    domain?: string | undefined;
+    challenge?: string | undefined;
+  }): Promise<IVerifiablePresentation> {
+    throw new Error('Method not implemented.');
+  }
+  verifyByClientSpec(params: {
+    signedPresentation: IVerifiablePresentation;
+    challenge?: string | undefined;
+    domain?: string | undefined;
+    issuerDid: string;
+    holderDid?: string | undefined;
+    holderDidDocSigned?: JSON | undefined;
+    holderVerificationMethodId: string;
+    issuerVerificationMethodId: string;
+    web3Obj: any;
+  }): Promise<{ verified: boolean; credentialResults: any; presentationResult: any; error: any }> {
+    throw new Error('Method not implemented.');
   }
 
   private async _getId(): Promise<string> {
@@ -86,6 +106,12 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     return presentation;
   }
 
+  async generateSD(param: { verifiableCredential: IVerifiableCredential; frame: object; suite: BabyJubJubKeys2021 }) {
+    param.frame['@context'] = param.verifiableCredential['@context'];
+    return await deriveProof(param.verifiableCredential, param.frame, {
+      suite: param.suite,
+    });
+  }
   /**
    * Signs a new presentation document
    * @params
@@ -104,6 +130,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     verificationMethodId: string;
     privateKeyMultibase: string;
     challenge: string;
+    domain?: string;
   }): Promise<IVerifiablePresentation> {
     if (params.holderDid && params.holderDidDocSigned) {
       throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
@@ -149,20 +176,34 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       (x) => x.id == publicKeyId
     ) as VerificationMethod;
 
-    const keyPair = await Ed25519VerificationKey2020.from({
+    const keyPair = await BabyJubJubKeys2021.fromKeys({
       privateKeyMultibase: params.privateKeyMultibase,
-      ...publicKeyVerMethod,
+      publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase as string,
+      options: {
+        id: publicKeyVerMethod.id,
+        controller: publicKeyVerMethod.controller,
+      },
     });
 
-    const suite = new Ed25519Signature2020({
+    const suite = new BabyJubJubSignature2021Suite({
       verificationMethod: publicKeyId,
       key: keyPair,
     });
-
-    const signedVP = await vc.signPresentation({
-      presentation: params.presentation,
+    params.presentation['@context'].push(
+      'https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/BJJSignature2021.jsonld'
+    );
+    const signedVP = await jsonSigs.sign(params.presentation, {
       suite,
-      challenge: params.challenge,
+      purpose: new AuthenticationProofPurpose({
+        controller: {
+          '@context': ['https://www.w3.org/2018/credentials/v1'],
+          id: publicKeyId,
+          authentication: [publicKeyId],
+        },
+        domain: params.domain,
+        challenge: params.challenge,
+      }),
+
       documentLoader,
     });
 
@@ -253,15 +294,20 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     // TODO:  need to use domainname.
     const presentationPurpose = new AuthenticationProofPurpose({
       controller: holderController,
+
+      domain: params.domain,
       challenge: params.challenge,
     });
 
-    const keyPair = await Ed25519VerificationKey2020.from({
-      privateKeyMultibase: '',
-      ...holderPublicKeyVerMethod,
+    const keyPair = await BabyJubJubKeys2021.fromKeys({
+      publicKeyMultibase: holderPublicKeyVerMethod.publicKeyMultibase as string,
+      options: {
+        id: holderPublicKeyVerMethod.id,
+        controller: holderPublicKeyVerMethod.controller,
+      },
     });
 
-    const vpSuite_holder = new Ed25519Signature2020({
+    const vpSuite_holder = new BabyJubJubSignature2021Suite({
       verificationMethod: holderPublicKeyId,
       key: keyPair,
     });
@@ -307,12 +353,15 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       controller: issuerController,
     });
 
-    const issuerKeyPair = await Ed25519VerificationKey2020.from({
-      privateKeyMultibase: '',
-      ...issuerPublicKeyVerMethod,
+    const issuerKeyPair = await BabyJubJubKeys2021.fromKeys({
+      publicKeyMultibase: issuerPublicKeyVerMethod.publicKeyMultibase as string,
+      options: {
+        id: issuerPublicKeyVerMethod.id,
+        controller: issuerPublicKeyVerMethod.controller,
+      },
     });
 
-    const vcSuite_issuer = new Ed25519Signature2020({
+    const vcSuite_issuer = new BabyJubJubSignature2021Suite({
       verificationMethod: issuerPublicKeyId,
       key: issuerKeyPair,
     });
@@ -320,274 +369,15 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     /* eslint-disable */
     const that = this;
     /* eslint-enable */
-    const result = await vc.verify({
-      presentation: params.signedPresentation,
-      presentationPurpose,
-      purpose,
-      suite: [vpSuite_holder, vcSuite_issuer],
+    const result = await jsonSigs.verify(params.signedPresentation, {
+      purpose: presentationPurpose,
+      suite: vpSuite_holder,
       documentLoader,
-      unsignedPresentation: true,
-      checkStatus: async function (options) {
-        return await that.vc.checkCredentialStatus({ credentialId: options.credential.id });
-      },
+      //   checkStatus: async function (options) {
+      //     return await that.vc.checkCredentialStatus({ credentialId: options.credential.id });
+      //   },
     });
 
     return result;
-  }
-
-  /**
-   * Sign a new presentation document generated using wallet
-   * @param
-   * - params.presentation            : Array of Verifiable Credentials
-   * - params.holderDid               : *Optional* DID of the subject
-   * - params.verificationMethodId    : verificationMethodId of holder
-   * - params.web3obj                 : Web3 object
-   * - params.domain                  : *Optional* Domain url
-   * - params.challenge               : *Optional* Any rando challenge
-   * @returns {Promise<IVerifiablePresentation>}
-   */
-  async signByClientSpec(params: {
-    presentation: IVerifiablePresentation;
-    holderDid?: string;
-    verificationMethodId: string;
-    web3Obj;
-    domain?: string;
-    challenge: string;
-  }): Promise<IVerifiablePresentation> {
-    if (!params.holderDid) {
-      throw new Error('HID-SSI-SDK:: params.holderDid is required to sign a presentation');
-    }
-    if (!params.presentation) {
-      throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
-    }
-
-    if (!params.challenge) {
-      throw new Error('HID-SSI-SDK:: params.challenge is required for signinng a presentation');
-    }
-
-    if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
-    }
-    if (!params.web3Obj || Object.keys(params.web3Obj).length === 0) {
-      throw new Error('HID-SSI-SDK:: Error: params.web3Obj is required to sign a presentation');
-    }
-    if (!this.hsDid) {
-      throw new Error(
-        'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
-      );
-    }
-    let resolvedDidDoc;
-    if (params.holderDid) {
-      resolvedDidDoc = await this.hsDid.resolve({ did: params.holderDid });
-    } else {
-      throw new Error('holderDid should be provided');
-    }
-    const vcs: Array<string> = [];
-    params.presentation.verifiableCredential.forEach((vc) => {
-      return vcs.push(JCS.cannonicalize(vc));
-    });
-    params.presentation.verifiableCredential = Array<string>();
-    params.presentation.verifiableCredential = vcs;
-    const EthereumEip712Signature2021obj = new EthereumEip712Signature2021({}, params.web3Obj);
-    const proof = await EthereumEip712Signature2021obj.createProof({
-      document: params.presentation,
-      purpose: new purposes.AuthenticationProofPurpose({
-        challenge: params.challenge,
-        domain: params.domain,
-        controller: {
-          '@context': DID.CONTROLLER_CONTEXT,
-          id: resolvedDidDoc.didDocument.id,
-          authentication: resolvedDidDoc.didDocument.authentication,
-        },
-      }),
-      verificationMethod: params.verificationMethodId,
-      date: new Date().toISOString(),
-      documentLoader,
-      domain: params.domain ? { name: params.domain } : undefined,
-    });
-    params.presentation.proof = proof;
-    const signedVP = params.presentation;
-    return signedVP;
-  }
-
-  /**
-   * Verifies signed presentation document
-   * @param
-   * - params.signedPresentation          : Signed presentation document
-   * - params.challenge                   : *Optional* Random challenge
-   * - params.domain                      : *Optional* domain url
-   * - params.issuerDid                   : Did of the issuer
-   * - params.holderDid                   : *Optional* Did of the subject
-   * - params.holderDidDocSigned          : *Optional* DidDocument of the subject
-   * - params.holderVerificationMethodId  : verificationMethodId of holder
-   * - params.issuerVerificationMethodId  : verificationMethodId of issuer
-   * - params.web3obj                     : Web3 object
-   * @returns {Promise<{object}>}
-   */
-
-  async verifyByClientSpec(params: {
-    signedPresentation: IVerifiablePresentation;
-    challenge?: string;
-    domain?: string;
-    issuerDid: string;
-    holderDid?: string;
-    holderDidDocSigned?: JSON;
-    holderVerificationMethodId: string; // verificationMethodId of holder for authentication
-    issuerVerificationMethodId: string;
-    web3Obj;
-  }) {
-    try {
-      if (params.holderDid && params.holderDidDocSigned) {
-        throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
-      }
-
-      if (!params.issuerDid) {
-        throw new Error('HID-SSI-SDK:: params.issuerDid is required for verifying a presentation');
-      }
-
-      if (!params.challenge) {
-        throw new Error('HID-SSI-SDK:: params.challenge is required for verifying a presentation');
-      }
-
-      if (!params.holderVerificationMethodId) {
-        throw new Error('HID-SSI-SDK:: params.holderVerificationMethodId is required for verifying a presentation');
-      }
-
-      if (!params.issuerVerificationMethodId) {
-        throw new Error('HID-SSI-SDK:: params.issuerVerificationMethodId is required for verifying a presentation');
-      }
-      if (!this.vc || !this.hsDid) {
-        throw new Error(
-          'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized'
-        );
-      }
-
-      if (!params.signedPresentation.proof) {
-        throw new Error('HID-SSI-SDK:: params.signedPresentation must be signed');
-      }
-
-      // Holder DID
-      let resolvedDidDoc;
-      if (params.holderDid) {
-        resolvedDidDoc = await this.hsDid.resolve({ did: params.holderDid });
-      } else if (params.holderDidDocSigned) {
-        resolvedDidDoc = {};
-        resolvedDidDoc.didDocument = params.holderDidDocSigned;
-      } else {
-        throw new Error('Either holderDid or holderDidDocSigned should be provided');
-      }
-
-      // Issuer DID
-
-      const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.issuerDid });
-      if (issuerDID === null || issuerDID === undefined) {
-        throw new Error('Issuer DID is not registered');
-      }
-      const publicKeyId = params.issuerVerificationMethodId;
-      const issuerDidDoc: Did = issuerDID as Did;
-
-      const publicKeyVerMethod: VerificationMethod = (issuerDidDoc.verificationMethod as VerificationMethod[]).find(
-        (x) => x.id == publicKeyId
-      ) as VerificationMethod;
-
-      const assertionController = {
-        '@context': ['DID.CONTROLLER_CONTEXT'],
-        id: issuerDidDoc.id,
-        assertionMethod: issuerDidDoc.assertionMethod,
-      };
-
-      const keyPair = await Ed25519VerificationKey2020.from({
-        privateKeyMultibase: '',
-        ...publicKeyVerMethod,
-      });
-
-      const suite = new Ed25519Signature2020({
-        verificationMethod: publicKeyId,
-        key: keyPair,
-      });
-
-      const EthereumEip712Signature2021obj = new EthereumEip712Signature2021({}, params.web3Obj);
-      /* eslint-disable */
-      const that = this;
-      const checkStatus = async function (options) {
-        return await that.vc.checkCredentialStatus({ credentialId: options.credential.id });
-      };
-
-      let finalResult = {
-        verified: false,
-        credentialResults: Array(),
-        presentationResult: {},
-        error: null,
-      };
-      switch (params.signedPresentation.proof['type']) {
-        case 'EthereumEip712Signature2021': {
-          const res = Array();
-          const VCs: Array<any> = params.signedPresentation.verifiableCredential;
-          for (let i = 0; i < VCs.length; i++) {
-            const result = await vc.verifyCredential({
-              credential: JSON.parse(VCs[i]),
-              controller: assertionController,
-              suite,
-              documentLoader,
-              checkStatus,
-            });
-            res.push(result);
-          }
-
-          const proof = params.signedPresentation.proof;
-          const document: any = {
-            ...params.signedPresentation,
-          };
-          delete document.proof;
-
-          const verificaitonResult = await EthereumEip712Signature2021obj.verifyProof({
-            document,
-            domain: params.domain ? { name: params.domain } : undefined,
-            proof,
-            types: params.signedPresentation.proof['eip712'].types,
-            purpose: new AuthenticationProofPurpose({
-              challenge: params.challenge,
-              domain: params.domain,
-              controller: {
-                '@context': 'DID.CONTROLLER_CONTEXT',
-                id: resolvedDidDoc.didDocument.id,
-                authentication: resolvedDidDoc.didDocument.authentication,
-              },
-            }),
-            documentLoader,
-          });
-
-          if (!verificaitonResult.verified) {
-            throw verificaitonResult.error;
-          }
-
-          finalResult = {
-            verified: true,
-            credentialResults: res,
-            presentationResult: verificaitonResult,
-            error: null,
-          };
-
-          break;
-        }
-        case 'Ed25519Signature2020': {
-          throw new Error('HID-SSI-SDK:: Error: Ed25519Signature2020 is not supported yet');
-          break;
-        }
-
-        default: {
-          throw new Error('HID-SSI-SDK:: Error: Invalid proof type');
-        }
-      }
-
-      return finalResult;
-    } catch (error) {
-      return {
-        verified: false,
-        credentialResults: Array(),
-        presentationResult: {},
-        error: error,
-      };
-    }
   }
 }
