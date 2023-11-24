@@ -37,6 +37,14 @@ export class DIDRpc implements IDIDRpc {
       (HIDClient.hidNodeRestEndpoint ? HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) + HYPERSIGN_NETWORK_DID_PATH;
   }
 
+  private getSigningStargateClient() {
+    const client = HIDClient.getHidClient();
+    if (!client) {
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
+    }
+    return client;
+  }
+
   async init() {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
@@ -69,6 +77,7 @@ export class DIDRpc implements IDIDRpc {
       gas: '200000',
     };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
+
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
     return txResult;
   }
@@ -102,7 +111,7 @@ export class DIDRpc implements IDIDRpc {
       gas: '200000',
     };
 
-    const hidClient: SigningStargateClient = HIDClient.getHidClient();
+    const hidClient: SigningStargateClient = this.getSigningStargateClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
     return txResult;
   }
@@ -135,12 +144,12 @@ export class DIDRpc implements IDIDRpc {
       gas: '200000',
     };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
+
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
     return txResult;
   }
 
   async resolveDID(did: string): Promise<IDIDResolve> {
-    did = did + ':'; // TODO:  we need to sort this out ... need to remove later
     const get_didUrl = `${this.didRestEp}/${did}`;
     let response;
     try {
