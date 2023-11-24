@@ -80,6 +80,18 @@ export const DID_EcdsaSecp256k1VerificationKey2019 = {
   SIGNATURE_TYPE: ProofTypes.EcdsaSecp256k1Signature2019,
 };
 
+export const DID_BabyJubJubKey2021={
+  CONTROLLER_CONTEXT: 'https://w3id.org/security/v2',
+  SCHEME: 'did',
+  METHOD: 'hid',
+  NAMESPACE: 'testnet', // this is not used
+  DID_BASE_CONTEXT: 'https://www.w3.org/ns/did/v1',
+  DID_KEYAGREEMENT_CONTEXT: "https://ns.did.ai/suites/x25519-2020/v1",
+  DID_BABYJUBJUBKEY2021: "https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/BabyJubJubKey2021.jsonld",
+  VERIFICATION_METHOD_TYPE: 'BabyJubJubKey2021',
+  BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
+  SIGNATURE_TYPE: ProofTypes.BabyJubJubSignature2021,
+}
 
 export enum CAIP_10_PREFIX {
   "eip155" = "eip155",
