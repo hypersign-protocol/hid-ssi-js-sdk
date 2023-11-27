@@ -22,7 +22,7 @@ import { IVerifiableCredential } from '../credential/ICredential';
 export interface IVerifiablePresentation {
   id: string;
   type: Array<string>;
-  verifiableCredential: Array<IVerifiableCredential> | Array<string>;
+  verifiableCredential: Array<IVerifiableCredential>;
   holder: string;
   proof: object;
 }
@@ -36,6 +36,7 @@ export interface IPresentationMethods {
     privateKeyMultibase: string;
     challenge: string;
     verificationMethodId: string;
+    domain?: string;
   }): Promise<object>;
 
   verify(params: {

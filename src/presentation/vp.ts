@@ -20,12 +20,14 @@ import { IPresentationMethods, IVerifiablePresentation } from './IPresentation';
 import customLoader from '../../libs/w3cache/v1';
 import { purposes } from 'jsonld-signatures';
 import { EthereumEip712Signature2021 } from 'ethereumeip712signature2021suite';
+import HyperSignBJJVP from './bjjVp';
 
 const documentLoader = jsonSigs.extendContextLoader(customLoader);
 
 export default class HypersignVerifiablePresentation implements IPresentationMethods, IVerifiablePresentation {
   private hsDid: HypersignDID | null;
   private vc: HypersignVerifiableCredential;
+  public bjjVp: HyperSignBJJVP;
   id: string;
   type: Array<string>;
   verifiableCredential: Array<IVerifiableCredential>;
@@ -53,6 +55,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     this.verifiableCredential = [];
     this.holder = '';
     this.proof = {};
+    this.bjjVp = new HyperSignBJJVP(params);
   }
 
   private async _getId(): Promise<string> {
@@ -383,8 +386,8 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     params.presentation.verifiableCredential.forEach((vc) => {
       return vcs.push(JCS.cannonicalize(vc));
     });
-    params.presentation.verifiableCredential = Array<string>();
-    params.presentation.verifiableCredential = vcs;
+    // params.presentation.verifiableCredential = Array<string>();
+    // params.presentation.verifiableCredential = vcs;
     const EthereumEip712Signature2021obj = new EthereumEip712Signature2021({}, params.web3Obj);
     const proof = await EthereumEip712Signature2021obj.createProof({
       document: params.presentation,
