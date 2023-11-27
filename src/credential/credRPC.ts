@@ -16,6 +16,8 @@ import {
 } from '../../libs/generated/ssi/credential_status';
 import { DocumentProof as CredentialProof } from '../../libs/generated/ssi/proof';
 import { OfflineSigner } from '@cosmjs/proto-signing';
+import Utils from '../utils';
+import * as constants from '../constants';
 
 export class CredentialRPC implements ICredentialRPC {
   public credentialRestEP: string;
@@ -73,12 +75,12 @@ export class CredentialRPC implements ICredentialRPC {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status);
     const fee = {
       amount: [
         {
           denom: 'uhid',
-          amount: '2000',
+          amount: amount,
         },
       ],
       gas: '200000',
@@ -119,12 +121,12 @@ export class CredentialRPC implements ICredentialRPC {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
     }
-
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status);
     const fee = {
       amount: [
         {
           denom: 'uhid',
-          amount: '2000',
+          amount: amount,
         },
       ],
       gas: '200000',
@@ -190,12 +192,12 @@ export class CredentialRPC implements ICredentialRPC {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Cred_Status);
     const fee = {
       amount: [
         {
           denom: 'uhid',
-          amount: '2000',
+          amount: amount,
         },
       ],
       gas: '200000',

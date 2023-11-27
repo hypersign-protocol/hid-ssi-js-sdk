@@ -15,7 +15,8 @@ import axios from 'axios';
 import { HIDClient } from '../hid/client';
 import { IDIDResolve, IDIDRpc, DeliverTxResponse } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
-
+import Utils from '../utils';
+import * as constants from '../constants';
 export class DIDRpc implements IDIDRpc {
   private didRestEp: string;
   private hidClient: HIDClient | null;
@@ -67,11 +68,12 @@ export class DIDRpc implements IDIDRpc {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Did);
     const fee = {
       amount: [
         {
           denom: 'uhid',
-          amount: '4000',
+          amount,
         },
       ],
       gas: '200000',
@@ -99,13 +101,12 @@ export class DIDRpc implements IDIDRpc {
         versionId: versionId,
       }),
     };
-
-    // TODO: need to find a way to make it dynamic
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Did);
     const fee = {
       amount: [
         {
           denom: 'uhid',
-          amount: '1000',
+          amount,
         },
       ],
       gas: '200000',
@@ -132,13 +133,12 @@ export class DIDRpc implements IDIDRpc {
         versionId: versionId,
       }),
     };
-
-    // TODO: need to find a way to make it dynamic
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Did);
     const fee = {
       amount: [
         {
           denom: 'uhid',
-          amount: '1000',
+          amount,
         },
       ],
       gas: '200000',

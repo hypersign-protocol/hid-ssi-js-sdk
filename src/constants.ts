@@ -163,3 +163,17 @@ export const HID_DECIMAL = 6;
 export const HID_DNOMINATION = 'uhid';
 export const HID_MIN_GAS = '200000';
 export const HID_MIN_FEE = '5000';
+
+const baseUrl = "https://api.jagrat.hypersign.id"
+
+export const GAS_FEE_API_URL = `${baseUrl}/hypersign-protocol/hidnode/ssi/fixedfee`
+export const GAS_FEE_METHODS = {
+  Register_Did: "register_did_fee",
+  Update_Did: "update_did_fee",
+  Deactivate_Did: "deactivate_did_fee",
+  Register_Cred_Schema: "register_credential_schema_fee",
+  Update_Cred_Schema: "update_credential_schema_fee",
+  Register_Cred_Status: "register_credential_status_fee",
+  Update_Cred_Status: "update_credential_status_fee"
+
+}

@@ -13,6 +13,8 @@ import { CredentialSchemaDocument, CredentialSchemaState as Schema } from '../..
 import { DocumentProof as SchemaProof } from '../../libs/generated/ssi/proof';
 import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate';
 import { CredentialSchemaDocument as SchemaDocument } from '../../libs/generated/ssi/credential_schema';
+import Utils from '../utils';
+import * as constants from '../constants';
 
 export interface ISchemaRPC {
   createSchema(schema: SchemaDocument, proof: SchemaProof): Promise<object>;
@@ -60,13 +62,12 @@ export class SchemaRpc implements ISchemaRPC {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-
-    // TODO: need to find a way to make it dynamic
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Schema);
     const fee = {
       amount: [
         {
           denom: 'uhid',
-          amount: '2000',
+          amount,
         },
       ],
       gas: '200000',
