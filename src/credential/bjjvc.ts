@@ -41,7 +41,7 @@ import CredentialApiService from '../ssiApi/services/credential/credential.servi
 import { IResolveSchema } from '../schema/ISchema';
 import * as constant from '../constants';
 import { BabyJubJubKeys2021 } from '@hypersign-protocol/babyjubjub2021';
-import { BabyJubJubSignature2021Suite } from '@hypersign-protocol/babyjubjubsignature2021';
+import { BabyJubJubSignature2021Suite, deriveProof } from '@hypersign-protocol/babyjubjubsignature2021';
 const { Merklizer } = require('@iden3/js-jsonld-merklization');
 const documentLoader = extendContextLoader(customLoader);
 
@@ -803,5 +803,39 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
       throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + resp.rawLog);
     }
     return resp;
+  }
+
+  public async generateSeletiveDisclosure(param: {
+    verifiableCredential: IVerifiableCredential;
+    frame: object;
+    verificationMethodId: string;
+    issuerDid: string;
+  }) {
+    if (!param.verifiableCredential) {
+      throw new Error('HID-SSI-SDK:: verfiableCredential is required');
+    }
+
+    if (!param.frame) {
+      throw new Error('HID-SSI-SDK:: frame is required');
+    }
+    if (!param.verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: verificationMethodId is required');
+    }
+
+    if (!param.issuerDid) {
+      throw new Error('HID-SSI-SDK:: issuerDid is required');
+    }
+
+    param.frame['@context'] = param.verifiableCredential['@context'];
+    const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: param.issuerDid });
+    const credIssuerDidDoc: Did = signerDidDoc as Did;
+    const vm = credIssuerDidDoc.verificationMethod?.find((vm) => vm.id == param.verificationMethodId);
+    const suite = await BabyJubJubKeys2021.fromKeys({
+      publicKeyMultibase: vm?.publicKeyMultibase as string,
+    });
+    return await deriveProof(param.verifiableCredential, param.frame, {
+      suite,
+      documentLoader,
+    });
   }
 }

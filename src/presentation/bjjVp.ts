@@ -109,16 +109,6 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
     return presentation;
   }
 
-  async generateSD(param: { verifiableCredential: IVerifiableCredential; frame: object; suite: BabyJubJubKeys2021 }) {
-    param.frame['@context'] = param.verifiableCredential['@context'];
-    return await this.generate({
-      verifiableCredentials: await deriveProof(param.verifiableCredential, param.frame, {
-        suite: param.suite,
-        documentLoader,
-      }),
-      holderDid: param.verifiableCredential.issuer,
-    });
-  }
   /**
    * Signs a new presentation document
    * @params
