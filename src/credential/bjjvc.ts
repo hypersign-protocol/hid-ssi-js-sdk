@@ -44,7 +44,6 @@ import { BabyJubJubKeys2021 } from '@hypersign-protocol/babyjubjub2021';
 import { BabyJubJubSignature2021Suite, deriveProof } from '@hypersign-protocol/babyjubjubsignature2021';
 const { Merklizer } = require('@iden3/js-jsonld-merklization');
 const documentLoader = extendContextLoader(customLoader);
-
 export default class HypersignBJJVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
   public '@context': Array<string>;
   public id: string;
@@ -61,7 +60,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
   private namespace: string;
   private hsSchema: HypersignSchema;
   private hsDid: HypersignDID;
-
+  public documentL: any;
   constructor(
     params: {
       namespace?: string;
@@ -72,7 +71,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     } = {}
   ) {
     const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, entityApiSecretKey } = params;
-
+    this.documentL = documentLoader;
     this.namespace = namespace && namespace != '' ? namespace : '';
     const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
@@ -233,6 +232,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
 
         const vc: IVerifiableCredential = {} as IVerifiableCredential;
         vc['@context'] = context;
+
         vc.id = await this._getId();
         vc.type = [];
         vc.type.push('VerifiableCredential');
@@ -277,7 +277,11 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     // const schemaName = schemaDoc.name as string;
     // context
     // vc['@context'] = this._getCredentialContext(params.schemaId, schemaProperties, schemaName);
-    vc['@context'] = [VC.CREDENTAIL_BASE_CONTEXT];
+    vc['@context'] = [
+      VC.CREDENTAIL_BASE_CONTEXT,
+      constant.DID_BabyJubJubKey2021.DID_BABYJUBJUBKEY2021,
+      constant.DID_BabyJubJubKey2021.BABYJUBJUBSIGNATURE,
+    ];
     vc['@context'].push(VC.CONTEXT_HypersignCredentialStatus2023);
     const JsonSchema = this.hsSchema.vcJsonSchema(schemaDoc);
     vc['@context'].push((JsonSchema as any).$metadata.jsonLdContext);
@@ -417,17 +421,21 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     const merkelizerObj = await Merklizer.merklizeJSONLD(JSON.stringify(params.credential), {
       documentLoader,
     });
+    // console.log(merkelizerObj);
+
     let credentialHash = await merkelizerObj.mt.root();
     credentialHash = Buffer.from(credentialHash.bytes).toString('hex');
 
     const credentialStatus: CredentialStatus = {
-      '@context': [constant.VC.CREDENTIAL_STATUS_CONTEXT, constant.DID_BabyJubJubKey2021.DID_BABYJUBJUBKEY2021],
+      '@context': [constant.VC.CREDENTIAL_STATUS_CONTEXT],
       id: params.credential.id,
       issuer: params.credential.issuer,
       issuanceDate: params.credential.issuanceDate,
       remarks: 'Credential is active',
       credentialMerkleRootHash: credentialHash,
     };
+    // console.log(JSON.stringify(credentialStatus));
+
     const credProof = await this._jsonLdSign({
       credentialStatus,
       privateKeyMultibase: params.privateKeyMultibase,
@@ -492,7 +500,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     credential: IVerifiableCredential;
     issuerDid: string;
     verificationMethodId: string;
-  }): Promise<object> {
+  }): Promise<any> {
     if (!params.credential) {
       throw new Error('HID-SSI-SDK:: params.credential is required to verify credential');
     }
@@ -534,6 +542,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
       verificationMethod: publicKeyId,
       key: keyPair,
     });
+
     /* eslint-disable */
     const that = this;
     /* eslint-enable */
@@ -830,9 +839,24 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: param.issuerDid });
     const credIssuerDidDoc: Did = signerDidDoc as Did;
     const vm = credIssuerDidDoc.verificationMethod?.find((vm) => vm.id == param.verificationMethodId);
-    const suite = await BabyJubJubKeys2021.fromKeys({
+    const suite = BabyJubJubKeys2021.fromKeys({
       publicKeyMultibase: vm?.publicKeyMultibase as string,
+      options: {
+        id: param.verificationMethodId,
+        controller: param.issuerDid,
+      },
     });
+
+    const verifyCredential = await this.verify({
+      credential: param.verifiableCredential,
+      issuerDid: param.issuerDid,
+      verificationMethodId: param.verificationMethodId,
+    });
+
+    if (!verifyCredential.verified == true) {
+      throw new Error('proofDocument cannot be verified');
+    }
+
     return await deriveProof(param.verifiableCredential, param.frame, {
       suite,
       documentLoader,
