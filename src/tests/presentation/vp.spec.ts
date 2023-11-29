@@ -253,7 +253,7 @@ describe('Schema Opearations', () => {
 //  * Test cases related to credential
 //  */
 describe('Verifiable Credential Opearations', () => {
-  describe('#getCredential() method to generate a credential', function () {
+  describe('#generate() method to generate a credential', function () {
     it('should be able to generate new credential for a schema with subject DID', async function () {
       const expirationDate = new Date('12/11/2027');
       const tempCredentialBody = { ...credentialBody };
@@ -397,7 +397,7 @@ describe('Verifiable Presentation Operataions', () => {
       return hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
         expect(function () {
           throw err;
-        }).to.throw(Error, 'HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+        }).to.throw(Error, 'HID-SSI-SDK:: params.presentation is required for signing a presentation');
       });
     });
     it('should not be able to sign presentation as challenge is not passed', async function () {
@@ -408,7 +408,7 @@ describe('Verifiable Presentation Operataions', () => {
       return hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
         expect(function () {
           throw err;
-        }).to.throw(Error, 'HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+        }).to.throw(Error, 'HID-SSI-SDK:: params.challenge is required for signing a presentation');
       });
     });
     it('should not be able to sign presentation as verificationMethodId is not passed', async function () {
@@ -420,7 +420,7 @@ describe('Verifiable Presentation Operataions', () => {
       return hypersignVP.sign(tempSignPresentationBody).catch(function (err) {
         expect(function () {
           throw err;
-        }).to.throw(Error, 'HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+        }).to.throw(Error, 'HID-SSI-SDK:: params.verificationMethodId is required for signing a presentation');
       });
     });
 

@@ -144,12 +144,10 @@ describe('#register() this is to register did on the blockchain', function () {
         should().exist(result.didDocument);
     });
     it('should be able to register didDocument for holder on the blockchain', async function () {
-        console.log(account.address)
 
         const address = account.address
 
         const signature = web3.eth.accounts.sign(holderDidDoc, account.privateKey)
-        console.log(signature)
         const created = new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z'
         const signInfo = [{
             verification_method_id: holderVmId,
@@ -158,7 +156,6 @@ describe('#register() this is to register did on the blockchain', function () {
             clientSpec: { type: 'eth-personalSign' }
         }]
         const result = await hypersignDID.registerByClientSpec({ didDocument: holderDidDoc, signInfos: signInfo });
-        console.log(result)
         should().exist(result.transactionHash);
         should().exist(result.didDocument);
         // const sign = await signDid(holderDidDoc, "eth-personalSign", holderVmId, account)
@@ -441,11 +438,7 @@ describe('Verifiable Presentation Operataions', () => {
             tempverifyPresentationBody.issuerVerificationMethodId = issuerVerificationMethodId;
             tempverifyPresentationBody.challenge = challenge;
             tempverifyPresentationBody.web3Obj = web3;
-
-
             const verifiedPresentationDetail = await hypersignPresentation.verifyByClientSpec(tempverifyPresentationBody);
-            console.log(JSON.stringify(verifiedPresentationDetail, null, 2));
-
             should().exist(verifiedPresentationDetail.verified);
             expect(verifiedPresentationDetail.verified).to.be.equal(true);
             expect(verifiedPresentationDetail).to.be.a('object');

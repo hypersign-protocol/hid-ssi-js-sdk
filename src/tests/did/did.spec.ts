@@ -745,9 +745,11 @@ describe('DID Test scenarios', () => {
         );
       });
     });
+    // Add test case should not update did if there is no change
+
     it('should be able to update did document', async function () {
       const didDoc = JSON.parse(JSON.stringify(didDocument))
-      didDoc['alsoKnownAs'].push('Some DATA');
+      didDoc['alsoKnownAs'].push('Some DATA')
       const result = await hypersignDID.update({
         didDocument: didDoc,
         privateKeyMultibase,

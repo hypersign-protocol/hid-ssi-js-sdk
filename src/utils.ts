@@ -96,4 +96,15 @@ export default class Utils {
     }
     return obj
   }
+  public static async fetchFee(methodName: string) {
+    const url = constants.GAS_FEE_API_URL;
+    const feeStructure = await fetch(url)
+    const fee = await feeStructure.json()
+    if (fee && fee[methodName]) {
+      const amount = fee[methodName].amount;
+      return amount;
+    } else {
+      throw new Error(`Fee not found for method: ${methodName}`);
+    }
+  }
 }

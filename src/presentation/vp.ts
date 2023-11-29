@@ -113,15 +113,15 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     }
 
     if (!params.presentation) {
-      throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.presentation is required for signing a presentation');
     }
 
     if (!params.challenge) {
-      throw new Error('HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.challenge is required for signing a presentation');
     }
 
     if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signing a presentation');
     }
 
     if (!this.hsDid) {
@@ -138,7 +138,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       resolvedDidDoc.didDocument = params.holderDidDocSigned;
     } else {
       throw new Error(
-        'HID-SSI-SDK:: params.holderDid or params.holderDidDocSigned is required for signinng a presentation'
+        'HID-SSI-SDK:: params.holderDid or params.holderDidDocSigned is required for signing a presentation'
       );
     }
     const { didDocument: signerDidDoc } = resolvedDidDoc;
@@ -358,15 +358,15 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       throw new Error('HID-SSI-SDK:: params.holderDid is required to sign a presentation');
     }
     if (!params.presentation) {
-      throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.presentation is required for signing a presentation');
     }
 
     if (!params.challenge) {
-      throw new Error('HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.challenge is required for signing a presentation');
     }
 
     if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signing a presentation');
     }
     if (!params.web3Obj || Object.keys(params.web3Obj).length === 0) {
       throw new Error('HID-SSI-SDK:: Error: params.web3Obj is required to sign a presentation');

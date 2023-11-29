@@ -271,7 +271,6 @@ describe('DID Test scenarion for clientSpec', () => {
 
             }
             const signedDidDocByClientSpec = await hypersignDID.signByClientSpec(params)
-            console.log(signedDidDocByClientSpec)
 
             // error Cannot read properties of undefined (reading 'eth')
         })
