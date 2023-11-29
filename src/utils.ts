@@ -96,8 +96,9 @@ export default class Utils {
     }
     return obj
   }
-  public static async fetchFee(methodName: string) {
-    const url = constants.GAS_FEE_API_URL;
+  public static async fetchFee(methodName: string,baseUrl) {
+    const url = constants.GAS_FEE_API_URL(baseUrl);
+    
     const feeStructure = await fetch(url)
     const fee = await feeStructure.json()
     if (fee && fee[methodName]) {

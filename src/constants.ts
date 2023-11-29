@@ -92,7 +92,7 @@ export const DID_BabyJubJubKey2021 = {
   VERIFICATION_METHOD_TYPE: 'BabyJubJubKey2021',
   BLOCKCHAINACCOUNTID_CONTEXT: 'https://w3c.github.io/vc-data-integrity/vocab/security/vocabulary.jsonld',
 
-  SIGNATURE_TYPE: ProofTypes.BabyJubJubSignature2021,
+  SIGNATURE_TYPE: ProofTypes.BJJSignature2021,
 };
 
 export enum CAIP_10_PREFIX {
@@ -166,10 +166,9 @@ export const HID_DNOMINATION = 'uhid';
 export const HID_MIN_GAS = '200000';
 export const HID_MIN_FEE = '5000';
 
-const baseUrl = "https://api.jagrat.hypersign.id"
-// const baseUrl = "http://localhost:1317"
 
-export const GAS_FEE_API_URL = `${baseUrl}/hypersign-protocol/hidnode/ssi/fixedfee`
+
+export const GAS_FEE_API_URL =  (baseUrl)=> { return `${baseUrl}/hypersign-protocol/hidnode/ssi/fixedfee`}
 export const GAS_FEE_METHODS = {
   Register_Did: "register_did_fee",
   Update_Did: "update_did_fee",

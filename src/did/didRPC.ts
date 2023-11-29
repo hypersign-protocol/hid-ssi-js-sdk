@@ -20,6 +20,7 @@ import * as constants from '../constants';
 export class DIDRpc implements IDIDRpc {
   private didRestEp: string;
   private hidClient: HIDClient | null;
+  private nodeRestEp: string;
   constructor({
     offlineSigner,
     nodeRpcEndpoint,
@@ -34,6 +35,7 @@ export class DIDRpc implements IDIDRpc {
     } else {
       this.hidClient = null;
     }
+    this.nodeRestEp=nodeRestEndpoint
     this.didRestEp =
       (HIDClient.hidNodeRestEndpoint ? HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) + HYPERSIGN_NETWORK_DID_PATH;
   }
@@ -68,7 +70,8 @@ export class DIDRpc implements IDIDRpc {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Did);
+
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Did,this.nodeRestEp);
     const fee = {
       amount: [
         {
@@ -101,7 +104,7 @@ export class DIDRpc implements IDIDRpc {
         versionId: versionId,
       }),
     };
-    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Did);
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Did,this.nodeRestEp);
     const fee = {
       amount: [
         {
@@ -133,7 +136,7 @@ export class DIDRpc implements IDIDRpc {
         versionId: versionId,
       }),
     };
-    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Did);
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Deactivate_Did,this.nodeRestEp);
     const fee = {
       amount: [
         {
