@@ -4,7 +4,6 @@
  * Author: Hypermine Core Team
  */
 
-import { JCS } from 'jcs';
 import vc from 'vc-js';
 import jsonSigs from 'jsonld-signatures';
 import HypersignDID from '../did/did';
@@ -21,7 +20,6 @@ import { BabyJubJubKeys2021 } from '@hypersign-protocol/babyjubjub2021';
 import {
   BabyJubJubSignature2021Suite,
   BabyJubJubSignatureProof2021,
-  deriveProof,
 } from '@hypersign-protocol/babyjubjubsignature2021';
 
 const documentLoader = jsonSigs.extendContextLoader(customLoader);
@@ -137,15 +135,15 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
     }
 
     if (!params.presentation) {
-      throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.presentation is required for signing a presentation');
     }
 
     if (!params.challenge) {
-      throw new Error('HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.challenge is required for signing a presentation');
     }
 
     if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signing a presentation');
     }
 
     if (!this.hsDid) {
@@ -162,7 +160,7 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
       resolvedDidDoc.didDocument = params.holderDidDocSigned;
     } else {
       throw new Error(
-        'HID-SSI-SDK:: params.holderDid or params.holderDidDocSigned is required for signinng a presentation'
+        'HID-SSI-SDK:: params.holderDid or params.holderDidDocSigned is required for signing a presentation'
       );
     }
     const { didDocument: signerDidDoc } = resolvedDidDoc;
@@ -277,7 +275,7 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
     const credentialResult = Array<any>();
 
     params.signedPresentation.verifiableCredential.forEach(async (verifiableCredential: IVerifiableCredential) => {
-      if (((verifiableCredential.proof as any).type as string) === 'BabyJubJubSignatureProof2021') {
+      if (verifiableCredential.proof?.type === 'BabyJubJubSignatureProof2021') {
         const res = await that.hsDid.resolve({ did: verifiableCredential.issuer });
 
         const didDocument = res.didDocument;

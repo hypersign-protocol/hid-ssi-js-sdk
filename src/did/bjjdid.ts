@@ -5,39 +5,22 @@
  */
 import * as constant from '../constants';
 import jsonSigs from 'jsonld-signatures';
-const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
+const { AssertionProofPurpose } = jsonSigs.purposes;
 import { DIDRpc } from './didRPC';
 import Utils from '../utils';
 import { BabyJubJubKeys2021 } from '@hypersign-protocol/babyjubjub2021';
 import { BabyJubJubSignature2021Suite } from '@hypersign-protocol/babyjubjubsignature2021';
-import { DidDocument as Did, VerificationMethod, Service, DidDocument } from '../../libs/generated/ssi/did';
+import { DidDocument as Did, VerificationMethod, Service } from '../../libs/generated/ssi/did';
 import { DocumentProof, DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
-
 import Web3 from 'web3';
 import DidApiService from '../ssiApi/services/did/did.service';
 import { IDidApiService } from '../ssiApi/services/did/IDIDApi';
 import jsonld from 'jsonld';
-import crypto from 'crypto';
-import {
-  IDID,
-  IDid,
-  IDIDResolve,
-  IDIDRpc,
-  IController,
-  ISignedDIDDocument,
-  IClientSpec,
-  ISignData,
-  ISignInfo,
-} from './IDID';
-import {
-  ProofTypes,
-  VerificationMethodRelationships,
-  VerificationMethodTypes,
-} from '../../libs/generated/ssi/client/enums';
+import { IDID, IDid, IDIDResolve, IDIDRpc, ISignedDIDDocument, IClientSpec, ISignData, ISignInfo } from './IDID';
+import { VerificationMethodRelationships, VerificationMethodTypes } from '../../libs/generated/ssi/client/enums';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import customLoader from '../../libs/w3cache/v1';
 import { DeliverTxResponse } from './IDID';
-import { ClientSpecType } from '../../libs/generated/ssi/client_spec';
 
 const documentLoader = jsonSigs.extendContextLoader(customLoader);
 class DIDDocument implements Did {
@@ -645,7 +628,6 @@ export default class HypersignDID implements IDID {
         }
       }
     }
-    console.log(didDoc, signInfos);
 
     if (this.didrpc) {
       const result: DeliverTxResponse = await this.didrpc.registerDID(didDoc, signInfos);
@@ -771,11 +753,8 @@ export default class HypersignDID implements IDID {
         'HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"'
       );
     }
-
     const { didDocument, privateKeyMultibase, verificationMethodId, versionId } = params;
     const prepareDidDocument = this.prepareDidDocument(didDocument);
-    console.log(prepareDidDocument);
-
     const proof = await this._jsonLdSign({
       didDocument: prepareDidDocument,
       privateKeyMultibase,

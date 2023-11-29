@@ -404,7 +404,6 @@ describe('Verifiable Credential Opearations', () => {
       should().exist(credentialDetail['credentialStatus']);
       expect(credentialDetail['credentialStatus'].type).to.be.equal('HypersignCredentialStatus2023');
     });
-
     it('should be able to generate new credential for a schema with signed subject DID doc', async function () {
       const expirationDate = new Date('12/11/2027');
       const tempCredentialBody = { ...credentialBody };
@@ -807,7 +806,7 @@ describe('Verifiable Credential Status Opearations', () => {
         issuerDid: didDocId,
         verificationMethodId,
         privateKeyMultibase,
-        status: 'SUSPENDED',
+        status: 'LIVE',
         statusReason: 'Setting the status to LIVE',
       };
       const updatedCredResult = await hypersignVC.updateCredentialStatus(params);

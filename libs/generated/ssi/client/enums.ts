@@ -152,7 +152,7 @@ export enum ProofTypes {
     Ed25519Signature2020 = "Ed25519Signature2020",
     EcdsaSecp256k1Signature2019 = "EcdsaSecp256k1Signature2019",
     EcdsaSecp256k1RecoverySignature2020 = "EcdsaSecp256k1RecoverySignature2020",
-    BabyJubJubSignature2021 = "BJJSignature2021",
+    BJJSignature2021 = "BJJSignature2021",
     BbsBlsSignature2020 = "BbsBlsSignature2020",
 }
 
@@ -168,14 +168,14 @@ export function proofTypesFromJSON(object: any): ProofTypes {
         case "EcdsaSecp256k1RecoverySignature2020":
             return ProofTypes.EcdsaSecp256k1RecoverySignature2020;
         case 3:
-        case "BabyJubJubSignature2021":
-            return ProofTypes.BabyJubJubSignature2021;
-        case 4:
-        case "BbsBlsSignature2020":
-            return ProofTypes.BbsBlsSignature2020;
-        default:
-            throw new globalThis.Error("Unrecognized enum value " + object + " for enum ProofTypes");
-    }
+      case "BJJSignature2021":
+          return ProofTypes.BJJSignature2021;
+      case 4:
+      case "BbsBlsSignature2020":
+          return ProofTypes.BbsBlsSignature2020;
+      default:
+          throw new globalThis.Error("Unrecognized enum value " + object + " for enum ProofTypes");
+  }
 }
 
 export function proofTypesToJSON(object: ProofTypes): string {
@@ -186,13 +186,13 @@ export function proofTypesToJSON(object: ProofTypes): string {
             return "EcdsaSecp256k1Signature2019";
         case ProofTypes.EcdsaSecp256k1RecoverySignature2020:
             return "EcdsaSecp256k1RecoverySignature2020";
-        case ProofTypes.BabyJubJubSignature2021:
-            return "BabyJubJubSignature2021";
-        case ProofTypes.BbsBlsSignature2020:
-            return "BbsBlsSignature2020";
-        default:
-            throw new globalThis.Error("Unrecognized enum value " + object + " for enum ProofTypes");
-    }
+      case ProofTypes.BJJSignature2021:
+          return "BJJSignature2021";
+      case ProofTypes.BbsBlsSignature2020:
+          return "BbsBlsSignature2020";
+      default:
+          throw new globalThis.Error("Unrecognized enum value " + object + " for enum ProofTypes");
+  }
 }
 
 export function proofTypesToNumber(object: ProofTypes): number {
@@ -203,11 +203,11 @@ export function proofTypesToNumber(object: ProofTypes): number {
             return 1;
         case ProofTypes.EcdsaSecp256k1RecoverySignature2020:
             return 2;
-        case ProofTypes.BabyJubJubSignature2021:
-            return 3;
-        case ProofTypes.BbsBlsSignature2020:
-            return 4;
-        default:
-            throw new globalThis.Error("Unrecognized enum value " + object + " for enum ProofTypes");
-    }
+      case ProofTypes.BJJSignature2021:
+          return 3;
+      case ProofTypes.BbsBlsSignature2020:
+          return 4;
+      default:
+          throw new globalThis.Error("Unrecognized enum value " + object + " for enum ProofTypes");
+  }
 }
