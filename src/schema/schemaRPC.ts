@@ -24,7 +24,7 @@ export interface ISchemaRPC {
 export class SchemaRpc implements ISchemaRPC {
   public schemaRestEp: string;
   private hidClient: any;
- private nodeRestEp:string
+  private nodeRestEp: string;
 
   constructor({
     offlineSigner,
@@ -41,7 +41,7 @@ export class SchemaRpc implements ISchemaRPC {
       this.hidClient = null;
     }
 
-    this.nodeRestEp=nodeRestEndpoint
+    this.nodeRestEp = nodeRestEndpoint;
     this.schemaRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_SCHEMA_PATH;
   }
 
@@ -65,7 +65,7 @@ export class SchemaRpc implements ISchemaRPC {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Schema,this.nodeRestEp);
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Schema, this.nodeRestEp);
     const fee = {
       amount: [
         {

@@ -295,10 +295,9 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
         });
         credentialResult.push(credentailRes);
         console.log(credentailRes);
-        
       } else {
-        console.log("Here");
-        
+        console.log('Here');
+
         const credentailRes = await that.vc.bjjVC.verify({
           credential: verifiableCredential,
           issuerDid: verifiableCredential.issuer,
@@ -306,7 +305,6 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
         });
         credentialResult.push(credentailRes);
         console.log(credentailRes);
-        
       }
     });
 

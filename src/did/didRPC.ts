@@ -35,7 +35,7 @@ export class DIDRpc implements IDIDRpc {
     } else {
       this.hidClient = null;
     }
-    this.nodeRestEp=nodeRestEndpoint
+    this.nodeRestEp = nodeRestEndpoint;
     this.didRestEp =
       (HIDClient.hidNodeRestEndpoint ? HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) + HYPERSIGN_NETWORK_DID_PATH;
   }
@@ -71,7 +71,7 @@ export class DIDRpc implements IDIDRpc {
       }),
     };
 
-    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Did,this.nodeRestEp);
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Did, this.nodeRestEp);
     const fee = {
       amount: [
         {
@@ -104,7 +104,7 @@ export class DIDRpc implements IDIDRpc {
         versionId: versionId,
       }),
     };
-    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Did,this.nodeRestEp);
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Did, this.nodeRestEp);
     const fee = {
       amount: [
         {
@@ -136,7 +136,7 @@ export class DIDRpc implements IDIDRpc {
         versionId: versionId,
       }),
     };
-    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Deactivate_Did,this.nodeRestEp);
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Deactivate_Did, this.nodeRestEp);
     const fee = {
       amount: [
         {

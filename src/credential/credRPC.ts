@@ -38,7 +38,7 @@ export class CredentialRPC implements ICredentialRPC {
     } else {
       this.hidClient = null;
     }
-    this.nodeRestEp=nodeRestEndpoint
+    this.nodeRestEp = nodeRestEndpoint;
     this.credentialRestEP =
       (HIDClient.hidNodeRestEndpoint ? HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) +
       HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
@@ -77,8 +77,8 @@ export class CredentialRPC implements ICredentialRPC {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-    
-    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status,this.nodeRestEp);
+
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status, this.nodeRestEp);
     const fee = {
       amount: [
         {
@@ -124,7 +124,7 @@ export class CredentialRPC implements ICredentialRPC {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
     }
-    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status,this.nodeRestEp);
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status, this.nodeRestEp);
     const fee = {
       amount: [
         {
@@ -195,7 +195,7 @@ export class CredentialRPC implements ICredentialRPC {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Cred_Status,this.nodeRestEp);
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Cred_Status, this.nodeRestEp);
     const fee = {
       amount: [
         {
