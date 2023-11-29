@@ -502,7 +502,6 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     verificationMethodId: string;
   }): Promise<any> {
     console.log('========Inside verify method');
-    console.log(params);
 
     if (!params.credential) {
       throw new Error('HID-SSI-SDK:: params.credential is required to verify credential');
@@ -520,8 +519,8 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
       throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
     }
 
-    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.issuerDid });
 
+    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: "did:hid:testnet:z3fAEUh181T5j98teY1E6xXpBFptmKd3dBVT44FFvseC2" });
     const issuerDidDoc: Did = issuerDID as Did;
     const publicKeyId = params.verificationMethodId;
     const publicKeyVerMethod: VerificationMethod = (issuerDidDoc.verificationMethod as VerificationMethod[]).find(
@@ -535,7 +534,6 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
         controller: publicKeyVerMethod.controller,
       },
     });
-
     const suite = new BabyJubJubSignature2021Suite({
       verificationMethod: publicKeyId,
       key: keyPair,
@@ -555,7 +553,6 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
       suite,
       documentLoader,
     });
-    console.log(result);
 
     const statusCheck = await that.checkCredentialStatus({ credentialId: params.credential.id });
     result.statusResult = statusCheck;

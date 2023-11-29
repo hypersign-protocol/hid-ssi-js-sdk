@@ -337,7 +337,7 @@ describe('Verifiable Credential Opearations', () => {
 
 describe('Verifiable Presentation Operataions', () => {
   describe('#generate() method to generate new presentation document', () => {
-    it('should be able to gnerate a new presentation document', async () => {
+    it('should be able to generate a new presentation document', async () => {
       const presentationBody = {
         verifiableCredentials: [credentialDetail],
         holderDid: holderDidDocument.id,
@@ -509,7 +509,7 @@ describe('Verifiable Presentation Operataions', () => {
       });
     });
 
-    it('should be able a verify sgned presentation document', async () => {
+    it('should be able a verify signed presentation document', async () => {
       const tempverifyPresentationBody = { ...verifyPresentationBody };
       tempverifyPresentationBody.signedPresentation = signedVerifiablePresentation;
       tempverifyPresentationBody.issuerDid = didDocId;
@@ -517,10 +517,7 @@ describe('Verifiable Presentation Operataions', () => {
       tempverifyPresentationBody.holderVerificationMethodId = holderDidDocument.verificationMethod[0].id;
       tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
       tempverifyPresentationBody.challenge = didDocId;
-
       const verifiedPresentationDetail = await hypersignVP.verify(tempverifyPresentationBody);
-      // console.log(JSON.stringify(verifiedPresentationDetail, null, 2));
-
       should().exist(verifiedPresentationDetail.verified);
       expect(verifiedPresentationDetail.verified).to.be.equal(true);
       expect(verifiedPresentationDetail).to.be.a('object');

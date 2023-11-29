@@ -21,7 +21,7 @@ beforeEach(async function () {
     hsSdk = new HypersignSSISdk(params);
     await hsSdk.init();
 });
-describe('DID Test scenarios', () => {
+describe('DID Test scenarios for BabyJubJub key', () => {
     //remove seed while creating did so that wallet can generate different did every time
     describe('#generateKeys() method to generate publicKyeMultibase and privateKeyMultiBase', function () {
         it('should return publickeyMultibase and privateKeyMultibase', async function () {
@@ -255,6 +255,20 @@ describe('DID Test scenarios', () => {
             expect(didDocument['service'].length).to.be.equal(0)
             should().exist(registerDid.transactionHash);
         })
+        it('should not be able to register didDocument as didDocument is already registered', async function () {
+            return await hsSdk.did.bjjDID.register({
+                didDocument,
+                privateKeyMultibase,
+                verificationMethodId: verificationMethod[0].id,
+            }).catch(function (err) {
+                expect(function () {
+                    throw err;
+                }).to.throw(
+                    Error,
+                    `failed to execute message; message index: 0: ${didDocId}: didDoc already exists`
+                );
+            });
+        });
     })
 
     describe('#resolve() method to resolve did', function () {
@@ -347,11 +361,10 @@ describe('DID Test scenarios', () => {
                     throw err;
                 }).to.throw(
                     Error,
-                    `Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ${didDocId} with version ${versionId}. Got version ${updateBody.versionId}: unexpected DID version`
+                    `failed to execute message; message index: 0: Expected ${didDocId} with version ${versionId}. Got version ${updateBody.versionId}: unexpected DID version`
                 );
             });
         });
-        // add testcase should not update did if it is not modified
         it('should not be able to update did document as there is no change in didDocument', function () {
             const updateBody = { didDocument, privateKeyMultibase, verificationMethodId: verificationMethod[0].id, versionId: '1.0.1' };
             const didDoc = JSON.parse(JSON.stringify(didDocument))
@@ -361,7 +374,7 @@ describe('DID Test scenarios', () => {
                     throw err;
                 }).to.throw(
                     Error,
-                    `Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: incoming DID Document does not have any changes: didDoc is invalid`
+                    "failed to execute message; message index: 0: incoming DID Document does not have any changes: didDoc is invalid"
                 );
             });
         });
@@ -451,7 +464,7 @@ describe('DID Test scenarios', () => {
                     }).to.throw(Error, 'HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
                 });
         });
-        it('should not be able to deactivate did document as versionId pased is incorrect', function () {
+        it('should not be able to deactivate did document as versionId passed is incorrect', function () {
             const didDoc = JSON.parse(JSON.stringify(didDocument))
             const deactivateBody = { didDocument: didDoc, privateKeyMultibase, verificationMethodId: verificationMethod[0].id, versionId: '1.0.1' };
             return hsSdk.did.bjjDID.deactivate(deactivateBody).catch(function (err) {
@@ -459,7 +472,7 @@ describe('DID Test scenarios', () => {
                     throw err;
                 }).to.throw(
                     Error,
-                    `Query failed with (6): rpc error: code = Unknown desc = failed to execute message; message index: 0: Expected ${didDocId} with version ${versionId}. Got version ${deactivateBody.versionId}: unexpected DID version`
+                    `failed to execute message; message index: 0: Expected ${didDocId} with version ${versionId}. Got version 1.0.1: unexpected DID version`
                 );
             });
         });
@@ -472,6 +485,19 @@ describe('DID Test scenarios', () => {
             })
             should().exist(updatedDid.transactionHash);
         })
+        it('should not be able to deactivate did document as its already deactivated', async function () {
+            const didDocTodeactivate = JSON.parse(JSON.stringify(didDocument))
+            return hsSdk.did.bjjDID.deactivate({
+                didDocument: didDocTodeactivate,
+                privateKeyMultibase,
+                verificationMethodId: verificationMethod[0].id,
+                versionId,
+            }).catch(function (err) {
+                expect(function () {
+                    throw err;
+                }).to.throw(Error, `failed to execute message; message index: 0: DID Document ${didDocId} is already deactivated: didDoc is deactivated`)
+            })
+        });
         it('should be able to resolve did after deactivation and deactivated should be true', async () => {
             const resolvedDid = await hsSdk.did.bjjDID.resolve({
                 did: didDocId

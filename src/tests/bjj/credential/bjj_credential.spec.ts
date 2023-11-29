@@ -844,6 +844,23 @@ describe('Verifiable Credential Status Opearations', () => {
       expect(updatedCredResult.code).to.be.equal(0);
       expect(updatedCredResult.transactionHash).to.be.a('string');
     });
+      it('should not be able to suspend a suspended  credential status', async function () {
+          const credentialStatus = await hsSdk.vc.bjjVC.resolveCredentialStatus({ credentialId });
+          const params = {
+              credentialStatus: credentialStatus,
+              issuerDid,
+              verificationMethodId: verificationMethod[0].id,
+              privateKeyMultibase: issuerPrivateKeyMultibase,
+              status: 'SUSPENDED',
+              statusReason: 'Suspending this credential for some time',
+          };
+          return hsSdk.vc.bjjVC.updateCredentialStatus(params).catch(function (err) {
+              expect(function () {
+                  throw err
+              }).to.throw(Error, "failed to execute message; message index: 0: incoming Credential Status Document does not have any changes: invalid Credential Status")
+          });
+
+    });
     it('should be able to change credential status to Live', async function () {
       const credentialStatus = await hsSdk.vc.bjjVC.resolveCredentialStatus({ credentialId });
       const params = {
@@ -874,6 +891,23 @@ describe('Verifiable Credential Status Opearations', () => {
       expect(updatedCredResult.code).to.be.equal(0);
       expect(updatedCredResult.transactionHash).to.be.a('string');
     });
+      it('should not be able to revoke a revoked credential status', async function () {
+          const credentialStatus = await hsSdk.vc.bjjVC.resolveCredentialStatus({ credentialId });
+          const params = {
+              credentialStatus,
+              issuerDid,
+              verificationMethodId: verificationMethod[0].id,
+              privateKeyMultibase: issuerPrivateKeyMultibase,
+              status: 'REVOKED',
+              statusReason: 'Revoking the credential',
+          };
+          return hsSdk.vc.bjjVC.updateCredentialStatus(params).catch(function (err) {
+              expect(function () {
+                  throw err
+              }).to.throw(Error, 'failed to execute message; message index: 0: incoming Credential Status Document does not have any changes: invalid Credential Status')
+          })
+
+      })
     it('should not be able to change the status of credential as it is revoked', async function () {
       const credentialStatus = await hsSdk.vc.bjjVC.resolveCredentialStatus({ credentialId });
       const params = {
@@ -923,6 +957,17 @@ describe('Verifiable Credential Status Opearations', () => {
       expect(registerCredDetail).to.be.a('object');
       should().exist(registerCredDetail.transactionHash);
     });
+      it('should not be able to register credential on blockchain as stutus already registerd on chain', async function () {
+          return hsSdk.vc.bjjVC.registerCredentialStatus({
+              credentialStatus: credentialStatus2,
+              credentialStatusProof: credentialStatusProof2,
+          }).catch(function (err) {
+              expect(function () {
+                  throw err
+
+              }).to.throw('failed to execute message; message index: 0: credential status document already exists')
+          })
+      });
   });
 });
 

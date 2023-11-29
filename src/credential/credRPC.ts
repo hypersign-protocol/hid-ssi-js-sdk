@@ -94,6 +94,9 @@ export class CredentialRPC implements ICredentialRPC {
       [txMessage],
       fee
     );
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 
@@ -140,6 +143,9 @@ export class CredentialRPC implements ICredentialRPC {
       txMessages,
       fee
     );
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 
@@ -211,6 +217,9 @@ export class CredentialRPC implements ICredentialRPC {
       [txMessage],
       fee
     );
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 }

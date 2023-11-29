@@ -280,6 +280,15 @@ describe('Schema Operations', () => {
             const registerdSchema = await hsSdk.schema.hypersignBjjschema.register({ schema: signedSchema })
             should().exist(registerdSchema.transactionHash);
         })
+        it('should not be able to register schema on blockchain as its already registered', async function () {
+            return hsSdk.schema.hypersignBjjschema.register({
+                schema: signedSchema,
+            }).catch(function (err) {
+                expect(function () {
+                    throw err
+                }).to.throw(Error, `failed to execute message; message index: 0: Schema ID:  ${schemaId}: schema already exists`)
+            })
+        });
     })
     describe('#resolve() method to resolve a schema', function () {
         it('Should be able to resolve schema from blockchain', async () => {

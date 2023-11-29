@@ -724,8 +724,8 @@ describe('Verifiable Credential Status Opearations', () => {
     //   const tempParams = { ...params };
     //   tempParams.verificationMethodId = verificationMethodId;
     //   tempParams.privateKeyMultibase = privateKeyMultibase;
-    //   tempParams.issuerDid = credentialStatus;
-    //   tempParams.credentialStatus = {} as ICredentialStatus;
+    //   tempParams.issuerDid = didDocId;
+    //   tempParams.credentialStatus =  {} as ICredentialStatus;
     //   return hypersignVC.updateCredentialStatus(tempParams).catch(function (err) {
     //     expect(function () {
     //       throw err;
@@ -784,21 +784,34 @@ describe('Verifiable Credential Status Opearations', () => {
     });
     it('should be able to change credential status to suspended', async function () {
       const credentialStatus = await hypersignVC.resolveCredentialStatus({ credentialId });
-      const params = {
-        credentialStatus,
-        issuerDid: didDocId,
-        verificationMethodId,
-        privateKeyMultibase,
-        status: 'SUSPENDED',
-        statusReason: 'Suspending this credential for some time',
-      };
-      const updatedCredResult = await hypersignVC.updateCredentialStatus(params);
-      // console.log(updatedCredResult);
+      const tempParams = { ...params }
+      tempParams['credentialStatus'] = credentialStatus
+      tempParams['verificationMethodId'] = verificationMethodId
+      tempParams.issuerDid = didDocId;
+      tempParams.privateKeyMultibase = privateKeyMultibase;
+      tempParams['status'] = 'SUSPENDED'
+      tempParams['statusReason'] = 'Suspending this credential for some time'
+      const updatedCredResult = await hypersignVC.updateCredentialStatus(tempParams);
       expect(updatedCredResult).to.be.a('object');
       expect(updatedCredResult.code).to.be.equal(0);
       expect(updatedCredResult.transactionHash).to.be.a('string');
     });
+    it('should not be able to suspend a suspended  credential status', async function () {
+      const credentialStatus = await hypersignVC.resolveCredentialStatus({ credentialId });
+      const tempParams = { ...params }
+      tempParams['credentialStatus'] = credentialStatus
+      tempParams['verificationMethodId'] = verificationMethodId
+      tempParams['status'] = 'SUSPENDED'
+      tempParams.privateKeyMultibase = privateKeyMultibase;
+      tempParams.issuerDid = didDocId;
+      tempParams['statusReason'] = 'Suspending this credential for some time'
+      return hypersignVC.updateCredentialStatus(tempParams).catch(function (err) {
+        expect(function () {
+          throw err
+        }).to.throw(Error, "failed to execute message; message index: 0: incoming Credential Status Document does not have any changes: invalid Credential Status")
+      });
 
+    });
     it('should be able to change credential status to Live', async function () {
       const credentialStatus = await hypersignVC.resolveCredentialStatus({ credentialId });
       const params = {
@@ -826,6 +839,23 @@ describe('Verifiable Credential Status Opearations', () => {
       const updatedCredResult = await hypersignVC.updateCredentialStatus(params);
       expect(updatedCredResult).to.be.a('object');
       expect(updatedCredResult.code).to.be.equal(0);
+    });
+    it('should not be able to revoke a revoked credential status', async function () {
+      const credentialStatus = await hypersignVC.resolveCredentialStatus({ credentialId });
+      const params = {
+        credentialStatus,
+        issuerDid: didDocId,
+        verificationMethodId,
+        privateKeyMultibase,
+        status: 'REVOKED',
+        statusReason: 'Revoking the credential',
+      };
+      return hypersignVC.updateCredentialStatus(params).catch(function (err) {
+        expect(function () {
+          throw err
+        }).to.throw(Error, 'failed to execute message; message index: 0: incoming Credential Status Document does not have any changes: invalid Credential Status')
+      })
+
     });
     it('should not be able to change the status of credential as it is revoked', async function () {
       const params = {
@@ -876,6 +906,17 @@ describe('Verifiable Credential Status Opearations', () => {
       });
       expect(registerCredDetail).to.be.a('object');
       should().exist(registerCredDetail.transactionHash);
+    });
+    it('should not be able to register credential on blockchain as stutus already registerd on chain', async function () {
+      return hypersignVC.registerCredentialStatus({
+        credentialStatus: credentialStatus2 as CredentialStatus,
+        credentialStatusProof: credentialStatusProof2 as CredentialProof,
+      }).catch(function (err) {
+        expect(function () {
+          throw err
+
+        }).to.throw('failed to execute message; message index: 0: credential status document already exists')
+      })
     });
   });
 });

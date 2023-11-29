@@ -247,6 +247,15 @@ describe('#register() function to register schema on blockchain', function () {
     });
     should().exist(registeredSchema.transactionHash);
   });
+  it('should not be able to register schema on blockchain as its already registered', async function () {
+    return hypersignSchema.register({
+      schema: signedSchema,
+    }).catch(function (err) {
+      expect(function () {
+        throw err
+      }).to.throw(Error, `failed to execute message; message index: 0: Schema ID:  ${schemaId}: schema already exists`)
+    })
+  });
 });
 
 describe('#resolve() this is to resolve schema', function () {
