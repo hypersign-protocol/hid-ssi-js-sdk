@@ -46,6 +46,7 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
     const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
     const offlineConstuctorParams = { nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp };
+
     this.vc = new HypersignVerifiableCredential(offlineConstuctorParams);
     this.hsDid = new HypersignDID(offlineConstuctorParams);
 
@@ -274,12 +275,12 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
     }
     const credentialResult = Array<any>();
 
-    params.signedPresentation.verifiableCredential.forEach(async (verifiableCredential: IVerifiableCredential) => {
-      if (verifiableCredential.proof?.type === 'BabyJubJubSignatureProof2021') {
-        const res = await that.hsDid.resolve({ did: verifiableCredential.issuer });
+    const verifiableCredential = params.signedPresentation.verifiableCredential;
+    for (let i = 0; i < verifiableCredential.length; i++) {
+      if (verifiableCredential[i].proof?.type === 'BabyJubJubSignatureProof2021') {
+        const res = await this.hsDid.resolve({ did: verifiableCredential[i].issuer });
 
         const didDocument = res.didDocument;
-
         const vm = didDocument.verificationMethod.find((x) => x.id == params.issuerVerificationMethodId);
 
         const credentailRes = await that.verifyProof(verifiableCredential, {
@@ -294,19 +295,15 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
           }),
         });
         credentialResult.push(credentailRes);
-        console.log(credentailRes);
       } else {
-        console.log('Here');
-
         const credentailRes = await that.vc.bjjVC.verify({
-          credential: verifiableCredential,
-          issuerDid: verifiableCredential.issuer,
-          verificationMethodId: verifiableCredential.proof?.verificationMethod as string,
+          credential: verifiableCredential[i],
+          issuerDid: verifiableCredential[i].issuer,
+          verificationMethodId: verifiableCredential[i].proof?.verificationMethod as string,
         });
         credentialResult.push(credentailRes);
-        console.log(credentailRes);
       }
-    });
+    }
 
     const { didDocument: holderDID } = resolvedDidDoc;
 

@@ -9,7 +9,7 @@ import Utils from '../utils';
 import HypersignSchema from '../schema/schema';
 import { CredentialSchemaProperty as SchemaProperty } from '../../libs/generated/ssi/credential_schema';
 import HypersignDID from '../did/did';
-import { DidDocument as Did, VerificationMethod } from '../../libs/generated/ssi/did';
+import { DidDocument as Did, DidDocument, VerificationMethod } from '../../libs/generated/ssi/did';
 
 import * as jsonSchemaValidator from '@cfworker/json-schema';
 
@@ -498,11 +498,10 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
    */
   public async verify(params: {
     credential: IVerifiableCredential;
-    issuerDid: string;
+    issuerDid?: string;
+    issuerDidDocument?: Did;
     verificationMethodId: string;
   }): Promise<any> {
-    console.log('========Inside verify method');
-
     if (!params.credential) {
       throw new Error('HID-SSI-SDK:: params.credential is required to verify credential');
     }
@@ -515,12 +514,24 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify credential');
     }
 
-    if (!params.issuerDid) {
-      throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
+    // if (!params.issuerDid) {
+    //   throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
+    // }
+
+    if (!params.issuerDid && !params.issuerDidDocument) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: params.issuerDid or params.issuerDidDocument is required to verify credential'
+      );
     }
 
+    let issuerDID;
+    if (params.issuerDid) {
+      const { didDocument } = await this.hsDid.resolve({ did: params.issuerDid });
+      issuerDID = didDocument;
+    } else {
+      issuerDID = params.issuerDidDocument;
+    }
 
-    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: "did:hid:testnet:z3fAEUh181T5j98teY1E6xXpBFptmKd3dBVT44FFvseC2" });
     const issuerDidDoc: Did = issuerDID as Did;
     const publicKeyId = params.verificationMethodId;
     const publicKeyVerMethod: VerificationMethod = (issuerDidDoc.verificationMethod as VerificationMethod[]).find(
@@ -540,7 +551,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     });
 
     /* eslint-disable */
-    const that = this;
+    const thats = this;
     /* eslint-enable */
     const result = await jssig.verify(params.credential, {
       purpose: new purposes.AssertionProofPurpose({
@@ -554,7 +565,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
       documentLoader,
     });
 
-    const statusCheck = await that.checkCredentialStatus({ credentialId: params.credential.id });
+    const statusCheck = await thats.checkCredentialStatus({ credentialId: params.credential.id });
     result.statusResult = statusCheck;
 
     return result;

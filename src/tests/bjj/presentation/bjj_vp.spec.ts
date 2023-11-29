@@ -643,9 +643,7 @@ describe('Verifiable Presentation Operataions', () => {
       };
       
       
-      const verifiedVp = await hsSdk.vp.bjjVp.verify(presentationBody);
-        console.log(verifiedVp, "response");
-      
+      const verifiedVp = await hsSdk.vp.bjjVp.verify(presentationBody);      
       should().exist(verifiedVp['verified']);
       expect(verifiedVp.verified).to.be.equal(true);
       should().exist(verifiedVp['results']);

@@ -556,11 +556,13 @@ export default class HypersignDID implements IDID {
     if (!params.did) {
       throw new Error('HID-SSI-SDK:: Error: params.did is required to resolve a did');
     }
+
     if (this.didrpc) {
       result = await this.didrpc.resolveDID(params.did);
     } else if (this.didAPIService) {
       result = await this.didAPIService.resolveDid({ did: params.did });
     }
+
     return {
       didDocument: Utils.jsonToLdConvertor(result.didDocument),
       didDocumentMetadata: result.didDocumentMetadata,
