@@ -296,7 +296,7 @@ describe('Verifiable Presentation Operataions', () => {
             return hypersignPresentation.signByClientSpec(tempSignPresentationBody).catch(function (err) {
                 expect(function () {
                     throw err;
-                }).to.throw(Error, 'HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+                }).to.throw(Error, 'HID-SSI-SDK:: params.presentation is required for signing a presentation');
             });
         });
         it('should not be able to sign presentation as challenge is not passed', async function () {
@@ -307,7 +307,7 @@ describe('Verifiable Presentation Operataions', () => {
             return hypersignPresentation.signByClientSpec(tempSignPresentationBody).catch(function (err) {
                 expect(function () {
                     throw err;
-                }).to.throw(Error, 'HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+                }).to.throw(Error, 'HID-SSI-SDK:: params.challenge is required for signing a presentation');
             });
         });
         it('should not be able to sign presentation as verificationMethodId is not passed', async function () {
@@ -319,7 +319,7 @@ describe('Verifiable Presentation Operataions', () => {
             return hypersignPresentation.signByClientSpec(tempSignPresentationBody).catch(function (err) {
                 expect(function () {
                     throw err;
-                }).to.throw(Error, 'HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+                }).to.throw(Error, 'HID-SSI-SDK:: params.verificationMethodId is required for signing a presentation');
             });
         });
         it('should not be able to sign presentation as web3 object is not passed', async function () {

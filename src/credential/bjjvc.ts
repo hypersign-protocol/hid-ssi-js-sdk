@@ -421,7 +421,6 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     const merkelizerObj = await Merklizer.merklizeJSONLD(JSON.stringify(params.credential), {
       documentLoader,
     });
-    // console.log(merkelizerObj);
 
     let credentialHash = await merkelizerObj.mt.root();
     credentialHash = Buffer.from(credentialHash.bytes).toString('hex');
@@ -434,7 +433,6 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
       remarks: 'Credential is active',
       credentialMerkleRootHash: credentialHash,
     };
-    // console.log(JSON.stringify(credentialStatus));
 
     const credProof = await this._jsonLdSign({
       credentialStatus,

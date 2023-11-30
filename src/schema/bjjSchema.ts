@@ -280,7 +280,7 @@ export default class HypersignBJJSchema implements ISchemaMethods {
     const schemaDoc = params.schema;
     const proof = schemaDoc['proof'] as DocumentProof;
     if (this.schemaRpc) {
-      const result: DeliverTxResponse = await this.schemaRpc.createSchema(schemaDoc as SchemaDocument, proof);
+      const result: DeliverTxResponse = await this.schemaRpc.registerSchema(schemaDoc as SchemaDocument, proof);
       response.transactionHash = result.transactionHash;
     } else if (this.schemaApiService) {
       const result: { transactionHash: string } = await this.schemaApiService.registerSchema({

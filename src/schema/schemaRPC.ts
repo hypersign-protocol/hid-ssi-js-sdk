@@ -17,7 +17,7 @@ import Utils from '../utils';
 import * as constants from '../constants';
 
 export interface ISchemaRPC {
-  createSchema(schema: SchemaDocument, proof: SchemaProof): Promise<object>;
+  registerSchema(schema: SchemaDocument, proof: SchemaProof): Promise<object>;
   resolveSchema(schemaId: string): Promise<object>;
 }
 
@@ -52,7 +52,7 @@ export class SchemaRpc implements ISchemaRPC {
     await this.hidClient.init();
   }
 
-  async createSchema(schema: CredentialSchemaDocument, proof: SchemaProof): Promise<DeliverTxResponse> {
+  async registerSchema(schema: CredentialSchemaDocument, proof: SchemaProof): Promise<DeliverTxResponse> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: SchemaRpc class is not initialise with offlinesigner');
     }

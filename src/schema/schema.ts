@@ -98,6 +98,11 @@ export default class HyperSignSchema implements ISchemaMethods {
   private _getDateTime(): string {
     return new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z';
   }
+
+  private isPascalCase(inputString: string): boolean {
+    const pattern = /^[A-Z][a-zA-Z0-9]*$/;
+    return pattern.test(inputString);
+  }
   private async _jsonLdSign(params: {
     schema: CredentialSchemaDocument;
     privateKeyMultibase: string;
@@ -154,6 +159,8 @@ export default class HyperSignSchema implements ISchemaMethods {
     additionalProperties: boolean;
   }): Promise<SchemaDocument> {
     if (!params.author) throw new Error('HID-SSI-SDK:: Error: Author must be passed');
+    if (!this.isPascalCase(params.name))
+      throw new Error('HID-SSI-SDK:: Error: schema name should always be in PascalCase');
     this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT];
     this.id = await this._getSchemaId();
     this.name = params.name;
@@ -280,7 +287,7 @@ export default class HyperSignSchema implements ISchemaMethods {
     const schemaDoc = params.schema;
     const proof = schemaDoc['proof'] as DocumentProof;
     if (this.schemaRpc) {
-      const result: DeliverTxResponse = await this.schemaRpc.createSchema(schemaDoc as SchemaDocument, proof);
+      const result: DeliverTxResponse = await this.schemaRpc.registerSchema(schemaDoc as SchemaDocument, proof);
       response.transactionHash = result.transactionHash;
     } else if (this.schemaApiService) {
       const result: { transactionHash: string } = await this.schemaApiService.registerSchema({

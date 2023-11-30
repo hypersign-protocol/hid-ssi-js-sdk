@@ -652,7 +652,7 @@ describe('Credential Operation', () => {
       return hsSdk.vc.bjjVC.verify(params).catch(function (err) {
         expect(function () {
           throw err;
-        }).to.throw(Error, 'HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
+        }).to.throw(Error, 'HID-SSI-SDK:: Error: params.issuerDid or params.issuerDidDocument is required to verify credential');
       });
     });
 

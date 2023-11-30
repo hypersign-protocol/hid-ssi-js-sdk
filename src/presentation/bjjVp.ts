@@ -279,11 +279,9 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
     for (let i = 0; i < verifiableCredential.length; i++) {
       if (verifiableCredential[i].proof?.type === 'BabyJubJubSignatureProof2021') {
         const res = await this.hsDid.resolve({ did: verifiableCredential[i].issuer });
-
         const didDocument = res.didDocument;
         const vm = didDocument.verificationMethod.find((x) => x.id == params.issuerVerificationMethodId);
-
-        const credentailRes = await that.verifyProof(verifiableCredential, {
+        const credentailRes = await this.verifyProof(verifiableCredential[i], {
           suite: new BabyJubJubSignatureProof2021({
             key: await BabyJubJubKeys2021.fromKeys({
               publicKeyMultibase: vm?.publicKeyMultibase as string,
@@ -361,7 +359,6 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
     }
   ) {
     const id = derivedProofs.proof.verificationMethod;
-
     const result = await jsonSigs.verify(derivedProofs, {
       suite: params.suite,
       purpose: new AssertionProofPurpose({
