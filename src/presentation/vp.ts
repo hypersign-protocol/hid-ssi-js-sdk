@@ -255,8 +255,8 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     // TODO:  need to use domainname.
     const presentationPurpose = new AuthenticationProofPurpose({
       controller: holderController,
-      domain: params.domain,
       challenge: params.challenge,
+      domain: params.domain,
     });
 
     const keyPair = await Ed25519VerificationKey2020.from({

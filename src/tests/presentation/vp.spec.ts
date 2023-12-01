@@ -560,5 +560,34 @@ describe('Verifiable Presentation Operataions', () => {
       expect(verifiedPresentationDetail.credentialResults[0].verified).to.be.equal(true);
       expect(verifiedPresentationDetail.credentialResults[0].credentialId).to.be.equal(credentialId);
     });
+
+    it('should be able a sign and verify a presentation without domain', async () => {
+      const signPresentationBody = {
+        presentation: unsignedverifiablePresentation,
+        holderDid: holderDidDocument.id,
+        verificationMethodId: holderDidDocument.verificationMethod[0].id,
+        privateKeyMultibase: holdersPrivateKeyMultibase,
+        challenge: "abcd",
+        // domain: "http://xyz.com"
+      };
+      signedVerifiablePresentation = await hypersignVP.sign(signPresentationBody);
+      should().exist(signedVerifiablePresentation['@context']);
+      should().exist(signedVerifiablePresentation['type']);
+      expect(signedVerifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
+      should().exist(signedVerifiablePresentation['verifiableCredential']);
+      expect(signedVerifiablePresentation.id).to.be.equal(verifiableCredentialPresentationId);
+      const verifyPresentationBody = {
+        signedPresentation: signedVerifiablePresentation,
+        holderDid: holderDidDocument.id,
+        holderVerificationMethodId: holderDidDocument.verificationMethod[0].id,
+        issuerVerificationMethodId: verificationMethodId,
+        privateKey: privateKeyMultibase,
+        challenge: "abcd",
+        issuerDid: didDocId,
+        domain: "http://xyz.com"
+      };
+      const verifiedPresentationDetail = await hypersignVP.verify(verifyPresentationBody);
+      console.log(verifiedPresentationDetail)
+    });
   });
 });
