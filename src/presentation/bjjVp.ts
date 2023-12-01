@@ -322,7 +322,6 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
     // TODO:  need to use domainname.
     const presentationPurpose = new AuthenticationProofPurpose({
       controller: holderController,
-
       domain: params.domain,
       challenge: params.challenge,
     });

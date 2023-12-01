@@ -11,7 +11,7 @@ let credentialDetail3;
 let issuedCredResult2;
 let issuedCredResult;
 let credentialStatusId;
-let credentialTransMessage
+const credentialTransMessage = [] as any
 let credentialDetail2
 let credenStatus;
 let verificationMethod;

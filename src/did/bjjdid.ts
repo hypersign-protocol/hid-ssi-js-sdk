@@ -177,7 +177,7 @@ class DIDDocument implements Did {
 }
 
 /** Class representing HypersignDID */
-export default class HypersignDID implements IDID {
+export default class HypersignBJJDID implements IDID {
   private didrpc: IDIDRpc | null;
   private didAPIService: IDidApiService | null;
   public namespace: string;

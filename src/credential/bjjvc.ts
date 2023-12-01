@@ -804,7 +804,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
    */
 
   public async registerCredentialStatusTxnBulk(txnMessage: []) {
-    if (!txnMessage) throw new Error('HID-SSI-SDK:: Error: txnMessage is required to register credential status');
+    if (!txnMessage || txnMessage.length <= 0) throw new Error('HID-SSI-SDK:: Error: txnMessage is required to register credential status');
 
     if (!this.credStatusRPC) {
       throw new Error(
