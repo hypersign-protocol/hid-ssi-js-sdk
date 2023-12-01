@@ -430,6 +430,8 @@ describe('Verifiable Presentation Operataions', () => {
       tempSignPresentationBody.holderDid = holderDidDocument.id;
       tempSignPresentationBody.verificationMethodId = holderDidDocument.verificationMethod[0].id;
       tempSignPresentationBody.privateKeyMultibase = holdersPrivateKeyMultibase;
+      tempSignPresentationBody.challenge = "abc";
+      tempSignPresentationBody['domain'] = "http://xyz.com";
       signedVerifiablePresentation = await hypersignVP.sign(tempSignPresentationBody);
       should().exist(signedVerifiablePresentation['@context']);
       should().exist(signedVerifiablePresentation['type']);
@@ -508,23 +510,53 @@ describe('Verifiable Presentation Operataions', () => {
         }).to.throw(Error, 'HID-SSI-SDK:: params.issuerVerificationMethodId is required for verifying a presentation');
       });
     });
-
-    it('should be able a verify signed presentation document', async () => {
+    it('should not be able to verify presentation as challenge used at the time of verification is different than challenge used in vp sign and getting presentation verification result false', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.signedPresentation = signedVerifiablePresentation;
+      tempverifyPresentationBody.issuerDid = didDocId;
+      tempverifyPresentationBody.holderDid = holderDidDocument.id;
+      tempverifyPresentationBody.challenge = "abczshdsfhgk";
+      tempverifyPresentationBody['domain'] = "http://xyz.com"
+      tempverifyPresentationBody.holderVerificationMethodId = holderDidDocument.verificationMethod[0].id;
+      tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
+      const verifiedPresentationDetail = await hypersignVP.verify(tempverifyPresentationBody);
+      expect(verifiedPresentationDetail.verified).to.be.equal(false);
+      expect(verifiedPresentationDetail.presentationResult.verified).to.be.equal(false);
+      expect(verifiedPresentationDetail.credentialResults[0].verified).to.be.equal(true);
+    });
+    it('should not be able to verify presentation as domain used at the time of vp verification is differ than domain used in vp sign and getting  presentation verification result false', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.signedPresentation = signedVerifiablePresentation;
+      tempverifyPresentationBody.issuerDid = didDocId;
+      tempverifyPresentationBody.holderDid = holderDidDocument.id;
+      tempverifyPresentationBody.challenge = "abc";
+      tempverifyPresentationBody['domain'] = "http://xyz1.com";
+      tempverifyPresentationBody.holderVerificationMethodId = holderDidDocument.verificationMethod[0].id;
+      tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
+      const verifiedPresentationDetail = await hypersignVP.verify(tempverifyPresentationBody);
+      expect(verifiedPresentationDetail.verified).to.be.equal(false);
+      expect(verifiedPresentationDetail.presentationResult.verified).to.be.equal(false);
+      expect(verifiedPresentationDetail.credentialResults[0].verified).to.be.equal(true);
+    });
+    it('should be able to verify signed presentation document', async () => {
       const tempverifyPresentationBody = { ...verifyPresentationBody };
       tempverifyPresentationBody.signedPresentation = signedVerifiablePresentation;
       tempverifyPresentationBody.issuerDid = didDocId;
       tempverifyPresentationBody.holderDid = holderDidDocument.id;
       tempverifyPresentationBody.holderVerificationMethodId = holderDidDocument.verificationMethod[0].id;
       tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
-      tempverifyPresentationBody.challenge = didDocId;
+      tempverifyPresentationBody.challenge = "abc";
+      tempverifyPresentationBody['domain'] = "http://xyz.com"
       const verifiedPresentationDetail = await hypersignVP.verify(tempverifyPresentationBody);
       should().exist(verifiedPresentationDetail.verified);
       expect(verifiedPresentationDetail.verified).to.be.equal(true);
+      expect(verifiedPresentationDetail.presentationResult.verified).to.be.equal(true);
+
       expect(verifiedPresentationDetail).to.be.a('object');
-      should().exist(verifiedPresentationDetail.results);
-      expect(verifiedPresentationDetail.results).to.be.a('array');
       should().exist(verifiedPresentationDetail.credentialResults);
       expect(verifiedPresentationDetail.credentialResults).to.be.a('array');
+      should().exist(verifiedPresentationDetail.credentialResults[0].results);
+      expect(verifiedPresentationDetail.credentialResults[0].results).to.be.a('array');
       expect(verifiedPresentationDetail.credentialResults[0].verified).to.be.equal(true);
       expect(verifiedPresentationDetail.credentialResults[0].credentialId).to.be.equal(credentialId);
     });

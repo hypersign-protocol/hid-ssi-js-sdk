@@ -7,7 +7,12 @@ let holderPrivateKeyMultibase;
 let holderPublicKeyMultibase;
 let offlineSigner;
 let hsSdk;
+let credentialDetail3;
+let issuedCredResult2;
+let issuedCredResult;
 let credentialStatusId;
+let credentialTransMessage
+let credentialDetail2
 let credenStatus;
 let verificationMethod;
 let schemaObject;
@@ -369,6 +374,46 @@ describe('Credential Operation', () => {
       should().exist(credentialDetail['credentialStatus']);
       expect(credentialDetail['credentialStatus'].type).to.be.equal('HypersignCredentialStatus2023');
     });
+    it('should be able to generate new credential for testing bulk registration', async function () {
+      const expirationDate = new Date('11/11/2027');
+      const tempCredentialBody = { ...credentialBody };
+      tempCredentialBody.schemaId = schemaId;
+      tempCredentialBody.subjectDid = subjectDid;
+      tempCredentialBody['expirationDate'] = expirationDate.toString();
+      tempCredentialBody.issuerDid = issuerDid;
+      tempCredentialBody['fields'] = { name: 'varsha', address: "random address" };
+      credentialDetail2 = await hsSdk.vc.bjjVC.generate(tempCredentialBody);
+      expect(credentialDetail).to.be.a('object');
+      should().exist(credentialDetail['@context']);
+      should().exist(credentialDetail['id']);
+      should().exist(credentialDetail['type']);
+      should().exist(credentialDetail['issuanceDate']);
+      should().exist(credentialDetail['issuer']);
+      should().exist(credentialDetail['credentialSubject']);
+      should().exist(credentialDetail['credentialSchema']);
+      should().exist(credentialDetail['credentialStatus']);
+      expect(credentialDetail['credentialStatus'].type).to.be.equal('HypersignCredentialStatus2023');
+    });
+    it('should be able to generate new credential even without offlinesigner passed to constructor to test bulkRegistration', async function () {
+      const expirationDate = new Date('11/11/2027');
+      const tempCredentialBody = { ...credentialBody };
+      tempCredentialBody.schemaId = schemaId;
+      tempCredentialBody.subjectDid = subjectDid;
+      tempCredentialBody['expirationDate'] = expirationDate.toString();
+      tempCredentialBody.issuerDid = issuerDid;
+      tempCredentialBody.fields = { name: 'varsha', address: 'random address' };
+      credentialDetail3 = await await hsSdk.vc.bjjVC.generate(tempCredentialBody);
+      expect(credentialDetail).to.be.a('object');
+      should().exist(credentialDetail['@context']);
+      should().exist(credentialDetail['id']);
+      should().exist(credentialDetail['type']);
+      should().exist(credentialDetail['issuanceDate']);
+      should().exist(credentialDetail['issuer']);
+      should().exist(credentialDetail['credentialSubject']);
+      should().exist(credentialDetail['credentialSchema']);
+      should().exist(credentialDetail['credentialStatus']);
+      expect(credentialDetail['credentialStatus'].type).to.be.equal('HypersignCredentialStatus2023');
+    });
   });
   describe('#issueCredential() method for issuing credential', function () {
     it('should not be able to issueCredential as verificationMethodId is null or empty', async function () {
@@ -489,6 +534,37 @@ describe('Credential Operation', () => {
         issuedCredResult;
       credentialStatus2 = credentialStatus;
       credentialStatusProof2 = credentialStatusProof;
+      expect(signedCredential).to.be.a('object');
+      expect(credentialStatus).to.be.a('object');
+      expect(credentialStatusProof).to.be.a('object');
+      should().not.exist(credentialStatusRegistrationResult);
+    });
+
+    it('should be able to issue credential without having the credential status registered on chain to test bulkRegistration', async function () {
+      const tempIssueCredentialBody = { ...issueCredentialBody };
+      tempIssueCredentialBody.credential = credentialDetail2;
+      tempIssueCredentialBody.issuerDid = issuerDid;
+      tempIssueCredentialBody.verificationMethodId = verificationMethod[0].id;
+      tempIssueCredentialBody.privateKeyMultibase = issuerPrivateKeyMultibase;
+      tempIssueCredentialBody.registerCredential = false;
+      issuedCredResult = await hsSdk.vc.bjjVC.issue(tempIssueCredentialBody);
+      const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
+        issuedCredResult;
+      expect(signedCredential).to.be.a('object');
+      expect(credentialStatus).to.be.a('object');
+      expect(credentialStatusProof).to.be.a('object');
+      should().not.exist(credentialStatusRegistrationResult);
+    });
+    it('should be able to issue credential without having the credential status registered on chain to test bulkRegistration', async function () {
+      const tempIssueCredentialBody = { ...issueCredentialBody };
+      tempIssueCredentialBody.credential = credentialDetail3;
+      tempIssueCredentialBody.issuerDid = issuerDid;
+      tempIssueCredentialBody.verificationMethodId = verificationMethod[0].id;
+      tempIssueCredentialBody.privateKeyMultibase = issuerPrivateKeyMultibase;
+      tempIssueCredentialBody.registerCredential = false;
+      issuedCredResult2 = await hsSdk.vc.bjjVC.issue(tempIssueCredentialBody);
+      const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
+        issuedCredResult;
       expect(signedCredential).to.be.a('object');
       expect(credentialStatus).to.be.a('object');
       expect(credentialStatusProof).to.be.a('object');
@@ -968,6 +1044,69 @@ describe('Verifiable Credential Status Opearations', () => {
               }).to.throw('failed to execute message; message index: 0: credential status document already exists')
           })
       });
+  });
+
+  describe('#generateRegisterCredentialStatusTxnMessage() method to generate transaction message for credential2', function () {
+    it('should not be able to generatecredential status TxnMessage as credentialStatus is not passed', async function () {
+      const credentialStatus = null
+      const credentialStatusProof = issuedCredResult.credentialStatusProof
+      return hsSdk.vc.bjjVC.generateRegisterCredentialStatusTxnMessage(credentialStatus, credentialStatusProof).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(
+          Error,
+          'HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status'
+        );
+      });
+    });
+    it('should not be able to generatecredential status TxnMessage as credentialStatusProof is not passed', async function () {
+      const credentialStatus = issuedCredResult.credentialStatus
+      const credentialStatusProof = null
+      return hsSdk.vc.bjjVC.generateRegisterCredentialStatusTxnMessage(credentialStatus, credentialStatusProof).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(
+          Error,
+          'HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status'
+        );
+      });
+    });
+    it('should be able to generate credential status TxnMessage', async function () {
+      const credentialStatus = issuedCredResult.credentialStatus
+      const credentialStatusProof = issuedCredResult.credentialStatusProof
+      const credentialStatus2 = issuedCredResult2.credentialStatus
+      const credentialStatusProof2 = issuedCredResult2.credentialStatusProof
+      const txnMessage1 = await hsSdk.vc.bjjVC.generateRegisterCredentialStatusTxnMessage(credentialStatus, credentialStatusProof)
+      credentialTransMessage.push(txnMessage1)
+      const txnMessage2 = await hsSdk.vc.bjjVC.generateRegisterCredentialStatusTxnMessage(credentialStatus2, credentialStatusProof2)
+      credentialTransMessage.push(txnMessage2)
+      expect(txnMessage1).to.be.a('object')
+      should().exist(txnMessage1.typeUrl)
+      should().exist(txnMessage1.value)
+      should().exist(txnMessage1.value.credentialStatusDocument)
+      should().exist(txnMessage1.value.credentialStatusProof)
+      should().exist(txnMessage1.value.txAuthor)
+    });
+  })
+
+
+  describe('#registerCredentialStatusTxnBulk() method to register credential on blockchain', function () {
+    it('should not be able to register multiple credential as txnMessage is not passed', async function () {
+      const txnMessage = []
+      return hsSdk.vc.bjjVC.registerCredentialStatusTxnBulk(txnMessage).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(
+          Error,
+          'HID-SSI-SDK:: Error: txnMessage is required to register credential status'
+        );
+      });
+    });
+    it('should be able to register credential on blockchain in a bulk', async function () {
+      const registerCredDetail = await hsSdk.vc.bjjVC.registerCredentialStatusTxnBulk(credentialTransMessage);
+      expect(registerCredDetail).to.be.a('object');
+      should().exist(registerCredDetail.transactionHash);
+    });
   });
 });
 

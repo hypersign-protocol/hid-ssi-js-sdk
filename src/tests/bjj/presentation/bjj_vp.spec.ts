@@ -597,12 +597,51 @@ describe('Verifiable Presentation Operataions', () => {
       tempverifyPresentationBody.challenge = 'abc';
       tempverifyPresentationBody.holderVerificationMethodId = subjectDidDoc.verificationMethod[0].id;
       tempverifyPresentationBody.issuerVerificationMethodId = '';
-
       return hsSdk.vp.bjjVp.verify(tempverifyPresentationBody).catch(function (err) {
         expect(function () {
           throw err;
         }).to.throw(Error, 'HID-SSI-SDK:: params.issuerVerificationMethodId is required for verifying a presentation');
       });
+    });
+    it('should not be able to verify a sd presentation as challenge is different that used in signing', async () => {
+      const presentationBody = {
+        signedPresentation: JSON.parse(JSON.stringify(signedSdVp)),
+        challenge: 'abcdvfgh',
+        domain: 'www.xyz.com',
+        issuerDid,
+        holderDid: subjectDid,
+        issuerVerificationMethodId: issuerDidDoc.assertionMethod[0],
+        holderVerificationMethodId: subjectDidDoc.authentication[0],
+      };
+      const verifiedVp = await hsSdk.vp.bjjVp.verify(presentationBody);
+      should().exist(verifiedVp['verified']);
+      expect(verifiedVp.verified).to.be.equal(false);
+      should().exist(verifiedVp['results']);
+      expect(verifiedVp.results).to.be.a('array');
+      expect(verifiedVp.results[0].verified).to.be.equal(false);
+      expect(verifiedVp.results[1].credentialResult).to.be.a('array');
+      expect(verifiedVp.results[1].credentialResult.length).to.be.greaterThan(0);
+      expect(verifiedVp.results[1].credentialResult[0].verified).to.be.equal(true);
+    });
+    it('should not be able to verify a sd presentation as domain is different that used in signing', async () => {
+      const presentationBody = {
+        signedPresentation: JSON.parse(JSON.stringify(signedSdVp)),
+        challenge: 'abc',
+        domain: 'www.xyz1.com',
+        issuerDid,
+        holderDid: subjectDid,
+        issuerVerificationMethodId: issuerDidDoc.assertionMethod[0],
+        holderVerificationMethodId: subjectDidDoc.authentication[0],
+      };
+      const verifiedVp = await hsSdk.vp.bjjVp.verify(presentationBody);
+      should().exist(verifiedVp['verified']);
+      expect(verifiedVp.verified).to.be.equal(false);
+      should().exist(verifiedVp['results']);
+      expect(verifiedVp.results).to.be.a('array');
+      expect(verifiedVp.results[0].verified).to.be.equal(false);
+      expect(verifiedVp.results[1].credentialResult).to.be.a('array');
+      expect(verifiedVp.results[1].credentialResult.length).to.be.greaterThan(0);
+      expect(verifiedVp.results[1].credentialResult[0].verified).to.be.equal(true);
     });
     it('should be able to verify a sd presentation document', async () => {
       const presentationBody = {
@@ -614,7 +653,6 @@ describe('Verifiable Presentation Operataions', () => {
         issuerVerificationMethodId: issuerDidDoc.assertionMethod[0],
         holderVerificationMethodId: subjectDidDoc.authentication[0],
       };
-
       const verifiedVp = await hsSdk.vp.bjjVp.verify(presentationBody);
       should().exist(verifiedVp['verified']);
       expect(verifiedVp.verified).to.be.equal(true);
@@ -624,7 +662,32 @@ describe('Verifiable Presentation Operataions', () => {
       expect(verifiedVp.results[1].credentialResult.length).to.be.greaterThan(0);
       expect(verifiedVp.results[1].credentialResult[0].verified).to.be.equal(true);
     });
-
+    it('should not be able to verify presentation as challenge used at the time of verification is different than challenge used in vp sign and getting presentation verification result false', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.signedPresentation = signedVp1;
+      tempverifyPresentationBody.issuerDid = issuerDid;
+      tempverifyPresentationBody.holderDid = subjectDid;
+      tempverifyPresentationBody.challenge = "abczshdsfhgk";
+      tempverifyPresentationBody['domain'] = "http://xyz.com"
+      tempverifyPresentationBody.holderVerificationMethodId = subjectDidDoc.assertionMethod[0]
+      tempverifyPresentationBody.issuerVerificationMethodId = issuerDidDoc.assertionMethod[0];
+      const verifiedPresentationDetail = await hsSdk.vp.bjjVp.verify(tempverifyPresentationBody);
+      expect(verifiedPresentationDetail.verified).to.be.equal(false);
+      expect(verifiedPresentationDetail.results[0].verified).to.be.equal(false);
+    });
+    it('should not be able to verify presentation as domain used at the time of vp verification is differ than domain used in vp sign and getting  presentation verification result false', async function () {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.signedPresentation = signedVp1;
+      tempverifyPresentationBody.issuerDid = issuerDid;
+      tempverifyPresentationBody.holderDid = subjectDid;
+      tempverifyPresentationBody.challenge = "abc";
+      tempverifyPresentationBody['domain'] = "http://xyz1.com";
+      tempverifyPresentationBody.holderVerificationMethodId = subjectDidDoc.authentication[0];
+      tempverifyPresentationBody.issuerVerificationMethodId = issuerDidDoc.assertionMethod[0];
+      const verifiedPresentationDetail = await hsSdk.vp.bjjVp.verify(tempverifyPresentationBody);
+      expect(verifiedPresentationDetail.verified).to.be.equal(false);
+      expect(verifiedPresentationDetail.results[0].verified).to.be.equal(false);
+    });
     it('should be able to verify a presentation document', async () => {
       const presentationBody = {
         signedPresentation: signedVp1,
