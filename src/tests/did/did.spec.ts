@@ -974,7 +974,7 @@ describe('DID Test scenarios', () => {
       });
     });
 
-    it('should able to sign did document', async function () {
+    it('should be able to sign did document', async function () {
       const params = {
         privateKeyMultibase: privateKeyMultibase as string,
         challenge: challenge as string,

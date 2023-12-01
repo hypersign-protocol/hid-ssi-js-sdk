@@ -10,6 +10,7 @@ let didDocument;
 let verificationMethod;
 let didDocId;
 let versionId;
+let signedDocument
 beforeEach(async function () {
     offlineSigner = await createWallet(mnemonic);
     const params = {
@@ -420,7 +421,6 @@ describe('DID Test scenarios for BabyJubJub key', () => {
             should().exist(didDocument['capabilityInvocation']);
             should().exist(didDocument['capabilityDelegation']);
             should().exist(didDocument['service']);
-            // expect(didDocument['authentication'].length).to.be.greaterThan(0)
             expect(didDocument['assertionMethod'].length).to.be.greaterThan(0)
             expect(didDocument['capabilityInvocation'].length).to.be.equal(0)
             expect(didDocument['capabilityDelegation'].length).to.be.equal(0)
@@ -517,4 +517,45 @@ describe('DID Test scenarios for BabyJubJub key', () => {
             expect(date1).to.be.greaterThan(date2)
         })
     })
+
+
+    describe('#sign() this is to sign didDoc', function () {
+        it('should able to sign did document', async function () {
+
+            const kp = await hsSdk.did.bjjDID.generateKeys();
+            privateKeyMultibase = kp.privateKeyMultibase;
+            publicKeyMultibase = kp.publicKeyMultibase;
+            didDocument = await hsSdk.did.bjjDID.generate({
+                publicKeyMultibase
+            })
+            const registerDid = await hsSdk.did.bjjDID.register({
+                didDocument: didDocument,
+                privateKeyMultibase,
+                verificationMethodId: didDocument.verificationMethod[0].id
+            })
+            const params = {
+                privateKeyMultibase: privateKeyMultibase as string,
+                challenge: "abcd" as string,
+                domain: "http://www.xyz.com" as string,
+                did: '', // This is taken as empty as didDoc is yet not register on blockchain and won't able to resolve based on did
+                didDocument: didDocument as object,
+                verificationMethodId: didDocument.verificationMethod[0].id,
+            };
+            signedDocument = await hsSdk.did.bjjDID.sign(params);
+            expect(signedDocument).to.be.a('object');
+            should().exist(signedDocument['@context']);
+            should().exist(signedDocument['id']);
+            expect(didDocId).to.be.equal(signedDocument['id']);
+            should().exist(signedDocument['controller']);
+            should().exist(signedDocument['alsoKnownAs']);
+            should().exist(signedDocument['verificationMethod']);
+            should().exist(signedDocument['authentication']);
+            should().exist(signedDocument['assertionMethod']);
+            should().exist(signedDocument['keyAgreement']);
+            should().exist(signedDocument['capabilityInvocation']);
+            should().exist(signedDocument['capabilityDelegation']);
+            should().exist(signedDocument['service']);
+            should().exist(signedDocument['proof']);
+        });
+    });
 })

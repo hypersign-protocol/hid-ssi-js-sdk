@@ -5,7 +5,7 @@
  */
 import * as constant from '../constants';
 import jsonSigs from 'jsonld-signatures';
-const { AssertionProofPurpose } = jsonSigs.purposes;
+const { AssertionProofPurpose, AuthenticationProofPurpose } = jsonSigs.purposes;
 import { DIDRpc } from './didRPC';
 import Utils from '../utils';
 import { BabyJubJubKeys2021 } from '@hypersign-protocol/babyjubjub2021';
@@ -218,7 +218,7 @@ export default class HypersignBJJDID implements IDID {
     }
     this.namespace = namespace ? namespace : '';
   }
-  sign(params: {
+  async sign(params: {
     didDocument: Did;
     privateKeyMultibase: string;
     challenge: string;
@@ -226,14 +226,97 @@ export default class HypersignBJJDID implements IDID {
     did: string;
     verificationMethodId: string;
   }): Promise<ISignedDIDDocument> {
-    throw new Error('Method not implemented.');
+    const { privateKeyMultibase, challenge, domain, did, didDocument, verificationMethodId } = params;
+    let resolveddoc;
+    if (!privateKeyMultibase) {
+      throw new Error('HID-SSI-SDK:: Error: params.privateKey is required to sign a did');
+    }
+    if (!challenge) {
+      throw new Error('HID-SSI-SDK:: Error: params.challenge is required to sign a did');
+    }
+    if (!domain) {
+      throw new Error('HID-SSI-SDK:: Error: params.domain is required to sign a did');
+    }
+
+    try {
+      if (did && this.didrpc) {
+        resolveddoc = await this.didrpc.resolveDID(did);
+      } else if (didDocument) {
+        resolveddoc = {};
+        resolveddoc.didDocument = didDocument;
+      } else {
+        throw new Error('HID-SSI-SDK:: Error: params.did or params.didDocument is required to sign a did');
+      }
+    } catch (e) {
+      throw new Error(`HID-SSI-SDK:: Error: could not resolve did ${did}`);
+    }
+    console.log(JSON.stringify(resolveddoc.didDocument, null, 2))
+    const publicKeyId = params.verificationMethodId
+    const publicKeyVerMethod: VerificationMethod = resolveddoc.didDocument['verificationMethod'].find(
+      (x) => x.id == publicKeyId
+    ) as VerificationMethod;
+
+
+    const keyPair = await BabyJubJubKeys2021.fromKeys({
+      privateKeyMultibase: params.privateKeyMultibase,
+      publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase as string,
+      options: {
+        id: publicKeyVerMethod.id,
+        controller: publicKeyVerMethod.controller,
+      },
+    });
+    const suite = new BabyJubJubSignature2021Suite({
+      verificationMethod: publicKeyId,
+      key: keyPair,
+    });
+    resolveddoc.didDocument['@context'].push(
+      'https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/BJJSignature2021.jsonld'
+    )
+    const signedDidDoc = await jsonSigs.sign(resolveddoc.didDocument, {
+      suite,
+      purpose: new AuthenticationProofPurpose({
+        challenge,
+        domain,
+      }),
+      documentLoader
+    })
+    return signedDidDoc
   }
-  verify(params: {
+  async verify(params: {
     didDocument: Did;
     verificationMethodId: string;
     challenge: string;
     domain?: string | undefined;
   }): Promise<object> {
+    ""
+    const { didDocument, verificationMethodId, challenge, domain } = params;
+
+    if (!didDocument) {
+      throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to verify a did');
+    }
+
+    if (!didDocument['proof']) {
+      throw new Error('HID-SSI-SDK:: Error: params.didDocument.proof is not present in the signed did document');
+    }
+
+    if (!verificationMethodId) {
+      throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify a did');
+    }
+
+    if (!challenge) {
+      throw new Error('HID-SSI-SDK:: Error: params.challenge is required to verify a did');
+    }
+    const didDoc = didDocument as Did;
+    const publicKeyId = verificationMethodId
+    const pubkey = didDoc.verificationMethod?.find((item) => item.id === publicKeyId);
+    if (!pubkey) {
+      throw new Error(
+        'HID-SSI-SDK:: Error: could not find verification method for verificationMethodId: ' +
+        verificationMethodId +
+        ' in did document'
+      );
+    }
+
     throw new Error('Method not implemented.');
   }
   addVerificationMethod(params: {
