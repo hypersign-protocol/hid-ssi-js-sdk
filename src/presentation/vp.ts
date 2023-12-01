@@ -95,6 +95,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
    *  - params.verificationMethodId : verificationMethodId of holder
    *  - params.privateKeyMultibase  : Private key associated with the verification method
    *  - params.challenge            : Any random challenge
+   *  - params.domain               : Domain url
    * @returns {Promise<IVerifiablePresentation>}
    */
   async sign(params: {
@@ -104,6 +105,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     verificationMethodId: string;
     privateKeyMultibase: string;
     challenge: string;
+    domain?: string;
   }): Promise<IVerifiablePresentation> {
     if (params.holderDid && params.holderDidDocSigned) {
       throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
@@ -164,6 +166,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       suite,
       challenge: params.challenge,
       documentLoader,
+      domain: params.domain,
     });
 
     return signedVP;
@@ -234,7 +237,6 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     } else {
       throw new Error('Either holderDid or holderDidDocSigned should be provided');
     }
-
     const { didDocument: holderDID } = resolvedDidDoc;
 
     const holderDidDoc: Did = holderDID as Did;
@@ -253,6 +255,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     // TODO:  need to use domainname.
     const presentationPurpose = new AuthenticationProofPurpose({
       controller: holderController,
+      domain: params.domain,
       challenge: params.challenge,
     });
 
@@ -326,7 +329,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       purpose,
       suite: [vpSuite_holder, vcSuite_issuer],
       documentLoader,
-      unsignedPresentation: true,
+      unsignedPresentation: false,
       checkStatus: async function (options) {
         return await that.vc.checkCredentialStatus({ credentialId: options.credential.id });
       },
