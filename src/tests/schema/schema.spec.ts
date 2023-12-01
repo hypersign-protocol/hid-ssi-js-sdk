@@ -29,7 +29,7 @@ const schemaBody = {
   name: 'TestSchema',
   description: 'This is a test schema generation',
   author: '',
-  fields: [{ name: 'name', type: 'string', isRequired: true }],
+  fields: [{ name: 'name', type: 'string', isRequired: true }] as any,
   additionalProperties: false,
 };
 
@@ -152,6 +152,17 @@ describe('#generate() method to create schema', function () {
       }).to.throw(Error, 'HID-SSI-SDK:: Error: schema name should always be in PascalCase');
     });
   });
+  it("should not be able to create a schema as sub-property 'name' is not present in field property", function () {
+    const tempSchemaBody = { ...schemaBody };
+    tempSchemaBody.author = didDocId;
+    tempSchemaBody['fields'] = [{ isRequired: true }]
+    return hypersignSchema.generate(tempSchemaBody).catch(function (err) {
+      expect(function () {
+        throw err;
+      }).to.throw(Error, "HID-SSI-SDK:: Error: All fields must contains property 'name'");
+    });
+  });
+
   it('should be able to create a new schema without offlinesigner', async function () {
     const tempSchemaBody = { ...schemaBody };
     tempSchemaBody.author = didDocId;
@@ -206,6 +217,38 @@ describe('#generate() method to create schema', function () {
 });
 // dont allow fields other than { name: 'name', type: 'string', isRequired: false }
 describe('#sign() function to sign schema', function () {
+  it('should not be able to sign a new schema as privateKeyMultibase is not passed', function () {
+    return hypersignSchema.sign({
+      privateKeyMultibase: "",
+      schema: schemaObject,
+      verificationMethodId: didDocument['assertionMethod'][0]
+    }).catch(function (err) {
+      expect(function () {
+        throw err;
+      }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKeyMultibase must be passed');
+    });
+  });
+  it('should not be able to sign a new schema as verificationMethodId is not passed', function () {
+    return hypersignSchema.sign({
+      privateKeyMultibase,
+      schema: schemaObject,
+      verificationMethodId: ""
+    }).catch(function (err) {
+      expect(function () {
+        throw err;
+      }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId must be passed');
+    });
+  });
+  it('should not be able to sign a new schema as schema is not passed', function () {
+    return hypersignSchema.sign({
+      privateKeyMultibase,
+      verificationMethodId: didDocument['assertionMethod'][0]
+    }).catch(function (err) {
+      expect(function () {
+        throw err;
+      }).to.throw(Error, 'HID-SSI-SDK:: Error: Schema must be passed');
+    });
+  });
   it('should be able to sign newly created schema', async function () {
     const tempSchemaBody = JSON.parse(JSON.stringify(schemaObject))
     signedSchema = await hypersignSchema.sign({

@@ -77,7 +77,6 @@ export class CredentialRPC implements ICredentialRPC {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-
     const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status, this.nodeRestEp);
     const fee = {
       amount: [
@@ -119,7 +118,6 @@ export class CredentialRPC implements ICredentialRPC {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-
     return txMessage;
   }
 
@@ -127,7 +125,10 @@ export class CredentialRPC implements ICredentialRPC {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
     }
-    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status, this.nodeRestEp);
+    const txLenght = txMessages.length;
+    const amount = (
+      txLenght * parseInt(await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status, this.nodeRestEp))
+    ).toString();
     const fee = {
       amount: [
         {

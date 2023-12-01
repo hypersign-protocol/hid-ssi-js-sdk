@@ -635,8 +635,6 @@ describe('Verifiable Presentation Operataions', () => {
         issuerVerificationMethodId: issuerDidDoc.assertionMethod[0],
         holderVerificationMethodId: subjectDidDoc.authentication[0],
       };
-      
-      
       const verifiedVp = await hsSdk.vp.bjjVp.verify(presentationBody);      
       should().exist(verifiedVp['verified']);
       expect(verifiedVp.verified).to.be.equal(true);

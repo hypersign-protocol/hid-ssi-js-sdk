@@ -117,6 +117,7 @@ export default class HyperSignBJJVP implements IPresentationMethods, IVerifiable
    *  - params.verificationMethodId : verificationMethodId of holder
    *  - params.privateKeyMultibase  : Private key associated with the verification method
    *  - params.challenge            : Any random challenge
+   *  - params.domain               : Domain url
    * @returns {Promise<IVerifiablePresentation>}
    */
   async sign(params: {

@@ -178,7 +178,7 @@ export default class HyperSignSchema implements ISchemaMethods {
     const t = {};
     if (params.fields && params.fields.length > 0) {
       params.fields.forEach((prop) => {
-        if (!prop.name) throw new Error("HID-SSI-SDK:: Error: All fields must contains property 'name'")
+        if (!prop.name) throw new Error("HID-SSI-SDK:: Error: All fields must contains property 'name'");
         const schemaPropsObj: {
           propName: string;
           val: { type: string; format?: string };
