@@ -329,20 +329,6 @@ export default class HypersignDID implements IDID {
     return signedDidDocument.proof;
   }
 
-  private async _jsonLdNormalize(params: { doc }) {
-    const docToNormalize = params.doc;
-    const normalizedoc = await jsonld.normalize(docToNormalize, {
-      format: 'application/n-quads',
-      algorithm: 'URDNA2015',
-    });
-    return normalizedoc;
-  }
-  private _concat(arr1, arr2) {
-    const concatenatedArr = new Uint8Array(arr1.length + arr2.length);
-    concatenatedArr.set(arr1, 0);
-    concatenatedArr.set(arr2, arr1.length);
-    return concatenatedArr;
-  }
   private _getId = (methodSpecificId: string) => {
     if (methodSpecificId && methodSpecificId.length < 32) {
       throw new Error('HID-SSI-SDK:: Error: methodSpecificId should be of minimum size 32');
