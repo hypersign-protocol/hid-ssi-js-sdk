@@ -272,8 +272,8 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     ///---------------------------------------
     /// Issuer
     const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.issuerDid });
-    if (issuerDID === null || issuerDID === undefined) {
-      throw new Error('Issuer DID is not registered');
+    if (issuerDID === null || issuerDID === undefined || Object.keys(issuerDID).length === 0) {
+      throw new Error(`Issuer DID ${issuerDID} is invalid or not registered on the blockchain`);
     }
 
     const issuerDidDoc: Did = issuerDID as Did;
