@@ -32,8 +32,7 @@
   "license": "ISC",
   "dependencies": {
     "@cfworker/json-schema": "github:hypersign-protocol/json-schema",
-    "@cosmjs/proto-signing": "^0.27.0",
-    "@cosmjs/stargate": "^0.27.0",
+    
     "@digitalbazaar/ed25519-signature-2020": "^3.0.0",
     "@digitalbazaar/ed25519-verification-key-2018": "^3.1.2",
     "@digitalbazaar/ed25519-verification-key-2020": "^3.3.0",
@@ -45,6 +44,8 @@
     "ethereumeip712signature2021suite": "github:hypersign-protocol/EthereumEip712Signature2021Suite.git",
     "jcs": "github:hypersign-protocol/JCS",
     "jsonld-signatures": "^9.3.1",
+    "@cosmjs/proto-signing": "^0.31.0",
+    "@cosmjs/stargate": "^0.31.0",
     "jsonwebtoken": "^9.0.1",
     "multiformats": "^9.9.0",
     "node-fetch": "^2.6.1",
