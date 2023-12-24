@@ -40,8 +40,8 @@ import { ICredentialService } from '../ssiApi/services/credential/ICredentialApi
 import CredentialApiService from '../ssiApi/services/credential/credential.service';
 import { IResolveSchema } from '../schema/ISchema';
 import * as constant from '../constants';
-import { BabyJubJubKeys2021 } from '@hypersign-protocol/babyjubjub2021';
-import { BabyJubJubSignature2021Suite, deriveProof } from '@hypersign-protocol/babyjubjubsignature2021';
+import { BabyJubJubKeys2021 } from 'babyjubjub2021';
+import { BabyJubJubSignature2021Suite, deriveProof } from 'babyjubjubsignature2021';
 const { Merklizer } = require('@iden3/js-jsonld-merklization');
 const documentLoader = extendContextLoader(customLoader);
 export default class HypersignBJJVerifiableCredential implements ICredentialMethods, IVerifiableCredential {

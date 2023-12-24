@@ -25,8 +25,8 @@ import customLoader from '../../libs/w3cache/v1';
 const documentLoader = extendContextLoader(customLoader);
 import HypersignDID from '../did/did';
 import { VerificationMethod } from '../../libs/generated/ssi/did';
-import { BabyJubJubKeys2021 } from '@hypersign-protocol/babyjubjub2021';
-import { BabyJubJubSignature2021Suite } from '@hypersign-protocol/babyjubjubsignature2021';
+import { BabyJubJubKeys2021 } from 'babyjubjub2021';
+import { BabyJubJubSignature2021Suite } from 'babyjubjubsignature2021';
 
 export default class HypersignBJJSchema implements ISchemaMethods {
   '@context': Array<string>;
