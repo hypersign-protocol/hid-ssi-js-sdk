@@ -16,11 +16,8 @@ const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 import { VP, DID } from '../constants';
 import { IPresentationMethods, IVerifiablePresentation } from './IPresentation';
 import customLoader from '../../libs/w3cache/v1';
-import { BabyJubJubKeys2021 } from '@hypersign-protocol/babyjubjub2021';
-import {
-  BabyJubJubSignature2021Suite,
-  BabyJubJubSignatureProof2021,
-} from '@hypersign-protocol/babyjubjubsignature2021';
+import { BabyJubJubKeys2021 } from 'babyjubjub2021';
+import { BabyJubJubSignature2021Suite, BabyJubJubSignatureProof2021 } from 'babyjubjubsignature2021';
 
 const documentLoader = jsonSigs.extendContextLoader(customLoader);
 

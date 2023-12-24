@@ -54,8 +54,8 @@ const v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 const jsonld_signatures_4 = require("jsonld-signatures");
 const credential_service_1 = __importDefault(require("../ssiApi/services/credential/credential.service"));
 const constant = __importStar(require("../constants"));
-const babyjubjub2021_1 = require("@hypersign-protocol/babyjubjub2021");
-const babyjubjubsignature2021_1 = require("@hypersign-protocol/babyjubjubsignature2021");
+const babyjubjub2021_1 = require("babyjubjub2021");
+const babyjubjubsignature2021_1 = require("babyjubjubsignature2021");
 const { Merklizer } = require('@iden3/js-jsonld-merklization');
 const documentLoader = (0, jsonld_signatures_4.extendContextLoader)(v1_1.default);
 class HypersignBJJVerifiableCredential {

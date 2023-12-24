@@ -4,6 +4,8 @@ This SDK is an implementation of proposed [DID](https://www.w3.org/TR/did-core/)
 
 ## Building
 
+> Node version:  v16.14
+
 ```sh
 npm i
 npm run build

@@ -25,8 +25,8 @@ const vc_1 = __importDefault(require("../credential/vc"));
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonld_signatures_1.default.purposes;
 const constants_1 = require("../constants");
 const v1_1 = __importDefault(require("../../libs/w3cache/v1"));
-const babyjubjub2021_1 = require("@hypersign-protocol/babyjubjub2021");
-const babyjubjubsignature2021_1 = require("@hypersign-protocol/babyjubjubsignature2021");
+const babyjubjub2021_1 = require("babyjubjub2021");
+const babyjubjubsignature2021_1 = require("babyjubjubsignature2021");
 const documentLoader = jsonld_signatures_1.default.extendContextLoader(v1_1.default);
 class HyperSignBJJVP {
     constructor(params = {}) {
