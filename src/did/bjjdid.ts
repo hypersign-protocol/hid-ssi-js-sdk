@@ -15,7 +15,6 @@ import { DocumentProof, DocumentProof as SignInfo } from '../../libs/generated/s
 import Web3 from 'web3';
 import DidApiService from '../ssiApi/services/did/did.service';
 import { IDidApiService } from '../ssiApi/services/did/IDIDApi';
-import jsonld from 'jsonld';
 import { IDID, IDid, IDIDResolve, IDIDRpc, ISignedDIDDocument, IClientSpec, ISignData, ISignInfo } from './IDID';
 import { VerificationMethodRelationships, VerificationMethodTypes } from '../../libs/generated/ssi/client/enums';
 import { OfflineSigner } from '@cosmjs/proto-signing';
