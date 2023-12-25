@@ -46,7 +46,6 @@ const jsonld_signatures_1 = __importDefault(require("jsonld-signatures"));
 const { AssertionProofPurpose } = jsonld_signatures_1.default.purposes;
 const utils_1 = __importDefault(require("../utils"));
 const jsonld_signatures_2 = require("jsonld-signatures");
-const schema_service_1 = __importDefault(require("../ssiApi/services/schema/schema.service"));
 const v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 const documentLoader = (0, jsonld_signatures_2.extendContextLoader)(v1_1.default);
 const did_1 = __importDefault(require("../did/did"));
@@ -59,13 +58,6 @@ class HypersignBJJSchema {
         const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
         this.schemaRpc = new schemaRPC_1.SchemaRpc({ offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
         this.hsDid = new did_1.default({ offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
-        if (entityApiSecretKey && entityApiSecretKey != '') {
-            this.schemaApiService = new schema_service_1.default(entityApiSecretKey);
-            this.schemaRpc = null;
-        }
-        else {
-            this.schemaApiService = null;
-        }
         this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT];
         this.namespace = namespace && namespace != '' ? namespace : '';
         (this.type = constants.SCHEMA.SCHEMA_TYPE),
@@ -130,14 +122,11 @@ class HypersignBJJSchema {
      */
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!this.schemaRpc && !this.schemaApiService) {
+            if (!this.schemaRpc) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized with entityApiSecretKey');
             }
             if (this.schemaRpc) {
                 yield this.schemaRpc.init();
-            }
-            if (this.schemaApiService) {
-                yield this.schemaApiService.auth();
             }
         });
     }
@@ -270,7 +259,7 @@ class HypersignBJJSchema {
                 throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain type');
             if (!params.schema['proof'].verificationMethod)
                 throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain verificationMethod');
-            if (!this.schemaRpc && !this.schemaApiService) {
+            if (!this.schemaRpc) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignSchema class is not instantiated with Offlinesigner or have not been initilized with entityApiSecret');
             }
             const response = {};
@@ -278,13 +267,6 @@ class HypersignBJJSchema {
             const proof = schemaDoc['proof'];
             if (this.schemaRpc) {
                 const result = yield this.schemaRpc.registerSchema(schemaDoc, proof);
-                response.transactionHash = result.transactionHash;
-            }
-            else if (this.schemaApiService) {
-                const result = yield this.schemaApiService.registerSchema({
-                    schemaDocument: params.schema,
-                    schemaProof: params.schema['proof'],
-                });
                 response.transactionHash = result.transactionHash;
             }
             return response;

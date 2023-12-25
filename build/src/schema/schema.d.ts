@@ -19,7 +19,6 @@ export default class HyperSignSchema implements ISchemaMethods {
     schema: SchemaProperty;
     schemaRpc: SchemaRpc | null;
     namespace: string;
-    private schemaApiService;
     private hsDid;
     hypersignBjjschema: HypersignBJJSchema;
     constructor(params?: {

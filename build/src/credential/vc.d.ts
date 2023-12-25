@@ -17,7 +17,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     proof: ICredentialProof;
     credentialStatus: ICredentialStatus;
     private credStatusRPC;
-    private credentialApiService;
     private namespace;
     private hsSchema;
     private hsDid;

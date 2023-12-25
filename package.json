@@ -45,7 +45,6 @@
     "ethereumeip712signature2021suite": "github:hypersign-protocol/EthereumEip712Signature2021Suite.git",
     "jcs": "github:hypersign-protocol/JCS",
     "jsonld-signatures": "^9.3.1",
-    "jsonwebtoken": "^9.0.1",
     "multiformats": "^9.9.0",
     "node-fetch": "^2.6.1",
     "protobufjs": "^6.11.2",

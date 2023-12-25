@@ -48,7 +48,6 @@ const utils_1 = __importDefault(require("../utils"));
 const babyjubjub2021_1 = require("babyjubjub2021");
 const babyjubjubsignature2021_1 = require("babyjubjubsignature2021");
 const web3_1 = __importDefault(require("web3"));
-const did_service_1 = __importDefault(require("../ssiApi/services/did/did.service"));
 const enums_1 = require("../../libs/generated/ssi/client/enums");
 const v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 const documentLoader = jsonld_signatures_1.default.extendContextLoader(v1_1.default);
@@ -226,11 +225,7 @@ class HypersignBJJDID {
         };
         this.didrpc = new didRPC_1.DIDRpc(rpcConstructorParams);
         if (entityApiSecretKey && entityApiSecretKey != '') {
-            this.didAPIService = new did_service_1.default(entityApiSecretKey);
             this.didrpc = null;
-        }
-        else {
-            this.didAPIService = null;
         }
         this.namespace = namespace ? namespace : '';
     }
@@ -320,14 +315,11 @@ class HypersignBJJDID {
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!this.didrpc && !this.didAPIService) {
+            if (!this.didrpc) {
                 throw new Error('HID-SSI-SDK:: Error:  HypersignDID class is not instantiated with Offlinesigner or have not been initilized with entityApiSecretKey');
             }
             if (this.didrpc) {
                 yield this.didrpc.init();
-            }
-            if (this.didAPIService) {
-                yield this.didAPIService.auth();
             }
         });
     }
@@ -452,7 +444,7 @@ class HypersignBJJDID {
             if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
                 throw new Error('HID-SSI-SDK:: Error: params.didDocString is required to register a did');
             }
-            if (!this.didrpc && !this.didAPIService) {
+            if (!this.didrpc) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
             }
             let { didDocument } = params;
@@ -541,15 +533,6 @@ class HypersignBJJDID {
                 response.didDocument = params.didDocument;
                 response.transactionHash = result.transactionHash;
             }
-            else if (this.didAPIService) {
-                const newSignInfos = signInfos;
-                const result = yield this.didAPIService.registerDid({
-                    didDocument,
-                    signInfos: newSignInfos,
-                });
-                response.didDocument = didDocument;
-                response.transactionHash = result.transactionHash;
-            }
             return response;
         });
     }
@@ -614,9 +597,6 @@ class HypersignBJJDID {
             if (this.didrpc) {
                 result = yield this.didrpc.resolveDID(params.did);
             }
-            else if (this.didAPIService) {
-                result = yield this.didAPIService.resolveDid({ did: params.did });
-            }
             return {
                 didDocument: utils_1.default.jsonToLdConvertor(result.didDocument),
                 didDocumentMetadata: result.didDocumentMetadata,
@@ -648,7 +628,7 @@ class HypersignBJJDID {
             if (!params.versionId) {
                 throw new Error('HID-SSI-SDK:: Error: params.versionId is required to update a did');
             }
-            if (!this.didrpc && !this.didAPIService) {
+            if (!this.didrpc) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
             }
             const { didDocument, privateKeyMultibase, verificationMethodId, versionId } = params;
@@ -669,15 +649,6 @@ class HypersignBJJDID {
             ];
             if (this.didrpc) {
                 const result = yield this.didrpc.updateDID(didDocument, signInfos, versionId);
-                response.transactionHash = result.transactionHash;
-            }
-            else if (this.didAPIService) {
-                const newSignInfos = signInfos;
-                const result = yield this.didAPIService.updateDid({
-                    didDocument: didDocument,
-                    signInfos: newSignInfos,
-                    deactivate: false,
-                });
                 response.transactionHash = result.transactionHash;
             }
             return response;
@@ -708,7 +679,7 @@ class HypersignBJJDID {
             if (!params.versionId) {
                 throw new Error('HID-SSI-SDK:: Error: params.versionId is required to deactivate a did');
             }
-            if (!this.didrpc && !this.didAPIService) {
+            if (!this.didrpc) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
             }
             const { didDocument, privateKeyMultibase, verificationMethodId, versionId } = params;
@@ -729,15 +700,6 @@ class HypersignBJJDID {
             ];
             if (this.didrpc) {
                 const result = yield this.didrpc.deactivateDID(didDocument.id, signInfos, versionId);
-                response.transactionHash = result.transactionHash;
-            }
-            else if (this.didAPIService) {
-                const newSignInfos = signInfos;
-                const result = yield this.didAPIService.updateDid({
-                    didDocument: didDocument,
-                    signInfos: newSignInfos,
-                    deactivate: true,
-                });
                 response.transactionHash = result.transactionHash;
             }
             return response;

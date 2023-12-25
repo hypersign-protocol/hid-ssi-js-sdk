@@ -7,7 +7,6 @@ import HypersignBJJDId from './bjjdid';
 /** Class representing HypersignDID */
 export default class HypersignDID implements IDID {
     private didrpc;
-    private didAPIService;
     namespace: string;
     bjjDID: HypersignBJJDId;
     /**

@@ -20,7 +20,6 @@ import Utils from '../utils';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { extendContextLoader } from 'jsonld-signatures';
-import SchemaApiService from '../ssiApi/services/schema/schema.service';
 import customLoader from '../../libs/w3cache/v1';
 const documentLoader = extendContextLoader(customLoader);
 import HypersignDID from '../did/did';
@@ -39,7 +38,6 @@ export default class HypersignBJJSchema implements ISchemaMethods {
   schema: SchemaProperty;
   schemaRpc: SchemaRpc | null;
   namespace: string;
-  private schemaApiService: SchemaApiService | null;
   private hsDid: HypersignDID;
   constructor(
     params: {
@@ -55,12 +53,7 @@ export default class HypersignBJJSchema implements ISchemaMethods {
     const nodeRestEp = nodeRestEndpoint ? nodeRestEndpoint : '';
     this.schemaRpc = new SchemaRpc({ offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
     this.hsDid = new HypersignDID({ offlineSigner, nodeRpcEndpoint: nodeRPCEp, nodeRestEndpoint: nodeRestEp });
-    if (entityApiSecretKey && entityApiSecretKey != '') {
-      this.schemaApiService = new SchemaApiService(entityApiSecretKey);
-      this.schemaRpc = null;
-    } else {
-      this.schemaApiService = null;
-    }
+
     this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT];
     this.namespace = namespace && namespace != '' ? namespace : '';
     (this.type = constants.SCHEMA.SCHEMA_TYPE),
@@ -129,16 +122,13 @@ export default class HypersignBJJSchema implements ISchemaMethods {
    * Initialise the offlinesigner to interact with Hypersign blockchain
    */
   public async init() {
-    if (!this.schemaRpc && !this.schemaApiService) {
+    if (!this.schemaRpc) {
       throw new Error(
         'HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized with entityApiSecretKey'
       );
     }
     if (this.schemaRpc) {
       await this.schemaRpc.init();
-    }
-    if (this.schemaApiService) {
-      await this.schemaApiService.auth();
     }
   }
 
@@ -277,7 +267,7 @@ export default class HypersignBJJSchema implements ISchemaMethods {
     if (!params.schema['proof'].verificationMethod)
       throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain verificationMethod');
 
-    if (!this.schemaRpc && !this.schemaApiService) {
+    if (!this.schemaRpc) {
       throw new Error(
         'HID-SSI-SDK:: Error: HypersignSchema class is not instantiated with Offlinesigner or have not been initilized with entityApiSecret'
       );
@@ -287,12 +277,6 @@ export default class HypersignBJJSchema implements ISchemaMethods {
     const proof = schemaDoc['proof'] as DocumentProof;
     if (this.schemaRpc) {
       const result: DeliverTxResponse = await this.schemaRpc.registerSchema(schemaDoc as SchemaDocument, proof);
-      response.transactionHash = result.transactionHash;
-    } else if (this.schemaApiService) {
-      const result: { transactionHash: string } = await this.schemaApiService.registerSchema({
-        schemaDocument: params.schema,
-        schemaProof: params.schema['proof'],
-      });
       response.transactionHash = result.transactionHash;
     }
     return response;

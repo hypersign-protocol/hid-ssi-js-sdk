@@ -55,7 +55,6 @@ const constants_1 = require("../constants");
 const v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 const ethereumeip712signature2021suite_1 = require("ethereumeip712signature2021suite");
 const jsonld_signatures_4 = require("jsonld-signatures");
-const credential_service_1 = __importDefault(require("../ssiApi/services/credential/credential.service"));
 const constant = __importStar(require("../constants"));
 const bjjvc_1 = __importDefault(require("./bjjvc"));
 const { Merklizer } = require('@iden3/js-jsonld-merklization');
@@ -101,11 +100,7 @@ class HypersignVerifiableCredential {
         this.hsDid = new did_1.default(offlineConstuctorParams);
         this.hsSchema = new schema_1.default(offlineConstuctorParams);
         if (entityApiSecretKey && entityApiSecretKey != '') {
-            this.credentialApiService = new credential_service_1.default(entityApiSecretKey);
             this.credStatusRPC = null;
-        }
-        else {
-            this.credentialApiService = null;
         }
         this['@context'] = [];
         this.id = '';
@@ -201,14 +196,11 @@ class HypersignVerifiableCredential {
      */
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!this.credStatusRPC && !this.credentialApiService) {
+            if (!this.credStatusRPC) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized with entityApiSecretKey');
             }
             if (this.credStatusRPC) {
                 yield this.credStatusRPC.init();
-            }
-            if (this.credentialApiService) {
-                yield this.credentialApiService.auth();
             }
         });
     }
@@ -674,23 +666,16 @@ class HypersignVerifiableCredential {
             const { credentialStatus, credentialStatusProof } = params;
             if (!credentialStatus || !credentialStatusProof)
                 throw new Error('HID-SSI-SDK:: Error: credentialStatus and credentialStatusProof are required to register credential status');
-            if (!this.credStatusRPC && !this.credentialApiService) {
+            if (!this.credStatusRPC) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized with entityApiSecret');
             }
-            let resp = {};
+            const resp = {};
             if (this.credStatusRPC) {
                 const result = yield this.credStatusRPC.registerCredentialStatus(credentialStatus, credentialStatusProof);
                 if (!result || result.code != 0) {
                     throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + result.rawLog);
                 }
                 resp.transactionHash = result.transactionHash;
-            }
-            else if (this.credentialApiService) {
-                resp = yield this.credentialApiService.registerCredentialStatus({
-                    credentialStatus,
-                    credentialStatusProof,
-                    namespace: this.namespace,
-                });
             }
             return resp;
         });

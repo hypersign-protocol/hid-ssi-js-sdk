@@ -6,7 +6,6 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 /** Class representing HypersignDID */
 export default class HypersignBJJDID implements IDID {
     private didrpc;
-    private didAPIService;
     namespace: string;
     /**
      * Creates instance of HypersignDID class

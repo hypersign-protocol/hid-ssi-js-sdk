@@ -16,7 +16,6 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     proof: ICredentialProof;
     credentialStatus: ICredentialStatus;
     private credStatusRPC;
-    private credentialApiService;
     private namespace;
     private hsSchema;
     private hsDid;
