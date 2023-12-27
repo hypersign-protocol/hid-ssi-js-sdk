@@ -5,7 +5,7 @@
  */
 import { IVerifiableCredential } from '../credential/ICredential';
 import { IPresentationMethods, IVerifiablePresentation } from './IPresentation';
-import { BabyJubJubSignatureProof2021 } from '@hypersign-protocol/babyjubjubsignature2021';
+import { BabyJubJubSignatureProof2021 } from 'babyjubjubsignature2021';
 export default class HyperSignBJJVP implements IPresentationMethods, IVerifiablePresentation {
     private hsDid;
     private vc;

@@ -50,8 +50,8 @@ const schema_service_1 = __importDefault(require("../ssiApi/services/schema/sche
 const v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 const documentLoader = (0, jsonld_signatures_2.extendContextLoader)(v1_1.default);
 const did_1 = __importDefault(require("../did/did"));
-const babyjubjub2021_1 = require("@hypersign-protocol/babyjubjub2021");
-const babyjubjubsignature2021_1 = require("@hypersign-protocol/babyjubjubsignature2021");
+const babyjubjub2021_1 = require("babyjubjub2021");
+const babyjubjubsignature2021_1 = require("babyjubjubsignature2021");
 class HypersignBJJSchema {
     constructor(params = {}) {
         const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, entityApiSecretKey } = params;
