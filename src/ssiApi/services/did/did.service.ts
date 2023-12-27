@@ -160,7 +160,6 @@ export default class DidApiService implements IDidApiService {
     */
 
   public async updateDid(params: IUpdate): Promise<{ transactionHash: string }> {
-    console.log('did services')
     if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to update a did');
     }

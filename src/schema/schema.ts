@@ -28,6 +28,7 @@ import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-
 import HypersignDID from '../did/did';
 import { VerificationMethod } from '../../libs/generated/ssi/did';
 
+import HypersignBJJSchema from './bjjSchema';
 export default class HyperSignSchema implements ISchemaMethods {
   '@context': Array<string>;
   type: string;
@@ -41,6 +42,7 @@ export default class HyperSignSchema implements ISchemaMethods {
   namespace: string;
   private schemaApiService: SchemaApiService | null;
   private hsDid: HypersignDID;
+  public hypersignBjjschema: HypersignBJJSchema;
   constructor(
     params: {
       namespace?: string;
@@ -77,6 +79,7 @@ export default class HyperSignSchema implements ISchemaMethods {
       required: [],
       additionalProperties: false,
     };
+    this.hypersignBjjschema = new HypersignBJJSchema(params);
   }
 
   // Ref:
@@ -94,6 +97,11 @@ export default class HyperSignSchema implements ISchemaMethods {
 
   private _getDateTime(): string {
     return new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z';
+  }
+
+  private isPascalCase(inputString: string): boolean {
+    const pattern = /^[A-Z][a-zA-Z0-9]*$/;
+    return pattern.test(inputString);
   }
   private async _jsonLdSign(params: {
     schema: CredentialSchemaDocument;
@@ -151,6 +159,8 @@ export default class HyperSignSchema implements ISchemaMethods {
     additionalProperties: boolean;
   }): Promise<SchemaDocument> {
     if (!params.author) throw new Error('HID-SSI-SDK:: Error: Author must be passed');
+    if (!this.isPascalCase(params.name))
+      throw new Error('HID-SSI-SDK:: Error: schema name should always be in PascalCase');
     this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT];
     this.id = await this._getSchemaId();
     this.name = params.name;
@@ -168,13 +178,14 @@ export default class HyperSignSchema implements ISchemaMethods {
     const t = {};
     if (params.fields && params.fields.length > 0) {
       params.fields.forEach((prop) => {
+        if (!prop.name) throw new Error("HID-SSI-SDK:: Error: All fields must contains property 'name'");
         const schemaPropsObj: {
           propName: string;
           val: { type: string; format?: string };
         } = {} as { propName: string; val: { type: string; format?: string } };
         schemaPropsObj.propName = prop.name;
         schemaPropsObj.val = {} as { type: string; format?: string };
-        schemaPropsObj.val.type = prop.type;
+        schemaPropsObj.val.type = prop?.type ?? 'string';
 
         if (prop.format) schemaPropsObj.val.format = prop.format;
 
@@ -277,7 +288,7 @@ export default class HyperSignSchema implements ISchemaMethods {
     const schemaDoc = params.schema;
     const proof = schemaDoc['proof'] as DocumentProof;
     if (this.schemaRpc) {
-      const result: DeliverTxResponse = await this.schemaRpc.createSchema(schemaDoc as SchemaDocument, proof);
+      const result: DeliverTxResponse = await this.schemaRpc.registerSchema(schemaDoc as SchemaDocument, proof);
       response.transactionHash = result.transactionHash;
     } else if (this.schemaApiService) {
       const result: { transactionHash: string } = await this.schemaApiService.registerSchema({

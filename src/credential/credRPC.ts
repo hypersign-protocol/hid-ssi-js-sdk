@@ -16,10 +16,13 @@ import {
 } from '../../libs/generated/ssi/credential_status';
 import { DocumentProof as CredentialProof } from '../../libs/generated/ssi/proof';
 import { OfflineSigner } from '@cosmjs/proto-signing';
+import Utils from '../utils';
+import * as constants from '../constants';
 
 export class CredentialRPC implements ICredentialRPC {
   public credentialRestEP: string;
   private hidClient: any;
+  private nodeRestEp: string;
 
   constructor({
     offlineSigner,
@@ -35,6 +38,7 @@ export class CredentialRPC implements ICredentialRPC {
     } else {
       this.hidClient = null;
     }
+    this.nodeRestEp = nodeRestEndpoint;
     this.credentialRestEP =
       (HIDClient.hidNodeRestEndpoint ? HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) +
       HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
@@ -73,14 +77,25 @@ export class CredentialRPC implements ICredentialRPC {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-
-    const fee = 'auto';
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status, this.nodeRestEp);
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount: amount,
+        },
+      ],
+      gas: '200000',
+    };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult: DeliverTxResponse = await hidClient.signAndBroadcast(
       HIDClient.getHidWalletAddress(),
       [txMessage],
       fee
     );
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 
@@ -103,7 +118,6 @@ export class CredentialRPC implements ICredentialRPC {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-
     return txMessage;
   }
 
@@ -111,14 +125,28 @@ export class CredentialRPC implements ICredentialRPC {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
     }
-
-    const fee = 'auto';
+    const txLenght = txMessages.length;
+    const amount = (
+      txLenght * parseInt(await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status, this.nodeRestEp))
+    ).toString();
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount: amount,
+        },
+      ],
+      gas: '200000',
+    };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult: DeliverTxResponse = await hidClient.signAndBroadcast(
       HIDClient.getHidWalletAddress(),
       txMessages,
       fee
     );
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 
@@ -174,14 +202,25 @@ export class CredentialRPC implements ICredentialRPC {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-
-    const fee = 'auto';
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Cred_Status, this.nodeRestEp);
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount: amount,
+        },
+      ],
+      gas: '200000',
+    };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult: DeliverTxResponse = await hidClient.signAndBroadcast(
       HIDClient.getHidWalletAddress(),
       [txMessage],
       fee
     );
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 }

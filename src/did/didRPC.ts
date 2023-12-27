@@ -15,10 +15,12 @@ import axios from 'axios';
 import { HIDClient } from '../hid/client';
 import { IDIDResolve, IDIDRpc, DeliverTxResponse } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
-
+import Utils from '../utils';
+import * as constants from '../constants';
 export class DIDRpc implements IDIDRpc {
   private didRestEp: string;
   private hidClient: HIDClient | null;
+  private nodeRestEp: string;
   constructor({
     offlineSigner,
     nodeRpcEndpoint,
@@ -33,6 +35,7 @@ export class DIDRpc implements IDIDRpc {
     } else {
       this.hidClient = null;
     }
+    this.nodeRestEp = nodeRestEndpoint;
     this.didRestEp =
       (HIDClient.hidNodeRestEndpoint ? HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) + HYPERSIGN_NETWORK_DID_PATH;
   }
@@ -67,9 +70,23 @@ export class DIDRpc implements IDIDRpc {
         txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-    const fee = 'auto';
-    const hidClient: SigningStargateClient = this.getSigningStargateClient();
+
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Did, this.nodeRestEp);
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount,
+        },
+      ],
+      gas: '200000',
+    };
+    const hidClient: SigningStargateClient = HIDClient.getHidClient();
+
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 
@@ -90,12 +107,22 @@ export class DIDRpc implements IDIDRpc {
         versionId: versionId,
       }),
     };
-
-    // TODO: need to find a way to make it dynamic
-    const fee = 'auto';
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Did, this.nodeRestEp);
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount,
+        },
+      ],
+      gas: '200000',
+    };
 
     const hidClient: SigningStargateClient = this.getSigningStargateClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 
@@ -115,11 +142,22 @@ export class DIDRpc implements IDIDRpc {
         versionId: versionId,
       }),
     };
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Deactivate_Did, this.nodeRestEp);
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount,
+        },
+      ],
+      gas: '200000',
+    };
+    const hidClient: SigningStargateClient = HIDClient.getHidClient();
 
-    // TODO: need to find a way to make it dynamic
-    const fee = 'auto';
-    const hidClient: SigningStargateClient = this.getSigningStargateClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 

@@ -20,12 +20,14 @@ import { IPresentationMethods, IVerifiablePresentation } from './IPresentation';
 import customLoader from '../../libs/w3cache/v1';
 import { purposes } from 'jsonld-signatures';
 import { EthereumEip712Signature2021 } from 'ethereumeip712signature2021suite';
+import HyperSignBJJVP from './bjjVp';
 
 const documentLoader = jsonSigs.extendContextLoader(customLoader);
 
 export default class HypersignVerifiablePresentation implements IPresentationMethods, IVerifiablePresentation {
   private hsDid: HypersignDID | null;
   private vc: HypersignVerifiableCredential;
+  public bjjVp: HyperSignBJJVP;
   id: string;
   type: Array<string>;
   verifiableCredential: Array<IVerifiableCredential>;
@@ -53,6 +55,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     this.verifiableCredential = [];
     this.holder = '';
     this.proof = {};
+    this.bjjVp = new HyperSignBJJVP(params);
   }
 
   private async _getId(): Promise<string> {
@@ -92,6 +95,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
    *  - params.verificationMethodId : verificationMethodId of holder
    *  - params.privateKeyMultibase  : Private key associated with the verification method
    *  - params.challenge            : Any random challenge
+   *  - params.domain               : Domain url
    * @returns {Promise<IVerifiablePresentation>}
    */
   async sign(params: {
@@ -101,6 +105,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     verificationMethodId: string;
     privateKeyMultibase: string;
     challenge: string;
+    domain?: string;
   }): Promise<IVerifiablePresentation> {
     if (params.holderDid && params.holderDidDocSigned) {
       throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
@@ -110,15 +115,15 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     }
 
     if (!params.presentation) {
-      throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.presentation is required for signing a presentation');
     }
 
     if (!params.challenge) {
-      throw new Error('HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.challenge is required for signing a presentation');
     }
 
     if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signing a presentation');
     }
 
     if (!this.hsDid) {
@@ -135,7 +140,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       resolvedDidDoc.didDocument = params.holderDidDocSigned;
     } else {
       throw new Error(
-        'HID-SSI-SDK:: params.holderDid or params.holderDidDocSigned is required for signinng a presentation'
+        'HID-SSI-SDK:: params.holderDid or params.holderDidDocSigned is required for signing a presentation'
       );
     }
     const { didDocument: signerDidDoc } = resolvedDidDoc;
@@ -161,6 +166,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       suite,
       challenge: params.challenge,
       documentLoader,
+      domain: params.domain,
     });
 
     return signedVP;
@@ -231,7 +237,6 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     } else {
       throw new Error('Either holderDid or holderDidDocSigned should be provided');
     }
-
     const { didDocument: holderDID } = resolvedDidDoc;
 
     const holderDidDoc: Did = holderDID as Did;
@@ -251,6 +256,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     const presentationPurpose = new AuthenticationProofPurpose({
       controller: holderController,
       challenge: params.challenge,
+      domain: params.domain,
     });
 
     const keyPair = await Ed25519VerificationKey2020.from({
@@ -266,8 +272,8 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     ///---------------------------------------
     /// Issuer
     const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.issuerDid });
-    if (issuerDID === null || issuerDID === undefined) {
-      throw new Error('Issuer DID is not registered');
+    if (issuerDID === null || issuerDID === undefined || Object.keys(issuerDID).length === 0) {
+      throw new Error(`Issuer DID ${issuerDID} is invalid or not registered on the blockchain`);
     }
 
     const issuerDidDoc: Did = issuerDID as Did;
@@ -323,7 +329,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       purpose,
       suite: [vpSuite_holder, vcSuite_issuer],
       documentLoader,
-      unsignedPresentation: true,
+      unsignedPresentation: false,
       checkStatus: async function (options) {
         return await that.vc.checkCredentialStatus({ credentialId: options.credential.id });
       },
@@ -355,15 +361,15 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
       throw new Error('HID-SSI-SDK:: params.holderDid is required to sign a presentation');
     }
     if (!params.presentation) {
-      throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.presentation is required for signing a presentation');
     }
 
     if (!params.challenge) {
-      throw new Error('HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.challenge is required for signing a presentation');
     }
 
     if (!params.verificationMethodId) {
-      throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+      throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signing a presentation');
     }
     if (!params.web3Obj || Object.keys(params.web3Obj).length === 0) {
       throw new Error('HID-SSI-SDK:: Error: params.web3Obj is required to sign a presentation');
@@ -383,8 +389,8 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
     params.presentation.verifiableCredential.forEach((vc) => {
       return vcs.push(JCS.cannonicalize(vc));
     });
-    params.presentation.verifiableCredential = Array<string>();
-    params.presentation.verifiableCredential = vcs;
+    // params.presentation.verifiableCredential = Array<string>();
+    // params.presentation.verifiableCredential = vcs;
     const EthereumEip712Signature2021obj = new EthereumEip712Signature2021({}, params.web3Obj);
     const proof = await EthereumEip712Signature2021obj.createProof({
       document: params.presentation,

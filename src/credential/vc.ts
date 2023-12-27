@@ -44,6 +44,7 @@ import { ICredentialService } from '../ssiApi/services/credential/ICredentialApi
 import CredentialApiService from '../ssiApi/services/credential/credential.service';
 import { IResolveSchema } from '../schema/ISchema';
 import * as constant from '../constants';
+import HypersignBJJVerifiableCredential from './bjjvc';
 const { Merklizer } = require('@iden3/js-jsonld-merklization');
 const documentLoader = extendContextLoader(customLoader);
 
@@ -63,6 +64,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   private namespace: string;
   private hsSchema: HypersignSchema;
   private hsDid: HypersignDID;
+  public bjjVC: HypersignBJJVerifiableCredential;
 
   constructor(
     params: {
@@ -105,6 +107,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       type: VC.CREDENTAIL_STATUS_TYPE,
     };
     this.proof = {} as ICredentialProof;
+
+    this.bjjVC = new HypersignBJJVerifiableCredential(params);
   }
   private async _jsonLdSign(params: {
     credentialStatus: CredentialStatus;
@@ -872,7 +876,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
    */
 
   public async registerCredentialStatusTxnBulk(txnMessage: []) {
-    if (!txnMessage) throw new Error('HID-SSI-SDK:: Error: txnMessage is required to register credential status');
+    if (!txnMessage || txnMessage.length <= 0)
+      throw new Error('HID-SSI-SDK:: Error: txnMessage is required to register credential status');
 
     if (!this.credStatusRPC) {
       throw new Error(

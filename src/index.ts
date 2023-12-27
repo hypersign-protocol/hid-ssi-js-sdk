@@ -1,11 +1,12 @@
 import HypersignDID from './did/did';
+import HyperSignBJJDID from './did/bjjdid';
 import HypersignVerifiableCredential from './credential/vc';
 import HypersignVerifiablePresentation from './presentation/vp';
 import HypersignSchema from './schema/schema';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { IClientSpec, ISignInfo } from './did/IDID';
-import { VerificationMethodTypes as IKeyType } from '../libs/generated/ssi/client/enums'
-import { VerificationMethodRelationships as IVerificationRelationships } from '../libs/generated/ssi/client/enums'
+import { VerificationMethodTypes as IKeyType } from '../libs/generated/ssi/client/enums';
+import { VerificationMethodRelationships as IVerificationRelationships } from '../libs/generated/ssi/client/enums';
 import { DidDocument as Did } from '../libs/generated/ssi/did';
 import { IVerifiableCredential } from './credential/ICredential';
 import { CredentialSchemaDocument as Schema } from '../libs/generated/ssi/credential_schema';
@@ -43,6 +44,7 @@ class HypersignSSISdk {
     };
 
     this.did = new HypersignDID(constructorParams);
+    this.did.bjjDID = new HyperSignBJJDID(constructorParams);
     this.schema = new HypersignSchema(constructorParams);
     this.vc = new HypersignVerifiableCredential(constructorParams);
     this.vp = new HypersignVerifiablePresentation(constructorParams);
@@ -50,8 +52,11 @@ class HypersignSSISdk {
 
   async init() {
     await this.did.init();
+    await this.did.bjjDID.init();
     await this.schema.init();
+    await this.schema.hypersignBjjschema.init();
     await this.vc.init();
+    await this.vc.bjjVC.init();
   }
 }
 
