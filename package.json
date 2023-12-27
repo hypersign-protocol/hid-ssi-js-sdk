@@ -38,6 +38,7 @@
     "@digitalbazaar/ed25519-verification-key-2018": "^3.1.2",
     "@digitalbazaar/ed25519-verification-key-2020": "^3.3.0",
     "@iden3/js-jsonld-merklization": "^1.0.2",
+    "@iden3/js-merkletree": "^1.1.2",
     "axios": "^1.6.2",
     "babyjubjub2021": "^0.1.1",
     "babyjubjubsignature2021": "^1.1.0",
