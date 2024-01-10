@@ -31,7 +31,7 @@
     "@digitalbazaar/ed25519-verification-key-2018": "^3.1.2",
     "@digitalbazaar/ed25519-verification-key-2020": "^3.3.0",
     "@stablelib/ed25519": "^1.0.2",
-    "axios": "^0.19.0",
+    "axios": "^1.6.5",
     "crypto-ld": "^6.0.0",
     "ethereumeip712signature2021suite": "github:hypersign-protocol/EthereumEip712Signature2021Suite.git",
     "jcs": "github:hypersign-protocol/JCS",
