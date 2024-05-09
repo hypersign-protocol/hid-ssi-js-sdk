@@ -23,6 +23,7 @@ let versionId;
 let hypersignDID;
 let transactionHash;
 let signedDocument;
+let signedDocumentAssertion;
 const challenge = '1231231231';
 const domain = 'www.adbv.com';
 let hypersignSSISDK;
@@ -939,7 +940,56 @@ describe('DID Test scenarios', () => {
                 }).to.throw(Error, 'HID-SSI-SDK:: Error: Incorrect verification method id');
             });
         });
-        it('should able to sign did document', function () {
+        it('should not able to sign did document and throw error as unsupported purpose is passed', function () {
+            const params = {
+                privateKeyMultibase: privateKeyMultibase,
+                challenge: challenge,
+                domain: domain,
+                did: '',
+                didDocument: didDocument,
+                verificationMethodId: verificationMethodId,
+                publicKey,
+                controller,
+                purpose: "random purpose"
+            };
+            params.verificationMethodId = '';
+            return hypersignDID.sign(params).catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, `HID-SSI-SDK:: Error: unsupported purpose ${params.purpose}`);
+            });
+        });
+        it('should able to sign did document for didAuth using assertion purpose', function () {
+            return __awaiter(this, void 0, void 0, function* () {
+                const tempDidDoc = JSON.parse(JSON.stringify(didDocument));
+                const params = {
+                    privateKeyMultibase: privateKeyMultibase,
+                    challenge: challenge,
+                    domain: domain,
+                    did: '',
+                    didDocument: tempDidDoc,
+                    verificationMethodId: verificationMethodId,
+                    controller,
+                    purpose: 'assertion'
+                };
+                signedDocumentAssertion = yield hypersignDID.sign(params);
+                (0, chai_1.expect)(signedDocumentAssertion).to.be.a('object');
+                (0, chai_1.should)().exist(signedDocumentAssertion['@context']);
+                (0, chai_1.should)().exist(signedDocumentAssertion['id']);
+                (0, chai_1.expect)(didDocId).to.be.equal(signedDocumentAssertion['id']);
+                (0, chai_1.should)().exist(signedDocumentAssertion['controller']);
+                (0, chai_1.should)().exist(signedDocumentAssertion['alsoKnownAs']);
+                (0, chai_1.should)().exist(signedDocumentAssertion['verificationMethod']);
+                (0, chai_1.should)().exist(signedDocumentAssertion['authentication']);
+                (0, chai_1.should)().exist(signedDocumentAssertion['assertionMethod']);
+                (0, chai_1.should)().exist(signedDocumentAssertion['keyAgreement']);
+                (0, chai_1.should)().exist(signedDocumentAssertion['capabilityInvocation']);
+                (0, chai_1.should)().exist(signedDocumentAssertion['capabilityDelegation']);
+                (0, chai_1.should)().exist(signedDocumentAssertion['service']);
+                (0, chai_1.should)().exist(signedDocumentAssertion['proof']);
+            });
+        });
+        it('should able to sign did document for didAuth using authentication purpose', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 const params = {
                     privateKeyMultibase: privateKeyMultibase,
@@ -987,13 +1037,37 @@ describe('DID Test scenarios', () => {
                 }).to.throw(Error, 'HID-SSI-SDK:: Error: params.challenge is required to verify a did');
             });
         });
-        it('should return verification result', function () {
+        it('should not able to verify did document and throw error as unsupported purpose is passed', function () {
+            return hypersignDID
+                .verify({ didDocument: signedDocument, verificationMethodId, challenge: '', domain, purpose: "random" })
+                .catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, `HID-SSI-SDK:: Error: unsupported purpose random`);
+            });
+        });
+        it('should return verification result for didAuthentication', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 const result = yield hypersignDID.verify({
                     didDocument: signedDocument,
                     verificationMethodId,
                     challenge,
                     domain,
+                });
+                (0, chai_1.expect)(result).to.be.a('object');
+                (0, chai_1.should)().exist(result);
+                (0, chai_1.should)().exist(result.verified);
+                (0, chai_1.should)().exist(result.results);
+                (0, chai_1.expect)(result.results).to.be.a('array');
+                (0, chai_1.expect)(result.verified).to.equal(true);
+            });
+        });
+        it('should return verification result for didAssertion', function () {
+            return __awaiter(this, void 0, void 0, function* () {
+                const result = yield hypersignDID.verify({
+                    didDocument: signedDocumentAssertion,
+                    verificationMethodId,
+                    purpose: "assertion"
                 });
                 (0, chai_1.expect)(result).to.be.a('object');
                 (0, chai_1.should)().exist(result);

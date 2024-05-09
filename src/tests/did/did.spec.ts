@@ -14,6 +14,7 @@ let versionId;
 let hypersignDID;
 let transactionHash;
 let signedDocument;
+let signedDocumentAssertion
 const challenge = '1231231231';
 const domain = 'www.adbv.com';
 let hypersignSSISDK;
@@ -973,8 +974,55 @@ describe('DID Test scenarios', () => {
         }).to.throw(Error, 'HID-SSI-SDK:: Error: Incorrect verification method id');
       });
     });
+    it('should not able to sign did document and throw error as unsupported purpose is passed', function () {
+      const params = {
+        privateKeyMultibase: privateKeyMultibase as string,
+        challenge: challenge as string,
+        domain: domain as string,
+        did: '',
+        didDocument: didDocument as object,
+        verificationMethodId: verificationMethodId as string,
+        publicKey,
+        controller,
+        purpose: "random purpose"
+      };
+      params.verificationMethodId = '';
+      return hypersignDID.sign(params).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(Error, `HID-SSI-SDK:: Error: unsupported purpose ${params.purpose}`);
+      });
+    });
 
-    it('should able to sign did document', async function () {
+    it('should able to sign did document for didAuth using assertion purpose', async function () {
+      const tempDidDoc = JSON.parse(JSON.stringify(didDocument))
+      const params = {
+        privateKeyMultibase: privateKeyMultibase as string,
+        challenge: challenge as string,
+        domain: domain as string,
+        did: '', // This is taken as empty as didDoc is yet not register on blockchain and won't able to resolve based on did
+        didDocument: tempDidDoc as object,
+        verificationMethodId: verificationMethodId as string,
+        controller,
+        purpose: 'assertion'
+      };
+      signedDocumentAssertion = await hypersignDID.sign(params);
+      expect(signedDocumentAssertion).to.be.a('object');
+      should().exist(signedDocumentAssertion['@context']);
+      should().exist(signedDocumentAssertion['id']);
+      expect(didDocId).to.be.equal(signedDocumentAssertion['id']);
+      should().exist(signedDocumentAssertion['controller']);
+      should().exist(signedDocumentAssertion['alsoKnownAs']);
+      should().exist(signedDocumentAssertion['verificationMethod']);
+      should().exist(signedDocumentAssertion['authentication']);
+      should().exist(signedDocumentAssertion['assertionMethod']);
+      should().exist(signedDocumentAssertion['keyAgreement']);
+      should().exist(signedDocumentAssertion['capabilityInvocation']);
+      should().exist(signedDocumentAssertion['capabilityDelegation']);
+      should().exist(signedDocumentAssertion['service']);
+      should().exist(signedDocumentAssertion['proof']);
+    });
+    it('should able to sign did document for didAuth using authentication purpose', async function () {
       const params = {
         privateKeyMultibase: privateKeyMultibase as string,
         challenge: challenge as string,
@@ -1020,13 +1068,34 @@ describe('DID Test scenarios', () => {
           }).to.throw(Error, 'HID-SSI-SDK:: Error: params.challenge is required to verify a did');
         });
     });
-
-    it('should return verification result', async function () {
+    it('should not able to verify did document and throw error as unsupported purpose is passed', function () {
+      return hypersignDID
+        .verify({ didDocument: signedDocument, verificationMethodId, challenge: '', domain, purpose: "random" })
+        .catch(function (err) {
+          expect(function () {
+            throw err;
+          }).to.throw(Error, `HID-SSI-SDK:: Error: unsupported purpose random`);
+        });
+    });
+    it('should return verification result for didAuthentication', async function () {
       const result = await hypersignDID.verify({
         didDocument: signedDocument,
         verificationMethodId,
         challenge,
         domain,
+      });
+      expect(result).to.be.a('object');
+      should().exist(result);
+      should().exist(result.verified);
+      should().exist(result.results);
+      expect(result.results).to.be.a('array');
+      expect(result.verified).to.equal(true);
+    });
+    it('should return verification result for didAssertion', async function () {
+      const result = await hypersignDID.verify({
+        didDocument: signedDocumentAssertion,
+        verificationMethodId,
+        purpose: "assertion"
       });
       expect(result).to.be.a('object');
       should().exist(result);

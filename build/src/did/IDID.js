@@ -5,9 +5,14 @@
  * Author: Hypermine Core Team
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.IClientSpec = void 0;
+exports.DidAuth = exports.IClientSpec = void 0;
 var IClientSpec;
 (function (IClientSpec) {
     IClientSpec["eth-personalSign"] = "eth-personalSign";
     IClientSpec["cosmos-ADR036"] = "cosmos-ADR036";
 })(IClientSpec = exports.IClientSpec || (exports.IClientSpec = {}));
+var DidAuth;
+(function (DidAuth) {
+    DidAuth["assertion"] = "assertion";
+    DidAuth["authentication"] = "authentication";
+})(DidAuth = exports.DidAuth || (exports.DidAuth = {}));

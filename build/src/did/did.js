@@ -218,7 +218,7 @@ class HypersignDID {
                 purpose: new AssertionProofPurpose(),
                 documentLoader,
             }));
-            return signedDidDocument.proof;
+            return signedDidDocument;
         });
     }
     _jsonLdNormalize(params) {
@@ -381,11 +381,12 @@ class HypersignDID {
                 }
                 else {
                     didDocument = utils_1.default.removeEmptyString(didDocument);
-                    const proof = yield this._jsonLdSign({
+                    const signedDidDoc = yield this._jsonLdSign({
                         didDocument: didDocument,
                         privateKeyMultibase,
                         verificationMethodId,
                     });
+                    const { proof } = signedDidDoc;
                     signature = proof.proofValue;
                     createdAt = proof.created;
                 }
@@ -421,11 +422,12 @@ class HypersignDID {
                         }
                         else {
                             didDocument = utils_1.default.removeEmptyString(didDocument);
-                            const proof = yield this._jsonLdSign({
+                            const signedDidDoc = yield this._jsonLdSign({
                                 didDocument: didDocument,
                                 privateKeyMultibase,
                                 verificationMethodId,
                             });
+                            const { proof } = signedDidDoc;
                             signature = proof.proofValue;
                             createdAt = proof.created;
                         }
@@ -486,11 +488,12 @@ class HypersignDID {
             }
             else {
                 didDocument = utils_1.default.removeEmptyString(didDocument);
-                const proof = yield this._jsonLdSign({
+                const signedDidDocument = yield this._jsonLdSign({
                     didDocument,
                     privateKeyMultibase,
                     verificationMethodId,
                 });
+                const { proof } = signedDidDocument;
                 signature = proof.proofValue;
                 createdAt = proof.created;
             }
@@ -556,11 +559,12 @@ class HypersignDID {
                 throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
             }
             const { didDocument, privateKeyMultibase, verificationMethodId, versionId } = params;
-            const proof = yield this._jsonLdSign({
+            const signedDidDocument = yield this._jsonLdSign({
                 didDocument,
                 privateKeyMultibase,
                 verificationMethodId,
             });
+            const { proof } = signedDidDocument;
             const signInfos = [
                 {
                     type: constant['DID_Ed25519VerificationKey2020'].SIGNATURE_TYPE,
@@ -615,11 +619,12 @@ class HypersignDID {
                 throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
             }
             const { didDocument, privateKeyMultibase, verificationMethodId, versionId } = params;
-            const proof = yield this._jsonLdSign({
+            const signedDidDocument = yield this._jsonLdSign({
                 didDocument,
                 privateKeyMultibase,
                 verificationMethodId,
             });
+            const { proof } = signedDidDocument;
             const signInfos = [
                 {
                     type: constant['DID_Ed25519VerificationKey2020'].SIGNATURE_TYPE,
@@ -654,21 +659,18 @@ class HypersignDID {
      *  - params.did                       :   did of the user
      *  - params.domain                    :   domain is the domain of the DID Document that is being authenticated
      *  - params.verificationMethodId      :   verificationMethodId of the DID
+     * -  params.purpose                   :   purpose of Auth (authentication or assertionn)
      * @returns {Promise<object>} Signed DID Document
      */
     sign(params) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const { privateKeyMultibase, challenge, domain, did, didDocument, verificationMethodId } = params;
             let resolveddoc;
             if (!privateKeyMultibase) {
                 throw new Error('HID-SSI-SDK:: Error: params.privateKey is required to sign a did');
             }
-            if (!challenge) {
-                throw new Error('HID-SSI-SDK:: Error: params.challenge is required to sign a did');
-            }
-            if (!domain) {
-                throw new Error('HID-SSI-SDK:: Error: params.domain is required to sign a did');
-            }
+            const didAuthType = (_a = params.purpose) !== null && _a !== void 0 ? _a : 'authentication';
             try {
                 // if did is prvovided then resolve the did doc from the blockchain or else use the did doc provided in the params object to sign the did doc with the proof
                 if (did && this.didrpc) {
@@ -685,31 +687,50 @@ class HypersignDID {
             catch (error) {
                 throw new Error(`HID-SSI-SDK:: Error: could not resolve did ${did}`);
             }
-            const publicKeyId = verificationMethodId;
-            const pubkey = resolveddoc.didDocument.verificationMethod.find((item) => item.id === publicKeyId);
-            if (!pubkey) {
-                throw new Error('HID-SSI-SDK:: Error: Incorrect verification method id');
+            let signedDidDocument;
+            if (didAuthType === 'authentication') {
+                if (!challenge) {
+                    throw new Error('HID-SSI-SDK:: Error: params.challenge is required to sign a did');
+                }
+                if (!domain) {
+                    throw new Error('HID-SSI-SDK:: Error: params.domain is required to sign a did');
+                }
+                const publicKeyId = verificationMethodId;
+                const pubkey = resolveddoc.didDocument.verificationMethod.find((item) => item.id === publicKeyId);
+                if (!pubkey) {
+                    throw new Error('HID-SSI-SDK:: Error: Incorrect verification method id');
+                }
+                const publicKeyMultibase1 = pubkey.publicKeyMultibase;
+                const keyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from({
+                    id: publicKeyId,
+                    privateKeyMultibase,
+                    publicKeyMultibase: publicKeyMultibase1,
+                });
+                const suite = new ed25519_signature_2020_1.Ed25519Signature2020({
+                    verificationMethod: publicKeyId,
+                    key: keyPair,
+                });
+                const didDocumentLd = resolveddoc.didDocument;
+                signedDidDocument = (yield jsonld_signatures_1.default.sign(didDocumentLd, {
+                    suite,
+                    purpose: new AuthenticationProofPurpose({
+                        challenge,
+                        domain,
+                    }),
+                    documentLoader,
+                    compactProof: constant.compactProof,
+                }));
             }
-            const publicKeyMultibase1 = pubkey.publicKeyMultibase;
-            const keyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from({
-                id: publicKeyId,
-                privateKeyMultibase,
-                publicKeyMultibase: publicKeyMultibase1,
-            });
-            const suite = new ed25519_signature_2020_1.Ed25519Signature2020({
-                verificationMethod: publicKeyId,
-                key: keyPair,
-            });
-            const didDocumentLd = resolveddoc.didDocument;
-            const signedDidDocument = (yield jsonld_signatures_1.default.sign(didDocumentLd, {
-                suite,
-                purpose: new AuthenticationProofPurpose({
-                    challenge,
-                    domain,
-                }),
-                documentLoader,
-                compactProof: constant.compactProof,
-            }));
+            else if (didAuthType === 'assertion') {
+                signedDidDocument = yield this._jsonLdSign({
+                    didDocument: resolveddoc.didDocument,
+                    privateKeyMultibase,
+                    verificationMethodId,
+                });
+            }
+            else {
+                throw new Error(`HID-SSI-SDK:: Error: unsupported purpose ${params.purpose}`);
+            }
             return signedDidDocument;
         });
     }
@@ -718,13 +739,14 @@ class HypersignDID {
      * @params
      *  - params.didDocument :   Signed DID Document
      *  - params.privateKey  :   private key in multibase format (base58 digitalbazar format)
-     *  - params.challenge   :   challenge is a random string generated by the client
+     *  - params.challenge   :   challenge is a random string generated by the client required for authentication purpose
      *  - params.did         :   did of the user
      *  - params.domain      :   domain is the domain of the DID Document that is being authenticated
+     *  -  params.purpose    :   purpose of Auth (authentication or assertion)
      * @returns Promise<{ verificationResult }> Verification Result
      */
     verify(params) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             const { didDocument, verificationMethodId, challenge, domain } = params;
             if (!didDocument) {
@@ -736,12 +758,10 @@ class HypersignDID {
             if (!verificationMethodId) {
                 throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify a did');
             }
-            if (!challenge) {
-                throw new Error('HID-SSI-SDK:: Error: params.challenge is required to verify a did');
-            }
+            const didAuthType = (_a = params.purpose) !== null && _a !== void 0 ? _a : 'authentication';
             const didDoc = didDocument;
             const publicKeyId = verificationMethodId;
-            const pubkey = (_a = didDoc.verificationMethod) === null || _a === void 0 ? void 0 : _a.find((item) => item.id === publicKeyId);
+            const pubkey = (_b = didDoc.verificationMethod) === null || _b === void 0 ? void 0 : _b.find((item) => item.id === publicKeyId);
             if (!pubkey) {
                 throw new Error('HID-SSI-SDK:: Error: could not find verification method for verificationMethodId: ' +
                     verificationMethodId +
@@ -756,16 +776,36 @@ class HypersignDID {
                 key: keyPair,
             });
             suite.date = new Date(new Date().getTime() - 100000).toISOString();
-            const controller = {
-                '@context': constant.DID.CONTROLLER_CONTEXT,
-                id: publicKeyId,
-                authentication: didDoc.authentication,
-            };
-            const purpose = new AuthenticationProofPurpose({
-                controller,
-                challenge,
-                domain,
-            });
+            let controller;
+            let purpose;
+            if (didAuthType === 'authentication') {
+                if (!challenge) {
+                    throw new Error('HID-SSI-SDK:: Error: params.challenge is required to verify a did');
+                }
+                controller = {
+                    '@context': constant.DID.CONTROLLER_CONTEXT,
+                    id: publicKeyId,
+                    authentication: didDoc.authentication,
+                };
+                purpose = new AuthenticationProofPurpose({
+                    controller,
+                    challenge,
+                    domain,
+                });
+            }
+            else if (didAuthType === 'assertion') {
+                controller = {
+                    '@context': constant.DID.CONTROLLER_CONTEXT,
+                    id: publicKeyId,
+                    assertionMethod: didDoc.assertionMethod,
+                };
+                purpose = new AssertionProofPurpose({
+                    controller,
+                });
+            }
+            else {
+                throw new Error(`HID-SSI-SDK:: Error: unsupported purpose ${params.purpose}`);
+            }
             const result = yield jsonld_signatures_1.default.verify(didDoc, {
                 suite,
                 purpose: purpose,
