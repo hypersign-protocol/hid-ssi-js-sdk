@@ -720,11 +720,11 @@ export default class HypersignDID implements IDID {
    * @returns {Promise<object>} Signed DID Document
    */
   public async sign(params: {
-    didDocument: Did;
+    didDocument?: Did;
     privateKeyMultibase: string;
     challenge: string;
     domain: string;
-    did: string;
+    did?: string;
     verificationMethodId: string;
     purpose?: SupportedPurpose;
   }): Promise<ISignedDIDDocument> {
