@@ -4,7 +4,7 @@ import HypersignVerifiableCredential from './credential/vc';
 import HypersignVerifiablePresentation from './presentation/vp';
 import HypersignSchema from './schema/schema';
 import { OfflineSigner } from '@cosmjs/proto-signing';
-import { IClientSpec, ISignInfo } from './did/IDID';
+import { IClientSpec, ISignInfo, SupportedPurpose } from './did/IDID';
 import { VerificationMethodTypes as IKeyType } from '../libs/generated/ssi/client/enums';
 import { VerificationMethodRelationships as IVerificationRelationships } from '../libs/generated/ssi/client/enums';
 import { DidDocument as Did } from '../libs/generated/ssi/did';
@@ -74,4 +74,5 @@ export {
   IVerifiableCredential,
   IVerifiablePresentation,
   Schema,
+  SupportedPurpose
 };

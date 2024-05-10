@@ -17,7 +17,7 @@ export declare enum IClientSpec {
     'eth-personalSign' = "eth-personalSign",
     'cosmos-ADR036' = "cosmos-ADR036"
 }
-export declare enum DidAuth {
+export declare enum SupportedPurpose {
     'assertion' = "assertion",
     'authentication' = "authentication"
 }

@@ -1,6 +1,6 @@
 import { DidDocument as Did } from '../../libs/generated/ssi/did';
 import Web3 from 'web3';
-import { IDID, IDIDResolve, ISignedDIDDocument, IClientSpec, ISignData, ISignInfo, DidAuth } from './IDID';
+import { IDID, IDIDResolve, ISignedDIDDocument, IClientSpec, ISignData, ISignInfo, SupportedPurpose } from './IDID';
 import { VerificationMethodRelationships, VerificationMethodTypes } from '../../libs/generated/ssi/client/enums';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import HypersignBJJDId from './bjjdid';
@@ -159,7 +159,7 @@ export default class HypersignDID implements IDID {
         domain: string;
         did: string;
         verificationMethodId: string;
-        purpose?: DidAuth;
+        purpose?: SupportedPurpose;
     }): Promise<ISignedDIDDocument>;
     /**
      * Verifies a signed DIDDocument
@@ -177,7 +177,7 @@ export default class HypersignDID implements IDID {
         verificationMethodId: string;
         challenge?: string;
         domain?: string;
-        purpose?: DidAuth;
+        purpose?: SupportedPurpose;
     }): Promise<object>;
     private _isValidMultibaseBase58String;
     /**

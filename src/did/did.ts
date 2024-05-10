@@ -27,7 +27,7 @@ import {
   IClientSpec,
   ISignData,
   ISignInfo,
-  DidAuth,
+  SupportedPurpose,
 } from './IDID';
 import {
   ProofTypes,
@@ -726,7 +726,7 @@ export default class HypersignDID implements IDID {
     domain: string;
     did: string;
     verificationMethodId: string;
-    purpose?: DidAuth;
+    purpose?: SupportedPurpose;
   }): Promise<ISignedDIDDocument> {
     const { privateKeyMultibase, challenge, domain, did, didDocument, verificationMethodId } = params;
     let resolveddoc;
@@ -810,7 +810,7 @@ export default class HypersignDID implements IDID {
     verificationMethodId: string;
     challenge?: string;
     domain?: string;
-    purpose?: DidAuth;
+    purpose?: SupportedPurpose;
   }): Promise<object> {
     const { didDocument, verificationMethodId, challenge, domain } = params;
     if (!didDocument) {
