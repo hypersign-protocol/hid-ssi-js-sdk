@@ -711,9 +711,15 @@ class HypersignDID {
                     key: keyPair,
                 });
                 const didDocumentLd = resolveddoc.didDocument;
+                const controller = {
+                    '@context': constant.DID.CONTROLLER_CONTEXT,
+                    id: publicKeyId,
+                    authentication: didDocumentLd.authentication,
+                };
                 signedDidDocument = (yield jsonld_signatures_1.default.sign(didDocumentLd, {
                     suite,
                     purpose: new AuthenticationProofPurpose({
+                        controller,
                         challenge,
                         domain,
                     }),

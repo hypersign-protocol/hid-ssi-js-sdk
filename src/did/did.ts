@@ -772,10 +772,17 @@ export default class HypersignDID implements IDID {
         verificationMethod: publicKeyId,
         key: keyPair,
       });
+
       const didDocumentLd = resolveddoc.didDocument;
+      const controller = {
+        '@context': constant.DID.CONTROLLER_CONTEXT,
+        id: publicKeyId,
+        authentication: didDocumentLd.authentication as string[],
+      };
       signedDidDocument = (await jsonSigs.sign(didDocumentLd, {
         suite,
         purpose: new AuthenticationProofPurpose({
+          controller,
           challenge,
           domain,
         }),
