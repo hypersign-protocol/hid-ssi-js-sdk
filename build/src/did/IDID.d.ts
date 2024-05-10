@@ -17,6 +17,10 @@ export declare enum IClientSpec {
     'eth-personalSign' = "eth-personalSign",
     'cosmos-ADR036' = "cosmos-ADR036"
 }
+export declare enum SupportedPurpose {
+    'assertion' = "assertion",
+    'authentication' = "authentication"
+}
 export interface ExtendedClientSpec {
     type: IClientSpec;
     adr036SignerAddress?: string;
@@ -30,7 +34,8 @@ export interface ISignInfo {
 export interface IController {
     '@context': string;
     id: string;
-    authentication: Array<string>;
+    authentication?: Array<string>;
+    assertionMethod?: Array<string>;
 }
 export interface IParams {
     doc: object;

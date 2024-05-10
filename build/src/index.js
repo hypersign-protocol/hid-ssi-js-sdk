@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Schema = exports.Did = exports.IClientSpec = exports.IKeyType = exports.IVerificationRelationships = exports.HypersignVerifiablePresentation = exports.HypersignVerifiableCredential = exports.HypersignSchema = exports.HypersignDID = exports.HypersignSSISdk = void 0;
+exports.SupportedPurpose = exports.Schema = exports.Did = exports.IClientSpec = exports.IKeyType = exports.IVerificationRelationships = exports.HypersignVerifiablePresentation = exports.HypersignVerifiableCredential = exports.HypersignSchema = exports.HypersignDID = exports.HypersignSSISdk = void 0;
 const did_1 = __importDefault(require("./did/did"));
 exports.HypersignDID = did_1.default;
 const bjjdid_1 = __importDefault(require("./did/bjjdid"));
@@ -24,6 +24,7 @@ const schema_1 = __importDefault(require("./schema/schema"));
 exports.HypersignSchema = schema_1.default;
 const IDID_1 = require("./did/IDID");
 Object.defineProperty(exports, "IClientSpec", { enumerable: true, get: function () { return IDID_1.IClientSpec; } });
+Object.defineProperty(exports, "SupportedPurpose", { enumerable: true, get: function () { return IDID_1.SupportedPurpose; } });
 const enums_1 = require("../libs/generated/ssi/client/enums");
 Object.defineProperty(exports, "IKeyType", { enumerable: true, get: function () { return enums_1.VerificationMethodTypes; } });
 const enums_2 = require("../libs/generated/ssi/client/enums");
