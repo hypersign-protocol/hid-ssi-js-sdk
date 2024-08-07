@@ -99,7 +99,7 @@ export interface ICredentialMethods {
     privateKeyMultibase: string;
     status: string;
     statusReason?: string;
-  }): Promise<DeliverTxResponse>;
+  }): Promise<DeliverTxResponse | { credentialStatus: CredentialStatus; proofValue: any }>;
 
   resolveCredentialStatus(params: { credentialId: string }): Promise<IResolveCredential>;
   checkCredentialStatus(params: { credentialId: string }): Promise<{ verified: boolean }>;

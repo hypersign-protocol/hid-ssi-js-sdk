@@ -45,6 +45,7 @@ import CredentialApiService from '../ssiApi/services/credential/credential.servi
 import { IResolveSchema } from '../schema/ISchema';
 import * as constant from '../constants';
 import HypersignBJJVerifiableCredential from './bjjvc';
+import Web3 from 'web3';
 const { Merklizer } = require('@iden3/js-jsonld-merklization');
 const documentLoader = extendContextLoader(customLoader);
 
@@ -141,7 +142,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
 
   private async _getId(): Promise<string> {
     const uuid = await Utils.getUUID();
-    let id;
+    let id: string | PromiseLike<string>;
     if (this.namespace && this.namespace != '') {
       id = `${VC.SCHEME}:${VC.METHOD}:${this.namespace}:${uuid}`;
     } else {
@@ -669,7 +670,11 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     privateKeyMultibase: string;
     status: string;
     statusReason?: string;
-  }): Promise<DeliverTxResponse> {
+    readonly?: boolean;
+  }): Promise<DeliverTxResponse | { credentialStatus: CredentialStatus; proofValue: any }> {
+    if (!params.readonly) {
+      params.readonly = false;
+    }
     if (!params.verificationMethodId) {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update credential status');
     }
@@ -756,6 +761,12 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     const { didDocument: controllerDidDoc } = await this.hsDid.resolve({ did: verificationMethodController });
     if (!controllerDidDoc)
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
+    if (params.readonly == true) {
+      return {
+        credentialStatus,
+        proofValue,
+      };
+    }
 
     /// UpdateCredRPC
     const resp: DeliverTxResponse = await this.credStatusRPC.updateCredentialStatus(credentialStatus, proofValue);
@@ -911,7 +922,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     issuerDid: string;
     verificationMethodId: string;
     type?: string;
-    web3Obj?;
+    web3Obj?: Web3 | undefined;
     privateKey?: string;
     registerCredential?: boolean;
     domain?: string;
@@ -953,7 +964,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         'HID-SSI-SDK:: Error: Could not find verification method for id = ' + params.verificationMethodId
       );
     }
-    let EthereumEip712Signature2021obj;
+    let EthereumEip712Signature2021obj: EthereumEip712Signature2021;
     if (params.privateKey) {
       EthereumEip712Signature2021obj = new EthereumEip712Signature2021({});
       await EthereumEip712Signature2021obj.fromPrivateKey(params.privateKey);

@@ -5,6 +5,7 @@ import { DeliverTxResponse } from '@cosmjs/stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { IClientSpec } from '../did/IDID';
 import HypersignBJJVerifiableCredential from './bjjvc';
+import Web3 from 'web3';
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
     '@context': Array<string>;
     id: string;
@@ -127,7 +128,11 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         privateKeyMultibase: string;
         status: string;
         statusReason?: string;
-    }): Promise<DeliverTxResponse>;
+        readonly?: boolean;
+    }): Promise<DeliverTxResponse | {
+        credentialStatus: CredentialStatus;
+        proofValue: any;
+    }>;
     /**
      * Check status of credential on Hypersign Chain
      * @param
@@ -188,7 +193,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         issuerDid: string;
         verificationMethodId: string;
         type?: string;
-        web3Obj?: any;
+        web3Obj?: Web3 | undefined;
         privateKey?: string;
         registerCredential?: boolean;
         domain?: string;

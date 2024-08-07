@@ -547,6 +547,9 @@ class HypersignVerifiableCredential {
     updateCredentialStatus(params) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            if (!params.readonly) {
+                params.readonly = false;
+            }
             if (!params.verificationMethodId) {
                 throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update credential status');
             }
@@ -617,6 +620,12 @@ class HypersignVerifiableCredential {
             const { didDocument: controllerDidDoc } = yield this.hsDid.resolve({ did: verificationMethodController });
             if (!controllerDidDoc)
                 throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
+            if (params.readonly == true) {
+                return {
+                    credentialStatus,
+                    proofValue,
+                };
+            }
             /// UpdateCredRPC
             const resp = yield this.credStatusRPC.updateCredentialStatus(credentialStatus, proofValue);
             if (!resp || resp.code != 0) {
