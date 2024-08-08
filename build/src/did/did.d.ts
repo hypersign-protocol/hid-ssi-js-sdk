@@ -120,8 +120,13 @@ export default class HypersignDID implements IDID {
         privateKeyMultibase: string;
         verificationMethodId: string;
         versionId: string;
+        readonly?: boolean;
     }): Promise<{
         transactionHash: string;
+    } | {
+        didDocument: any;
+        signInfos: any;
+        versionId: any;
     }>;
     /**
      * Deactivate a DIDDocument in Hypersign blockchain - an onchain activity

@@ -94,6 +94,10 @@ export interface IDID {
         versionId: string;
     }): Promise<{
         transactionHash: string;
+    } | {
+        didDocument: any;
+        signInfos: any;
+        versionId: any;
     }>;
     deactivate(params: {
         didDocument: object;

@@ -103,7 +103,7 @@ export interface IDID {
     privateKeyMultibase: string;
     verificationMethodId: string;
     versionId: string;
-  }): Promise<{ transactionHash: string }>;
+  }): Promise<{ transactionHash: string } | { didDocument; signInfos; versionId }>;
 
   deactivate(params: {
     didDocument: object;

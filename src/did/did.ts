@@ -586,7 +586,11 @@ export default class HypersignDID implements IDID {
     privateKeyMultibase: string;
     verificationMethodId: string;
     versionId: string;
-  }): Promise<{ transactionHash: string }> {
+    readonly?: boolean;
+  }): Promise<{ transactionHash: string } | { didDocument; signInfos; versionId }> {
+    if (!params.readonly) {
+      params.readonly = false;
+    }
     const response = {} as { transactionHash: string };
     if (!params.didDocument) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to update a did');
@@ -624,6 +628,13 @@ export default class HypersignDID implements IDID {
         proofValue: proof.proofValue,
       },
     ];
+    if (params.readonly === true) {
+      return {
+        didDocument,
+        signInfos,
+        versionId,
+      };
+    }
     if (this.didrpc) {
       const result: DeliverTxResponse = await this.didrpc.updateDID(didDocument, signInfos, versionId);
       response.transactionHash = result.transactionHash;

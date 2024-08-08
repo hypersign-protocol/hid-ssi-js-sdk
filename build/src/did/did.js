@@ -542,6 +542,9 @@ class HypersignDID {
     update(params) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            if (!params.readonly) {
+                params.readonly = false;
+            }
             const response = {};
             if (!params.didDocument) {
                 throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to update a did');
@@ -574,6 +577,13 @@ class HypersignDID {
                     proofValue: proof.proofValue,
                 },
             ];
+            if (params.readonly === true) {
+                return {
+                    didDocument,
+                    signInfos,
+                    versionId,
+                };
+            }
             if (this.didrpc) {
                 const result = yield this.didrpc.updateDID(didDocument, signInfos, versionId);
                 response.transactionHash = result.transactionHash;
