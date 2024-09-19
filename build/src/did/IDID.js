@@ -13,6 +13,6 @@ var IClientSpec;
 })(IClientSpec = exports.IClientSpec || (exports.IClientSpec = {}));
 var SupportedPurpose;
 (function (SupportedPurpose) {
-    SupportedPurpose["assertion"] = "assertion";
+    SupportedPurpose["assertionMethod"] = "assertionMethod";
     SupportedPurpose["authentication"] = "authentication";
 })(SupportedPurpose = exports.SupportedPurpose || (exports.SupportedPurpose = {}));

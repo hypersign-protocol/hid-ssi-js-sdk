@@ -398,36 +398,32 @@ class HypersignBJJDID {
         Object.assign(did1, did);
         // delete did1.alsoKnownAs;
         //  TODO FIx
+        did1.assertionMethod = [];
+        did1.authentication = [];
         if (did.assertionMethod) {
-            did.assertionMethod.map((x) => {
+            did.assertionMethod.forEach((x) => {
                 var _a;
-                (_a = did.verificationMethod) === null || _a === void 0 ? void 0 : _a.find((vm) => {
-                    if (vm.id === x) {
-                        did1.assertionMethod = [
-                            {
-                                id: vm.id + 'assertionMethod',
-                                type: vm.type,
-                                publicKeyMultibase: vm.publicKeyMultibase,
-                            },
-                        ];
-                    }
-                });
+                const vm = (_a = did.verificationMethod) === null || _a === void 0 ? void 0 : _a.find((vm) => vm.id === x);
+                if (vm) {
+                    did1.assertionMethod.push({
+                        id: vm.id + 'assertionMethod',
+                        type: vm.type,
+                        publicKeyMultibase: vm.publicKeyMultibase,
+                    });
+                }
             });
         }
         if (did.authentication) {
-            did.authentication.map((x) => {
+            did.authentication.forEach((x) => {
                 var _a;
-                (_a = did.verificationMethod) === null || _a === void 0 ? void 0 : _a.find((vm) => {
-                    if (vm.id === x) {
-                        did1.authentication = [
-                            {
-                                id: vm.id + 'authentication',
-                                type: vm.type,
-                                publicKeyMultibase: vm.publicKeyMultibase,
-                            },
-                        ];
-                    }
-                });
+                const vm = (_a = did.verificationMethod) === null || _a === void 0 ? void 0 : _a.find((vm) => vm.id === x);
+                if (vm) {
+                    did1.authentication.push({
+                        id: vm.id + 'authentication',
+                        type: vm.type,
+                        publicKeyMultibase: vm.publicKeyMultibase,
+                    });
+                }
             });
         }
         did1.capabilityDelegation = [];
@@ -514,8 +510,9 @@ class HypersignBJJDID {
                         }
                         else {
                             didDocument = utils_1.default.removeEmptyString(didDocument);
+                            const prepareDidDocument = this.prepareDidDocument(didDocument);
                             const proof = yield this._jsonLdSign({
-                                didDocument: didDocument,
+                                didDocument: prepareDidDocument,
                                 privateKeyMultibase,
                                 verificationMethodId,
                             });
@@ -658,7 +655,7 @@ class HypersignBJJDID {
                 privateKeyMultibase,
                 verificationMethodId,
             });
-            const signInfos = [
+            let signInfos = [
                 {
                     type: constant['DID_BabyJubJubKey2021'].SIGNATURE_TYPE,
                     created: (_a = proof.created) !== null && _a !== void 0 ? _a : this._getDateTime(),
@@ -667,6 +664,16 @@ class HypersignBJJDID {
                     proofValue: proof.proofValue,
                 },
             ];
+            if (params.otherSignInfo) {
+                signInfos = [...signInfos, ...params.otherSignInfo];
+            }
+            if (params.readonly === true) {
+                return {
+                    didDocument,
+                    signInfos,
+                    versionId,
+                };
+            }
             if (this.didrpc) {
                 const result = yield this.didrpc.updateDID(didDocument, signInfos, versionId);
                 response.transactionHash = result.transactionHash;

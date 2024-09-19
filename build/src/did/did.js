@@ -561,14 +561,14 @@ class HypersignDID {
             if (!this.didrpc && !this.didAPIService) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignDID class is not instantiated with "Offlinesigner" or have not been initilized with "EntityAPISecreKey"');
             }
-            const { didDocument, privateKeyMultibase, verificationMethodId, versionId } = params;
+            const { didDocument, privateKeyMultibase, verificationMethodId, versionId, otherSignInfo } = params;
             const signedDidDocument = yield this._jsonLdSign({
                 didDocument,
                 privateKeyMultibase,
                 verificationMethodId,
             });
             const { proof } = signedDidDocument;
-            const signInfos = [
+            let signInfos = [
                 {
                     type: constant['DID_Ed25519VerificationKey2020'].SIGNATURE_TYPE,
                     created: (_a = proof.created) !== null && _a !== void 0 ? _a : this._getDateTime(),
@@ -577,6 +577,9 @@ class HypersignDID {
                     proofValue: proof.proofValue,
                 },
             ];
+            if (otherSignInfo) {
+                signInfos = [...signInfos, ...otherSignInfo];
+            }
             if (params.readonly === true) {
                 return {
                     didDocument,
@@ -669,7 +672,7 @@ class HypersignDID {
      *  - params.did                       :   did of the user
      *  - params.domain                    :   domain is the domain of the DID Document that is being authenticated
      *  - params.verificationMethodId      :   verificationMethodId of the DID
-     * -  params.purpose                   :   purpose of Auth (authentication or assertionn)
+     * -  params.purpose                   :   purpose of Auth (authentication or assertionMethod)
      * @returns {Promise<object>} Signed DID Document
      */
     sign(params) {
@@ -737,7 +740,7 @@ class HypersignDID {
                     compactProof: constant.compactProof,
                 }));
             }
-            else if (didAuthType === 'assertion') {
+            else if (didAuthType === 'assertionMethod') {
                 signedDidDocument = yield this._jsonLdSign({
                     didDocument: resolveddoc.didDocument,
                     privateKeyMultibase,
@@ -809,7 +812,7 @@ class HypersignDID {
                     domain,
                 });
             }
-            else if (didAuthType === 'assertion') {
+            else if (didAuthType === 'assertionMethod') {
                 controller = {
                     '@context': constant.DID.CONTROLLER_CONTEXT,
                     id: publicKeyId,
@@ -1423,6 +1426,9 @@ class HypersignDID {
             if (type !== enums_1.VerificationMethodTypes.Ed25519VerificationKey2020) {
                 verificationMethod['blockchainAccountId'] = (_c = params === null || params === void 0 ? void 0 : params.blockchainAccountId) !== null && _c !== void 0 ? _c : '';
             }
+            if (type == enums_1.VerificationMethodTypes.BabyJubJubKey2021) {
+                delete verificationMethod['blockchainAccountId'];
+            }
             didDocument.verificationMethod.push(verificationMethod);
             if (verificationMethod['type'] === enums_1.VerificationMethodTypes.X25519KeyAgreementKey2020 ||
                 verificationMethod['type'] === enums_1.VerificationMethodTypes.X25519KeyAgreementKeyEIP5630) {
@@ -1442,6 +1448,12 @@ class HypersignDID {
             }
             if (verificationMethod['type'] === enums_1.VerificationMethodTypes.X25519KeyAgreementKeyEIP5630) {
                 const newContext = constant['DID_' + enums_1.VerificationMethodTypes.EcdsaSecp256k1RecoveryMethod2020].DID_KEYAGREEMENT_CONTEXT;
+                if (!didDocument['@context'].includes(newContext)) {
+                    didDocument['@context'].push(newContext);
+                }
+            }
+            if (verificationMethod['type'] === enums_1.VerificationMethodTypes.BabyJubJubKey2021) {
+                const newContext = constant['DID_' + enums_1.VerificationMethodTypes.BabyJubJubKey2021].DID_BABYJUBJUBKEY2021;
                 if (!didDocument['@context'].includes(newContext)) {
                     didDocument['@context'].push(newContext);
                 }

@@ -1,4 +1,5 @@
 import { DidDocument as Did } from '../../libs/generated/ssi/did';
+import { DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
 import Web3 from 'web3';
 import { IDID, IDIDResolve, ISignedDIDDocument, IClientSpec, ISignData, ISignInfo, SupportedPurpose } from './IDID';
 import { VerificationMethodRelationships, VerificationMethodTypes } from '../../libs/generated/ssi/client/enums';
@@ -121,6 +122,7 @@ export default class HypersignDID implements IDID {
         verificationMethodId: string;
         versionId: string;
         readonly?: boolean;
+        otherSignInfo?: Array<SignInfo>;
     }): Promise<{
         transactionHash: string;
     } | {
@@ -154,7 +156,7 @@ export default class HypersignDID implements IDID {
      *  - params.did                       :   did of the user
      *  - params.domain                    :   domain is the domain of the DID Document that is being authenticated
      *  - params.verificationMethodId      :   verificationMethodId of the DID
-     * -  params.purpose                   :   purpose of Auth (authentication or assertionn)
+     * -  params.purpose                   :   purpose of Auth (authentication or assertionMethod)
      * @returns {Promise<object>} Signed DID Document
      */
     sign(params: {

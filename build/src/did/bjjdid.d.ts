@@ -1,5 +1,5 @@
 import { DidDocument as Did } from '../../libs/generated/ssi/did';
-import { DocumentProof } from '../../libs/generated/ssi/proof';
+import { DocumentProof, DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
 import { IDID, IDIDResolve, ISignedDIDDocument, IClientSpec, ISignData, ISignInfo } from './IDID';
 import { VerificationMethodRelationships, VerificationMethodTypes } from '../../libs/generated/ssi/client/enums';
 import { OfflineSigner } from '@cosmjs/proto-signing';
@@ -188,8 +188,14 @@ export default class HypersignBJJDID implements IDID {
         privateKeyMultibase: string;
         verificationMethodId: string;
         versionId: string;
+        readonly?: boolean;
+        otherSignInfo?: Array<SignInfo>;
     }): Promise<{
         transactionHash: string;
+    } | {
+        didDocument: any;
+        signInfos: any;
+        versionId: any;
     }>;
     /**
      * Deactivate a DIDDocument in Hypersign blockchain - an onchain activity

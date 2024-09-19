@@ -18,7 +18,7 @@ export declare enum IClientSpec {
     'cosmos-ADR036' = "cosmos-ADR036"
 }
 export declare enum SupportedPurpose {
-    'assertion' = "assertion",
+    'assertionMethod' = "assertionMethod",
     'authentication' = "authentication"
 }
 export interface ExtendedClientSpec {
