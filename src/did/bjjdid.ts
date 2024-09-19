@@ -465,35 +465,31 @@ export default class HypersignBJJDID implements IDID {
     Object.assign(did1, did);
     // delete did1.alsoKnownAs;
     //  TODO FIx
+    did1.assertionMethod = [];
+    did1.authentication = [];
     if (did.assertionMethod) {
-      did.assertionMethod.map((x) => {
-        did.verificationMethod?.find((vm) => {
-          if (vm.id === x) {
-            did1.assertionMethod = [
-              {
-                id: vm.id + 'assertionMethod',
-                type: vm.type,
-                publicKeyMultibase: vm.publicKeyMultibase,
-              },
-            ];
-          }
-        });
+      did.assertionMethod.forEach((x) => {
+        const vm = did.verificationMethod?.find((vm) => vm.id === x);
+        if (vm) {
+          did1.assertionMethod.push({
+            id: vm.id + 'assertionMethod',
+            type: vm.type,
+            publicKeyMultibase: vm.publicKeyMultibase,
+          });
+        }
       });
     }
 
     if (did.authentication) {
-      did.authentication.map((x) => {
-        did.verificationMethod?.find((vm) => {
-          if (vm.id === x) {
-            did1.authentication = [
-              {
-                id: vm.id + 'authentication',
-                type: vm.type,
-                publicKeyMultibase: vm.publicKeyMultibase,
-              },
-            ];
-          }
-        });
+      did.authentication.forEach((x) => {
+        const vm = did.verificationMethod?.find((vm) => vm.id === x);
+        if (vm) {
+          did1.authentication.push({
+            id: vm.id + 'authentication',
+            type: vm.type,
+            publicKeyMultibase: vm.publicKeyMultibase,
+          });
+        }
       });
     }
 
@@ -501,7 +497,6 @@ export default class HypersignBJJDID implements IDID {
     did1.capabilityInvocation = [];
     did1.keyAgreement = [];
     delete did1.verificationMethod;
-
     return did1;
   }
   /**
@@ -519,7 +514,6 @@ export default class HypersignBJJDID implements IDID {
     signData?: ISignData[];
   }): Promise<{ didDocument: Did; transactionHash: string }> {
     //ToDO  check if did exists
-
     const response = {} as { didDocument: Did; transactionHash: string };
 
     // TODO:  this method MUST also accept signature/proof
@@ -595,8 +589,9 @@ export default class HypersignBJJDID implements IDID {
             throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
           } else {
             didDocument = Utils.removeEmptyString(didDocument);
+            const prepareDidDocument = this.prepareDidDocument(didDocument);
             const proof: SignInfo = await this._jsonLdSign({
-              didDocument: didDocument,
+              didDocument: prepareDidDocument,
               privateKeyMultibase,
               verificationMethodId,
             });
@@ -718,7 +713,9 @@ export default class HypersignBJJDID implements IDID {
     privateKeyMultibase: string;
     verificationMethodId: string;
     versionId: string;
-  }): Promise<{ transactionHash: string }> {
+    readonly?: boolean;
+    otherSignInfo?: Array<SignInfo>;
+  }): Promise<{ transactionHash: string } | { didDocument; signInfos; versionId }> {
     const response = {} as { transactionHash: string };
     if (!params.didDocument) {
       throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to update a did');
@@ -746,7 +743,7 @@ export default class HypersignBJJDID implements IDID {
       privateKeyMultibase,
       verificationMethodId,
     });
-    const signInfos: Array<SignInfo> = [
+    let signInfos: Array<SignInfo> = [
       {
         type: constant['DID_BabyJubJubKey2021'].SIGNATURE_TYPE,
         created: proof.created ?? this._getDateTime(),
@@ -755,6 +752,16 @@ export default class HypersignBJJDID implements IDID {
         proofValue: proof.proofValue,
       },
     ];
+    if (params.otherSignInfo) {
+      signInfos = [...signInfos, ...params.otherSignInfo];
+    }
+    if (params.readonly === true) {
+      return {
+        didDocument,
+        signInfos,
+        versionId,
+      };
+    }
     if (this.didrpc) {
       const result: DeliverTxResponse = await this.didrpc.updateDID(didDocument, signInfos, versionId);
       response.transactionHash = result.transactionHash;

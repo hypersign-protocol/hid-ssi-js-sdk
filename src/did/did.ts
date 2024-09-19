@@ -587,6 +587,7 @@ export default class HypersignDID implements IDID {
     verificationMethodId: string;
     versionId: string;
     readonly?: boolean;
+    otherSignInfo?: Array<SignInfo>;
   }): Promise<{ transactionHash: string } | { didDocument; signInfos; versionId }> {
     if (!params.readonly) {
       params.readonly = false;
@@ -612,14 +613,14 @@ export default class HypersignDID implements IDID {
       );
     }
 
-    const { didDocument, privateKeyMultibase, verificationMethodId, versionId } = params;
+    const { didDocument, privateKeyMultibase, verificationMethodId, versionId, otherSignInfo } = params;
     const signedDidDocument = await this._jsonLdSign({
       didDocument,
       privateKeyMultibase,
       verificationMethodId,
     });
     const { proof } = signedDidDocument;
-    const signInfos: Array<SignInfo> = [
+    let signInfos: Array<SignInfo> = [
       {
         type: constant['DID_Ed25519VerificationKey2020'].SIGNATURE_TYPE,
         created: proof.created ?? this._getDateTime(),
@@ -628,6 +629,9 @@ export default class HypersignDID implements IDID {
         proofValue: proof.proofValue,
       },
     ];
+    if (otherSignInfo) {
+      signInfos = [...signInfos, ...otherSignInfo];
+    }
     if (params.readonly === true) {
       return {
         didDocument,
@@ -727,7 +731,7 @@ export default class HypersignDID implements IDID {
    *  - params.did                       :   did of the user
    *  - params.domain                    :   domain is the domain of the DID Document that is being authenticated
    *  - params.verificationMethodId      :   verificationMethodId of the DID
-   * -  params.purpose                   :   purpose of Auth (authentication or assertionn)
+   * -  params.purpose                   :   purpose of Auth (authentication or assertionMethod)
    * @returns {Promise<object>} Signed DID Document
    */
   public async sign(params: {
@@ -800,7 +804,7 @@ export default class HypersignDID implements IDID {
         documentLoader,
         compactProof: constant.compactProof,
       })) as ISignedDIDDocument;
-    } else if (didAuthType === 'assertion') {
+    } else if (didAuthType === 'assertionMethod') {
       signedDidDocument = await this._jsonLdSign({
         didDocument: resolveddoc.didDocument,
         privateKeyMultibase,
@@ -879,7 +883,7 @@ export default class HypersignDID implements IDID {
         challenge,
         domain,
       });
-    } else if (didAuthType === 'assertion') {
+    } else if (didAuthType === 'assertionMethod') {
       controller = {
         '@context': constant.DID.CONTROLLER_CONTEXT,
         id: publicKeyId,
@@ -1598,6 +1602,9 @@ export default class HypersignDID implements IDID {
     if (type !== VerificationMethodTypes.Ed25519VerificationKey2020) {
       verificationMethod['blockchainAccountId'] = params?.blockchainAccountId ?? '';
     }
+    if (type == VerificationMethodTypes.BabyJubJubKey2021) {
+      delete verificationMethod['blockchainAccountId'];
+    }
     didDocument.verificationMethod.push(verificationMethod);
     if (
       verificationMethod['type'] === VerificationMethodTypes.X25519KeyAgreementKey2020 ||
@@ -1619,6 +1626,12 @@ export default class HypersignDID implements IDID {
     if (verificationMethod['type'] === VerificationMethodTypes.X25519KeyAgreementKeyEIP5630) {
       const newContext =
         constant['DID_' + VerificationMethodTypes.EcdsaSecp256k1RecoveryMethod2020].DID_KEYAGREEMENT_CONTEXT;
+      if (!didDocument['@context'].includes(newContext)) {
+        didDocument['@context'].push(newContext);
+      }
+    }
+    if (verificationMethod['type'] === VerificationMethodTypes.BabyJubJubKey2021) {
+      const newContext = constant['DID_' + VerificationMethodTypes.BabyJubJubKey2021].DID_BABYJUBJUBKEY2021;
       if (!didDocument['@context'].includes(newContext)) {
         didDocument['@context'].push(newContext);
       }
