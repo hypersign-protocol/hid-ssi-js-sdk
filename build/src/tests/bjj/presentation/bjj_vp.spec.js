@@ -352,7 +352,7 @@ describe('Credential Operation', () => {
         const presentationBody = {
             verifiableCredential: signedVC1,
             frame: {},
-            verificationMethodId: "",
+            verificationMethodId: '',
             issuerDid,
         };
         it('should be able to generate a sd document', () => __awaiter(this, void 0, void 0, function* () {
@@ -418,7 +418,7 @@ describe('Verifiable Presentation Operataions', () => {
         }));
         it('should be able to generate a presentation for credential document', () => __awaiter(void 0, void 0, void 0, function* () {
             const presentationBody = {
-                verifiableCredentials: [credentialDetail],
+                verifiableCredentials: [signedVC1],
                 holderDid: subjectDid,
             };
             const tempPresentationBody = Object.assign({}, presentationBody);
@@ -676,8 +676,8 @@ describe('Verifiable Presentation Operataions', () => {
                 tempverifyPresentationBody.signedPresentation = signedVp1;
                 tempverifyPresentationBody.issuerDid = issuerDid;
                 tempverifyPresentationBody.holderDid = subjectDid;
-                tempverifyPresentationBody.challenge = "abczshdsfhgk";
-                tempverifyPresentationBody['domain'] = "http://xyz.com";
+                tempverifyPresentationBody.challenge = 'abczshdsfhgk';
+                tempverifyPresentationBody['domain'] = 'http://xyz.com';
                 tempverifyPresentationBody.holderVerificationMethodId = subjectDidDoc.assertionMethod[0];
                 tempverifyPresentationBody.issuerVerificationMethodId = issuerDidDoc.assertionMethod[0];
                 const verifiedPresentationDetail = yield hsSdk.vp.bjjVp.verify(tempverifyPresentationBody);
@@ -691,8 +691,8 @@ describe('Verifiable Presentation Operataions', () => {
                 tempverifyPresentationBody.signedPresentation = signedVp1;
                 tempverifyPresentationBody.issuerDid = issuerDid;
                 tempverifyPresentationBody.holderDid = subjectDid;
-                tempverifyPresentationBody.challenge = "abc";
-                tempverifyPresentationBody['domain'] = "http://xyz1.com";
+                tempverifyPresentationBody.challenge = 'abc';
+                tempverifyPresentationBody['domain'] = 'http://xyz1.com';
                 tempverifyPresentationBody.holderVerificationMethodId = subjectDidDoc.authentication[0];
                 tempverifyPresentationBody.issuerVerificationMethodId = issuerDidDoc.assertionMethod[0];
                 const verifiedPresentationDetail = yield hsSdk.vp.bjjVp.verify(tempverifyPresentationBody);

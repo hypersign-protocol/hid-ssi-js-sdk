@@ -589,7 +589,7 @@ describe('Verifiable Presentation Operataions', () => {
                 verificationMethodId: holderDidDocument.verificationMethod[0].id,
                 privateKeyMultibase: holdersPrivateKeyMultibase,
                 challenge: "abcd",
-                // domain: "http://xyz.com"
+                domain: "http://xyz.com"
             };
             signedVerifiablePresentation = yield hypersignVP.sign(signPresentationBody);
             (0, chai_1.should)().exist(signedVerifiablePresentation['@context']);

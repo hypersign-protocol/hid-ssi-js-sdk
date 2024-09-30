@@ -1004,7 +1004,7 @@ describe('DID Test scenarios', () => {
         didDocument: tempDidDoc as object,
         verificationMethodId: verificationMethodId as string,
         controller,
-        purpose: 'assertion'
+        purpose: 'assertionMethod'
       };
       signedDocumentAssertion = await hypersignDID.sign(params);
       expect(signedDocumentAssertion).to.be.a('object');
@@ -1095,7 +1095,7 @@ describe('DID Test scenarios', () => {
       const result = await hypersignDID.verify({
         didDocument: signedDocumentAssertion,
         verificationMethodId,
-        purpose: "assertion"
+        purpose: "assertionMethod"
       });
       expect(result).to.be.a('object');
       should().exist(result);

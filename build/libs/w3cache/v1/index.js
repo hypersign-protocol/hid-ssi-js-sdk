@@ -28,10 +28,10 @@ const hypersignCredentialStatus2023_json_1 = __importDefault(require("./hypersig
 // Ref: https://github.com/digitalbazaar/jsonld.js/#custom-document-loader
 let nodeDocumentLoader;
 if (typeof window === 'undefined') {
-    nodeDocumentLoader = jsonld_1.default.documentLoaders.node();
+    nodeDocumentLoader = jsonld_1.default.documentLoaders.node;
 }
 else {
-    nodeDocumentLoader = jsonld_1.default.documentLoaders.xhr();
+    nodeDocumentLoader = jsonld_1.default.documentLoaders.xhr;
 }
 const did_wellknown_json_1 = __importDefault(require("./did-wellknown.json"));
 const CONTEXTS = Object.freeze({
@@ -76,6 +76,11 @@ const CONTEXTS = Object.freeze({
             '@version': 1.1,
             id: '@id',
             type: '@type',
+            proof: {
+                '@id': 'https://w3id.org/security#proof',
+                '@type': '@id',
+                '@container': '@graph',
+            },
             BJJSignature2021: {
                 '@id': 'https://w3id.org/security#BJJSignature2021',
                 '@context': {

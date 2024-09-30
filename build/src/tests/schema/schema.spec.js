@@ -457,6 +457,7 @@ describe('#register() function to register schema on blockchain', function () {
     }));
     it('should be able to register schema on blockchain', function () {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(signedSchema);
             const registeredSchema = yield hypersignSchema.register({
                 schema: signedSchema,
             });

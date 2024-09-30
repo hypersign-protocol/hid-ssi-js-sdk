@@ -459,6 +459,14 @@ class HypersignDID {
             return response;
         });
     }
+    registerSignInfos(didDoc, signInfos) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            // const response = {} as { didDocument: Did; transactionHash: string };
+            const result = yield ((_a = this.didrpc) === null || _a === void 0 ? void 0 : _a.registerDID(didDoc, signInfos));
+            return result;
+        });
+    }
     /**
      * Generate signature
      * @params
@@ -1456,6 +1464,10 @@ class HypersignDID {
                 const newContext = constant['DID_' + enums_1.VerificationMethodTypes.BabyJubJubKey2021].DID_BABYJUBJUBKEY2021;
                 if (!didDocument['@context'].includes(newContext)) {
                     didDocument['@context'].push(newContext);
+                }
+                const newContext1 = constant['DID_' + enums_1.VerificationMethodTypes.BabyJubJubKey2021].BABYJUBJUBSIGNATURE;
+                if (!didDocument['@context'].includes(newContext1)) {
+                    didDocument['@context'].push(newContext1);
                 }
             }
             return didDocument;

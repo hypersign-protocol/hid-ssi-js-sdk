@@ -116,6 +116,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
       publicKeyMultibase: params.publicKeyMultibase,
     });
     const suite = new BabyJubJubSignature2021Suite({ key: keyPair, verificationMethod: verificationMethodId });
+
     const signedCredStatus = await jsonSigs.sign(credentialStatus, {
       suite,
       purpose: new AssertionProofPurpose(),
@@ -221,6 +222,8 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
       try {
         const context = Array<string>();
         context.push(VC.CREDENTAIL_BASE_CONTEXT);
+        context.push(constant.DID_BabyJubJubKey2021.BABYJUBJUBSIGNATURE);
+
         params.schemaContext.forEach((x) => {
           context.push(x);
         });
@@ -426,7 +429,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     credentialHash = Buffer.from(credentialHash.bytes).toString('hex');
 
     const credentialStatus: CredentialStatus = {
-      '@context': [constant.VC.CREDENTIAL_STATUS_CONTEXT],
+      '@context': [constant.VC.CREDENTIAL_STATUS_CONTEXT, constant.DID_BabyJubJubKey2021.BABYJUBJUBSIGNATURE],
       id: params.credential.id,
       issuer: params.credential.issuer,
       issuanceDate: params.credential.issuanceDate,
@@ -473,7 +476,6 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
           'HID-SSI-SDK:: Error while issuing the credential error = ' + credentialStatusRegistrationResult.rawLog
         );
       }
-
       return {
         signedCredential: signedVC,
         credentialStatus,
@@ -551,6 +553,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     /* eslint-disable */
     const thats = this;
     /* eslint-enable */
+
     const result = await jssig.verify(params.credential, {
       purpose: new purposes.AssertionProofPurpose({
         controller: {
@@ -653,7 +656,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     }
     const claim = params.credentialStatus;
     const credentialStatus: CredentialStatus = {
-      '@context': [constant.VC.CREDENTIAL_STATUS_CONTEXT, constant.DID_BabyJubJubKey2021.DID_BABYJUBJUBKEY2021],
+      '@context': [constant.VC.CREDENTIAL_STATUS_CONTEXT, constant.DID_BabyJubJubKey2021.BABYJUBJUBSIGNATURE],
       id: claim.id,
       remarks: params.statusReason ?? VC.CRED_STATUS_REASON_TYPES[params.status],
       issuer: params.credentialStatus.issuer,

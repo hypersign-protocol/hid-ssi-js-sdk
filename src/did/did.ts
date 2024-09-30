@@ -499,6 +499,15 @@ export default class HypersignDID implements IDID {
     }
     return response;
   }
+
+  public async registerSignInfos(didDoc, signInfos) {
+    // const response = {} as { didDocument: Did; transactionHash: string };
+    const result: DeliverTxResponse | any = await this.didrpc?.registerDID(didDoc, signInfos);
+    return result;
+    // response.didDocument = didDoc;
+    // response.transactionHash = result.transactionHash;
+  }
+
   /**
    * Generate signature
    * @params
@@ -1634,6 +1643,11 @@ export default class HypersignDID implements IDID {
       const newContext = constant['DID_' + VerificationMethodTypes.BabyJubJubKey2021].DID_BABYJUBJUBKEY2021;
       if (!didDocument['@context'].includes(newContext)) {
         didDocument['@context'].push(newContext);
+      }
+      const newContext1 = constant['DID_' + VerificationMethodTypes.BabyJubJubKey2021].BABYJUBJUBSIGNATURE;
+
+      if (!didDocument['@context'].includes(newContext1)) {
+        didDocument['@context'].push(newContext1);
       }
     }
     return didDocument;
