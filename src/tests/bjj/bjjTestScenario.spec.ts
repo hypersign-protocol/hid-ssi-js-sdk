@@ -18,13 +18,18 @@ let schemaId;
 let credentialDetail;
 let signedVC;
 let unsignedverifiablePresentation;
+let issuerDidDoc
+let issuerDid
+let holderDidDoc
+let holderDid
 let signedVerifiablePresentation;
 let challenge;
 let credenStatus;
 let credentialStatusId
 let credentialId;
 let verifiableCredentialPresentationId;
-let holderDidDocument;
+let IssuerKp
+let holderKp
 const schemaBody = {
   name: 'TestSchema',
   description: 'This is a test schema generation',
@@ -106,7 +111,7 @@ describe('DID Test scenarios', () => {
     });
 
     it('Should be able to generate and register a DID using the Bjj key type, and update it by adding a Ed255 verification method (VM)', async function () {
-      holderDidDocument = await hsSdk.did.bjjDID.generate({ publicKeyMultibase: bjjPubKey });
+      const holderDidDocument = await hsSdk.did.bjjDID.generate({ publicKeyMultibase: bjjPubKey });
       subjectDid = holderDidDocument['id'];
       const verificationMethodId = holderDidDocument['verificationMethod'][0].id;
       await hsSdk.did.bjjDID.register({
@@ -145,11 +150,12 @@ describe('DID Test scenarios', () => {
   describe('Register did with two vm together', function () {
     it('Should be able to generate a DID BJJ and register it by adding Ed255 VM', async function () {
       const ed25519Kp = await hsSdk.did.generateKeys();
-      const bjjKp = await hsSdk.did.bjjDID.generateKeys();
-      const BjjDidDocument = await hsSdk.did.bjjDID.generate({ publicKeyMultibase: bjjKp.publicKeyMultibase });
-      const verificationMethodId = BjjDidDocument['verificationMethod'][0].id;
+      IssuerKp = await hsSdk.did.bjjDID.generateKeys();
+      issuerDidDoc = await hsSdk.did.bjjDID.generate({ publicKeyMultibase: IssuerKp.publicKeyMultibase });
+      issuerDid = issuerDidDoc['id']
+      const verificationMethodId = issuerDidDoc['verificationMethod'][0].id;
       const didDocWithEdd255VM = await hsSdk.did.addVerificationMethod({
-        didDocument: BjjDidDocument,
+        didDocument: issuerDidDoc,
         type: VerificationMethodTypes.Ed25519VerificationKey2020,
         publicKeyMultibase: ed25519Kp.publicKeyMultibase,
       });
@@ -163,7 +169,7 @@ describe('DID Test scenarios', () => {
       delete didDocWithEdd255VM.proof
       let bjjSign = await hsSdk.did.bjjDID.createSignInfos({
         didDocument: didDocWithEdd255VM,
-        privateKeyMultibase: bjjKp.privateKeyMultibase,
+        privateKeyMultibase: IssuerKp.privateKeyMultibase,
         verificationMethodId: verificationMethodId,
       });
       bjjSign = bjjSign[0]
@@ -175,7 +181,7 @@ describe('DID Test scenarios', () => {
           {
             type: bjjSign.type,
             verification_method_id: bjjSign.verification_method_id,
-            privateKeyMultibase: bjjKp.privateKeyMultibase,
+            privateKeyMultibase: IssuerKp.privateKeyMultibase,
             signature: bjjSign.signature,
             created: bjjSign.created
           },
@@ -193,18 +199,19 @@ describe('DID Test scenarios', () => {
 
     it('Should be able to generate a Ed255 Did and register it by adding Bjj VM', async function () {
       const ed25519Kp = await hsSdk.did.generateKeys();
-      const bjjKp = await hsSdk.did.bjjDID.generateKeys();
-      const Ed255didDocument = await hsSdk.did.generate({ publicKeyMultibase: ed25519Kp.publicKeyMultibase });
-      const verificationMethodId = Ed255didDocument['verificationMethod'][0].id;
+      holderKp = await hsSdk.did.bjjDID.generateKeys();
+      holderDidDoc = await hsSdk.did.generate({ publicKeyMultibase: ed25519Kp.publicKeyMultibase });
+      holderDid = holderDidDoc['id']
+      const verificationMethodId = holderDidDoc['verificationMethod'][0].id;
       const didDocWithBJJVM = await hsSdk.did.addVerificationMethod({
-        didDocument: Ed255didDocument,
+        didDocument: holderDidDoc,
         type: VerificationMethodTypes.BabyJubJubKey2021,
-        publicKeyMultibase: bjjKp.publicKeyMultibase,
+        publicKeyMultibase: holderKp.publicKeyMultibase,
       });
       delete didDocWithBJJVM.alsoKnownAs;
       let bjjSign = await hsSdk.did.bjjDID.createSignInfos({
         didDocument: didDocWithBJJVM,
-        privateKeyMultibase: bjjKp.privateKeyMultibase,
+        privateKeyMultibase: holderKp.privateKeyMultibase,
         verificationMethodId: didDocWithBJJVM.verificationMethod[1].id,
       });
       bjjSign = bjjSign[0]
@@ -227,7 +234,7 @@ describe('DID Test scenarios', () => {
           {
             type: 'BJJSignature2021',
             verification_method_id: bjjSign.verification_method_id,
-            privateKeyMultibase: bjjKp.privateKeyMultibase,
+            privateKeyMultibase: holderKp.privateKeyMultibase,
             signature: bjjSign.signature,
             created: bjjSign.created
           },
@@ -242,10 +249,9 @@ describe('DID Test scenarios', () => {
 describe('#generate() method to create schema', function () {
   it('should be able to create a new schema', async function () {
     const tempSchemaBody = { ...schemaBody };
-    tempSchemaBody.author = didDocId;
-    schemaObject = await hsSdk.schema.generate(tempSchemaBody);
+    tempSchemaBody.author = issuerDid;
+    schemaObject = await hsSdk.schema.hypersignBjjschema.generate(tempSchemaBody);
     schemaId = schemaObject['id'];
-    console.log(schemaObject)
     expect(schemaObject).to.be.a('object');
     should().exist(schemaObject['type']);
     should().exist(schemaObject['modelVersion']);
@@ -264,10 +270,10 @@ describe('#generate() method to create schema', function () {
 describe('#sign() function to sign schema', function () {
   it('should be able to sign newly created schema', async function () {
     const tempSchemaBody = JSON.parse(JSON.stringify(schemaObject))
-    signedSchema = await hsSdk.schema.sign({
-      privateKeyMultibase: privateKeyMultibase,
+    signedSchema = await hsSdk.schema.hypersignBjjschema.sign({
+      privateKeyMultibase: IssuerKp.privateKeyMultibase,
       schema: tempSchemaBody,
-      verificationMethodId,
+      verificationMethodId: issuerDidDoc.verificationMethod[0].id,
     });
     expect(signedSchema).to.be.a('object');
     should().exist(signedSchema.proof);
@@ -289,7 +295,7 @@ describe('#sign() function to sign schema', function () {
 
 describe('#register() function to register schema on blockchain', function () {
   it('should be able to register schema on blockchain', async function () {
-    const registeredSchema = await hsSdk.schema.register({
+    const registeredSchema = await hsSdk.schema.hypersignBjjschema.register({
       schema: signedSchema,
     });
     should().exist(registeredSchema.transactionHash);
@@ -302,12 +308,11 @@ describe('Verifiable Credential Opearations', () => {
       const expirationDate = new Date('12/11/2027');
       const tempCredentialBody = { ...credentialBody };
       tempCredentialBody.schemaId = schemaId;
-      tempCredentialBody.subjectDid = subjectDid;
+      tempCredentialBody.subjectDid = holderDid;
       tempCredentialBody['expirationDate'] = expirationDate.toString();
-      tempCredentialBody.issuerDid = didDocId;
+      tempCredentialBody.issuerDid = issuerDid;
       tempCredentialBody.fields = { name: 'varsha' };
-
-      credentialDetail = await hsSdk.vc.generate(tempCredentialBody);
+      credentialDetail = await hsSdk.vc.bjjVC.generate(tempCredentialBody);
       expect(credentialDetail).to.be.a('object');
       should().exist(credentialDetail['@context']);
       should().exist(credentialDetail['id']);
@@ -327,11 +332,10 @@ describe('Verifiable Credential Opearations', () => {
     it('should be able to issue credential with credential status registered on chain', async function () {
       const tempIssueCredentialBody = { ...issueCredentialBody };
       tempIssueCredentialBody.credential = credentialDetail;
-      tempIssueCredentialBody.issuerDid = didDocId;
-      tempIssueCredentialBody.verificationMethodId = verificationMethodId;
-      tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
-      const issuedCredResult = await hsSdk.vc.issue(tempIssueCredentialBody);
-
+      tempIssueCredentialBody.issuerDid = issuerDid;
+      tempIssueCredentialBody.verificationMethodId = issuerDidDoc.verificationMethod[0].id;
+      tempIssueCredentialBody.privateKeyMultibase = IssuerKp.privateKeyMultibase;
+      const issuedCredResult = await hsSdk.vc.bjjVC.issue(tempIssueCredentialBody);
       const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
         issuedCredResult;
 
@@ -374,10 +378,10 @@ describe('Verifiable Credential Opearations', () => {
     it('should be able to verify credential', async function () {
       const params = {
         credential: signedVC,
-        issuerDid: didDocId,
-        verificationMethodId,
+        issuerDid: issuerDid,
+        verificationMethodId: issuerDidDoc.verificationMethod[0].id,
       };
-      const verificationResult = await hsSdk.vc.verify(params);
+      const verificationResult = await hsSdk.vc.bjjVC.verify(params);
       expect(verificationResult).to.be.a('object');
       should().exist(verificationResult.verified);
       expect(verificationResult.verified).to.be.equal(true);
@@ -393,12 +397,12 @@ describe('Verifiable Presentation Operataions', () => {
     it('should be able to generate a new presentation document', async () => {
       const presentationBody = {
         verifiableCredentials: [credentialDetail],
-        holderDid: subjectDid,
+        holderDid: holderDid,
       };
       const tempPresentationBody = { ...presentationBody };
       tempPresentationBody.verifiableCredentials[0] = credentialDetail;
-      tempPresentationBody.holderDid = subjectDid;
-      unsignedverifiablePresentation = await hsSdk.vp.generate(tempPresentationBody);
+      tempPresentationBody.holderDid = holderDid;
+      unsignedverifiablePresentation = await hsSdk.vp.bjjVp.generate(tempPresentationBody);
       should().exist(unsignedverifiablePresentation['@context']);
       should().exist(unsignedverifiablePresentation['type']);
       expect(unsignedverifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
@@ -410,68 +414,62 @@ describe('Verifiable Presentation Operataions', () => {
     });
   });
 
-  //   describe('#sign() method to sign presentation document', () => {
-  //     const signPresentationBody = {
-  //       presentation: unsignedverifiablePresentation,
-  //       holderDid: '',
-  //       verificationMethodId: '',
-  //       privateKeyMultibase: '',
-  //       challenge,
-  //     };
+  describe('#sign() method to sign presentation document', () => {
+    const signPresentationBody = {
+      presentation: unsignedverifiablePresentation,
+      holderDid: '',
+      verificationMethodId: '',
+      privateKeyMultibase: '',
+      challenge,
+    };
 
-  //     it('should be able a sign presentation document', async () => {
-  //       const tempSignPresentationBody = { ...signPresentationBody };
-  //       tempSignPresentationBody.presentation = unsignedverifiablePresentation;
-  //       tempSignPresentationBody.holderDid = subjectDid;
-  //       console.log(holderDidDocument)
-  //       console.log(holderDidDocument.verificationMethod)
+    it('should be able a sign presentation document', async () => {
+      const tempSignPresentationBody = { ...signPresentationBody };
+      tempSignPresentationBody.presentation = unsignedverifiablePresentation;
+      tempSignPresentationBody.holderDid = holderDid;
+      tempSignPresentationBody.verificationMethodId = holderDidDoc.verificationMethod[1].id;
+      tempSignPresentationBody.privateKeyMultibase = holderKp.privateKeyMultibase;
+      tempSignPresentationBody.challenge = "abc";
+      tempSignPresentationBody['domain'] = "http://xyz.com";
+      signedVerifiablePresentation = await hsSdk.vp.bjjVp.sign(tempSignPresentationBody);
+      should().exist(signedVerifiablePresentation['@context']);
+      should().exist(signedVerifiablePresentation['type']);
+      expect(signedVerifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
+      should().exist(signedVerifiablePresentation['verifiableCredential']);
+      expect(signedVerifiablePresentation.id).to.be.equal(verifiableCredentialPresentationId);
+    });
 
-  //       tempSignPresentationBody.verificationMethodId = holderDidDocument.verificationMethod[0].id;
-  //       tempSignPresentationBody.privateKeyMultibase = bjjPrivKey;
-  //       tempSignPresentationBody.challenge = "abc";
-  //       tempSignPresentationBody['domain'] = "http://xyz.com";
-  //       signedVerifiablePresentation = await hsSdk.vp.sign(tempSignPresentationBody);
-  //       should().exist(signedVerifiablePresentation['@context']);
-  //       should().exist(signedVerifiablePresentation['type']);
-  //       expect(signedVerifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
-  //       should().exist(signedVerifiablePresentation['verifiableCredential']);
-  //       expect(signedVerifiablePresentation.id).to.be.equal(verifiableCredentialPresentationId);
-  //     });
+  });
+  describe('#verify() method to verify a signed presentation document', () => {
+    const verifyPresentationBody = {
+      signedPresentation: signedVerifiablePresentation,
+      holderDid: '',
+      holderVerificationMethodId: '',
+      issuerVerificationMethodId: verificationMethodId,
+      privateKey: privateKeyMultibase,
+      challenge,
+      issuerDid: didDocId,
+    };
 
-  //   });
-  //   // describe('#verify() method to verify a signed presentation document', () => {
-  //   //   const verifyPresentationBody = {
-  //   //     signedPresentation: signedVerifiablePresentation,
-  //   //     holderDid: '',
-  //   //     holderVerificationMethodId: '',
-  //   //     issuerVerificationMethodId: verificationMethodId,
-  //   //     privateKey: privateKeyMultibase,
-  //   //     challenge,
-  //   //     issuerDid: didDocId,
-  //   //   };
+    it('should be able to verify signed presentation document', async () => {
+      const tempverifyPresentationBody = { ...verifyPresentationBody };
+      tempverifyPresentationBody.signedPresentation = signedVerifiablePresentation;
+      tempverifyPresentationBody.issuerDid = issuerDid;
+      tempverifyPresentationBody.holderDid = holderDid;
+      tempverifyPresentationBody.holderVerificationMethodId = holderDidDoc.verificationMethod[1].id;
+      tempverifyPresentationBody.issuerVerificationMethodId = issuerDidDoc.verificationMethod[0].id;
+      tempverifyPresentationBody.challenge = "abc";
+      tempverifyPresentationBody['domain'] = "http://xyz.com"
+      const verifiedPresentationDetail = await hsSdk.vp.bjjVp.verify(tempverifyPresentationBody);
+      should().exist(verifiedPresentationDetail['verified']);
+      expect(verifiedPresentationDetail.verified).to.be.equal(true);
+      should().exist(verifiedPresentationDetail['results']);
+      expect(verifiedPresentationDetail.results).to.be.a('array');
+      expect(verifiedPresentationDetail.results[1].credentialResult).to.be.a('array');
+      expect(verifiedPresentationDetail.results[1].credentialResult.length).to.be.greaterThan(0);
+      expect(verifiedPresentationDetail.results[1].credentialResult[0].verified).to.be.equal(true);
+    });
 
-  //   //   // it('should be able to verify signed presentation document', async () => {
-  //   //   //   const tempverifyPresentationBody = { ...verifyPresentationBody };
-  //   //   //   tempverifyPresentationBody.signedPresentation = signedVerifiablePresentation;
-  //   //   //   tempverifyPresentationBody.issuerDid = didDocId;
-  //   //   //   tempverifyPresentationBody.holderDid = holderDidDocument.id;
-  //   //   //   tempverifyPresentationBody.holderVerificationMethodId = holderDidDocument.verificationMethod[0].id;
-  //   //   //   tempverifyPresentationBody.issuerVerificationMethodId = verificationMethodId;
-  //   //   //   tempverifyPresentationBody.challenge = "abc";
-  //   //   //   tempverifyPresentationBody['domain'] = "http://xyz.com"
-  //   //   //   const verifiedPresentationDetail = await hypersignVP.verify(tempverifyPresentationBody);
-  //   //   //   should().exist(verifiedPresentationDetail.verified);
-  //   //   //   expect(verifiedPresentationDetail.verified).to.be.equal(true);
-  //   //   //   expect(verifiedPresentationDetail.presentationResult.verified).to.be.equal(true);
+  });
 
-  //   //   //   expect(verifiedPresentationDetail).to.be.a('object');
-  //   //   //   should().exist(verifiedPresentationDetail.credentialResults);
-  //   //   //   expect(verifiedPresentationDetail.credentialResults).to.be.a('array');
-  //   //   //   should().exist(verifiedPresentationDetail.credentialResults[0].results);
-  //   //   //   expect(verifiedPresentationDetail.credentialResults[0].results).to.be.a('array');
-  //   //   //   expect(verifiedPresentationDetail.credentialResults[0].verified).to.be.equal(true);
-  //   //   //   expect(verifiedPresentationDetail.credentialResults[0].credentialId).to.be.equal(credentialId);
-  //   //   // });
-
-  //   // });
 })
