@@ -696,6 +696,7 @@ export default class HypersignBJJDID implements IDID {
     const { privateKeyMultibase, verificationMethodId } = params;
     let signature;
     let createdAt;
+    let type;
     if (!didDocument['@context']) {
       throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
     } else {
@@ -709,8 +710,10 @@ export default class HypersignBJJDID implements IDID {
       });
       signature = proof.proofValue;
       createdAt = proof.created;
+      type = proof.type;
     }
     signInfos.push({
+      type,
       signature,
       verification_method_id: verificationMethodId,
       created: createdAt,

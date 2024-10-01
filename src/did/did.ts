@@ -500,14 +500,6 @@ export default class HypersignDID implements IDID {
     return response;
   }
 
-  public async registerSignInfos(didDoc, signInfos) {
-    // const response = {} as { didDocument: Did; transactionHash: string };
-    const result: DeliverTxResponse | any = await this.didrpc?.registerDID(didDoc, signInfos);
-    return result;
-    // response.didDocument = didDoc;
-    // response.transactionHash = result.transactionHash;
-  }
-
   /**
    * Generate signature
    * @params
@@ -535,6 +527,7 @@ export default class HypersignDID implements IDID {
     const { privateKeyMultibase, verificationMethodId } = params;
     let signature;
     let createdAt;
+    let type;
     if (!didDocument['@context']) {
       throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
     } else {
@@ -547,12 +540,14 @@ export default class HypersignDID implements IDID {
       const { proof } = signedDidDocument;
       signature = proof.proofValue;
       createdAt = proof.created;
+      type = proof.type;
     }
     signInfos.push({
       signature,
       verification_method_id: verificationMethodId,
       created: createdAt,
       clientSpec: undefined,
+      type,
     });
     return signInfos;
   }
@@ -1072,6 +1067,13 @@ export default class HypersignDID implements IDID {
       if (clientSpec && clientSpec.type && !(clientSpec.type in IClientSpec)) {
         throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${0}].clientSpec is invalid`);
       }
+      if (clientSpec === undefined) {
+        if (!params.signInfos[i].type) {
+          throw new Error(
+            `HID-SSI-SDK:: Error: params.signInfos[${i}].type is required to register a did if clientSpec is not passed or undefined`
+          );
+        }
+      }
 
       if (!params.signInfos[i]['signature']) {
         throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].signature is required to register a did`);
@@ -1091,6 +1093,8 @@ export default class HypersignDID implements IDID {
         } else if (sign['clientSpec']?.type === IClientSpec['cosmos-ADR036']) {
           type = constant['DID_EcdsaSecp256k1VerificationKey2019'].SIGNATURE_TYPE;
           clientSpec = ClientSpecType.CLIENT_SPEC_TYPE_COSMOS_ADR036;
+        } else if (sign['clientSpec'] === undefined) {
+          type = sign.type;
         } else {
           throw new Error('Invalid clientSpec type');
         }
