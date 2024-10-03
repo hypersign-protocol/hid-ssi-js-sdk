@@ -85,7 +85,6 @@ export default class HypersignDID implements IDID {
         didDocument: Did;
         transactionHash: string;
     }>;
-    registerSignInfos(didDoc: any, signInfos: any): Promise<any>;
     /**
      * Generate signature
      * @params

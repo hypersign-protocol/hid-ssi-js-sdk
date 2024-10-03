@@ -180,6 +180,27 @@ const CONTEXTS = Object.freeze({
       },
     },
   },
+
+  'https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/LinkedDomains.jsonld': {
+    '@context': {
+      '@protected': true,
+      id: '@id',
+      type: '@type',
+      LinkedDomains: {
+        '@id': 'https://www.w3.org/ns/did#LinkedDomains',
+        '@type': '@id',
+        '@context': {
+          '@protected': true,
+          id: '@id',
+          type: '@type',
+          serviceEndpoint: {
+            '@id': 'https://www.w3.org/ns/did#serviceEndpoint',
+            '@type': '@id',
+          },
+        },
+      },
+    },
+  },
 });
 
 export default async (url, options) => {
