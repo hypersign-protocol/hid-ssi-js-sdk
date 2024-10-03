@@ -181,14 +181,12 @@ describe('DID Test scenarios', () => {
           {
             type: bjjSign.type,
             verification_method_id: bjjSign.verification_method_id,
-            privateKeyMultibase: IssuerKp.privateKeyMultibase,
             signature: bjjSign.signature,
             created: bjjSign.created
           },
           {
             type: ed255Sign.type,
             verification_method_id: ed255Sign.verification_method_id,
-            privateKeyMultibase: ed25519Kp.privateKeyMultibase,
             signature: ed255Sign.signature,
             created: ed255Sign.created
           },
@@ -227,14 +225,12 @@ describe('DID Test scenarios', () => {
           {
             type: 'Ed25519Signature2020',
             verification_method_id: verificationMethodId,
-            privateKeyMultibase: ed25519Kp.privateKeyMultibase,
             signature: ed255Sign.signature,
             created: ed255Sign.created
           },
           {
             type: 'BJJSignature2021',
             verification_method_id: bjjSign.verification_method_id,
-            privateKeyMultibase: holderKp.privateKeyMultibase,
             signature: bjjSign.signature,
             created: bjjSign.created
           },
