@@ -6,7 +6,7 @@
 import { DidDocument as IDidProto, DidDocumentMetadata as Metadata, VerificationMethod, Service, DidDocument } from '../../libs/generated/ssi/did';
 import { DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
 import Web3 from 'web3';
-import { VerificationMethodRelationships, VerificationMethodTypes } from '../../libs/generated/ssi/client/enums';
+import { ProofTypes, VerificationMethodRelationships, VerificationMethodTypes } from '../../libs/generated/ssi/client/enums';
 export interface IPublicKey {
     '@context': string;
     id: string;
@@ -30,6 +30,7 @@ export interface ISignInfo {
     signature: string;
     clientSpec?: ExtendedClientSpec | undefined;
     created: string;
+    type?: ProofTypes;
 }
 export interface IController {
     '@context': string;

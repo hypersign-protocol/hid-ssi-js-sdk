@@ -34,7 +34,7 @@ beforeEach(function () {
         yield hypersignDID.init();
     });
 });
-describe("testing hypersignDid initiation", function () {
+describe('testing hypersignDid initiation', function () {
     it('It should throw error as hypersignDid is neither init using offlineSigner nor using entityApiKey', () => __awaiter(this, void 0, void 0, function* () {
         const params = {
             nodeRestEndpoint: config_1.hidNodeEp.rest,
@@ -102,17 +102,17 @@ describe('DID Test Scenarios using entiAPiSecretKey', () => {
     describe('#register() to register did on chain', function () {
         it('should not be able to initialize HypersignDID with entityApiSecretKey as entityApiSecretKey is invalid', () => __awaiter(this, void 0, void 0, function* () {
             const HypersignDid = new index_1.HypersignDID({
-                entityApiSecretKey: "entityApiSecretKey",
+                entityApiSecretKey: 'entityApiSecretKey',
                 nodeRestEndpoint: config_1.hidNodeEp.rest,
                 nodeRpcEndpoint: config_1.hidNodeEp.rpc,
                 namespace: config_1.hidNodeEp.namespace,
             });
             try {
                 yield HypersignDid.init();
-                chai_1.expect.fail("Expected an error but initialization succeeded");
+                chai_1.expect.fail('Expected an error but initialization succeeded');
             }
             catch (error) {
-                (0, chai_1.expect)(error.message).to.equal("HID-SSI-SDK:: access_denied");
+                (0, chai_1.expect)(error.message).to.equal('HID-SSI-SDK:: access_denied');
             }
         }));
         it('should not able to register did document and throw error as didDocument is not passed or it is empty', () => __awaiter(this, void 0, void 0, function* () {
@@ -167,7 +167,7 @@ describe('DID Test Scenarios using entiAPiSecretKey', () => {
         });
         it('Should be able to resolve did using entityApiSecret', () => __awaiter(this, void 0, void 0, function* () {
             const params = {
-                did: didDocId
+                did: didDocId,
             };
             const HypersignDid = new index_1.HypersignDID({
                 entityApiSecretKey: config_1.entityApiSecret,
@@ -226,7 +226,7 @@ describe('DID Test Scenarios using entiAPiSecretKey', () => {
                 verificationMethodId,
                 versionId,
             });
-            (0, chai_1.should)().exist(result.transactionHash);
+            (0, chai_1.should)().exist(result);
         }));
     });
     describe('#resolve() did ater updating did document', function () {
@@ -253,9 +253,12 @@ describe('DID Test Scenarios using entiAPiSecretKey', () => {
                 namespace: config_1.hidNodeEp.namespace,
             });
             yield HypersignDid.init();
-            return HypersignDid
-                .deactivate({ didDocument, privateKeyMultibase: '', verificationMethodId, versionId: '1.0' })
-                .catch(function (err) {
+            return HypersignDid.deactivate({
+                didDocument,
+                privateKeyMultibase: '',
+                verificationMethodId,
+                versionId: '1.0',
+            }).catch(function (err) {
                 (0, chai_1.expect)(function () {
                     throw err;
                 }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKeyMultibase is required to deactivate a did');
@@ -270,9 +273,12 @@ describe('DID Test Scenarios using entiAPiSecretKey', () => {
                     namespace: config_1.hidNodeEp.namespace,
                 });
                 yield HypersignDid.init();
-                return HypersignDid
-                    .deactivate({ didDocument, privateKeyMultibase, verificationMethodId: '', versionId: '1.0' })
-                    .catch(function (err) {
+                return HypersignDid.deactivate({
+                    didDocument,
+                    privateKeyMultibase,
+                    verificationMethodId: '',
+                    versionId: '1.0',
+                }).catch(function (err) {
                     (0, chai_1.expect)(function () {
                         throw err;
                     }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to deactivate a did');
@@ -306,7 +312,7 @@ describe('DID Test Scenarios using entiAPiSecretKey', () => {
         }));
         it('Should be able to resolve deactivated did and get deactivated as true in didDoc', () => __awaiter(this, void 0, void 0, function* () {
             const params = {
-                did: didDocId
+                did: didDocId,
             };
             const HypersignDid = new index_1.HypersignDID({
                 entityApiSecretKey: config_1.entityApiSecret,

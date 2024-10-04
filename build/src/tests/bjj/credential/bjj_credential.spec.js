@@ -394,7 +394,7 @@ describe('Credential Operation', () => {
                 tempCredentialBody.subjectDid = subjectDid;
                 tempCredentialBody['expirationDate'] = expirationDate.toString();
                 tempCredentialBody.issuerDid = issuerDid;
-                tempCredentialBody['fields'] = { name: 'varsha', address: "random address" };
+                tempCredentialBody['fields'] = { name: 'varsha', address: 'random address' };
                 credentialDetail2 = yield hsSdk.vc.bjjVC.generate(tempCredentialBody);
                 (0, chai_1.expect)(credentialDetail).to.be.a('object');
                 (0, chai_1.should)().exist(credentialDetail['@context']);
@@ -721,7 +721,7 @@ describe('Credential Operation', () => {
         it('should be able to verify credential', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 const params = {
-                    credential: signedVC,
+                    credential: signedVC1,
                     issuerDid,
                     verificationMethodId: verificationMethod[0].id,
                 };
@@ -987,7 +987,7 @@ describe('Verifiable Credential Status Opearations', () => {
                 return hsSdk.vc.bjjVC.updateCredentialStatus(params).catch(function (err) {
                     (0, chai_1.expect)(function () {
                         throw err;
-                    }).to.throw(Error, "failed to execute message; message index: 0: incoming Credential Status Document does not have any changes: invalid Credential Status");
+                    }).to.throw(Error, 'failed to execute message; message index: 0: incoming Credential Status Document does not have any changes: invalid Credential Status');
                 });
             });
         });
@@ -1093,10 +1093,12 @@ describe('Verifiable Credential Status Opearations', () => {
         });
         it('should not be able to register credential on blockchain as stutus already registerd on chain', function () {
             return __awaiter(this, void 0, void 0, function* () {
-                return hsSdk.vc.bjjVC.registerCredentialStatus({
+                return hsSdk.vc.bjjVC
+                    .registerCredentialStatus({
                     credentialStatus: credentialStatus2,
                     credentialStatusProof: credentialStatusProof2,
-                }).catch(function (err) {
+                })
+                    .catch(function (err) {
                     (0, chai_1.expect)(function () {
                         throw err;
                     }).to.throw('failed to execute message; message index: 0: credential status document already exists');
@@ -1109,7 +1111,9 @@ describe('Verifiable Credential Status Opearations', () => {
             return __awaiter(this, void 0, void 0, function* () {
                 const credentialStatus = null;
                 const credentialStatusProof = issuedCredResult.credentialStatusProof;
-                return hsSdk.vc.bjjVC.generateRegisterCredentialStatusTxnMessage(credentialStatus, credentialStatusProof).catch(function (err) {
+                return hsSdk.vc.bjjVC
+                    .generateRegisterCredentialStatusTxnMessage(credentialStatus, credentialStatusProof)
+                    .catch(function (err) {
                     (0, chai_1.expect)(function () {
                         throw err;
                     }).to.throw(Error, 'HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');
@@ -1120,7 +1124,9 @@ describe('Verifiable Credential Status Opearations', () => {
             return __awaiter(this, void 0, void 0, function* () {
                 const credentialStatus = issuedCredResult.credentialStatus;
                 const credentialStatusProof = null;
-                return hsSdk.vc.bjjVC.generateRegisterCredentialStatusTxnMessage(credentialStatus, credentialStatusProof).catch(function (err) {
+                return hsSdk.vc.bjjVC
+                    .generateRegisterCredentialStatusTxnMessage(credentialStatus, credentialStatusProof)
+                    .catch(function (err) {
                     (0, chai_1.expect)(function () {
                         throw err;
                     }).to.throw(Error, 'HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status');

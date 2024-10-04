@@ -142,6 +142,7 @@ class DIDDocument implements Did {
         this['@context'] = [
           constant['DID_' + keyType].DID_BASE_CONTEXT,
           constant['DID_' + keyType].DID_BABYJUBJUBKEY2021,
+          constant['DID_' + keyType].BABYJUBJUBSIGNATURE,
         ];
         this.id = id;
         this.controller = [this.id];
@@ -463,10 +464,13 @@ export default class HypersignBJJDID implements IDID {
   private prepareDidDocument(did: Did) {
     const did1 = {} as any;
     Object.assign(did1, did);
-    // delete did1.alsoKnownAs;
+    delete did1.alsoKnownAs;
     //  TODO FIx
     did1.assertionMethod = [];
     did1.authentication = [];
+    did1.capabilityDelegation = [];
+    did1.capabilityInvocation = [];
+    did1.keyAgreement = [];
     if (did.assertionMethod) {
       did.assertionMethod.forEach((x) => {
         const vm = did.verificationMethod?.find((vm) => vm.id === x);
@@ -493,9 +497,45 @@ export default class HypersignBJJDID implements IDID {
       });
     }
 
-    did1.capabilityDelegation = [];
-    did1.capabilityInvocation = [];
-    did1.keyAgreement = [];
+    if (did.capabilityDelegation) {
+      did.capabilityDelegation.forEach((x) => {
+        const vm = did.verificationMethod?.find((vm) => vm.id === x);
+        if (vm) {
+          did1.capabilityDelegation.push({
+            id: vm.id + 'capabilityDelegation',
+            type: vm.type,
+            publicKeyMultibase: vm.publicKeyMultibase,
+          });
+        }
+      });
+    }
+
+    if (did.capabilityInvocation) {
+      did.capabilityInvocation.forEach((x) => {
+        const vm = did.verificationMethod?.find((vm) => vm.id === x);
+        if (vm) {
+          did1.capabilityInvocation.push({
+            id: vm.id + 'capabilityInvocation',
+            type: vm.type,
+            publicKeyMultibase: vm.publicKeyMultibase,
+          });
+        }
+      });
+    }
+
+    if (did.keyAgreement) {
+      did.keyAgreement.forEach((x) => {
+        const vm = did.verificationMethod?.find((vm) => vm.id === x);
+        if (vm) {
+          did1.keyAgreement.push({
+            id: vm.id + 'keyAgreement',
+            type: vm.type,
+            publicKeyMultibase: vm.publicKeyMultibase,
+          });
+        }
+      });
+    }
+
     delete did1.verificationMethod;
     return did1;
   }
@@ -656,9 +696,12 @@ export default class HypersignBJJDID implements IDID {
     const { privateKeyMultibase, verificationMethodId } = params;
     let signature;
     let createdAt;
+    let type;
     if (!didDocument['@context']) {
       throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
     } else {
+      didDocument = this.prepareDidDocument(didDocument);
+
       didDocument = Utils.removeEmptyString(didDocument);
       const proof = await this._jsonLdSign({
         didDocument,
@@ -667,8 +710,10 @@ export default class HypersignBJJDID implements IDID {
       });
       signature = proof.proofValue;
       createdAt = proof.created;
+      type = proof.type;
     }
     signInfos.push({
+      type,
       signature,
       verification_method_id: verificationMethodId,
       created: createdAt,

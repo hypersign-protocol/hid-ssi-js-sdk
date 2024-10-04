@@ -61,7 +61,7 @@ export default class HypersignBJJSchema implements ISchemaMethods {
     } else {
       this.schemaApiService = null;
     }
-    this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT];
+    this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT, constants.DID_BabyJubJubKey2021.BABYJUBJUBSIGNATURE];
     this.namespace = namespace && namespace != '' ? namespace : '';
     (this.type = constants.SCHEMA.SCHEMA_TYPE),
       (this.modelVersion = '1.0'),
@@ -117,6 +117,7 @@ export default class HypersignBJJSchema implements ISchemaMethods {
       publicKeyMultibase: params.publicKeyMultibase,
     });
     const suite = new BabyJubJubSignature2021Suite({ key: keyPair });
+
     const signedSchema = await jsonSigs.sign(schema, {
       suite,
       purpose: new AssertionProofPurpose(),
@@ -162,7 +163,7 @@ export default class HypersignBJJSchema implements ISchemaMethods {
     if (!params.author) throw new Error('HID-SSI-SDK:: Error: Author must be passed');
     if (!this.isPascalCase(params.name))
       throw new Error('HID-SSI-SDK:: Error: schema name should always be in PascalCase');
-    this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT];
+    this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT, constants.DID_BabyJubJubKey2021.BABYJUBJUBSIGNATURE];
     this.id = await this._getSchemaId();
     this.name = params.name;
     this.author = params.author;

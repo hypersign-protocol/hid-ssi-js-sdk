@@ -970,7 +970,7 @@ describe('DID Test scenarios', () => {
                     didDocument: tempDidDoc,
                     verificationMethodId: verificationMethodId,
                     controller,
-                    purpose: 'assertion'
+                    purpose: 'assertionMethod'
                 };
                 signedDocumentAssertion = yield hypersignDID.sign(params);
                 (0, chai_1.expect)(signedDocumentAssertion).to.be.a('object');
@@ -1067,7 +1067,7 @@ describe('DID Test scenarios', () => {
                 const result = yield hypersignDID.verify({
                     didDocument: signedDocumentAssertion,
                     verificationMethodId,
-                    purpose: "assertion"
+                    purpose: "assertionMethod"
                 });
                 (0, chai_1.expect)(result).to.be.a('object');
                 (0, chai_1.should)().exist(result);

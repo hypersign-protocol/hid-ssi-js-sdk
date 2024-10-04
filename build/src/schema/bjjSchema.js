@@ -66,7 +66,7 @@ class HypersignBJJSchema {
         else {
             this.schemaApiService = null;
         }
-        this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT];
+        this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT, constants.DID_BabyJubJubKey2021.BABYJUBJUBSIGNATURE];
         this.namespace = namespace && namespace != '' ? namespace : '';
         (this.type = constants.SCHEMA.SCHEMA_TYPE),
             (this.modelVersion = '1.0'),
@@ -158,7 +158,7 @@ class HypersignBJJSchema {
                 throw new Error('HID-SSI-SDK:: Error: Author must be passed');
             if (!this.isPascalCase(params.name))
                 throw new Error('HID-SSI-SDK:: Error: schema name should always be in PascalCase');
-            this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT];
+            this['@context'] = [constants.SCHEMA.SCHEMA_CONTEXT, constants.DID_BabyJubJubKey2021.BABYJUBJUBSIGNATURE];
             this.id = yield this._getSchemaId();
             this.name = params.name;
             this.author = params.author;

@@ -11,8 +11,8 @@ let credentialDetail3;
 let issuedCredResult2;
 let issuedCredResult;
 let credentialStatusId;
-const credentialTransMessage = [] as any
-let credentialDetail2
+const credentialTransMessage = [] as any;
+let credentialDetail2;
 let credenStatus;
 let verificationMethod;
 let schemaObject;
@@ -381,7 +381,7 @@ describe('Credential Operation', () => {
       tempCredentialBody.subjectDid = subjectDid;
       tempCredentialBody['expirationDate'] = expirationDate.toString();
       tempCredentialBody.issuerDid = issuerDid;
-      tempCredentialBody['fields'] = { name: 'varsha', address: "random address" };
+      tempCredentialBody['fields'] = { name: 'varsha', address: 'random address' };
       credentialDetail2 = await hsSdk.vc.bjjVC.generate(tempCredentialBody);
       expect(credentialDetail).to.be.a('object');
       should().exist(credentialDetail['@context']);
@@ -470,10 +470,11 @@ describe('Credential Operation', () => {
       tempIssueCredentialBody.issuerDid = issuerDid;
       tempIssueCredentialBody.verificationMethodId = verificationMethod[0].id;
       tempIssueCredentialBody.privateKeyMultibase = issuerPrivateKeyMultibase;
+
       const issuedCredResult = await hsSdk.vc.bjjVC.issue(tempIssueCredentialBody);
       const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
         issuedCredResult;
-        signedVC={}
+      signedVC = {};
       Object.assign(signedVC, signedCredential);
       signedVC1 = signedCredential;
       credenStatus = credentialStatus;
@@ -689,12 +690,13 @@ describe('Credential Operation', () => {
   describe('#verify() method for verifying credential', function () {
     it('should be able to verify credential', async function () {
       const params = {
-        credential: signedVC,
+        credential: signedVC1,
         issuerDid,
         verificationMethodId: verificationMethod[0].id,
       };
 
       const verificationResult = await hsSdk.vc.bjjVC.verify(params);
+
       expect(verificationResult).to.be.a('object');
       should().exist(verificationResult.verified);
       expect(verificationResult.verified).to.be.equal(true);
@@ -728,7 +730,10 @@ describe('Credential Operation', () => {
       return hsSdk.vc.bjjVC.verify(params).catch(function (err) {
         expect(function () {
           throw err;
-        }).to.throw(Error, 'HID-SSI-SDK:: Error: params.issuerDid or params.issuerDidDocument is required to verify credential');
+        }).to.throw(
+          Error,
+          'HID-SSI-SDK:: Error: params.issuerDid or params.issuerDidDocument is required to verify credential'
+        );
       });
     });
 
@@ -920,22 +925,24 @@ describe('Verifiable Credential Status Opearations', () => {
       expect(updatedCredResult.code).to.be.equal(0);
       expect(updatedCredResult.transactionHash).to.be.a('string');
     });
-      it('should not be able to suspend a suspended  credential status', async function () {
-          const credentialStatus = await hsSdk.vc.bjjVC.resolveCredentialStatus({ credentialId });
-          const params = {
-              credentialStatus: credentialStatus,
-              issuerDid,
-              verificationMethodId: verificationMethod[0].id,
-              privateKeyMultibase: issuerPrivateKeyMultibase,
-              status: 'SUSPENDED',
-              statusReason: 'Suspending this credential for some time',
-          };
-          return hsSdk.vc.bjjVC.updateCredentialStatus(params).catch(function (err) {
-              expect(function () {
-                  throw err
-              }).to.throw(Error, "failed to execute message; message index: 0: incoming Credential Status Document does not have any changes: invalid Credential Status")
-          });
-
+    it('should not be able to suspend a suspended  credential status', async function () {
+      const credentialStatus = await hsSdk.vc.bjjVC.resolveCredentialStatus({ credentialId });
+      const params = {
+        credentialStatus: credentialStatus,
+        issuerDid,
+        verificationMethodId: verificationMethod[0].id,
+        privateKeyMultibase: issuerPrivateKeyMultibase,
+        status: 'SUSPENDED',
+        statusReason: 'Suspending this credential for some time',
+      };
+      return hsSdk.vc.bjjVC.updateCredentialStatus(params).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(
+          Error,
+          'failed to execute message; message index: 0: incoming Credential Status Document does not have any changes: invalid Credential Status'
+        );
+      });
     });
     it('should be able to change credential status to Live', async function () {
       const credentialStatus = await hsSdk.vc.bjjVC.resolveCredentialStatus({ credentialId });
@@ -967,23 +974,25 @@ describe('Verifiable Credential Status Opearations', () => {
       expect(updatedCredResult.code).to.be.equal(0);
       expect(updatedCredResult.transactionHash).to.be.a('string');
     });
-      it('should not be able to revoke a revoked credential status', async function () {
-          const credentialStatus = await hsSdk.vc.bjjVC.resolveCredentialStatus({ credentialId });
-          const params = {
-              credentialStatus,
-              issuerDid,
-              verificationMethodId: verificationMethod[0].id,
-              privateKeyMultibase: issuerPrivateKeyMultibase,
-              status: 'REVOKED',
-              statusReason: 'Revoking the credential',
-          };
-          return hsSdk.vc.bjjVC.updateCredentialStatus(params).catch(function (err) {
-              expect(function () {
-                  throw err
-              }).to.throw(Error, 'failed to execute message; message index: 0: incoming Credential Status Document does not have any changes: invalid Credential Status')
-          })
-
-      })
+    it('should not be able to revoke a revoked credential status', async function () {
+      const credentialStatus = await hsSdk.vc.bjjVC.resolveCredentialStatus({ credentialId });
+      const params = {
+        credentialStatus,
+        issuerDid,
+        verificationMethodId: verificationMethod[0].id,
+        privateKeyMultibase: issuerPrivateKeyMultibase,
+        status: 'REVOKED',
+        statusReason: 'Revoking the credential',
+      };
+      return hsSdk.vc.bjjVC.updateCredentialStatus(params).catch(function (err) {
+        expect(function () {
+          throw err;
+        }).to.throw(
+          Error,
+          'failed to execute message; message index: 0: incoming Credential Status Document does not have any changes: invalid Credential Status'
+        );
+      });
+    });
     it('should not be able to change the status of credential as it is revoked', async function () {
       const credentialStatus = await hsSdk.vc.bjjVC.resolveCredentialStatus({ credentialId });
       const params = {
@@ -1033,73 +1042,80 @@ describe('Verifiable Credential Status Opearations', () => {
       expect(registerCredDetail).to.be.a('object');
       should().exist(registerCredDetail.transactionHash);
     });
-      it('should not be able to register credential on blockchain as stutus already registerd on chain', async function () {
-          return hsSdk.vc.bjjVC.registerCredentialStatus({
-              credentialStatus: credentialStatus2,
-              credentialStatusProof: credentialStatusProof2,
-          }).catch(function (err) {
-              expect(function () {
-                  throw err
-
-              }).to.throw('failed to execute message; message index: 0: credential status document already exists')
-          })
-      });
+    it('should not be able to register credential on blockchain as stutus already registerd on chain', async function () {
+      return hsSdk.vc.bjjVC
+        .registerCredentialStatus({
+          credentialStatus: credentialStatus2,
+          credentialStatusProof: credentialStatusProof2,
+        })
+        .catch(function (err) {
+          expect(function () {
+            throw err;
+          }).to.throw('failed to execute message; message index: 0: credential status document already exists');
+        });
+    });
   });
 
   describe('#generateRegisterCredentialStatusTxnMessage() method to generate transaction message for credential2', function () {
     it('should not be able to generatecredential status TxnMessage as credentialStatus is not passed', async function () {
-      const credentialStatus = null
-      const credentialStatusProof = issuedCredResult.credentialStatusProof
-      return hsSdk.vc.bjjVC.generateRegisterCredentialStatusTxnMessage(credentialStatus, credentialStatusProof).catch(function (err) {
-        expect(function () {
-          throw err;
-        }).to.throw(
-          Error,
-          'HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status'
-        );
-      });
+      const credentialStatus = null;
+      const credentialStatusProof = issuedCredResult.credentialStatusProof;
+      return hsSdk.vc.bjjVC
+        .generateRegisterCredentialStatusTxnMessage(credentialStatus, credentialStatusProof)
+        .catch(function (err) {
+          expect(function () {
+            throw err;
+          }).to.throw(
+            Error,
+            'HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status'
+          );
+        });
     });
     it('should not be able to generatecredential status TxnMessage as credentialStatusProof is not passed', async function () {
-      const credentialStatus = issuedCredResult.credentialStatus
-      const credentialStatusProof = null
-      return hsSdk.vc.bjjVC.generateRegisterCredentialStatusTxnMessage(credentialStatus, credentialStatusProof).catch(function (err) {
-        expect(function () {
-          throw err;
-        }).to.throw(
-          Error,
-          'HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status'
-        );
-      });
+      const credentialStatus = issuedCredResult.credentialStatus;
+      const credentialStatusProof = null;
+      return hsSdk.vc.bjjVC
+        .generateRegisterCredentialStatusTxnMessage(credentialStatus, credentialStatusProof)
+        .catch(function (err) {
+          expect(function () {
+            throw err;
+          }).to.throw(
+            Error,
+            'HID-SSI-SDK:: Error: credentialStatus and proof are required to register credential status'
+          );
+        });
     });
     it('should be able to generate credential status TxnMessage', async function () {
-      const credentialStatus = issuedCredResult.credentialStatus
-      const credentialStatusProof = issuedCredResult.credentialStatusProof
-      const credentialStatus2 = issuedCredResult2.credentialStatus
-      const credentialStatusProof2 = issuedCredResult2.credentialStatusProof
-      const txnMessage1 = await hsSdk.vc.bjjVC.generateRegisterCredentialStatusTxnMessage(credentialStatus, credentialStatusProof)
-      credentialTransMessage.push(txnMessage1)
-      const txnMessage2 = await hsSdk.vc.bjjVC.generateRegisterCredentialStatusTxnMessage(credentialStatus2, credentialStatusProof2)
-      credentialTransMessage.push(txnMessage2)
-      expect(txnMessage1).to.be.a('object')
-      should().exist(txnMessage1.typeUrl)
-      should().exist(txnMessage1.value)
-      should().exist(txnMessage1.value.credentialStatusDocument)
-      should().exist(txnMessage1.value.credentialStatusProof)
-      should().exist(txnMessage1.value.txAuthor)
+      const credentialStatus = issuedCredResult.credentialStatus;
+      const credentialStatusProof = issuedCredResult.credentialStatusProof;
+      const credentialStatus2 = issuedCredResult2.credentialStatus;
+      const credentialStatusProof2 = issuedCredResult2.credentialStatusProof;
+      const txnMessage1 = await hsSdk.vc.bjjVC.generateRegisterCredentialStatusTxnMessage(
+        credentialStatus,
+        credentialStatusProof
+      );
+      credentialTransMessage.push(txnMessage1);
+      const txnMessage2 = await hsSdk.vc.bjjVC.generateRegisterCredentialStatusTxnMessage(
+        credentialStatus2,
+        credentialStatusProof2
+      );
+      credentialTransMessage.push(txnMessage2);
+      expect(txnMessage1).to.be.a('object');
+      should().exist(txnMessage1.typeUrl);
+      should().exist(txnMessage1.value);
+      should().exist(txnMessage1.value.credentialStatusDocument);
+      should().exist(txnMessage1.value.credentialStatusProof);
+      should().exist(txnMessage1.value.txAuthor);
     });
-  })
-
+  });
 
   describe('#registerCredentialStatusTxnBulk() method to register credential on blockchain', function () {
     it('should not be able to register multiple credential as txnMessage is not passed', async function () {
-      const txnMessage = []
+      const txnMessage = [];
       return hsSdk.vc.bjjVC.registerCredentialStatusTxnBulk(txnMessage).catch(function (err) {
         expect(function () {
           throw err;
-        }).to.throw(
-          Error,
-          'HID-SSI-SDK:: Error: txnMessage is required to register credential status'
-        );
+        }).to.throw(Error, 'HID-SSI-SDK:: Error: txnMessage is required to register credential status');
       });
     });
     it('should be able to register credential on blockchain in a bulk', async function () {

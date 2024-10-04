@@ -483,6 +483,7 @@ class HypersignDID {
             const { privateKeyMultibase, verificationMethodId } = params;
             let signature;
             let createdAt;
+            let type;
             if (!didDocument['@context']) {
                 throw new Error('HID-SSI-SDK:: Error: didDocument is not in Ld-json format');
             }
@@ -496,12 +497,14 @@ class HypersignDID {
                 const { proof } = signedDidDocument;
                 signature = proof.proofValue;
                 createdAt = proof.created;
+                type = proof.type;
             }
             signInfos.push({
                 signature,
                 verification_method_id: verificationMethodId,
                 created: createdAt,
                 clientSpec: undefined,
+                type,
             });
             return signInfos;
         });
@@ -952,6 +955,11 @@ class HypersignDID {
                 if (clientSpec && clientSpec.type && !(clientSpec.type in IDID_1.IClientSpec)) {
                     throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${0}].clientSpec is invalid`);
                 }
+                if (clientSpec === undefined) {
+                    if (!params.signInfos[i].type) {
+                        throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].type is required to register a did if clientSpec is not passed or undefined`);
+                    }
+                }
                 if (!params.signInfos[i]['signature']) {
                     throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].signature is required to register a did`);
                 }
@@ -971,6 +979,9 @@ class HypersignDID {
                     else if (((_b = sign['clientSpec']) === null || _b === void 0 ? void 0 : _b.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
                         type = constant['DID_EcdsaSecp256k1VerificationKey2019'].SIGNATURE_TYPE;
                         clientSpec = client_spec_1.ClientSpecType.CLIENT_SPEC_TYPE_COSMOS_ADR036;
+                    }
+                    else if (sign['clientSpec'] === undefined) {
+                        type = sign.type;
                     }
                     else {
                         throw new Error('Invalid clientSpec type');
@@ -1456,6 +1467,10 @@ class HypersignDID {
                 const newContext = constant['DID_' + enums_1.VerificationMethodTypes.BabyJubJubKey2021].DID_BABYJUBJUBKEY2021;
                 if (!didDocument['@context'].includes(newContext)) {
                     didDocument['@context'].push(newContext);
+                }
+                const newContext1 = constant['DID_' + enums_1.VerificationMethodTypes.BabyJubJubKey2021].BABYJUBJUBSIGNATURE;
+                if (!didDocument['@context'].includes(newContext1)) {
+                    didDocument['@context'].push(newContext1);
                 }
             }
             return didDocument;

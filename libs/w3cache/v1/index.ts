@@ -15,9 +15,9 @@ import hypersigncredentialStatus2023 from './hypersignCredentialStatus2023.json'
 
 let nodeDocumentLoader;
 if (typeof window === 'undefined') {
-  nodeDocumentLoader = jsonld.documentLoaders.node();
+  nodeDocumentLoader = jsonld.documentLoaders.node;
 } else {
-  nodeDocumentLoader = jsonld.documentLoaders.xhr();
+  nodeDocumentLoader = jsonld.documentLoaders.xhr;
 }
 import wellknown from './did-wellknown.json';
 const CONTEXTS = Object.freeze({
@@ -88,6 +88,11 @@ const CONTEXTS = Object.freeze({
       '@version': 1.1,
       id: '@id',
       type: '@type',
+      proof: {
+        '@id': 'https://w3id.org/security#proof',
+        '@type': '@id',
+        '@container': '@graph',
+      },
       BJJSignature2021: {
         '@id': 'https://w3id.org/security#BJJSignature2021',
         '@context': {
@@ -169,6 +174,27 @@ const CONTEXTS = Object.freeze({
           credentialRoot: 'https://w3id.org/security#credentialRoot',
           verificationMethod: {
             '@id': 'https://w3id.org/security#verificationMethod',
+            '@type': '@id',
+          },
+        },
+      },
+    },
+  },
+
+  'https://raw.githubusercontent.com/hypersign-protocol/hypersign-contexts/main/LinkedDomains.jsonld': {
+    '@context': {
+      '@protected': true,
+      id: '@id',
+      type: '@type',
+      LinkedDomains: {
+        '@id': 'https://www.w3.org/ns/did#LinkedDomains',
+        '@type': '@id',
+        '@context': {
+          '@protected': true,
+          id: '@id',
+          type: '@type',
+          serviceEndpoint: {
+            '@id': 'https://www.w3.org/ns/did#serviceEndpoint',
             '@type': '@id',
           },
         },

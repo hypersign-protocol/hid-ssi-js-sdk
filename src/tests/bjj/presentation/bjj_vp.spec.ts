@@ -277,6 +277,7 @@ describe('Credential Operation', () => {
       tempCredentialBody.issuerDid = issuerDid;
       tempCredentialBody.fields = { name: 'varsha', address: 'random address' };
       credentialDetail = await hsSdk.vc.bjjVC.generate(tempCredentialBody);
+
       expect(credentialDetail).to.be.a('object');
       should().exist(credentialDetail['@context']);
       should().exist(credentialDetail['id']);
@@ -298,10 +299,12 @@ describe('Credential Operation', () => {
       tempIssueCredentialBody.verificationMethodId = verificationMethod[0].id;
       tempIssueCredentialBody.privateKeyMultibase = issuerPrivateKeyMultibase;
       const issuedCredResult = await hsSdk.vc.bjjVC.issue(tempIssueCredentialBody);
+
       const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
         issuedCredResult;
-    signedVC1={}
-    Object.assign(signedVC1,signedCredential)
+
+      signedVC1 = {};
+      Object.assign(signedVC1, signedCredential);
       signedVC = signedCredential;
       credenStatus = credentialStatus;
       credentialId = signedVC.id;
@@ -341,15 +344,14 @@ describe('Credential Operation', () => {
     });
   });
 
-    describe('#generateSeletiveDisclosure() method for genertaing sd', function () {
-      const presentationBody = {
-          verifiableCredential: signedVC1,
-        frame: {},
-          verificationMethodId: "",
-        issuerDid,
-      };
-        it('should be able to generate a sd document', async () => {
-
+  describe('#generateSeletiveDisclosure() method for genertaing sd', function () {
+    const presentationBody = {
+      verifiableCredential: signedVC1,
+      frame: {},
+      verificationMethodId: '',
+      issuerDid,
+    };
+    it('should be able to generate a sd document', async () => {
       const revelDocument = {
         type: ['VerifiableCredential', 'TestSchema'],
         expirationDate: {},
@@ -361,11 +363,12 @@ describe('Credential Operation', () => {
         },
       };
       const tempPresentationBody = { ...presentationBody };
-            tempPresentationBody.verifiableCredential = signedVC1;
+      tempPresentationBody.verifiableCredential = signedVC1;
       tempPresentationBody.frame = revelDocument;
       tempPresentationBody.issuerDid = issuerDid;
       tempPresentationBody.verificationMethodId = verificationMethod[0].id;
       selectiveDisclosure = await hsSdk.vc.bjjVC.generateSeletiveDisclosure(tempPresentationBody);
+
       should().exist(selectiveDisclosure['@context']);
       should().exist(selectiveDisclosure['id']);
       expect(selectiveDisclosure['id']).to.be.equal(credentialId);
@@ -400,6 +403,7 @@ describe('Verifiable Presentation Operataions', () => {
         verifiableCredentials: [selectiveDisclosure],
         holderDid: subjectDid,
       };
+
       const tempPresentationBody = { ...presentationBody };
       tempPresentationBody.holderDid = subjectDid;
       unsignedSdVerifiablePresentation = await hsSdk.vp.bjjVp.generate(tempPresentationBody);
@@ -412,22 +416,22 @@ describe('Verifiable Presentation Operataions', () => {
       should().exist(unsignedSdVerifiablePresentation['holder']);
     });
 
-      it('should be able to generate a presentation for credential document', async () => {
-          const presentationBody = {
-              verifiableCredentials: [credentialDetail],
-              holderDid: subjectDid,
-          };
-        const tempPresentationBody = { ...presentationBody };
-          tempPresentationBody.holderDid = subjectDid;
-          unsignedVerifiablePresentation = await hsSdk.vp.bjjVp.generate(tempPresentationBody);
-          should().exist(unsignedVerifiablePresentation['@context']);
-          should().exist(unsignedVerifiablePresentation['type']);
-          expect(unsignedVerifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
-          should().exist(unsignedVerifiablePresentation['verifiableCredential']);
-          expect(unsignedVerifiablePresentation.verifiableCredential).to.be.a('array');
-          should().exist(unsignedVerifiablePresentation['id']);
-          should().exist(unsignedVerifiablePresentation['holder']);
-      });
+    it('should be able to generate a presentation for credential document', async () => {
+      const presentationBody = {
+        verifiableCredentials: [signedVC1],
+        holderDid: subjectDid,
+      };
+      const tempPresentationBody = { ...presentationBody };
+      tempPresentationBody.holderDid = subjectDid;
+      unsignedVerifiablePresentation = await hsSdk.vp.bjjVp.generate(tempPresentationBody);
+      should().exist(unsignedVerifiablePresentation['@context']);
+      should().exist(unsignedVerifiablePresentation['type']);
+      expect(unsignedVerifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
+      should().exist(unsignedVerifiablePresentation['verifiableCredential']);
+      expect(unsignedVerifiablePresentation.verifiableCredential).to.be.a('array');
+      should().exist(unsignedVerifiablePresentation['id']);
+      should().exist(unsignedVerifiablePresentation['holder']);
+    });
   });
 
   describe('#sign() method to sign presentation of credential', () => {
@@ -509,32 +513,34 @@ describe('Verifiable Presentation Operataions', () => {
       should().exist(signedSdVp['proof'].challenge);
       should().exist(signedSdVp['proof'].proofValue);
     });
-      it('should be able to sign a verifiable presentation document', async () => {
-          const presentationBody = {
-              presentation: unsignedVerifiablePresentation,
-              holderDid: subjectDid,
-              verificationMethodId: subjectDidDoc.authentication[0],
-              privateKeyMultibase: holderPrivateKeyMultibase,
-              challenge: 'abc',
-              domain: 'www.xyz.com',
-          };
-          signedVp = await hsSdk.vp.bjjVp.sign(presentationBody);
-          signedVp1 = {}
-          Object.assign(signedVp1, signedVp)
-          should().exist(signedVp['@context']);
-          should().exist(signedVp['type']);
-          expect(signedVp.type[0]).to.be.equal('VerifiablePresentation');
-          should().exist(signedVp['verifiableCredential']);
-          should().exist(signedVp['id']);
-          should().exist(signedVp['holder']);
-          should().exist(signedVp['proof']);
-          expect(signedVp['proof'].type).to.be.equal('BJJSignature2021');
-          should().exist(signedVp['proof'].created);
-          should().exist(signedVp['proof'].verificationMethod);
-          should().exist(signedVp['proof'].proofPurpose);
-          should().exist(signedVp['proof'].challenge);
-          should().exist(signedVp['proof'].proofValue);
-      });
+    it('should be able to sign a verifiable presentation document', async () => {
+      const presentationBody = {
+        presentation: unsignedVerifiablePresentation,
+        holderDid: subjectDid,
+        verificationMethodId: subjectDidDoc.authentication[0],
+        privateKeyMultibase: holderPrivateKeyMultibase,
+        challenge: 'abc',
+        domain: 'www.xyz.com',
+      };
+      signedVp = await hsSdk.vp.bjjVp.sign(presentationBody);
+
+      signedVp1 = {};
+      Object.assign(signedVp1, signedVp);
+
+      should().exist(signedVp['@context']);
+      should().exist(signedVp['type']);
+      expect(signedVp.type[0]).to.be.equal('VerifiablePresentation');
+      should().exist(signedVp['verifiableCredential']);
+      should().exist(signedVp['id']);
+      should().exist(signedVp['holder']);
+      should().exist(signedVp['proof']);
+      expect(signedVp['proof'].type).to.be.equal('BJJSignature2021');
+      should().exist(signedVp['proof'].created);
+      should().exist(signedVp['proof'].verificationMethod);
+      should().exist(signedVp['proof'].proofPurpose);
+      should().exist(signedVp['proof'].challenge);
+      should().exist(signedVp['proof'].proofValue);
+    });
   });
   describe('#verify() method to verify signed presentation of credential', () => {
     const verifyPresentationBody = {
@@ -667,9 +673,9 @@ describe('Verifiable Presentation Operataions', () => {
       tempverifyPresentationBody.signedPresentation = signedVp1;
       tempverifyPresentationBody.issuerDid = issuerDid;
       tempverifyPresentationBody.holderDid = subjectDid;
-      tempverifyPresentationBody.challenge = "abczshdsfhgk";
-      tempverifyPresentationBody['domain'] = "http://xyz.com"
-      tempverifyPresentationBody.holderVerificationMethodId = subjectDidDoc.assertionMethod[0]
+      tempverifyPresentationBody.challenge = 'abczshdsfhgk';
+      tempverifyPresentationBody['domain'] = 'http://xyz.com';
+      tempverifyPresentationBody.holderVerificationMethodId = subjectDidDoc.assertionMethod[0];
       tempverifyPresentationBody.issuerVerificationMethodId = issuerDidDoc.assertionMethod[0];
       const verifiedPresentationDetail = await hsSdk.vp.bjjVp.verify(tempverifyPresentationBody);
       expect(verifiedPresentationDetail.verified).to.be.equal(false);
@@ -680,8 +686,8 @@ describe('Verifiable Presentation Operataions', () => {
       tempverifyPresentationBody.signedPresentation = signedVp1;
       tempverifyPresentationBody.issuerDid = issuerDid;
       tempverifyPresentationBody.holderDid = subjectDid;
-      tempverifyPresentationBody.challenge = "abc";
-      tempverifyPresentationBody['domain'] = "http://xyz1.com";
+      tempverifyPresentationBody.challenge = 'abc';
+      tempverifyPresentationBody['domain'] = 'http://xyz1.com';
       tempverifyPresentationBody.holderVerificationMethodId = subjectDidDoc.authentication[0];
       tempverifyPresentationBody.issuerVerificationMethodId = issuerDidDoc.assertionMethod[0];
       const verifiedPresentationDetail = await hsSdk.vp.bjjVp.verify(tempverifyPresentationBody);
@@ -698,7 +704,8 @@ describe('Verifiable Presentation Operataions', () => {
         issuerVerificationMethodId: issuerDidDoc.assertionMethod[0],
         holderVerificationMethodId: subjectDidDoc.authentication[0],
       };
-      const verifiedVp = await hsSdk.vp.bjjVp.verify(presentationBody);      
+      const verifiedVp = await hsSdk.vp.bjjVp.verify(presentationBody);
+
       should().exist(verifiedVp['verified']);
       expect(verifiedVp.verified).to.be.equal(true);
       should().exist(verifiedVp['results']);
@@ -709,4 +716,3 @@ describe('Verifiable Presentation Operataions', () => {
     });
   });
 });
-

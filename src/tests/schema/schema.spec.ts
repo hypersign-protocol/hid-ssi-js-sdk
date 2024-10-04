@@ -439,6 +439,8 @@ describe('#register() function to register schema on blockchain', function () {
     })
   })
   it('should be able to register schema on blockchain', async function () {
+    console.log(signedSchema);
+    
     const registeredSchema = await hypersignSchema.register({
       schema: signedSchema,
     });

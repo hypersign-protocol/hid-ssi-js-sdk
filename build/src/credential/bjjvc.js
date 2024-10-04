@@ -198,6 +198,7 @@ class HypersignBJJVerifiableCredential {
                 try {
                     const context = Array();
                     context.push(constants_1.VC.CREDENTAIL_BASE_CONTEXT);
+                    context.push(constant.DID_BabyJubJubKey2021.BABYJUBJUBSIGNATURE);
                     params.schemaContext.forEach((x) => {
                         context.push(x);
                     });
@@ -357,7 +358,7 @@ class HypersignBJJVerifiableCredential {
             let credentialHash = yield merkelizerObj.mt.root();
             credentialHash = Buffer.from(credentialHash.bytes).toString('hex');
             const credentialStatus = {
-                '@context': [constant.VC.CREDENTIAL_STATUS_CONTEXT],
+                '@context': [constant.VC.CREDENTIAL_STATUS_CONTEXT, constant.DID_BabyJubJubKey2021.BABYJUBJUBSIGNATURE],
                 id: params.credential.id,
                 issuer: params.credential.issuer,
                 issuanceDate: params.credential.issuanceDate,
@@ -539,7 +540,7 @@ class HypersignBJJVerifiableCredential {
             }
             const claim = params.credentialStatus;
             const credentialStatus = {
-                '@context': [constant.VC.CREDENTIAL_STATUS_CONTEXT, constant.DID_BabyJubJubKey2021.DID_BABYJUBJUBKEY2021],
+                '@context': [constant.VC.CREDENTIAL_STATUS_CONTEXT, constant.DID_BabyJubJubKey2021.BABYJUBJUBSIGNATURE],
                 id: claim.id,
                 remarks: (_a = params.statusReason) !== null && _a !== void 0 ? _a : constants_1.VC.CRED_STATUS_REASON_TYPES[params.status],
                 issuer: params.credentialStatus.issuer,
