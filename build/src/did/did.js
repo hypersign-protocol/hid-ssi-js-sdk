@@ -694,7 +694,7 @@ class HypersignDID {
                 }
                 else if (didDocument) {
                     resolveddoc = {};
-                    resolveddoc.didDocument = didDocument;
+                    resolveddoc.didDocument = utils_1.default.removeEmptyString(didDocument);
                 }
                 else {
                     throw new Error('HID-SSI-SDK:: Error: params.did or params.didDocument is required to sign a did');
@@ -781,7 +781,7 @@ class HypersignDID {
                 throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify a did');
             }
             const didAuthType = (_a = params.purpose) !== null && _a !== void 0 ? _a : 'authentication';
-            const didDoc = didDocument;
+            const didDoc = utils_1.default.removeEmptyString(didDocument);
             const publicKeyId = verificationMethodId;
             const pubkey = (_b = didDoc.verificationMethod) === null || _b === void 0 ? void 0 : _b.find((item) => item.id === publicKeyId);
             if (!pubkey) {

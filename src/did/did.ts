@@ -759,7 +759,7 @@ export default class HypersignDID implements IDID {
         resolveddoc = await this.didrpc.resolveDID(did);
       } else if (didDocument) {
         resolveddoc = {};
-        resolveddoc.didDocument = didDocument;
+        resolveddoc.didDocument = Utils.removeEmptyString(didDocument) as Did;
       } else {
         throw new Error('HID-SSI-SDK:: Error: params.did or params.didDocument is required to sign a did');
       }
@@ -851,7 +851,7 @@ export default class HypersignDID implements IDID {
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to verify a did');
     }
     const didAuthType = params.purpose ?? 'authentication';
-    const didDoc = didDocument as Did;
+    const didDoc = Utils.removeEmptyString(didDocument) as Did;
     const publicKeyId = verificationMethodId;
     const pubkey = didDoc.verificationMethod?.find((item) => item.id === publicKeyId);
 

@@ -16,16 +16,16 @@ let keyPair;
 export const mnemonic =
   'verify sustain lumber boat demise parade special soft bargain scout spoil there addict move badge rebuild horn achieve hollow acquire glide bundle curious present';
 
-// export const hidNodeEp = {
-//   rpc: 'https://rpc.prajna.hypersign.id',
-//   rest: 'https://api.prajna.hypersign.id',
-//   namespace: 'testnet',
-// };
 export const hidNodeEp = {
-  rpc: 'http://127.0.0.1:26657',
-  rest: 'http://127.0.0.1:1317',
+  rpc: 'https://rpc.prajna.hypersign.id',
+  rest: 'https://api.prajna.hypersign.id',
   namespace: 'testnet',
 };
+// export const hidNodeEp = {
+//   rpc: 'http://127.0.0.1:26657',
+//   rest: 'http://127.0.0.1:1317',
+//   namespace: 'testnet',
+// };
 export function makeCosmoshubPath(a) {
   return [
     Slip10RawIndex.hardened(44),
