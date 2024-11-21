@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SupportedPurpose = exports.Schema = exports.Did = exports.IClientSpec = exports.IKeyType = exports.IVerificationRelationships = exports.HypersignVerifiablePresentation = exports.HypersignVerifiableCredential = exports.HypersignSchema = exports.HypersignDID = exports.HypersignSSISdk = void 0;
+exports.SupportedPurpose = exports.Schema = exports.Did = exports.IClientSpec = exports.IKeyType = exports.HypersignBJJVerifiableCredential = exports.IVerificationRelationships = exports.HypersignVerifiablePresentation = exports.HypersignVerifiableCredential = exports.HypersignSchema = exports.HypersignDID = exports.HypersignSSISdk = void 0;
 const did_1 = __importDefault(require("./did/did"));
 exports.HypersignDID = did_1.default;
 const bjjdid_1 = __importDefault(require("./did/bjjdid"));
@@ -34,6 +34,7 @@ Object.defineProperty(exports, "Did", { enumerable: true, get: function () { ret
 const credential_schema_1 = require("../libs/generated/ssi/credential_schema");
 Object.defineProperty(exports, "Schema", { enumerable: true, get: function () { return credential_schema_1.CredentialSchemaDocument; } });
 const bjjvc_1 = __importDefault(require("./credential/bjjvc"));
+exports.HypersignBJJVerifiableCredential = bjjvc_1.default;
 class HypersignSSISdk {
     constructor(params) {
         const { offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, namespace, entityApiSecretKey } = params;

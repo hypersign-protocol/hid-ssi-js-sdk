@@ -48,7 +48,7 @@ class HypersignSSISdk {
     this.did.bjjDID = new HyperSignBJJDID(constructorParams);
     this.schema = new HypersignSchema(constructorParams);
     this.vc = new HypersignVerifiableCredential(constructorParams);
-    this.vc.bjjVC= new HypersignBJJVerifiableCredential(constructorParams)
+    this.vc.bjjVC = new HypersignBJJVerifiableCredential(constructorParams);
     this.vp = new HypersignVerifiablePresentation(constructorParams);
   }
 
@@ -69,6 +69,7 @@ export {
   HypersignVerifiableCredential,
   HypersignVerifiablePresentation,
   IVerificationRelationships,
+  HypersignBJJVerifiableCredential,
   IKeyType,
   ISignInfo,
   IClientSpec,
@@ -76,5 +77,5 @@ export {
   IVerifiableCredential,
   IVerifiablePresentation,
   Schema,
-  SupportedPurpose
+  SupportedPurpose,
 };

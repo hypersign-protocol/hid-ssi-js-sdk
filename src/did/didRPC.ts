@@ -8,8 +8,8 @@ import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_DID_PATH } from '../c
 import * as generatedProto from '../../libs/generated/ssi/tx';
 import { DidDocument as IDidProto } from '../../libs/generated/ssi/did';
 import { DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
-
-import { buildMemoryStorage, setupCache } from 'axios-cache-interceptor';
+import https from 'https';
+import { buildMemoryStorage, setupCache } from 'axios-cache-interceptor/dev';
 import { SigningStargateClient } from '@cosmjs/stargate';
 
 import axios from 'axios';
@@ -42,8 +42,10 @@ export class DIDRpc implements IDIDRpc {
       (HIDClient.hidNodeRestEndpoint ? HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) + HYPERSIGN_NETWORK_DID_PATH;
     this.api = axios.create({
       baseURL: this.didRestEp,
+      httpsAgent: new https.Agent({ keepAlive: true, keepAliveMsecs: 1000 }),
     });
     this.axiosCache = setupCache(this.api, {
+      debug: console.log,
       methods: ['get'],
       storage: buildMemoryStorage(),
     });
@@ -175,7 +177,14 @@ export class DIDRpc implements IDIDRpc {
 
     return new Promise((resolve, reject) => {
       this.axiosCache
-        .get(get_didUrl)
+        .get(get_didUrl, {
+          timeout: 1000000,
+
+          proxy: false,
+          headers: {
+            'Cache-Control': 'public',
+          },
+        })
         .then((response) => {
           const didDoc = response.data;
           resolve(didDoc);

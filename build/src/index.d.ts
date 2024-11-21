@@ -10,6 +10,7 @@ import { DidDocument as Did } from '../libs/generated/ssi/did';
 import { IVerifiableCredential } from './credential/ICredential';
 import { CredentialSchemaDocument as Schema } from '../libs/generated/ssi/credential_schema';
 import { IVerifiablePresentation } from './presentation/IPresentation';
+import HypersignBJJVerifiableCredential from './credential/bjjvc';
 declare class HypersignSSISdk {
     did: HypersignDID;
     vc: HypersignVerifiableCredential;
@@ -29,5 +30,5 @@ declare class HypersignSSISdk {
     });
     init(): Promise<void>;
 }
-export { HypersignSSISdk, HypersignDID, HypersignSchema, HypersignVerifiableCredential, HypersignVerifiablePresentation, IVerificationRelationships, IKeyType, ISignInfo, IClientSpec, Did, IVerifiableCredential, IVerifiablePresentation, Schema, SupportedPurpose };
+export { HypersignSSISdk, HypersignDID, HypersignSchema, HypersignVerifiableCredential, HypersignVerifiablePresentation, IVerificationRelationships, HypersignBJJVerifiableCredential, IKeyType, ISignInfo, IClientSpec, Did, IVerifiableCredential, IVerifiablePresentation, Schema, SupportedPurpose, };
 //# sourceMappingURL=index.d.ts.map
