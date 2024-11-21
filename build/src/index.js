@@ -33,6 +33,7 @@ const did_2 = require("../libs/generated/ssi/did");
 Object.defineProperty(exports, "Did", { enumerable: true, get: function () { return did_2.DidDocument; } });
 const credential_schema_1 = require("../libs/generated/ssi/credential_schema");
 Object.defineProperty(exports, "Schema", { enumerable: true, get: function () { return credential_schema_1.CredentialSchemaDocument; } });
+const bjjvc_1 = __importDefault(require("./credential/bjjvc"));
 class HypersignSSISdk {
     constructor(params) {
         const { offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, namespace, entityApiSecretKey } = params;
@@ -52,6 +53,7 @@ class HypersignSSISdk {
         this.did.bjjDID = new bjjdid_1.default(constructorParams);
         this.schema = new schema_1.default(constructorParams);
         this.vc = new vc_1.default(constructorParams);
+        this.vc.bjjVC = new bjjvc_1.default(constructorParams);
         this.vp = new vp_1.default(constructorParams);
     }
     init() {

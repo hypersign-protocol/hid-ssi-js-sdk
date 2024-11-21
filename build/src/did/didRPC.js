@@ -43,6 +43,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DIDRpc = void 0;
 const constants_1 = require("../constants");
 const generatedProto = __importStar(require("../../libs/generated/ssi/tx"));
+const axios_cache_interceptor_1 = require("axios-cache-interceptor");
 const axios_1 = __importDefault(require("axios"));
 const client_1 = require("../hid/client");
 const utils_1 = __importDefault(require("../utils"));
@@ -58,6 +59,13 @@ class DIDRpc {
         this.nodeRestEp = nodeRestEndpoint;
         this.didRestEp =
             (client_1.HIDClient.hidNodeRestEndpoint ? client_1.HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) + constants_1.HYPERSIGN_NETWORK_DID_PATH;
+        this.api = axios_1.default.create({
+            baseURL: this.didRestEp,
+        });
+        this.axiosCache = (0, axios_cache_interceptor_1.setupCache)(this.api, {
+            methods: ['get'],
+            storage: (0, axios_cache_interceptor_1.buildMemoryStorage)(),
+        });
     }
     getSigningStargateClient() {
         const client = client_1.HIDClient.getHidClient();
@@ -177,15 +185,17 @@ class DIDRpc {
     resolveDID(did) {
         return __awaiter(this, void 0, void 0, function* () {
             const get_didUrl = `${this.didRestEp}/${did}`;
-            let response;
-            try {
-                response = yield axios_1.default.get(get_didUrl);
-                const didDoc = response.data;
-                return didDoc;
-            }
-            catch (err) {
-                return { didDocument: null, didDocumentMetadata: null };
-            }
+            return new Promise((resolve, reject) => {
+                this.axiosCache
+                    .get(get_didUrl)
+                    .then((response) => {
+                    const didDoc = response.data;
+                    resolve(didDoc);
+                })
+                    .catch((err) => {
+                    resolve({ didDocument: null, didDocumentMetadata: null });
+                });
+            });
         });
     }
 }

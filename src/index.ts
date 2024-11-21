@@ -11,6 +11,7 @@ import { DidDocument as Did } from '../libs/generated/ssi/did';
 import { IVerifiableCredential } from './credential/ICredential';
 import { CredentialSchemaDocument as Schema } from '../libs/generated/ssi/credential_schema';
 import { IVerifiablePresentation } from './presentation/IPresentation';
+import HypersignBJJVerifiableCredential from './credential/bjjvc';
 
 class HypersignSSISdk {
   did: HypersignDID;
@@ -47,6 +48,7 @@ class HypersignSSISdk {
     this.did.bjjDID = new HyperSignBJJDID(constructorParams);
     this.schema = new HypersignSchema(constructorParams);
     this.vc = new HypersignVerifiableCredential(constructorParams);
+    this.vc.bjjVC= new HypersignBJJVerifiableCredential(constructorParams)
     this.vp = new HypersignVerifiablePresentation(constructorParams);
   }
 

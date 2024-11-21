@@ -9,6 +9,7 @@ import * as generatedProto from '../../libs/generated/ssi/tx';
 import { DidDocument as IDidProto } from '../../libs/generated/ssi/did';
 import { DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
 
+import { buildMemoryStorage, setupCache } from 'axios-cache-interceptor';
 import { SigningStargateClient } from '@cosmjs/stargate';
 
 import axios from 'axios';
@@ -18,6 +19,7 @@ import { OfflineSigner } from '@cosmjs/proto-signing';
 import Utils from '../utils';
 import * as constants from '../constants';
 export class DIDRpc implements IDIDRpc {
+  [x: string]: any;
   private didRestEp: string;
   private hidClient: HIDClient | null;
   private nodeRestEp: string;
@@ -38,6 +40,13 @@ export class DIDRpc implements IDIDRpc {
     this.nodeRestEp = nodeRestEndpoint;
     this.didRestEp =
       (HIDClient.hidNodeRestEndpoint ? HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) + HYPERSIGN_NETWORK_DID_PATH;
+    this.api = axios.create({
+      baseURL: this.didRestEp,
+    });
+    this.axiosCache = setupCache(this.api, {
+      methods: ['get'],
+      storage: buildMemoryStorage(),
+    });
   }
 
   private getSigningStargateClient() {
@@ -163,13 +172,17 @@ export class DIDRpc implements IDIDRpc {
 
   async resolveDID(did: string): Promise<IDIDResolve> {
     const get_didUrl = `${this.didRestEp}/${did}`;
-    let response;
-    try {
-      response = await axios.get(get_didUrl);
-      const didDoc = response.data;
-      return didDoc;
-    } catch (err) {
-      return { didDocument: null, didDocumentMetadata: null } as any as IDIDResolve;
-    }
+
+    return new Promise((resolve, reject) => {
+      this.axiosCache
+        .get(get_didUrl)
+        .then((response) => {
+          const didDoc = response.data;
+          resolve(didDoc);
+        })
+        .catch((err) => {
+          resolve({ didDocument: null, didDocumentMetadata: null } as any as IDIDResolve);
+        });
+    });
   }
 }
