@@ -181,6 +181,11 @@ export class DIDRpc implements IDIDRpc {
           resolve(didDoc);
         })
         .catch((err) => {
+          if (err.response) {
+            console.error(err.response.data);
+          } else {
+            console.error(err);
+          }
           resolve({ didDocument: null, didDocumentMetadata: null } as any as IDIDResolve);
         });
     });

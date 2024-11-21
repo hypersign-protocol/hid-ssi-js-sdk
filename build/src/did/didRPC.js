@@ -193,6 +193,12 @@ class DIDRpc {
                     resolve(didDoc);
                 })
                     .catch((err) => {
+                    if (err.response) {
+                        console.error(err.response.data);
+                    }
+                    else {
+                        console.error(err);
+                    }
                     resolve({ didDocument: null, didDocumentMetadata: null });
                 });
             });
