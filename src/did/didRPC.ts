@@ -45,7 +45,6 @@ export class DIDRpc implements IDIDRpc {
       httpsAgent: new https.Agent({ keepAlive: true, keepAliveMsecs: 1000 }),
     });
     this.axiosCache = setupCache(this.api, {
-      debug: console.log,
       methods: ['get'],
       storage: buildMemoryStorage(),
     });
@@ -174,12 +173,9 @@ export class DIDRpc implements IDIDRpc {
 
   async resolveDID(did: string): Promise<IDIDResolve> {
     const get_didUrl = `${this.didRestEp}/${did}`;
-
     return new Promise((resolve, reject) => {
       this.axiosCache
         .get(get_didUrl, {
-          timeout: 1000000,
-
           proxy: false,
           headers: {
             'Cache-Control': 'public',
