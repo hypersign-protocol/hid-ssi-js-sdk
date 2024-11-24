@@ -176,9 +176,9 @@ class HypersignBJJVerifiableCredential {
             const issuerDid = params.issuerDid;
             const subjectDid = params.subjectDid;
             let resolvedsubjectDidDoc;
-            const { didDocument: issuerDidDoc } = yield this.hsDid.resolve({ did: issuerDid });
+            // const { didDocument: issuerDidDoc } = await this.hsDid.resolve({ did: issuerDid });
             if (params.subjectDid) {
-                resolvedsubjectDidDoc = yield this.hsDid.resolve({ did: params.subjectDid });
+                // resolvedsubjectDidDoc = await this.hsDid.resolve({ did: params.subjectDid });
             }
             else if (params.subjectDidDocSigned) {
                 resolvedsubjectDidDoc = {};
@@ -187,13 +187,13 @@ class HypersignBJJVerifiableCredential {
             else {
                 throw new Error('HID-SSI-SDK:: Error: Could not resolve the subjectDid or subjectDidDoc');
             }
-            const { didDocument: subjectDidDoc } = resolvedsubjectDidDoc;
-            if (!issuerDidDoc) {
-                throw new Error('HID-SSI-SDK:: Error: Could not fetch issuer did doc, issuer did = ' + issuerDid);
-            }
-            if (!subjectDidDoc) {
-                throw new Error('HID-SSI-SDK:: Error: Could not fetch subject did doc, subject did = ' + subjectDid);
-            }
+            // const { didDocument: subjectDidDoc } = resolvedsubjectDidDoc;
+            // if (!issuerDidDoc) {
+            //   throw new Error('HID-SSI-SDK:: Error: Could not fetch issuer did doc, issuer did = ' + issuerDid);
+            // }
+            // if (!subjectDidDoc) {
+            //   throw new Error('HID-SSI-SDK:: Error: Could not fetch subject did doc, subject did = ' + subjectDid);
+            // }
             if (params && params.schemaContext && params.type) {
                 try {
                     const context = Array();
@@ -218,7 +218,7 @@ class HypersignBJJVerifiableCredential {
                     vc.issuanceDate = this._dateNow(new Date(new Date().getTime() - 100000).toISOString());
                     vc.expirationDate = this._dateNow(expirationDate);
                     vc.credentialSubject = credentialSubject;
-                    vc.credentialSubject['id'] = subjectDid && subjectDid != undefined ? subjectDid : subjectDidDoc.id;
+                    vc.credentialSubject['id'] = subjectDid; //subjectDid && subjectDid != undefined ? subjectDid : subjectDidDoc.id;
                     // TODO: confusion here is, what would be the status of this credential at the time of its creation?
                     // If this properpty is present , then checkStatus() must be passed at the time of verification of the credential
                     // Ref: https://github.com/digitalbazaar/vc-js/blob/7e14ef27bc688194635077d243d9025c0020448b/test/10-verify.spec.js#L188
@@ -279,7 +279,7 @@ class HypersignBJJVerifiableCredential {
             //   ...this._getCredentialSubject(schemaDoc.schema as SchemaProperty, params.fields),
             // };
             vc.credentialSubject = params.fields;
-            vc.credentialSubject['id'] = subjectDid && subjectDid != undefined ? subjectDid : subjectDidDoc.id;
+            vc.credentialSubject['id'] = subjectDid; // subjectDid && subjectDid != undefined ? subjectDid : subjectDidDoc.id;
             vc.credentialSchema = {
                 id: schemaDoc.id,
                 type: this.credentialSchema.type,
@@ -328,7 +328,16 @@ class HypersignBJJVerifiableCredential {
             if (params.registerCredential == undefined) {
                 params.registerCredential = true;
             }
-            const { didDocument: signerDidDoc } = yield this.hsDid.resolve({ did: params.issuerDid });
+            // const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
+            let signerDidDoc;
+            if (params.issuerDidDoc) {
+                console.log('Got issuerDID doc so no need to resolve');
+                signerDidDoc = params.issuerDidDoc;
+            }
+            else {
+                console.log('Did not get issuerDID doc, need to resolve');
+                signerDidDoc = (yield this.hsDid.resolve({ did: params.issuerDid })).didDocument;
+            }
             if (signerDidDoc === null || signerDidDoc === undefined)
                 throw new Error('HID-SSI-SDK:: Error: Could not resolve issuerDid = ' + params.issuerDid);
             const publicKeyId = params.verificationMethodId;
@@ -371,7 +380,15 @@ class HypersignBJJVerifiableCredential {
                 verificationMethodId: params.verificationMethodId,
                 publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase,
             });
-            const { didDocument: issuerDID } = yield this.hsDid.resolve({ did: params.credential.issuer });
+            let issuerDID;
+            if (params.issuerDidDoc) {
+                console.log('Got issuerDID doc so no need to resolve');
+                issuerDID = params.issuerDidDoc;
+            }
+            else {
+                console.log('Did not get issuerDID doc, need to resolve');
+                issuerDID = (yield this.hsDid.resolve({ did: params.credential.issuer })).didDocument;
+            }
             if (issuerDID === null || issuerDID === undefined)
                 throw new Error('Could not resolve issuerDid = ' + params.credential.issuer);
             const credIssuerDidDoc = issuerDID;

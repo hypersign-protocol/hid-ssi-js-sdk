@@ -65,7 +65,6 @@ class DIDRpc {
             httpsAgent: new https_1.default.Agent({ keepAlive: true, keepAliveMsecs: 1000 }),
         });
         this.axiosCache = (0, dev_1.setupCache)(this.api, {
-            debug: console.log,
             methods: ['get'],
             storage: (0, dev_1.buildMemoryStorage)(),
         });
@@ -191,7 +190,6 @@ class DIDRpc {
             return new Promise((resolve, reject) => {
                 this.axiosCache
                     .get(get_didUrl, {
-                    timeout: 1000000,
                     proxy: false,
                     headers: {
                         'Cache-Control': 'public',

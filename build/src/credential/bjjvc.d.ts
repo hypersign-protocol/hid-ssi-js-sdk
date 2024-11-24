@@ -78,6 +78,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
         verificationMethodId: string;
         privateKeyMultibase: string;
         registerCredential?: boolean;
+        issuerDidDoc?: JSON;
     }): Promise<{
         signedCredential: IVerifiableCredential;
         credentialStatus: CredentialStatus;
