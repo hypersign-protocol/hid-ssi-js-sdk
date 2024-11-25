@@ -41,7 +41,6 @@
     "@iden3/js-jsonld-merklization": "^1.0.2",
     "@iden3/js-merkletree": "^1.1.2",
     "axios": "^1.6.2",
-    "axios-cache-interceptor": "^1.6.2",
     "babyjubjub2021": "^0.1.1",
     "babyjubjubsignature2021": "github:hypersign-protocol/BabyJubJubSignature2021Suite",
     "crypto-ld": "^6.0.0",

@@ -8,7 +8,6 @@ import { DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
 import { IDIDResolve, IDIDRpc, DeliverTxResponse } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 export declare class DIDRpc implements IDIDRpc {
-    [x: string]: any;
     private didRestEp;
     private hidClient;
     private nodeRestEp;
