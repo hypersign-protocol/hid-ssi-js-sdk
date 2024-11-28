@@ -53,12 +53,15 @@ class HypersignSSISdk {
   }
 
   async init() {
-    await this.did.init();
-    await this.did.bjjDID.init();
-    await this.schema.init();
-    await this.schema.hypersignBjjschema.init();
-    await this.vc.init();
-    await this.vc.bjjVC.init();
+    const p = [
+      this.did.init(),
+      this.did.bjjDID.init(),
+      this.schema.init(),
+      this.schema.hypersignBjjschema.init(),
+      this.vc.init(),
+      this.vc.bjjVC.init(),
+    ];
+    await Promise.all(p);
   }
 }
 

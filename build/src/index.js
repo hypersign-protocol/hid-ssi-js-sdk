@@ -59,12 +59,15 @@ class HypersignSSISdk {
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.did.init();
-            yield this.did.bjjDID.init();
-            yield this.schema.init();
-            yield this.schema.hypersignBjjschema.init();
-            yield this.vc.init();
-            yield this.vc.bjjVC.init();
+            const p = [
+                this.did.init(),
+                this.did.bjjDID.init(),
+                this.schema.init(),
+                this.schema.hypersignBjjschema.init(),
+                this.vc.init(),
+                this.vc.bjjVC.init(),
+            ];
+            yield Promise.all(p);
         });
     }
 }

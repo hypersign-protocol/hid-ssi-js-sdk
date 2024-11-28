@@ -45,6 +45,7 @@ const jsonld_signatures_2 = require("jsonld-signatures");
 const utils_1 = __importDefault(require("../utils"));
 const schema_1 = __importDefault(require("../schema/schema"));
 const did_1 = __importDefault(require("../did/did"));
+const path_1 = __importDefault(require("path"));
 const jsonSchemaValidator = __importStar(require("@cfworker/json-schema"));
 const jsonld_signatures_3 = __importDefault(require("jsonld-signatures"));
 const { AssertionProofPurpose } = jsonld_signatures_3.default.purposes;
@@ -56,6 +57,7 @@ const credential_service_1 = __importDefault(require("../ssiApi/services/credent
 const constant = __importStar(require("../constants"));
 const babyjubjub2021_1 = require("babyjubjub2021");
 const babyjubjubsignature2021_1 = require("babyjubjubsignature2021");
+const worker_threads_1 = require("worker_threads");
 const { Merklizer } = require('@iden3/js-jsonld-merklization');
 const documentLoader = (0, jsonld_signatures_4.extendContextLoader)(v1_1.default);
 class HypersignBJJVerifiableCredential {
@@ -96,7 +98,7 @@ class HypersignBJJVerifiableCredential {
     _jsonLdSign(params) {
         return __awaiter(this, void 0, void 0, function* () {
             const { credentialStatus, privateKeyMultibase, verificationMethodId } = params;
-            const keyPair = yield babyjubjub2021_1.BabyJubJubKeys2021.fromKeys({
+            const keyPair = babyjubjub2021_1.BabyJubJubKeys2021.fromKeys({
                 options: { id: verificationMethodId, controller: verificationMethodId },
                 privateKeyMultibase: privateKeyMultibase,
                 publicKeyMultibase: params.publicKeyMultibase,
@@ -108,6 +110,31 @@ class HypersignBJJVerifiableCredential {
                 documentLoader: v1_1.default,
             });
             return signedCredStatus.proof;
+        });
+    }
+    _jsonLdSignThread(params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                const worker = new worker_threads_1.Worker(path_1.default.resolve(__dirname, 'worker/bjj/credStatus.worker.js'), {
+                    workerData: Object.assign({}, params),
+                });
+                worker.on('message', (message) => {
+                    if (message.success) {
+                        resolve(message.result);
+                    }
+                    else {
+                        reject(new Error(message.error));
+                    }
+                });
+                worker.on('error', (err) => {
+                    reject(err);
+                });
+                worker.on('exit', (code) => {
+                    if (code !== 0) {
+                        reject(new Error(`Worker stopped with exit code ${code}`));
+                    }
+                });
+            });
         });
     }
     _dateNow(date) {
@@ -345,41 +372,30 @@ class HypersignBJJVerifiableCredential {
             if (!publicKeyVerMethod) {
                 throw new Error('HID-SSI-SDK:: Error: Could not find verification method for id = ' + params.verificationMethodId);
             }
-            const keyPair = yield babyjubjub2021_1.BabyJubJubKeys2021.fromKeys({
-                privateKeyMultibase: params.privateKeyMultibase,
-                publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase,
-                options: {
-                    id: publicKeyVerMethod.id,
-                    controller: publicKeyVerMethod.controller,
-                },
-            });
-            const suite = new babyjubjubsignature2021_1.BabyJubJubSignature2021Suite({
-                verificationMethod: publicKeyId,
-                key: keyPair,
-            });
+            // const keyPair = BabyJubJubKeys2021.fromKeys({
+            //   privateKeyMultibase: params.privateKeyMultibase,
+            //   publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase as string,
+            //   options: {
+            //     id: publicKeyVerMethod.id,
+            //     controller: publicKeyVerMethod.controller,
+            //   },
+            // });
+            // const suite = new BabyJubJubSignature2021Suite({
+            //   verificationMethod: publicKeyId,
+            //   key: keyPair,
+            // });
             /// Before we issue the credential the credential status has to be added
             /// for that we will call RegisterCredentialStatus RPC
             //  Let us generate credentialHash first
             // generating hash using merkelroot hash
-            const merkelizerObj = yield Merklizer.merklizeJSONLD(JSON.stringify(params.credential), {
-                documentLoader,
-            });
-            let credentialHash = yield merkelizerObj.mt.root();
-            credentialHash = Buffer.from(credentialHash.bytes).toString('hex');
-            const credentialStatus = {
-                '@context': [constant.VC.CREDENTIAL_STATUS_CONTEXT, constant.DID_BabyJubJubKey2021.BABYJUBJUBSIGNATURE],
-                id: params.credential.id,
-                issuer: params.credential.issuer,
-                issuanceDate: params.credential.issuanceDate,
-                remarks: 'Credential is active',
-                credentialMerkleRootHash: credentialHash,
-            };
-            const credProof = yield this._jsonLdSign({
-                credentialStatus,
+            const result = this._jsonLdSignThread({
+                credential: params.credential,
                 privateKeyMultibase: params.privateKeyMultibase,
                 verificationMethodId: params.verificationMethodId,
                 publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase,
             });
+            const promise = Array();
+            promise.push(result);
             let issuerDID;
             if (params.issuerDidDoc) {
                 console.log('Got issuerDID doc so no need to resolve');
@@ -397,17 +413,21 @@ class HypersignBJJVerifiableCredential {
                 throw new Error(params.issuerDid + ' is not a controller of ' + params.credential.issuer);
             }
             /// RegisterCRedeRPC
-            const signedVC = yield jsonld_signatures_1.default.sign(params.credential, {
-                purpose: new jsonld_signatures_2.purposes.AssertionProofPurpose({
-                    controller: {
-                        '@context': ['https://www.w3.org/ns/did/v1'],
-                        id: issuerDID.id,
-                        assertionMethod: issuerDID.assertionMethod,
+            promise.push(this.signCredThread(params.credential, {
+                keys: {
+                    privateKeyMultibase: params.privateKeyMultibase,
+                    publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase,
+                    options: {
+                        id: publicKeyVerMethod.id,
+                        controller: publicKeyVerMethod.controller,
                     },
-                }),
-                suite,
-                documentLoader,
-            });
+                },
+                issuerDID,
+                publicKeyId,
+            }));
+            const finalResult = yield Promise.all(promise);
+            const { credentialStatus, credProof } = finalResult[0];
+            const signedVC = finalResult[1];
             let credentialStatusRegistrationResult;
             if (params.registerCredential) {
                 credentialStatusRegistrationResult = yield this.credStatusRPC.registerCredentialStatus(credentialStatus, credProof);
@@ -421,7 +441,36 @@ class HypersignBJJVerifiableCredential {
                     credentialStatusRegistrationResult,
                 };
             }
-            return { signedCredential: signedVC, credentialStatus, credentialStatusProof: credProof };
+            return {
+                signedCredential: signedVC,
+                credentialStatus,
+                credentialStatusProof: credProof,
+            };
+        });
+    }
+    signCredThread(credential, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                const worker = new worker_threads_1.Worker(path_1.default.resolve(__dirname, 'worker/bjj/sign.js'), {
+                    workerData: Object.assign({ credential }, params),
+                });
+                worker.on('message', (message) => {
+                    if (message.success) {
+                        resolve(message.result);
+                    }
+                    else {
+                        reject(new Error(message.error));
+                    }
+                });
+                worker.on('error', (err) => {
+                    reject(err);
+                });
+                worker.on('exit', (code) => {
+                    if (code !== 0) {
+                        reject(new Error(`Worker stopped with exit code ${code}`));
+                    }
+                });
+            });
         });
     }
     // Ref: https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251

@@ -29,6 +29,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
         entityApiSecretKey?: string;
     });
     private _jsonLdSign;
+    private _jsonLdSignThread;
     private _dateNow;
     private _getId;
     private _toTitleCase;
@@ -85,6 +86,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
         credentialStatusProof: CredentialProof;
         credentialStatusRegistrationResult?: DeliverTxResponse;
     }>;
+    private signCredThread;
     /**
      * Verfies signed/issued credential
      * @params
