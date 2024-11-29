@@ -47,12 +47,14 @@ async function _jsonLdSign(params: {
     purpose: new AssertionProofPurpose(),
     documentLoader: customLoader,
   });
+
   return { credentialStatus, credProof: signedCredStatus.proof };
 }
 
 (async () => {
   try {
     const result = await _jsonLdSign(workerData);
+
     parentPort?.postMessage({ success: true, result });
   } catch (error) {
     parentPort?.postMessage({

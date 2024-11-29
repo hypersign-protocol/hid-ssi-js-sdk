@@ -34,7 +34,7 @@ function signCredential(params) {
                 assertionMethod: params.issuerDID.assertionMethod,
             },
         });
-        return jsonld_signatures_1.default.sign(params.credential, {
+        return yield jsonld_signatures_1.default.sign(params.credential, {
             purpose,
             suite,
             documentLoader,

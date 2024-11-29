@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/WorkerPool/index.ts"],"names":[],"mappings":"AAIA,qBAAa,UAAU;IACrB,UAAU,EAAE,MAAM,CAAC;IAEnB,IAAI,EAAE,MAAM,CAAC;gBACD,IAAI,EAAE,MAAM;IAMxB,OAAO,CAAC,QAAQ,KAAA;IAYhB,WAAW,CAAC,IAAI,KAAA;IAoBhB,YAAY,CAAC,MAAM,KAAA;CASpB"}

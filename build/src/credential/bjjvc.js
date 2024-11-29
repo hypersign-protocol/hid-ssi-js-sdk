@@ -57,7 +57,7 @@ const credential_service_1 = __importDefault(require("../ssiApi/services/credent
 const constant = __importStar(require("../constants"));
 const babyjubjub2021_1 = require("babyjubjub2021");
 const babyjubjubsignature2021_1 = require("babyjubjubsignature2021");
-const worker_threads_1 = require("worker_threads");
+const WorkerPool_1 = require("../WorkerPool");
 const { Merklizer } = require('@iden3/js-jsonld-merklization');
 const documentLoader = (0, jsonld_signatures_4.extendContextLoader)(v1_1.default);
 class HypersignBJJVerifiableCredential {
@@ -114,27 +114,8 @@ class HypersignBJJVerifiableCredential {
     }
     _jsonLdSignThread(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                const worker = new worker_threads_1.Worker(path_1.default.resolve(__dirname, 'worker/bjj/credStatus.worker.js'), {
-                    workerData: Object.assign({}, params),
-                });
-                worker.on('message', (message) => {
-                    if (message.success) {
-                        resolve(message.result);
-                    }
-                    else {
-                        reject(new Error(message.error));
-                    }
-                });
-                worker.on('error', (err) => {
-                    reject(err);
-                });
-                worker.on('exit', (code) => {
-                    if (code !== 0) {
-                        reject(new Error(`Worker stopped with exit code ${code}`));
-                    }
-                });
-            });
+            const pool = new WorkerPool_1.WorkerPool(path_1.default.resolve(__dirname, 'worker/bjj/credStatus.worker.js'));
+            return yield pool.runTask(Object.assign({}, params));
         });
     }
     _dateNow(date) {
@@ -450,27 +431,8 @@ class HypersignBJJVerifiableCredential {
     }
     signCredThread(credential, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                const worker = new worker_threads_1.Worker(path_1.default.resolve(__dirname, 'worker/bjj/sign.js'), {
-                    workerData: Object.assign({ credential }, params),
-                });
-                worker.on('message', (message) => {
-                    if (message.success) {
-                        resolve(message.result);
-                    }
-                    else {
-                        reject(new Error(message.error));
-                    }
-                });
-                worker.on('error', (err) => {
-                    reject(err);
-                });
-                worker.on('exit', (code) => {
-                    if (code !== 0) {
-                        reject(new Error(`Worker stopped with exit code ${code}`));
-                    }
-                });
-            });
+            const pool = new WorkerPool_1.WorkerPool(path_1.default.resolve(__dirname, 'worker/bjj/sign.js'));
+            return yield pool.runTask(Object.assign({ credential }, params));
         });
     }
     // Ref: https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251

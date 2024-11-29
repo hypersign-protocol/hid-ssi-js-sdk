@@ -9,7 +9,6 @@ import customLoader from '../../../../libs/w3cache/v1';
 const documentLoader = extendContextLoader(customLoader);
 
 async function signCredential(params) {
-    
   const keyPair = BabyJubJubKeys2021.fromKeys(params.keys);
   const suite = new BabyJubJubSignature2021Suite({
     key: keyPair,
@@ -22,7 +21,8 @@ async function signCredential(params) {
       assertionMethod: params.issuerDID.assertionMethod,
     },
   });
-  return jssig.sign(params.credential, {
+
+  return await jssig.sign(params.credential, {
     purpose,
     suite,
     documentLoader,
@@ -31,6 +31,7 @@ async function signCredential(params) {
 
 (async () => {
   try {
+    
     const result = await signCredential(workerData);
     parentPort?.postMessage({ success: true, result });
   } catch (error) {

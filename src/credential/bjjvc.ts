@@ -44,6 +44,7 @@ import { BabyJubJubKeys2021 } from 'babyjubjub2021';
 import { BabyJubJubSignature2021Suite, deriveProof } from 'babyjubjubsignature2021';
 import { time, timeEnd } from 'console';
 import { Worker, workerData } from 'worker_threads';
+import { WorkerPool } from '../WorkerPool';
 const { Merklizer } = require('@iden3/js-jsonld-merklization');
 const documentLoader = extendContextLoader(customLoader);
 export default class HypersignBJJVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
@@ -132,30 +133,9 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     verificationMethodId: string;
     publicKeyMultibase: string;
   }) {
-    return new Promise((resolve, reject) => {
-      const worker = new Worker(path.resolve(__dirname, 'worker/bjj/credStatus.worker.js'), {
-        workerData: {
-          ...params,
-        },
-      });
-
-      worker.on('message', (message) => {
-        if (message.success) {
-          resolve(message.result);
-        } else {
-          reject(new Error(message.error));
-        }
-      });
-
-      worker.on('error', (err) => {
-        reject(err);
-      });
-
-      worker.on('exit', (code) => {
-        if (code !== 0) {
-          reject(new Error(`Worker stopped with exit code ${code}`));
-        }
-      });
+    const pool = new WorkerPool(path.resolve(__dirname, 'worker/bjj/credStatus.worker.js'));
+    return await pool.runTask({
+      ...params,
     });
   }
 
@@ -543,31 +523,10 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
   }
 
   private async signCredThread(credential, params) {
-    return new Promise((resolve, reject) => {
-      const worker = new Worker(path.resolve(__dirname, 'worker/bjj/sign.js'), {
-        workerData: {
-          credential,
-          ...params,
-        },
-      });
-
-      worker.on('message', (message) => {
-        if (message.success) {
-          resolve(message.result);
-        } else {
-          reject(new Error(message.error));
-        }
-      });
-
-      worker.on('error', (err) => {
-        reject(err);
-      });
-
-      worker.on('exit', (code) => {
-        if (code !== 0) {
-          reject(new Error(`Worker stopped with exit code ${code}`));
-        }
-      });
+    const pool = new WorkerPool(path.resolve(__dirname, 'worker/bjj/sign.js'));
+    return await pool.runTask({
+      credential,
+      ...params,
     });
   }
 
