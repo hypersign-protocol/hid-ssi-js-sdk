@@ -192,7 +192,7 @@ class HypersignBJJDID {
      */
     constructor(params = {}) {
         this._getId = (methodSpecificId) => {
-            if (methodSpecificId && methodSpecificId.length < 32) {
+            if (methodSpecificId && methodSpecificId.length > 32) {
                 throw new Error('HID-SSI-SDK:: Error: methodSpecificId should be of minimum size 32');
             }
             let did = '';

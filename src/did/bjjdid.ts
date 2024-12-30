@@ -331,7 +331,7 @@ export default class HypersignBJJDID implements IDID {
   }
 
   private _getId = (methodSpecificId: string) => {
-    if (methodSpecificId && methodSpecificId.length < 32) {
+    if (methodSpecificId && methodSpecificId.length > 32) {
       throw new Error('HID-SSI-SDK:: Error: methodSpecificId should be of minimum size 32');
     }
     let did = '';
