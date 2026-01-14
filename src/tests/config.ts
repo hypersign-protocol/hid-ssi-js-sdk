@@ -5,8 +5,8 @@ export const mnemonic =
   'verify sustain lumber boat demise parade special soft bargain scout spoil there addict move badge rebuild horn achieve hollow acquire glide bundle curious present';
 
 export const hidNodeEp = {
-  rpc: 'https://rpc.jagrat.hypersign.id',
-  rest: 'https://api.jagrat.hypersign.id',
+  rpc: 'https://rpc.prajna-1.hypersign.id',
+  rest: 'https://api.prajna-1.hypersign.id',
   namespace: 'testnet',
 };
 // export const hidNodeEp = {
