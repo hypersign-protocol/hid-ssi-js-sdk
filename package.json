@@ -37,7 +37,7 @@
     "@cosmjs/stargate": "^0.31.0",
     "@digitalbazaar/ed25519-signature-2020": "3.0.0",
     "crypto-ld": "6.0.0",
-    "@digitalbazaar/ed25519-verification-key-2018": "3.2.0",
+    "@digitalbazaar/ed25519-verification-key-2018": "3.1.2",
     "@digitalbazaar/ed25519-verification-key-2020": "3.3.0",
     "@iden3/js-jsonld-merklization": "^1.0.2",
     "@iden3/js-merkletree": "^1.1.2",
