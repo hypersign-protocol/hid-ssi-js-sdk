@@ -251,7 +251,6 @@ describe('Schema Opearations', () => {
                 const registeredSchema = yield hypersignSchema.register({
                     schema: signedSchema,
                 });
-                //console.log(JSON.stringify(registeredSchema, null, 2))
                 (0, chai_1.expect)(registeredSchema).to.be.a('object');
                 (0, chai_1.should)().exist(registeredSchema.transactionHash);
             });
@@ -273,8 +272,6 @@ describe('Verifiable Credential Opearations', () => {
                 tempCredentialBody.issuerDid = didDocId;
                 tempCredentialBody.fields = { name: 'varsha' };
                 credentialDetail = yield hypersignVC.generate(tempCredentialBody);
-                // console.log('New Credential --------------------------------');
-                // console.log(JSON.stringify(credentialDetail, null, 2));
                 (0, chai_1.expect)(credentialDetail).to.be.a('object');
                 (0, chai_1.should)().exist(credentialDetail['@context']);
                 (0, chai_1.should)().exist(credentialDetail['id']);
@@ -298,7 +295,6 @@ describe('Verifiable Credential Opearations', () => {
                 tempIssueCredentialBody.issuerDid = didDocId;
                 tempIssueCredentialBody.verificationMethodId = verificationMethodId;
                 tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
-                //console.log(JSON.stringify(tempIssueCredentialBody, null, 2));
                 const issuedCredResult = yield hypersignVC.issue(tempIssueCredentialBody);
                 const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } = issuedCredResult;
                 signedVC = signedCredential;
@@ -583,13 +579,13 @@ describe('Verifiable Presentation Operataions', () => {
             (0, chai_1.expect)(verifiedPresentationDetail.credentialResults[0].credentialId).to.be.equal(credentialId);
         }));
         it('should be able a sign and verify a presentation without domain', () => __awaiter(void 0, void 0, void 0, function* () {
+            delete unsignedverifiablePresentation['proof'];
             const signPresentationBody = {
                 presentation: unsignedverifiablePresentation,
                 holderDid: holderDidDocument.id,
                 verificationMethodId: holderDidDocument.verificationMethod[0].id,
                 privateKeyMultibase: holdersPrivateKeyMultibase,
                 challenge: "abcd",
-                domain: "http://xyz.com"
             };
             signedVerifiablePresentation = yield hypersignVP.sign(signPresentationBody);
             (0, chai_1.should)().exist(signedVerifiablePresentation['@context']);
@@ -602,13 +598,10 @@ describe('Verifiable Presentation Operataions', () => {
                 holderDid: holderDidDocument.id,
                 holderVerificationMethodId: holderDidDocument.verificationMethod[0].id,
                 issuerVerificationMethodId: verificationMethodId,
-                privateKey: privateKeyMultibase,
                 challenge: "abcd",
                 issuerDid: didDocId,
-                domain: "http://xyz.com"
             };
             const verifiedPresentationDetail = yield hypersignVP.verify(verifyPresentationBody);
-            console.log(verifiedPresentationDetail);
         }));
     });
 });

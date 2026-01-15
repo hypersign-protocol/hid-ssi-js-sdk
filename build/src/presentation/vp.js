@@ -66,7 +66,7 @@ class HypersignVerifiablePresentation {
      * @params
      *  - params.verifiableCredentials: Array of Verifiable Credentials
      *  - params.holderDid            : DID of the subject
-     * @returns {Promise<object>}
+     * @returns {Promise<IVerifiableUnsignedPresentation>}
      */
     generate(params) {
         return __awaiter(this, void 0, void 0, function* () {
