@@ -1,6 +1,6 @@
 # Introduction
 
-The Hypersign Schema comply [Verifiable Credentials JSON Schema 2022 data model](https://w3c-ccg.github.io/vc-json-schemas/#data_model) specification and is stored on [Hypersign Identity Blockchain Network](https://explorer.hypersign.id/hypersign-testnet) as it is [adviced to store](https://w3c-ccg.github.io/vc-json-schemas/#storage) schema documents  and made available as immutable objects. 
+The Hypersign Schema comply [Verifiable Credentials JSON Schema 2022 data model](https://w3c-ccg.github.io/vc-json-schemas/#data_model) specification and is stored on [Hypersign Identity Blockchain Network](https://explorer.hypersign.id/hypersign-testnet) as it is [advised to store](https://w3c-ccg.github.io/vc-json-schemas/#storage) schema documents  and made available as immutable objects. 
 
 ## What is Verifiable Credential Schema or Data Models? 
 
@@ -15,19 +15,19 @@ A schema can be viewed from four perspectives: the author, issuer, verifier and 
 - **Verifier**: Verifiers processes a *Verifiable Credentials* and need to do so with knowledge of the terms and data the compromise the credentials. Credential Schemas aid a verifier in both requesting and processing credenetials that have been produced in a well-known format.
 - **Holder**: Holders, or those who are the subject of credential issuance, can make sense of the data they control by evaluating it against a data schema. When data is requested from a holder which references a Credential Schema the holder has the capability to to present the data specifically requested by the verifier.
 
-Note: Often, Issuer and Autor of schema may be same.
+Note: Often, Issuer and Author of schema may be same.
 
 
 ## HypersignSchema SDK
 
 
-Is a javascript library for Schema related operation (generate, sign, register etc). It also provides APIs to store/update/retrive Schema to/from the [Hypersign Schema Registry](https://docs.hypersign.id/self-sovereign-identity-ssi/schema/schema-registry) on the Hypersign Blockchain network easily.
+Is a javascript library for Schema related operation (generate, sign, register etc). It also provides APIs to store/update/retrieve Schema to/from the [Hypersign Schema Registry](https://docs.hypersign.id/self-sovereign-identity-ssi/schema/schema-registry) on the Hypersign Blockchain network easily.
 
 
 ## **NOTES**
 
-- A DID registred on Hypersign blockchain in order to register a schema on  Hypersign blockchain network.
-- Schema can not be registred using private DIDs. 
+- A DID registered on Hypersign blockchain in order to register a schema on  Hypersign blockchain network.
+- Schema can not be registered using private DIDs. 
 
 
 ## Table of Contents

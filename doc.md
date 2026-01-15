@@ -23,7 +23,7 @@ const attributesMap = {
  name: "Vishwas Anand",
  email: "yahiwa5710@99mimpi.com",
  phoneNumber: "+91-1111-0000-2222",
- addresss: "4th cross, LA",
+ address: "4th cross, LA",
 }
 
 const issuerKeys = {"publicKey":{"@context":"https://w3id.org/security/v2","id":"did:hs:45366005-5fe7-4efe-8581-ef73201a3bc4#z6Mkn8haqXgd9jotYHVsiKvtLR6MVrD9zkngdSMrDLG7rvqg","type":"Ed25519VerificationKey2018","publicKeyBase58":"8gSYFHSBpCKRRnfB2ky3VKYMgGwJasYKwRSvP4J6wi4J"},"privateKeyBase58":"6UtVLp9duZhkuEfks8kMZDpqrGDjGL5ztURxMfxxY9yXQGYs7dxR1dSMPXHjWaLaeMcKzkGqS6U3tTRWGBZWSmY"}
@@ -83,7 +83,7 @@ The term Linked Data is used to describe a recommended best practice for exposin
 
 ## Linked Data Signature 
 
-With the increase in usage of Linked Data for a variety of applications, there is a need to be able to verify the authenticity and integrity of Linked Data documents. That authenticity and integrity can be maintained by appending a *proof*, by specifying a [signature suite](#signature-suites) and a [proof purpose](#proof-purpose), with the linked data which can further be verified by verifer using signature suites.
+With the increase in usage of Linked Data for a variety of applications, there is a need to be able to verify the authenticity and integrity of Linked Data documents. That authenticity and integrity can be maintained by appending a *proof*, by specifying a [signature suite](#signature-suites) and a [proof purpose](#proof-purpose), with the linked data which can further be verified by verifier using signature suites.
 
 ### Signature Suites
 
@@ -113,7 +113,7 @@ We can read more [here](https://w3c-ccg.github.io/ld-proofs/#proof-purpose)
 
 ## Demo
 
-Now that we know the basic concept of Linked Data Signature, lets see how it can be implemented. For the purpose of demonstration we will use `Ed25519Signature2018` crypto suite and the purpose for the signature would be `autentication` . We need to do the following:
+Now that we know the basic concept of Linked Data Signature, lets see how it can be implemented. For the purpose of demonstration we will use `Ed25519Signature2018` crypto suite and the purpose for the signature would be `authentication` . We need to do the following:
 
 1. [Generating cryptographic materials](#generating-cryptographic-materials)
 2. [Signing the sample doc](#signing-the-sample-doc)
@@ -156,7 +156,7 @@ Result:
 
 #### Controller (The user)
 
-Using the above crypto material we can define controller. A controller is an object that contains authorization relations that explicitly permit the use of certain verification methods (identifier for publickey) for specific purposes. For example, a controller object could contain statements that restrict a public key to being used *only for signing Verifiable Credentials* and no other kinds of documents. Or it could contain statement that restrict publick key to used for *only for authentication* -  see the example below.
+Using the above crypto material we can define controller. A controller is an object that contains authorization relations that explicitly permit the use of certain verification methods (identifier for publicey) for specific purposes. For example, a controller object could contain statements that restrict a public key to being used *only for signing Verifiable Credentials* and no other kinds of documents. Or it could contain statement that restrict public key to used for *only for authentication* -  see the example below.
 
 ``` js
 const controller = {
@@ -203,7 +203,7 @@ const purpose = new AuthenticationProofPurpose({
 })
 ```
 
-3. Now that we have cryptosuite and purpose ready, lets go and sign our doument.
+3. Now that we have cryptosuite and purpose ready, lets go and sign our document.
 
 ``` js
 const signed_doc = await jsonSigs.sign(doc, {
@@ -243,7 +243,7 @@ Result:
 ### Verifying the signed doc
 
 ``` js
-// this time only publickey is required
+// this time only publicey is required
 const cryptoSuite = new Ed25519Signature2018({
     verificationMethod: id,
     key: new Ed25519KeyPair(publicKey)
