@@ -1,7 +1,7 @@
 import { expect, should } from 'chai';
 import { HypersignSchema, HypersignVerifiableCredential, HypersignSSISdk } from '../../index';
 import { createWallet, mnemonic, hidNodeEp } from '../config';
-import { IVerifiablePresentation } from '../../presentation/IPresentation';
+import { IVerifiablePresentation, IVerifiableUnsignedPresentation } from '../../presentation/IPresentation';
 import { ICredentialStatus, IVerifiableCredential } from '../../credential/ICredential';
 let holdersPrivateKeyMultibase;
 let holderDidDocument;
@@ -27,7 +27,7 @@ let credentialStatusId;
 let signedVC: IVerifiableCredential;
 let credenStatus: ICredentialStatus;
 let hypersignVP;
-let unsignedverifiablePresentation: IVerifiablePresentation;
+let unsignedverifiablePresentation: IVerifiableUnsignedPresentation;
 let verifiableCredentialPresentationId;
 let signedVerifiablePresentation: IVerifiablePresentation;
 const credentialBody = {
@@ -242,7 +242,6 @@ describe('Schema Opearations', () => {
       const registeredSchema = await hypersignSchema.register({
         schema: signedSchema,
       });
-      //console.log(JSON.stringify(registeredSchema, null, 2))
       expect(registeredSchema).to.be.a('object');
       should().exist(registeredSchema.transactionHash);
     });
@@ -264,8 +263,6 @@ describe('Verifiable Credential Opearations', () => {
       tempCredentialBody.fields = { name: 'varsha' };
 
       credentialDetail = await hypersignVC.generate(tempCredentialBody);
-      // console.log('New Credential --------------------------------');
-      // console.log(JSON.stringify(credentialDetail, null, 2));
 
       expect(credentialDetail).to.be.a('object');
       should().exist(credentialDetail['@context']);
@@ -288,7 +285,6 @@ describe('Verifiable Credential Opearations', () => {
       tempIssueCredentialBody.issuerDid = didDocId;
       tempIssueCredentialBody.verificationMethodId = verificationMethodId;
       tempIssueCredentialBody.privateKeyMultibase = privateKeyMultibase;
-      //console.log(JSON.stringify(tempIssueCredentialBody, null, 2));
       const issuedCredResult = await hypersignVC.issue(tempIssueCredentialBody);
       const { signedCredential, credentialStatus, credentialStatusProof, credentialStatusRegistrationResult } =
         issuedCredResult;
@@ -562,13 +558,13 @@ describe('Verifiable Presentation Operataions', () => {
     });
 
     it('should be able a sign and verify a presentation without domain', async () => {
+      delete unsignedverifiablePresentation['proof'];
       const signPresentationBody = {
         presentation: unsignedverifiablePresentation,
         holderDid: holderDidDocument.id,
         verificationMethodId: holderDidDocument.verificationMethod[0].id,
         privateKeyMultibase: holdersPrivateKeyMultibase,
         challenge: "abcd",
-        domain: "http://xyz.com"
       };
       signedVerifiablePresentation = await hypersignVP.sign(signPresentationBody);
       should().exist(signedVerifiablePresentation['@context']);
@@ -576,18 +572,16 @@ describe('Verifiable Presentation Operataions', () => {
       expect(signedVerifiablePresentation.type[0]).to.be.equal('VerifiablePresentation');
       should().exist(signedVerifiablePresentation['verifiableCredential']);
       expect(signedVerifiablePresentation.id).to.be.equal(verifiableCredentialPresentationId);
+
       const verifyPresentationBody = {
         signedPresentation: signedVerifiablePresentation,
         holderDid: holderDidDocument.id,
         holderVerificationMethodId: holderDidDocument.verificationMethod[0].id,
         issuerVerificationMethodId: verificationMethodId,
-        privateKey: privateKeyMultibase,
         challenge: "abcd",
         issuerDid: didDocId,
-        domain: "http://xyz.com"
       };
       const verifiedPresentationDetail = await hypersignVP.verify(verifyPresentationBody);
-      console.log(verifiedPresentationDetail)
     });
   });
 });

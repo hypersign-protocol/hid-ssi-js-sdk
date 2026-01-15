@@ -19,13 +19,16 @@ import { IVerifiableCredential } from '../credential/ICredential';
 //}
 
 // https://www.w3.org/TR/vc-data-model/#presentations-0
-export interface IVerifiablePresentation {
+export interface IVerifiableUnsignedPresentation {
   id: string;
   type: Array<string>;
   verifiableCredential: Array<IVerifiableCredential>;
   holder: string;
+}
+export interface IVerifiablePresentation extends IVerifiableUnsignedPresentation {
   proof: object;
 }
+
 
 export interface IPresentationMethods {
   generate(params: { verifiableCredentials: Array<IVerifiableCredential>; holderDid: string }): Promise<object>;

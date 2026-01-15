@@ -16,7 +16,7 @@ import HypersignVerifiableCredential from '../credential/vc';
 import { IVerifiableCredential } from '../credential/ICredential';
 const { AuthenticationProofPurpose, AssertionProofPurpose } = jsonSigs.purposes;
 import { VP, DID } from '../constants';
-import { IPresentationMethods, IVerifiablePresentation } from './IPresentation';
+import { IPresentationMethods, IVerifiablePresentation, IVerifiableUnsignedPresentation } from './IPresentation';
 import customLoader from '../../libs/w3cache/v1';
 import { purposes } from 'jsonld-signatures';
 import { EthereumEip712Signature2021 } from 'ethereumeip712signature2021suite';
@@ -74,9 +74,9 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
    * @params
    *  - params.verifiableCredentials: Array of Verifiable Credentials
    *  - params.holderDid            : DID of the subject
-   * @returns {Promise<object>}
+   * @returns {Promise<IVerifiableUnsignedPresentation>}
    */
-  async generate(params: { verifiableCredentials: Array<IVerifiableCredential>; holderDid: string }): Promise<object> {
+  async generate(params: { verifiableCredentials: Array<IVerifiableCredential>; holderDid: string }): Promise<IVerifiableUnsignedPresentation> {
     const id = await this._getId();
     const presentation = vc.createPresentation({
       verifiableCredential: params.verifiableCredentials,

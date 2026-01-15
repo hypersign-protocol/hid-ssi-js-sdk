@@ -28,8 +28,8 @@ const documentLoader = v1_1.default;
 let keyPair;
 exports.mnemonic = 'verify sustain lumber boat demise parade special soft bargain scout spoil there addict move badge rebuild horn achieve hollow acquire glide bundle curious present';
 exports.hidNodeEp = {
-    rpc: 'https://rpc.prajna.hypersign.id',
-    rest: 'https://api.prajna.hypersign.id',
+    rpc: 'https://rpc.prajna-1.hypersign.id',
+    rest: 'https://api.prajna-1.hypersign.id',
     namespace: 'testnet',
 };
 // export const hidNodeEp = {
