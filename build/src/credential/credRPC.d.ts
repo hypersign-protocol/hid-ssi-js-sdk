@@ -6,11 +6,13 @@
 import * as generatedProto from '../../libs/generated/ssi/tx';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { ICredentialRPC } from './ICredential';
-import { CredentialStatus, CredentialProof, Credential } from '../../libs/generated/ssi/credential';
+import { CredentialStatusDocument as CredentialStatus, CredentialStatusState as Credential } from '../../libs/generated/ssi/credential_status';
+import { DocumentProof as CredentialProof } from '../../libs/generated/ssi/proof';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 export declare class CredentialRPC implements ICredentialRPC {
     credentialRestEP: string;
     private hidClient;
+    private nodeRestEp;
     constructor({ offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, }: {
         offlineSigner?: OfflineSigner;
         nodeRpcEndpoint: string;
@@ -24,5 +26,6 @@ export declare class CredentialRPC implements ICredentialRPC {
     }>;
     registerCredentialStatusBulk(txMessages: []): Promise<DeliverTxResponse>;
     resolveCredentialStatus(credentialId: string): Promise<Credential>;
+    updateCredentialStatus(credentialStatus: CredentialStatus, proof: CredentialProof): Promise<DeliverTxResponse>;
 }
 //# sourceMappingURL=credRPC.d.ts.map

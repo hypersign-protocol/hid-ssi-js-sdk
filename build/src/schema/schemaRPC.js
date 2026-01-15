@@ -45,6 +45,8 @@ const constants_1 = require("../constants");
 const generatedProto = __importStar(require("../../libs/generated/ssi/tx"));
 const axios_1 = __importDefault(require("axios"));
 const client_1 = require("../hid/client");
+const utils_1 = __importDefault(require("../utils"));
+const constants = __importStar(require("../constants"));
 class SchemaRpc {
     constructor({ offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, }) {
         if (offlineSigner) {
@@ -53,6 +55,7 @@ class SchemaRpc {
         else {
             this.hidClient = null;
         }
+        this.nodeRestEp = nodeRestEndpoint;
         this.schemaRestEp = client_1.HIDClient.hidNodeRestEndpoint + constants_1.HYPERSIGN_NETWORK_SCHEMA_PATH;
     }
     init() {
@@ -63,24 +66,35 @@ class SchemaRpc {
             yield this.hidClient.init();
         });
     }
-    createSchema(schema, proof) {
+    registerSchema(schema, proof) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.hidClient) {
                 throw new Error('HID-SSI-SDK:: Error: SchemaRpc class is not initialise with offlinesigner');
             }
-            const typeUrl = `${constants_1.HID_COSMOS_MODULE}.${constants_1.HIDRpcEnums.MsgCreateSchema}`;
+            const typeUrl = `${constants_1.HID_COSMOS_MODULE}.${constants_1.HIDRpcEnums.MsgRegisterCredentialSchema}`;
             const txMessage = {
                 typeUrl,
-                value: generatedProto[constants_1.HIDRpcEnums.MsgCreateSchema].fromJSON({
-                    schemaDoc: schema,
-                    schemaProof: proof,
-                    creator: client_1.HIDClient.getHidWalletAddress(),
+                value: generatedProto[constants_1.HIDRpcEnums.MsgRegisterCredentialSchema].fromPartial({
+                    credentialSchemaDocument: schema,
+                    credentialSchemaProof: proof,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
                 }),
             };
-            // TODO: need to find a way to make it dynamic
-            const fee = 'auto';
+            const amount = yield utils_1.default.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Schema, this.nodeRestEp);
+            const fee = {
+                amount: [
+                    {
+                        denom: 'uhid',
+                        amount,
+                    },
+                ],
+                gas: '200000',
+            };
             const hidClient = client_1.HIDClient.getHidClient();
             const txResult = yield hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee);
+            if (txResult.code !== 0) {
+                throw new Error(`${txResult.rawLog}`);
+            }
             return txResult;
         });
     }
@@ -88,8 +102,12 @@ class SchemaRpc {
         return __awaiter(this, void 0, void 0, function* () {
             const getSchemaUrl = `${this.schemaRestEp}/${schemaId}:`;
             const response = yield axios_1.default.get(getSchemaUrl);
-            const { schema } = response.data;
-            return schema;
+            const { credentialSchemas } = response.data;
+            if (credentialSchemas === undefined) {
+                const { schema } = response.data;
+                return schema;
+            }
+            return credentialSchemas;
         });
     }
 }

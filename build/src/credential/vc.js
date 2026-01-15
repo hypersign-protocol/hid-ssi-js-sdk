@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -17,23 +40,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * All rights reserved.
  * Author: Hypermine Core Team
  */
-const jsonld_signatures_1 = require("jsonld-signatures");
-const vc_js_1 = __importDefault(require("vc-js"));
+const jsonld_signatures_1 = __importDefault(require("jsonld-signatures"));
+const jsonld_signatures_2 = require("jsonld-signatures");
 const utils_1 = __importDefault(require("../utils"));
 const schema_1 = __importDefault(require("../schema/schema"));
 const did_1 = __importDefault(require("../did/did"));
+const jsonSchemaValidator = __importStar(require("@cfworker/json-schema"));
 const ed25519_verification_key_2020_1 = require("@digitalbazaar/ed25519-verification-key-2020");
 const ed25519_signature_2020_1 = require("@digitalbazaar/ed25519-signature-2020");
-const ed25519 = require('@stablelib/ed25519');
+const jsonld_signatures_3 = __importDefault(require("jsonld-signatures"));
+const { AssertionProofPurpose } = jsonld_signatures_3.default.purposes;
 const credRPC_1 = require("./credRPC");
 const constants_1 = require("../constants");
-const credential_1 = require("../../libs/generated/ssi/credential");
-const crypto_1 = __importDefault(require("crypto"));
 const v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 const ethereumeip712signature2021suite_1 = require("ethereumeip712signature2021suite");
-const jsonld_signatures_2 = require("jsonld-signatures");
+const jsonld_signatures_4 = require("jsonld-signatures");
 const credential_service_1 = __importDefault(require("../ssiApi/services/credential/credential.service"));
-const documentLoader = (0, jsonld_signatures_2.extendContextLoader)(v1_1.default);
+const constant = __importStar(require("../constants"));
+const bjjvc_1 = __importDefault(require("./bjjvc"));
+const { Merklizer } = require('@iden3/js-jsonld-merklization');
+const documentLoader = (0, jsonld_signatures_4.extendContextLoader)(v1_1.default);
 class HypersignVerifiableCredential {
     constructor(params = {}) {
         this._checkIfAllRequiredPropsAreSent = (sentAttributes, requiredProps) => {
@@ -66,31 +92,6 @@ class HypersignVerifiableCredential {
             });
             return cs;
         };
-        //
-        // TODO: https://www.w3.org/TR/vc-data-model/#data-schemas
-        // TODO: handle schemaUrl variable properly later.
-        this._getCredentialContext = (schemaId, schemaProperties) => {
-            const context = [];
-            let schemaUrl;
-            if (this.hsSchema && this.hsSchema.schemaRpc) {
-                schemaUrl = `${this.hsSchema.schemaRpc.schemaRestEp}/${schemaId}:`;
-            }
-            else {
-                throw new Error('Error: HypersigSchema object may not be initialized');
-            }
-            context.push(constants_1.VC.CREDENTAIL_BASE_CONTEXT);
-            //context.push(VC.CREDENTAIL_SECURITY_SUITE);
-            context.push({
-                hs: schemaUrl,
-            });
-            const props = Object.keys(schemaProperties);
-            props.forEach((x) => {
-                const obj = {};
-                obj[x] = `hs:${x}`;
-                context.push(obj);
-            });
-            return context;
-        };
         const { namespace, offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, entityApiSecretKey } = params;
         this.namespace = namespace && namespace != '' ? namespace : '';
         const nodeRPCEp = nodeRpcEndpoint ? nodeRpcEndpoint : 'MAIN';
@@ -122,18 +123,23 @@ class HypersignVerifiableCredential {
             type: constants_1.VC.CREDENTAIL_STATUS_TYPE,
         };
         this.proof = {};
+        this.bjjVC = new bjjvc_1.default(params);
     }
-    _sign(params) {
+    _jsonLdSign(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { privateKeyMultibase: privateKeyMultibaseConverted } = utils_1.default.convertEd25519verificationkey2020toStableLibKeysInto({
-                privKey: params.privateKeyMultibase,
+            const { credentialStatus, privateKeyMultibase, verificationMethodId } = params;
+            const keyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from({
+                id: verificationMethodId,
+                privateKeyMultibase: privateKeyMultibase,
+                publicKeyMultibase: params.publicKeyMultibase,
             });
-            // TODO:  do proper checck of paramaters
-            const credentialStatus = JSON.parse(params.message);
-            const credentialBytes = (yield credential_1.CredentialStatus.encode(credentialStatus)).finish();
-            // const messageBytes = Buffer.from(params.message);
-            const signed = ed25519.sign(privateKeyMultibaseConverted, credentialBytes);
-            return Buffer.from(signed).toString('base64');
+            const suite = new ed25519_signature_2020_1.Ed25519Signature2020({ key: keyPair });
+            const signedCredStatus = yield jsonld_signatures_3.default.sign(credentialStatus, {
+                suite,
+                purpose: new AssertionProofPurpose(),
+                documentLoader: v1_1.default,
+            });
+            return signedCredStatus.proof;
         });
     }
     _dateNow(date) {
@@ -143,10 +149,6 @@ class HypersignVerifiableCredential {
         else {
             return new Date(new Date().getTime() - 100000).toISOString().slice(0, -5) + 'Z';
         }
-    }
-    _sha256Hash(message) {
-        const sha256 = crypto_1.default.createHash('sha256');
-        return sha256.update(message).digest('hex');
     }
     _getId() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -159,6 +161,39 @@ class HypersignVerifiableCredential {
                 id = `${constants_1.VC.SCHEME}:${constants_1.VC.METHOD}:${uuid}`;
             }
             return id;
+        });
+    }
+    //
+    // TODO: https://www.w3.org/TR/vc-data-model/#data-schemas
+    // TODO: handle schemaUrl variable properly later.
+    // private _getCredentialContext = (schemaId: string, schemaProperties: object, schemaName: string) => {
+    //   const context: any = [];
+    //   let schemaUrl;
+    //   if (this.hsSchema && this.hsSchema.schemaRpc) {
+    //     schemaUrl = `${this.hsSchema.schemaRpc.schemaRestEp}/${schemaId}:`;
+    //   } else {
+    //     throw new Error('Error: HypersigSchema object may not be initialized');
+    //   }
+    //   context.push(VC.CREDENTAIL_BASE_CONTEXT);
+    //   // context.push(VC.CREDENTAIL_SECURITY_SUITE);
+    //   context.push({
+    //     hs: schemaUrl,
+    //   });
+    //   context.push({
+    //     [schemaName]: `hs:${schemaName}`,
+    //   });
+    //   const props: Array<string> = Object.keys(schemaProperties);
+    //   props.forEach((x) => {
+    //     const obj = {};
+    //     obj[x] = `hs:${x}`;
+    //     context.push(obj);
+    //   });
+    //   context.push(VC.CONTEXT_HypersignCredentialStatus2023);
+    //   return context;
+    // };
+    _toTitleCase(status) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
         });
     }
     /**
@@ -202,7 +237,6 @@ class HypersignVerifiableCredential {
             const subjectDid = params.subjectDid;
             let resolvedsubjectDidDoc;
             const { didDocument: issuerDidDoc } = yield this.hsDid.resolve({ did: issuerDid });
-            //
             if (params.subjectDid) {
                 resolvedsubjectDidDoc = yield this.hsDid.resolve({ did: params.subjectDid });
             }
@@ -269,10 +303,15 @@ class HypersignVerifiableCredential {
             // TODO: do proper check for date and time
             //if(params.expirationDate < new Date()) throw  new Error("Expiration date can not be lesser than current date")
             const vc = {};
-            const schemaInternal = schemaDoc.schema;
-            const schemaProperties = JSON.parse(schemaInternal.properties);
+            // const schemaInternal = schemaDoc.schema as SchemaProperty;
+            // const schemaProperties = JSON.parse(schemaInternal.properties as string);
+            // const schemaName = schemaDoc.name as string;
             // context
-            vc['@context'] = this._getCredentialContext(params.schemaId, schemaProperties);
+            // vc['@context'] = this._getCredentialContext(params.schemaId, schemaProperties, schemaName);
+            vc['@context'] = [constants_1.VC.CREDENTAIL_BASE_CONTEXT];
+            vc['@context'].push(constants_1.VC.CONTEXT_HypersignCredentialStatus2023);
+            const JsonSchema = this.hsSchema.vcJsonSchema(schemaDoc);
+            vc['@context'].push(JsonSchema.$metadata.jsonLdContext);
             /// TODO:  need to implement this properly
             vc.id = yield this._getId();
             // Type
@@ -283,7 +322,18 @@ class HypersignVerifiableCredential {
             vc.issuanceDate = this._dateNow(); // TODO: need to remove this.
             vc.issuer = issuerDid;
             vc.credentialSubject = {};
-            vc.credentialSubject = Object.assign({}, this._getCredentialSubject(schemaDoc.schema, params.fields));
+            // ToDo: Implement Schema validation (JSON Schema Validator)
+            const validator = new jsonSchemaValidator.Validator(JsonSchema, '2020-12', true);
+            const result = validator.validate({
+                credentialSubject: Object.assign({}, params.fields),
+            });
+            if (!result.valid) {
+                throw result.errors;
+            }
+            // vc.credentialSubject = {
+            //   ...this._getCredentialSubject(schemaDoc.schema as SchemaProperty, params.fields),
+            // };
+            vc.credentialSubject = params.fields;
             vc.credentialSubject['id'] = subjectDid && subjectDid != undefined ? subjectDid : subjectDidDoc.id;
             vc.credentialSchema = {
                 id: schemaDoc.id,
@@ -336,16 +386,11 @@ class HypersignVerifiableCredential {
             const { didDocument: signerDidDoc } = yield this.hsDid.resolve({ did: params.issuerDid });
             if (signerDidDoc === null || signerDidDoc === undefined)
                 throw new Error('HID-SSI-SDK:: Error: Could not resolve issuerDid = ' + params.issuerDid);
-            // TODO: take verification method from params
-            const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
+            const publicKeyId = params.verificationMethodId;
             const publicKeyVerMethod = signerDidDoc['verificationMethod'].find((x) => x.id == publicKeyId);
             if (!publicKeyVerMethod) {
                 throw new Error('HID-SSI-SDK:: Error: Could not find verification method for id = ' + params.verificationMethodId);
             }
-            const convertedKeyPair = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
-                publicKey: publicKeyVerMethod.publicKeyMultibase,
-            });
-            publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
             const keyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(Object.assign({ privateKeyMultibase: params.privateKeyMultibase }, publicKeyVerMethod));
             const suite = new ed25519_signature_2020_1.Ed25519Signature2020({
                 verificationMethod: publicKeyId,
@@ -354,23 +399,29 @@ class HypersignVerifiableCredential {
             /// Before we issue the credential the credential status has to be added
             /// for that we will call RegisterCredentialStatus RPC
             //  Let us generate credentialHash first
-            const credentialHash = this._sha256Hash(JSON.stringify(params.credential));
+            // generating hash using merkelroot hash
+            const merkelizerObj = yield Merklizer.merklizeJSONLD(JSON.stringify(params.credential), {
+                documentLoader,
+            });
+            let credentialHash = yield merkelizerObj.mt.root();
+            credentialHash = Buffer.from(credentialHash.bytes).toString('hex');
             const credentialStatus = {
-                claim: {
-                    id: params.credential.id,
-                    currentStatus: constants_1.VC.CRED_STATUS_TYPES.LIVE,
-                    statusReason: 'Credential is active',
-                },
+                '@context': [
+                    constant.VC.CREDENTIAL_STATUS_CONTEXT,
+                    constant.DID_Ed25519VerificationKey2020.DID_Ed25519_CONTEXT_2020,
+                ],
+                id: params.credential.id,
                 issuer: params.credential.issuer,
                 issuanceDate: params.credential.issuanceDate,
-                expirationDate: params.credential.expirationDate,
-                credentialHash,
+                remarks: 'Credential is active',
+                credentialMerkleRootHash: credentialHash,
             };
-            const proofValue = yield this._sign({
-                message: JSON.stringify(credentialStatus),
+            const credProof = yield this._jsonLdSign({
+                credentialStatus,
                 privateKeyMultibase: params.privateKeyMultibase,
+                verificationMethodId: params.verificationMethodId,
+                publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase,
             });
-            // check params.issuer is a controller of params.credential.issuer
             const { didDocument: issuerDID } = yield this.hsDid.resolve({ did: params.credential.issuer });
             if (issuerDID === null || issuerDID === undefined)
                 throw new Error('Could not resolve issuerDid = ' + params.credential.issuer);
@@ -379,40 +430,32 @@ class HypersignVerifiableCredential {
             if (!credIssuerController.includes(params.issuerDid)) {
                 throw new Error(params.issuerDid + ' is not a controller of ' + params.credential.issuer);
             }
-            // const issuerDidDoc: Did = issuerDID as Did;
-            // const issuerPublicKeyId = params.verificationMethodId;
-            // const issuerPublicKeyVerMethod: VerificationMethod = issuerDidDoc.verificationMethod.find(
-            //   (x) => x.id == issuerPublicKeyId
-            // ) as VerificationMethod;
-            const issuerPublicKeyVerMethod = publicKeyVerMethod;
-            const proof = {
-                type: constants_1.VC.VERIFICATION_METHOD_TYPE,
-                created: this._dateNow(),
-                updated: this._dateNow(),
-                verificationMethod: issuerPublicKeyVerMethod.id,
-                proofValue,
-                proofPurpose: constants_1.VC.PROOF_PURPOSE,
-            };
             /// RegisterCRedeRPC
-            const signedVC = yield vc_js_1.default.issue({
-                credential: params.credential,
+            const signedVC = yield jsonld_signatures_1.default.sign(params.credential, {
+                purpose: new jsonld_signatures_2.purposes.AssertionProofPurpose({
+                    controller: {
+                        '@context': ['https://www.w3.org/ns/did/v1'],
+                        id: issuerDID.id,
+                        assertionMethod: issuerDID.assertionMethod,
+                    },
+                }),
                 suite,
                 documentLoader,
             });
             let credentialStatusRegistrationResult;
             if (params.registerCredential) {
-                credentialStatusRegistrationResult = yield this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
+                credentialStatusRegistrationResult = yield this.credStatusRPC.registerCredentialStatus(credentialStatus, credProof);
                 if (!credentialStatusRegistrationResult || credentialStatusRegistrationResult.code != 0) {
                     throw new Error('HID-SSI-SDK:: Error while issuing the credential error = ' + credentialStatusRegistrationResult.rawLog);
                 }
                 return {
                     signedCredential: signedVC,
                     credentialStatus,
-                    credentialStatusProof: proof,
+                    credentialStatusProof: credProof,
                     credentialStatusRegistrationResult,
                 };
             }
-            return { signedCredential: signedVC, credentialStatus, credentialStatusProof: proof };
+            return { signedCredential: signedVC, credentialStatus, credentialStatusProof: credProof };
         });
     }
     // Ref: https://github.com/digitalbazaar/vc-js/blob/44ca660f62ad3569f338eaaaecb11a7b09949bd2/lib/vc.js#L251
@@ -442,12 +485,6 @@ class HypersignVerifiableCredential {
             const issuerDidDoc = issuerDID;
             const publicKeyId = params.verificationMethodId;
             const publicKeyVerMethod = issuerDidDoc.verificationMethod.find((x) => x.id == publicKeyId);
-            // TODO: Get rid of this hack later.
-            // Convert 45 byte publick key into 48
-            const { publicKeyMultibase } = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
-                publicKey: publicKeyVerMethod.publicKeyMultibase,
-            });
-            publicKeyVerMethod.publicKeyMultibase = publicKeyMultibase;
             const assertionController = {
                 '@context': constants_1.DID.CONTROLLER_CONTEXT,
                 id: issuerDidDoc.id,
@@ -461,17 +498,19 @@ class HypersignVerifiableCredential {
             /* eslint-disable */
             const that = this;
             /* eslint-enable */
-            const result = yield vc_js_1.default.verifyCredential({
-                credential: params.credential,
-                controller: assertionController,
+            const result = yield jsonld_signatures_1.default.verify(params.credential, {
+                purpose: new jsonld_signatures_2.purposes.AssertionProofPurpose({
+                    controller: {
+                        '@context': ['https://www.w3.org/ns/did/v1'],
+                        id: issuerDID.id,
+                        assertionMethod: issuerDID.assertionMethod,
+                    },
+                }),
                 suite,
                 documentLoader,
-                checkStatus: function (options) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        return yield that.checkCredentialStatus({ credentialId: options.credential.id });
-                    });
-                },
             });
+            const statusCheck = yield that.checkCredentialStatus({ credentialId: params.credential.id });
+            result.statusResult = statusCheck;
             return result;
         });
     }
@@ -479,7 +518,7 @@ class HypersignVerifiableCredential {
      * Resolves credential status from Hypersign Blokchain
      * @params
      *  - params.credentialId           : Verifiable credential id
-     * @returns {Promise<CredentialStatus>}
+     * @returns {Promise<IResolveCredential>}
      */
     resolveCredentialStatus(params) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -490,7 +529,8 @@ class HypersignVerifiableCredential {
                 throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCred is not instantiated with Offlinesigner or not initialized');
             }
             credentialStatus = yield this.credStatusRPC.resolveCredentialStatus(params.credentialId);
-            return credentialStatus;
+            const response = Object.assign(Object.assign({}, credentialStatus.credentialStatusDocument), { proof: credentialStatus.credentialStatusProof });
+            return response;
         });
     }
     /**
@@ -505,7 +545,11 @@ class HypersignVerifiableCredential {
      * @returns {Promise<DeliverTxResponse>}
      */
     updateCredentialStatus(params) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            if (!params.readonly) {
+                params.readonly = false;
+            }
             if (!params.verificationMethodId) {
                 throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId is required to update credential status');
             }
@@ -530,10 +574,6 @@ class HypersignVerifiableCredential {
             // TODO: take verification method from params
             const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
             const publicKeyVerMethod = signerDidDoc['verificationMethod'].find((x) => x.id == publicKeyId);
-            const convertedKeyPair = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
-                publicKey: publicKeyVerMethod.publicKeyMultibase,
-            });
-            publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
             const keyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(Object.assign({ privateKeyMultibase: params.privateKeyMultibase }, publicKeyVerMethod));
             const suite = new ed25519_signature_2020_1.Ed25519Signature2020({
                 verificationMethod: publicKeyId,
@@ -542,22 +582,33 @@ class HypersignVerifiableCredential {
             /// Before we issue the credential the credential status has to be added
             /// for that we will call RegisterCredentialStatus RPC
             //  Let us generate credentialHash first
-            params.status = params.status.toUpperCase();
-            const claim = params.credentialStatus.claim;
+            const status = yield this._toTitleCase(params.status);
+            if (!Object.values(constants_1.CredentialStatusEnums).includes(status)) {
+                throw new Error(`HID-SSI-SDK:: Error: params.status is invalid`);
+            }
+            const claim = params.credentialStatus;
             const credentialStatus = {
-                claim: {
-                    id: claim.id,
-                    currentStatus: constants_1.VC.CRED_STATUS_TYPES[params.status],
-                    statusReason: params.statusReason ? params.statusReason : constants_1.VC.CRED_STATUS_REASON_TYPES[params.status],
-                },
+                '@context': [
+                    constant.VC.CREDENTIAL_STATUS_CONTEXT,
+                    constant.DID_Ed25519VerificationKey2020.DID_Ed25519_CONTEXT_2020,
+                ],
+                id: claim.id,
+                remarks: (_a = params.statusReason) !== null && _a !== void 0 ? _a : constants_1.VC.CRED_STATUS_REASON_TYPES[params.status],
                 issuer: params.credentialStatus.issuer,
                 issuanceDate: params.credentialStatus.issuanceDate,
-                expirationDate: params.credentialStatus.expirationDate,
-                credentialHash: params.credentialStatus.credentialHash,
+                credentialMerkleRootHash: params.credentialStatus.credentialMerkleRootHash,
             };
-            const proofValue = yield this._sign({
-                message: JSON.stringify(credentialStatus),
+            if (status === constants_1.VC.CRED_STATUS_TYPES.REVOKED) {
+                credentialStatus['revoked'] = true;
+            }
+            else if (status === constants_1.VC.CRED_STATUS_TYPES.SUSPENDED) {
+                credentialStatus['suspended'] = true;
+            }
+            const proofValue = yield this._jsonLdSign({
+                credentialStatus,
                 privateKeyMultibase: params.privateKeyMultibase,
+                verificationMethodId: params.verificationMethodId,
+                publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase,
             });
             const { didDocument: issuerDID } = yield this.hsDid.resolve({ did: params.credentialStatus.issuer });
             const issuerDidDoc = issuerDID;
@@ -569,20 +620,14 @@ class HypersignVerifiableCredential {
             const { didDocument: controllerDidDoc } = yield this.hsDid.resolve({ did: verificationMethodController });
             if (!controllerDidDoc)
                 throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId does not belong to issuerDid');
-            const didDocofController = controllerDidDoc;
-            const issuerPublicKeyId = params.verificationMethodId;
-            const issuerPublicKeyVerMethod = didDocofController.verificationMethod.find((x) => x.id == issuerPublicKeyId);
-            const proof = {
-                type: constants_1.VC.VERIFICATION_METHOD_TYPE,
-                created: params.credentialStatus.issuanceDate,
-                updated: this._dateNow(),
-                verificationMethod: issuerPublicKeyVerMethod.id,
-                proofValue,
-                proofPurpose: constants_1.VC.PROOF_PURPOSE,
-            };
-            /// RegisterCRedeRPC
-            // We use the same RPC (i.e. MsgRegisterCredentialStatus) for register and update of credential status on blockchain
-            const resp = yield this.credStatusRPC.registerCredentialStatus(credentialStatus, proof);
+            if (params.readonly == true) {
+                return {
+                    credentialStatus,
+                    proofValue,
+                };
+            }
+            /// UpdateCredRPC
+            const resp = yield this.credStatusRPC.updateCredentialStatus(credentialStatus, proofValue);
             if (!resp || resp.code != 0) {
                 throw new Error('HID-SSI-SDK:: Error while revoking the credential error = ' + resp.rawLog);
             }
@@ -596,6 +641,7 @@ class HypersignVerifiableCredential {
      * @returns {Promise<{ verified: boolean }>}
      */
     checkCredentialStatus(params) {
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             if (!params || !params.credentialId)
                 throw new Error('HID-SSI-SDK:: Error: params.credentialId is required to resolve credential status');
@@ -608,11 +654,15 @@ class HypersignVerifiableCredential {
             if (!credentialStatus) {
                 throw new Error('HID-SSI-SDK:: Error: while checking credential status of credentialID ' + credentialId);
             }
-            const claim = credentialStatus.claim;
-            const { currentStatus, statusReason } = claim;
+            // const claim: Claim = credentialStatus.claim as Claim;
+            const { remarks: statusReason } = credentialStatus.credentialStatusDocument;
+            let currentStatus;
             /// TODO:  probably we should also verify the credential HASH by recalculating the hash of the crdential and
             // matching with credentialHash property.
             // const { credentialHash } = credentialStatus;
+            if (!((_a = credentialStatus.credentialStatusDocument) === null || _a === void 0 ? void 0 : _a.revoked) && !((_b = credentialStatus.credentialStatusDocument) === null || _b === void 0 ? void 0 : _b.suspended)) {
+                currentStatus = constants_1.VC.CRED_STATUS_TYPES.LIVE;
+            }
             if (currentStatus != constants_1.VC.CRED_STATUS_TYPES.LIVE) {
                 console.log('WARN: Credential status is  not LIVE, currentStatus ' + currentStatus);
                 console.log('WARN: Status reason is ' + statusReason);
@@ -680,7 +730,7 @@ class HypersignVerifiableCredential {
      */
     registerCredentialStatusTxnBulk(txnMessage) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!txnMessage)
+            if (!txnMessage || txnMessage.length <= 0)
                 throw new Error('HID-SSI-SDK:: Error: txnMessage is required to register credential status');
             if (!this.credStatusRPC) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
@@ -719,8 +769,8 @@ class HypersignVerifiableCredential {
             if (!this.credStatusRPC) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
             }
-            if (!params.web3Obj) {
-                throw new Error('HID-SSI-SDK:: Error: prams.web3Obj should be passed');
+            if (!params.web3Obj && !params.privateKey) {
+                throw new Error('HID-SSI-SDK:: Error: prams.web3Obj or prams.privateKey should be passed');
             }
             if (params.type == undefined) {
                 params.type = 'Document';
@@ -736,10 +786,23 @@ class HypersignVerifiableCredential {
             if (!publicKeyVerMethod) {
                 throw new Error('HID-SSI-SDK:: Error: Could not find verification method for id = ' + params.verificationMethodId);
             }
-            const EthereumEip712Signature2021obj = new ethereumeip712signature2021suite_1.EthereumEip712Signature2021({}, params.web3Obj);
+            let EthereumEip712Signature2021obj;
+            if (params.privateKey) {
+                EthereumEip712Signature2021obj = new ethereumeip712signature2021suite_1.EthereumEip712Signature2021({});
+                yield EthereumEip712Signature2021obj.fromPrivateKey(params.privateKey);
+            }
+            else {
+                EthereumEip712Signature2021obj = new ethereumeip712signature2021suite_1.EthereumEip712Signature2021({}, params.web3Obj);
+            }
             const proof = yield EthereumEip712Signature2021obj.createProof({
                 document: params.credential,
-                purpose: new jsonld_signatures_1.purposes.AssertionProofPurpose(),
+                purpose: new jsonld_signatures_2.purposes.AssertionProofPurpose({
+                    controller: {
+                        '@context': ['https://w3id.org/security/v2'],
+                        id: signerDidDoc.id,
+                        assertionMethod: [params.verificationMethodId],
+                    },
+                }),
                 verificationMethod: params.verificationMethodId,
                 primaryType: params.type,
                 date: new Date().toISOString(),
@@ -787,20 +850,23 @@ class HypersignVerifiableCredential {
             if (!params.issuerDid) {
                 throw new Error('HID-SSI-SDK:: Error: params.issuerDid is required to verify credential');
             }
-            if (!params.web3Obj) {
-                throw new Error('HID-SSI-SDK:: Error: prams.web3Obj should be passed');
-            }
             const { didDocument } = yield this.hsDid.resolve({ did: params.issuerDid });
             if (didDocument === null || didDocument === undefined)
                 throw new Error('HID-SSI-SDK:: Error: Could not resolve issuerDid = ' + params.issuerDid);
-            const EthereumEip712Signature2021obj = new ethereumeip712signature2021suite_1.EthereumEip712Signature2021({}, params.web3Obj);
+            const EthereumEip712Signature2021obj = new ethereumeip712signature2021suite_1.EthereumEip712Signature2021({});
             const { proof } = params.credential;
             const verificationResult = yield EthereumEip712Signature2021obj.verifyProof({
                 proof: proof,
                 document: params.credential,
                 types: proof.eip712.types,
                 domain: proof.eip712.domain,
-                purpose: new jsonld_signatures_1.purposes.AssertionProofPurpose(),
+                purpose: new jsonld_signatures_2.purposes.AssertionProofPurpose({
+                    controller: {
+                        '@context': ['https://w3id.org/security/v2'],
+                        id: didDocument.id,
+                        assertionMethod: [params.verificationMethodId],
+                    },
+                }),
                 documentLoader,
             });
             return verificationResult;

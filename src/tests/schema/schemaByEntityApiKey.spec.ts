@@ -1,7 +1,6 @@
 import { expect, should } from 'chai';
 import { HypersignSchema, HypersignDID } from '../../index';
 import { createWallet, mnemonic, hidNodeEp, entityApiSecret } from '../config'
-import { Schema, SchemaProof, SchemaDocument } from '../../../libs/generated/ssi/schema';
 import HyperSignSchema from '../../schema/schema';
 
 let signedSchema

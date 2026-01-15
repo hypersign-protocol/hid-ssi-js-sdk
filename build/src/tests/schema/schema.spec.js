@@ -12,35 +12,37 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const chai_1 = require("chai");
 const index_1 = require("../../index");
 const config_1 = require("../config");
-let hsSdk;
+let signedSchema2;
+let invalidSchemaNamedSignedSchema1;
+let invalidSchemaNamedSignedSchema2;
+let invalidSchemaNamedSignedSchema3;
 let privateKeyMultibase;
 let publicKeyMultibase;
 let verificationMethodId;
 let didDocument;
 let didDocId;
 let offlineSigner;
-let schemaSignature;
 let hypersignSchema;
 let schemaObject;
+let schemaObject2;
 let schemaId;
 let verificationMethod;
+let randomProperty;
 let hypersignDID;
 let signedSchema;
 const signSchema = {};
-signSchema.proof = {};
+signSchema['proof'] = {};
 const schemaBody = {
-    name: 'testSchema',
+    name: 'TestSchema',
     description: 'This is a test schema generation',
     author: '',
-    fields: [{ name: 'name', type: 'integer', isRequired: false }],
+    fields: [{ name: 'name', type: 'string', isRequired: true }],
     additionalProperties: false,
 };
 //add mnemonic of wallet that have balance
 beforeEach(function () {
     return __awaiter(this, void 0, void 0, function* () {
         offlineSigner = yield (0, config_1.createWallet)(config_1.mnemonic);
-        // hsSdk = new HypersignSSISdk(offlineSigner, hidNodeEp.rpc, hidNodeEp.rest, hidNodeEp.namespace);
-        // await hsSdk.init();
         hypersignSchema = new index_1.HypersignSchema({
             // entityApiSecretKey,
             offlineSigner,
@@ -123,7 +125,47 @@ describe('#generate() method to create schema', function () {
             }).to.throw(Error, 'HID-SSI-SDK:: Error: Author must be passed');
         });
     });
-    it('should able to create a new schema without offlinesigner', function () {
+    it('should not be able to create a new schema as schema name is in camelCase and only pascalCase is allowed', function () {
+        const tempSchemaBody = Object.assign({}, schemaBody);
+        tempSchemaBody.author = didDocId;
+        tempSchemaBody['name'] = 'testSchema';
+        return hypersignSchema.generate(tempSchemaBody).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: schema name should always be in PascalCase');
+        });
+    });
+    it('should not be able to create a schema as schema name is in snakeCase and only pascalCase is allowed', function () {
+        const tempSchemaBody = Object.assign({}, schemaBody);
+        tempSchemaBody.author = didDocId;
+        tempSchemaBody['name'] = 'testing_schema';
+        return hypersignSchema.generate(tempSchemaBody).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: schema name should always be in PascalCase');
+        });
+    });
+    it('should not be able to create a schema as schema name is not in  pascalCase', function () {
+        const tempSchemaBody = Object.assign({}, schemaBody);
+        tempSchemaBody.author = didDocId;
+        tempSchemaBody['name'] = 'Test credential Schema';
+        return hypersignSchema.generate(tempSchemaBody).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: schema name should always be in PascalCase');
+        });
+    });
+    it("should not be able to create a schema as sub-property 'name' is not present in field property", function () {
+        const tempSchemaBody = Object.assign({}, schemaBody);
+        tempSchemaBody.author = didDocId;
+        tempSchemaBody['fields'] = [{ isRequired: true }];
+        return hypersignSchema.generate(tempSchemaBody).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, "HID-SSI-SDK:: Error: All fields must contains property 'name'");
+        });
+    });
+    it('should be able to create a new schema without offlinesigner', function () {
         return __awaiter(this, void 0, void 0, function* () {
             const tempSchemaBody = Object.assign({}, schemaBody);
             tempSchemaBody.author = didDocId;
@@ -142,7 +184,7 @@ describe('#generate() method to create schema', function () {
             (0, chai_1.expect)(schemaDoc['author']).to.be.equal(tempSchemaBody.author);
         });
     });
-    it('should able to create a new schema', function () {
+    it('should be able to create a new schema', function () {
         return __awaiter(this, void 0, void 0, function* () {
             const tempSchemaBody = Object.assign({}, schemaBody);
             tempSchemaBody.author = didDocId;
@@ -161,16 +203,175 @@ describe('#generate() method to create schema', function () {
             (0, chai_1.expect)(schemaObject['author']).to.be.equal(tempSchemaBody.author);
         });
     });
+    it('should be able to create a schema with differnt field value', function () {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tempSchemaBody = Object.assign({}, schemaBody);
+            tempSchemaBody.fields.push({ name: 'address', type: 'string', isRequired: false });
+            tempSchemaBody.author = didDocId;
+            schemaObject2 = yield hypersignSchema.generate(tempSchemaBody);
+            (0, chai_1.expect)(schemaObject).to.be.a('object');
+            (0, chai_1.should)().exist(schemaObject['type']);
+            (0, chai_1.should)().exist(schemaObject['modelVersion']);
+            (0, chai_1.should)().exist(schemaObject['id']);
+            (0, chai_1.should)().exist(schemaObject['name']);
+            (0, chai_1.should)().exist(schemaObject['author']);
+            (0, chai_1.should)().exist(schemaObject['authored']);
+            (0, chai_1.should)().exist(schemaObject['schema']);
+            (0, chai_1.expect)(schemaObject.schema).to.be.a('object');
+            (0, chai_1.expect)(schemaObject['name']).to.be.equal(tempSchemaBody.name);
+            (0, chai_1.expect)(schemaObject['author']).to.be.equal(tempSchemaBody.author);
+        });
+    });
 });
+// dont allow fields other than { name: 'name', type: 'string', isRequired: false }
 describe('#sign() function to sign schema', function () {
+    it('should not be able to sign a new schema as privateKeyMultibase is not passed', function () {
+        return hypersignSchema.sign({
+            privateKeyMultibase: "",
+            schema: schemaObject,
+            verificationMethodId: didDocument['assertionMethod'][0]
+        }).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.privateKeyMultibase must be passed');
+        });
+    });
+    it('should not be able to sign a new schema as verificationMethodId is not passed', function () {
+        return hypersignSchema.sign({
+            privateKeyMultibase,
+            schema: schemaObject,
+            verificationMethodId: ""
+        }).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId must be passed');
+        });
+    });
+    it('should not be able to sign a new schema as schema is not passed', function () {
+        return hypersignSchema.sign({
+            privateKeyMultibase,
+            verificationMethodId: didDocument['assertionMethod'][0]
+        }).catch(function (err) {
+            (0, chai_1.expect)(function () {
+                throw err;
+            }).to.throw(Error, 'HID-SSI-SDK:: Error: Schema must be passed');
+        });
+    });
     it('should be able to sign newly created schema', function () {
         return __awaiter(this, void 0, void 0, function* () {
+            const tempSchemaBody = JSON.parse(JSON.stringify(schemaObject));
             signedSchema = yield hypersignSchema.sign({
                 privateKeyMultibase: privateKeyMultibase,
-                schema: schemaObject,
+                schema: tempSchemaBody,
                 verificationMethodId: didDocument['assertionMethod'][0],
             });
-            //onsole.log(JSON.stringify(signedSchema, null, 2))
+            (0, chai_1.expect)(signedSchema).to.be.a('object');
+            (0, chai_1.should)().exist(signedSchema.proof);
+            (0, chai_1.should)().exist(signedSchema.proof.type);
+            (0, chai_1.should)().exist(signedSchema.proof.verificationMethod);
+            (0, chai_1.should)().exist(signedSchema.proof.proofPurpose);
+            (0, chai_1.should)().exist(signedSchema.proof.proofValue);
+            (0, chai_1.should)().exist(signedSchema.proof.created);
+            (0, chai_1.should)().exist(signedSchema.type);
+            (0, chai_1.should)().exist(signedSchema.modelVersion);
+            (0, chai_1.should)().exist(signedSchema.author);
+            (0, chai_1.should)().exist(signedSchema['id']);
+            (0, chai_1.should)().exist(signedSchema['name']);
+            (0, chai_1.should)().exist(signedSchema['author']);
+            (0, chai_1.should)().exist(signedSchema['authored']);
+            (0, chai_1.should)().exist(signedSchema['schema']);
+        });
+    });
+    it('should be able to sign newly created schema with schema name is in camelCase', function () {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tempSchemaBody = JSON.parse(JSON.stringify(schemaObject2));
+            tempSchemaBody['name'] = "testSchema";
+            invalidSchemaNamedSignedSchema1 = yield hypersignSchema.sign({
+                privateKeyMultibase: privateKeyMultibase,
+                schema: tempSchemaBody,
+                verificationMethodId: didDocument['assertionMethod'][0],
+            });
+            (0, chai_1.expect)(signedSchema).to.be.a('object');
+            (0, chai_1.should)().exist(signedSchema.proof);
+            (0, chai_1.should)().exist(signedSchema.proof.type);
+            (0, chai_1.should)().exist(signedSchema.proof.verificationMethod);
+            (0, chai_1.should)().exist(signedSchema.proof.proofPurpose);
+            (0, chai_1.should)().exist(signedSchema.proof.proofValue);
+            (0, chai_1.should)().exist(signedSchema.proof.created);
+            (0, chai_1.should)().exist(signedSchema.type);
+            (0, chai_1.should)().exist(signedSchema.modelVersion);
+            (0, chai_1.should)().exist(signedSchema.author);
+            (0, chai_1.should)().exist(signedSchema['id']);
+            (0, chai_1.should)().exist(signedSchema['name']);
+            (0, chai_1.should)().exist(signedSchema['author']);
+            (0, chai_1.should)().exist(signedSchema['authored']);
+            (0, chai_1.should)().exist(signedSchema['schema']);
+        });
+    });
+    it('should be able to sign newly created schema with schema name is in snakeCase', function () {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tempSchemaBody = JSON.parse(JSON.stringify(schemaObject2));
+            tempSchemaBody['name'] = "test_schema";
+            invalidSchemaNamedSignedSchema2 = yield hypersignSchema.sign({
+                privateKeyMultibase: privateKeyMultibase,
+                schema: tempSchemaBody,
+                verificationMethodId: didDocument['assertionMethod'][0],
+            });
+            (0, chai_1.expect)(signedSchema).to.be.a('object');
+            (0, chai_1.should)().exist(signedSchema.proof);
+            (0, chai_1.should)().exist(signedSchema.proof.type);
+            (0, chai_1.should)().exist(signedSchema.proof.verificationMethod);
+            (0, chai_1.should)().exist(signedSchema.proof.proofPurpose);
+            (0, chai_1.should)().exist(signedSchema.proof.proofValue);
+            (0, chai_1.should)().exist(signedSchema.proof.created);
+            (0, chai_1.should)().exist(signedSchema.type);
+            (0, chai_1.should)().exist(signedSchema.modelVersion);
+            (0, chai_1.should)().exist(signedSchema.author);
+            (0, chai_1.should)().exist(signedSchema['id']);
+            (0, chai_1.should)().exist(signedSchema['name']);
+            (0, chai_1.should)().exist(signedSchema['author']);
+            (0, chai_1.should)().exist(signedSchema['authored']);
+            (0, chai_1.should)().exist(signedSchema['schema']);
+        });
+    });
+    it('should be able to sign newly created schema with schema name is in sentanceCase', function () {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tempSchemaBody = JSON.parse(JSON.stringify(schemaObject2));
+            tempSchemaBody['name'] = "Test Schema";
+            invalidSchemaNamedSignedSchema3 = yield hypersignSchema.sign({
+                privateKeyMultibase: privateKeyMultibase,
+                schema: tempSchemaBody,
+                verificationMethodId: didDocument['assertionMethod'][0],
+            });
+            (0, chai_1.expect)(signedSchema).to.be.a('object');
+            (0, chai_1.should)().exist(signedSchema.proof);
+            (0, chai_1.should)().exist(signedSchema.proof.type);
+            (0, chai_1.should)().exist(signedSchema.proof.verificationMethod);
+            (0, chai_1.should)().exist(signedSchema.proof.proofPurpose);
+            (0, chai_1.should)().exist(signedSchema.proof.proofValue);
+            (0, chai_1.should)().exist(signedSchema.proof.created);
+            (0, chai_1.should)().exist(signedSchema.type);
+            (0, chai_1.should)().exist(signedSchema.modelVersion);
+            (0, chai_1.should)().exist(signedSchema.author);
+            (0, chai_1.should)().exist(signedSchema['id']);
+            (0, chai_1.should)().exist(signedSchema['name']);
+            (0, chai_1.should)().exist(signedSchema['author']);
+            (0, chai_1.should)().exist(signedSchema['authored']);
+            (0, chai_1.should)().exist(signedSchema['schema']);
+        });
+    });
+    it('should be able to sign newly created schema with invalid sub-property of propert field', function () {
+        return __awaiter(this, void 0, void 0, function* () {
+            const tempSchemaBody = JSON.parse(JSON.stringify(schemaObject2));
+            const prop = JSON.parse(tempSchemaBody.schema.properties);
+            randomProperty = "randomProperty";
+            prop[`${schemaBody.fields[0].name}`]['randomProperty'] = "xyz";
+            tempSchemaBody['schema'].properties = JSON.stringify(prop);
+            signedSchema2 = yield hypersignSchema.sign({
+                privateKeyMultibase: privateKeyMultibase,
+                schema: tempSchemaBody,
+                verificationMethodId: didDocument['assertionMethod'][0],
+            });
             (0, chai_1.expect)(signedSchema).to.be.a('object');
             (0, chai_1.should)().exist(signedSchema.proof);
             (0, chai_1.should)().exist(signedSchema.proof.type);
@@ -256,10 +457,66 @@ describe('#register() function to register schema on blockchain', function () {
     }));
     it('should be able to register schema on blockchain', function () {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(signedSchema);
             const registeredSchema = yield hypersignSchema.register({
                 schema: signedSchema,
             });
             (0, chai_1.should)().exist(registeredSchema.transactionHash);
+        });
+    });
+    it('should not be able to register schema on blockchain as its already registered', function () {
+        return __awaiter(this, void 0, void 0, function* () {
+            return hypersignSchema.register({
+                schema: signedSchema,
+            }).catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, `failed to execute message; message index: 0: Schema ID:  ${schemaId}: schema already exists`);
+            });
+        });
+    });
+    it('should not be able to register schema as schema name is in camel case which is not valid', function () {
+        return __awaiter(this, void 0, void 0, function* () {
+            return hypersignSchema.register({
+                schema: invalidSchemaNamedSignedSchema1,
+            }).catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, `failed to execute message; message index: 0: name must always be in PascalCase: ${invalidSchemaNamedSignedSchema1.name}: invalid credential schema`);
+            });
+        });
+    });
+    it('should not be able to register schema as schema name is in snake case which is not valid', function () {
+        return __awaiter(this, void 0, void 0, function* () {
+            return hypersignSchema.register({
+                schema: invalidSchemaNamedSignedSchema2,
+            }).catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, `failed to execute message; message index: 0: name must always be in PascalCase: ${invalidSchemaNamedSignedSchema2.name}: invalid credential schema`);
+            });
+        });
+    });
+    it('should not be able to register schema as schema name is in sentance case which is not valid', function () {
+        return __awaiter(this, void 0, void 0, function* () {
+            return hypersignSchema.register({
+                schema: invalidSchemaNamedSignedSchema3,
+            }).catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, `failed to execute message; message index: 0: name must always be in PascalCase: ${invalidSchemaNamedSignedSchema3.name}: invalid credential schema`);
+            });
+        });
+    });
+    it('should not be able to register schema as there is a invalid sub-property in side property field', function () {
+        return __awaiter(this, void 0, void 0, function* () {
+            return hypersignSchema.register({
+                schema: signedSchema2,
+            }).catch(function (err) {
+                (0, chai_1.expect)(function () {
+                    throw err;
+                }).to.throw(Error, `failed to execute message; message index: 0: invalid \`property\` provided: invalid sub-attribute ${randomProperty} of attribute name. Only \`type\` and \`format\` sub-attributes are permitted: invalid credential schema`);
+            });
         });
     });
 });

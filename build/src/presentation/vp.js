@@ -30,7 +30,8 @@ const constants_1 = require("../constants");
 const v1_1 = __importDefault(require("../../libs/w3cache/v1"));
 const jsonld_signatures_2 = require("jsonld-signatures");
 const ethereumeip712signature2021suite_1 = require("ethereumeip712signature2021suite");
-const documentLoader = v1_1.default;
+const bjjVp_1 = __importDefault(require("./bjjVp"));
+const documentLoader = jsonld_signatures_1.default.extendContextLoader(v1_1.default);
 class HypersignVerifiablePresentation {
     constructor(params = {}) {
         const { namespace, nodeRpcEndpoint, nodeRestEndpoint } = params;
@@ -45,6 +46,7 @@ class HypersignVerifiablePresentation {
         this.verifiableCredential = [];
         this.holder = '';
         this.proof = {};
+        this.bjjVp = new bjjVp_1.default(params);
     }
     _getId() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -64,7 +66,7 @@ class HypersignVerifiablePresentation {
      * @params
      *  - params.verifiableCredentials: Array of Verifiable Credentials
      *  - params.holderDid            : DID of the subject
-     * @returns {Promise<object>}
+     * @returns {Promise<IVerifiableUnsignedPresentation>}
      */
     generate(params) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -86,6 +88,7 @@ class HypersignVerifiablePresentation {
      *  - params.verificationMethodId : verificationMethodId of holder
      *  - params.privateKeyMultibase  : Private key associated with the verification method
      *  - params.challenge            : Any random challenge
+     *  - params.domain               : Domain url
      * @returns {Promise<IVerifiablePresentation>}
      */
     sign(params) {
@@ -97,13 +100,13 @@ class HypersignVerifiablePresentation {
                 throw new Error('HID-SSI-SDK:: params.privateKeyMultibase is required for signing a presentation');
             }
             if (!params.presentation) {
-                throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+                throw new Error('HID-SSI-SDK:: params.presentation is required for signing a presentation');
             }
             if (!params.challenge) {
-                throw new Error('HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+                throw new Error('HID-SSI-SDK:: params.challenge is required for signing a presentation');
             }
             if (!params.verificationMethodId) {
-                throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+                throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signing a presentation');
             }
             if (!this.hsDid) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
@@ -117,16 +120,12 @@ class HypersignVerifiablePresentation {
                 resolvedDidDoc.didDocument = params.holderDidDocSigned;
             }
             else {
-                throw new Error('HID-SSI-SDK:: params.holderDid or params.holderDidDocSigned is required for signinng a presentation');
+                throw new Error('HID-SSI-SDK:: params.holderDid or params.holderDidDocSigned is required for signing a presentation');
             }
             const { didDocument: signerDidDoc } = resolvedDidDoc;
             // TODO: take verification method from params
             const publicKeyId = params.verificationMethodId; // TODO: bad idea -  should not hardcode it.
             const publicKeyVerMethod = signerDidDoc['verificationMethod'].find((x) => x.id == publicKeyId);
-            const convertedKeyPair = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
-                publicKey: publicKeyVerMethod.publicKeyMultibase,
-            });
-            publicKeyVerMethod['publicKeyMultibase'] = convertedKeyPair.publicKeyMultibase;
             const keyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(Object.assign({ privateKeyMultibase: params.privateKeyMultibase }, publicKeyVerMethod));
             const suite = new ed25519_signature_2020_1.Ed25519Signature2020({
                 verificationMethod: publicKeyId,
@@ -137,6 +136,7 @@ class HypersignVerifiablePresentation {
                 suite,
                 challenge: params.challenge,
                 documentLoader,
+                domain: params.domain,
             });
             return signedVP;
         });
@@ -195,11 +195,6 @@ class HypersignVerifiablePresentation {
             const holderDidDoc = holderDID;
             const holderPublicKeyId = params.holderVerificationMethodId;
             const holderPublicKeyVerMethod = holderDidDoc.verificationMethod.find((x) => x.id == holderPublicKeyId);
-            // Connvert the 45 byte pub key of holder into 48 byte
-            const { publicKeyMultibase: holderPublicKeyMultibase } = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
-                publicKey: holderPublicKeyVerMethod.publicKeyMultibase,
-            });
-            holderPublicKeyVerMethod.publicKeyMultibase = holderPublicKeyMultibase;
             const holderController = {
                 '@context': constants_1.DID.CONTROLLER_CONTEXT,
                 id: holderDidDoc.id,
@@ -209,6 +204,7 @@ class HypersignVerifiablePresentation {
             const presentationPurpose = new AuthenticationProofPurpose({
                 controller: holderController,
                 challenge: params.challenge,
+                domain: params.domain,
             });
             const keyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.from(Object.assign({ privateKeyMultibase: '' }, holderPublicKeyVerMethod));
             const vpSuite_holder = new ed25519_signature_2020_1.Ed25519Signature2020({
@@ -218,8 +214,8 @@ class HypersignVerifiablePresentation {
             ///---------------------------------------
             /// Issuer
             const { didDocument: issuerDID } = yield this.hsDid.resolve({ did: params.issuerDid });
-            if (issuerDID === null || issuerDID === undefined) {
-                throw new Error('Issuer DID is not registered');
+            if (issuerDID === null || issuerDID === undefined || Object.keys(issuerDID).length === 0) {
+                throw new Error(`Issuer DID ${issuerDID} is invalid or not registered on the blockchain`);
             }
             const issuerDidDoc = issuerDID;
             const issuerDidDocController = issuerDidDoc.controller;
@@ -236,11 +232,6 @@ class HypersignVerifiablePresentation {
                 const controllerDidDoc = controllerDidDocT;
                 issuerPublicKeyVerMethod = controllerDidDoc.verificationMethod.find((x) => x.id == issuerPublicKeyId);
             }
-            // Connvert the 45 byte pub key of issuer into 48 byte
-            const { publicKeyMultibase: issuerPublicKeyMultibase } = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
-                publicKey: issuerPublicKeyVerMethod.publicKeyMultibase,
-            });
-            issuerPublicKeyVerMethod.publicKeyMultibase = issuerPublicKeyMultibase;
             const issuerController = {
                 '@context': constants_1.DID.CONTROLLER_CONTEXT,
                 id: issuerDidDoc.id,
@@ -263,7 +254,7 @@ class HypersignVerifiablePresentation {
                 purpose,
                 suite: [vpSuite_holder, vcSuite_issuer],
                 documentLoader,
-                unsignedPresentation: true,
+                unsignedPresentation: false,
                 checkStatus: function (options) {
                     return __awaiter(this, void 0, void 0, function* () {
                         return yield that.vc.checkCredentialStatus({ credentialId: options.credential.id });
@@ -287,16 +278,19 @@ class HypersignVerifiablePresentation {
     signByClientSpec(params) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!params.holderDid) {
-                throw new Error('HID-SSI-SDK:: Either holderDid or holderDidDocSigned should be provided');
+                throw new Error('HID-SSI-SDK:: params.holderDid is required to sign a presentation');
             }
             if (!params.presentation) {
-                throw new Error('HID-SSI-SDK:: params.presentation is required for signinng a presentation');
+                throw new Error('HID-SSI-SDK:: params.presentation is required for signing a presentation');
             }
             if (!params.challenge) {
-                throw new Error('HID-SSI-SDK:: params.challenge is required for signinng a presentation');
+                throw new Error('HID-SSI-SDK:: params.challenge is required for signing a presentation');
             }
             if (!params.verificationMethodId) {
-                throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signinng a presentation');
+                throw new Error('HID-SSI-SDK:: params.verificationMethodId is required for signing a presentation');
+            }
+            if (!params.web3Obj || Object.keys(params.web3Obj).length === 0) {
+                throw new Error('HID-SSI-SDK:: Error: params.web3Obj is required to sign a presentation');
             }
             if (!this.hsDid) {
                 throw new Error('HID-SSI-SDK:: Error: HypersignVerifiableCredential class is not instantiated with Offlinesigner or have not been initilized');
@@ -312,8 +306,8 @@ class HypersignVerifiablePresentation {
             params.presentation.verifiableCredential.forEach((vc) => {
                 return vcs.push(jcs_1.JCS.cannonicalize(vc));
             });
-            params.presentation.verifiableCredential = Array();
-            params.presentation.verifiableCredential = vcs;
+            // params.presentation.verifiableCredential = Array<string>();
+            // params.presentation.verifiableCredential = vcs;
             const EthereumEip712Signature2021obj = new ethereumeip712signature2021suite_1.EthereumEip712Signature2021({}, params.web3Obj);
             const proof = yield EthereumEip712Signature2021obj.createProof({
                 document: params.presentation,
@@ -394,12 +388,6 @@ class HypersignVerifiablePresentation {
                 const publicKeyId = params.issuerVerificationMethodId;
                 const issuerDidDoc = issuerDID;
                 const publicKeyVerMethod = issuerDidDoc.verificationMethod.find((x) => x.id == publicKeyId);
-                // TODO: Get rid of this hack later.
-                // Convert 45 byte publick key into 48
-                const { publicKeyMultibase } = utils_1.default.convertedStableLibKeysIntoEd25519verificationkey2020({
-                    publicKey: publicKeyVerMethod.publicKeyMultibase,
-                });
-                publicKeyVerMethod.publicKeyMultibase = publicKeyMultibase;
                 const assertionController = {
                     '@context': ['DID.CONTROLLER_CONTEXT'],
                     id: issuerDidDoc.id,

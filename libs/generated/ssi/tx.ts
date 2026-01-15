@@ -1,1103 +1,1196 @@
 /* eslint-disable */
-import { Reader, util, configure, Writer } from "protobufjs/minimal";
-import * as Long from "long";
-import { Did, SignInfo } from "./did";
-import { SchemaDocument, SchemaProof } from "./schema";
-import { ClientSpec } from "./clientSpec";
-import { CredentialStatus, CredentialProof } from "./credential";
+import _m0 from "protobufjs/minimal";
+import { CredentialSchemaDocument } from "./credential_schema";
+import { CredentialStatusDocument } from "./credential_status";
+import { DidDocument } from "./did";
+import { DocumentProof } from "./proof";
 
-export const protobufPackage = "hypersignprotocol.hidnode.ssi";
+export const protobufPackage = "hypersign.ssi.v1";
 
-export interface MsgCreateDID {
-  didDocString: Did | undefined;
-  signatures: SignInfo[];
-  creator: string;
+export interface MsgRegisterDID {
+  didDocument?: DidDocument | undefined;
+  didDocumentProofs?: DocumentProof[] | undefined;
+  txAuthor?: string | undefined;
 }
 
-export interface MsgCreateDIDResponse {
-  id: number;
+export interface MsgRegisterDIDResponse {
 }
 
 export interface MsgUpdateDID {
-  didDocString: Did | undefined;
-  version_id: string;
-  signatures: SignInfo[];
-  creator: string;
+  didDocument?: DidDocument | undefined;
+  didDocumentProofs?: DocumentProof[] | undefined;
+  versionId?: string | undefined;
+  txAuthor?: string | undefined;
 }
 
 export interface MsgUpdateDIDResponse {
-  updateId: string;
-}
-
-export interface MsgCreateSchema {
-  creator: string;
-  schemaDoc: SchemaDocument | undefined;
-  schemaProof: SchemaProof | undefined;
-  clientSpec: ClientSpec | undefined;
-}
-
-export interface MsgCreateSchemaResponse {
-  id: number;
 }
 
 export interface MsgDeactivateDID {
-  creator: string;
-  didId: string;
-  version_id: string;
-  signatures: SignInfo[];
+  didDocumentId?: string | undefined;
+  didDocumentProofs?: DocumentProof[] | undefined;
+  versionId?: string | undefined;
+  txAuthor?: string | undefined;
 }
 
 export interface MsgDeactivateDIDResponse {
-  id: number;
+}
+
+export interface MsgRegisterCredentialSchema {
+  credentialSchemaDocument?: CredentialSchemaDocument | undefined;
+  credentialSchemaProof?: DocumentProof | undefined;
+  txAuthor?: string | undefined;
+}
+
+export interface MsgRegisterCredentialSchemaResponse {
+}
+
+export interface MsgUpdateCredentialSchema {
+  credentialSchemaDocument?: CredentialSchemaDocument | undefined;
+  credentialSchemaProof?: DocumentProof | undefined;
+  txAuthor?: string | undefined;
+}
+
+export interface MsgUpdateCredentialSchemaResponse {
 }
 
 export interface MsgRegisterCredentialStatus {
-  creator: string;
-  credentialStatus: CredentialStatus | undefined;
-  proof: CredentialProof | undefined;
-  clientSpec: ClientSpec | undefined;
+  credentialStatusDocument?: CredentialStatusDocument | undefined;
+  credentialStatusProof?: DocumentProof | undefined;
+  txAuthor?: string | undefined;
 }
 
 export interface MsgRegisterCredentialStatusResponse {
-  id: number;
 }
 
-const baseMsgCreateDID: object = { creator: "" };
+export interface MsgUpdateCredentialStatus {
+  credentialStatusDocument?: CredentialStatusDocument | undefined;
+  credentialStatusProof?: DocumentProof | undefined;
+  txAuthor?: string | undefined;
+}
 
-export const MsgCreateDID = {
-  encode(message: MsgCreateDID, writer: Writer = Writer.create()): Writer {
-    if (message.didDocString !== undefined) {
-      Did.encode(message.didDocString, writer.uint32(10).fork()).ldelim();
+export interface MsgUpdateCredentialStatusResponse {
+}
+
+function createBaseMsgRegisterDID(): MsgRegisterDID {
+  return {};
+}
+
+export const MsgRegisterDID = {
+  encode(message: MsgRegisterDID, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.didDocument !== undefined) {
+      DidDocument.encode(message.didDocument, writer.uint32(10).fork()).ldelim();
     }
-    for (const v of message.signatures) {
-      SignInfo.encode(v!, writer.uint32(18).fork()).ldelim();
+    if (message.didDocumentProofs !== undefined && message.didDocumentProofs.length !== 0) {
+      for (const v of message.didDocumentProofs) {
+        DocumentProof.encode(v!, writer.uint32(18).fork()).ldelim();
+      }
     }
-    if (message.creator !== "") {
-      writer.uint32(26).string(message.creator);
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      writer.uint32(26).string(message.txAuthor);
     }
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): MsgCreateDID {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRegisterDID {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseMsgCreateDID } as MsgCreateDID;
-    message.signatures = [];
+    const message = createBaseMsgRegisterDID();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.didDocString = Did.decode(reader, reader.uint32());
-          break;
+          if (tag !== 10) {
+            break;
+          }
+
+          message.didDocument = DidDocument.decode(reader, reader.uint32());
+          continue;
         case 2:
-          message.signatures.push(SignInfo.decode(reader, reader.uint32()));
-          break;
+          if (tag !== 18) {
+            break;
+          }
+
+          if (message.didDocumentProofs === undefined) {
+            message.didDocumentProofs = [];
+          }
+          message.didDocumentProofs!.push(DocumentProof.decode(reader, reader.uint32()));
+          continue;
         case 3:
-          message.creator = reader.string();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          if (tag !== 26) {
+            break;
+          }
+
+          message.txAuthor = reader.string();
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
 
-  fromJSON(object: any): MsgCreateDID {
-    const message = { ...baseMsgCreateDID } as MsgCreateDID;
-    message.signatures = [];
-    if (object.didDocString !== undefined && object.didDocString !== null) {
-      message.didDocString = Did.fromJSON(object.didDocString);
-    } else {
-      message.didDocString = undefined;
-    }
-    if (object.signatures !== undefined && object.signatures !== null) {
-      for (const e of object.signatures) {
-        message.signatures.push(SignInfo.fromJSON(e));
-      }
-    }
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = String(object.creator);
-    } else {
-      message.creator = "";
-    }
-    return message;
+  fromJSON(object: any): MsgRegisterDID {
+    return {
+      didDocument: isSet(object.didDocument) ? DidDocument.fromJSON(object.didDocument) : undefined,
+      didDocumentProofs: globalThis.Array.isArray(object?.didDocumentProofs)
+        ? object.didDocumentProofs.map((e: any) => DocumentProof.fromJSON(e))
+        : undefined,
+      txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+    };
   },
 
-  toJSON(message: MsgCreateDID): unknown {
+  toJSON(message: MsgRegisterDID): unknown {
     const obj: any = {};
-    message.didDocString !== undefined &&
-      (obj.didDocString = message.didDocString
-        ? Did.toJSON(message.didDocString)
-        : undefined);
-    if (message.signatures) {
-      obj.signatures = message.signatures.map((e) =>
-        e ? SignInfo.toJSON(e) : undefined
-      );
-    } else {
-      obj.signatures = [];
+    if (message.didDocument !== undefined) {
+      obj.didDocument = DidDocument.toJSON(message.didDocument);
     }
-    message.creator !== undefined && (obj.creator = message.creator);
+    if (message.didDocumentProofs?.length) {
+      obj.didDocumentProofs = message.didDocumentProofs.map((e) => DocumentProof.toJSON(e));
+    }
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      obj.txAuthor = message.txAuthor;
+    }
     return obj;
   },
 
-  fromPartial(object: DeepPartial<MsgCreateDID>): MsgCreateDID {
-    const message = { ...baseMsgCreateDID } as MsgCreateDID;
-    message.signatures = [];
-    if (object.didDocString !== undefined && object.didDocString !== null) {
-      message.didDocString = Did.fromPartial(object.didDocString);
-    } else {
-      message.didDocString = undefined;
-    }
-    if (object.signatures !== undefined && object.signatures !== null) {
-      for (const e of object.signatures) {
-        message.signatures.push(SignInfo.fromPartial(e));
-      }
-    }
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = object.creator;
-    } else {
-      message.creator = "";
-    }
+  create<I extends Exact<DeepPartial<MsgRegisterDID>, I>>(base?: I): MsgRegisterDID {
+    return MsgRegisterDID.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRegisterDID>, I>>(object: I): MsgRegisterDID {
+    const message = createBaseMsgRegisterDID();
+    message.didDocument = (object.didDocument !== undefined && object.didDocument !== null)
+      ? DidDocument.fromPartial(object.didDocument)
+      : undefined;
+    message.didDocumentProofs = object.didDocumentProofs?.map((e) => DocumentProof.fromPartial(e)) || undefined;
+    message.txAuthor = object.txAuthor ?? undefined;
     return message;
   },
 };
 
-const baseMsgCreateDIDResponse: object = { id: 0 };
+function createBaseMsgRegisterDIDResponse(): MsgRegisterDIDResponse {
+  return {};
+}
 
-export const MsgCreateDIDResponse = {
-  encode(
-    message: MsgCreateDIDResponse,
-    writer: Writer = Writer.create()
-  ): Writer {
-    if (message.id !== 0) {
-      writer.uint32(8).uint64(message.id);
-    }
+export const MsgRegisterDIDResponse = {
+  encode(_: MsgRegisterDIDResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): MsgCreateDIDResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRegisterDIDResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseMsgCreateDIDResponse } as MsgCreateDIDResponse;
+    const message = createBaseMsgRegisterDIDResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 1:
-          message.id = longToNumber(reader.uint64() as Long);
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
 
-  fromJSON(object: any): MsgCreateDIDResponse {
-    const message = { ...baseMsgCreateDIDResponse } as MsgCreateDIDResponse;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = Number(object.id);
-    } else {
-      message.id = 0;
-    }
-    return message;
+  fromJSON(_: any): MsgRegisterDIDResponse {
+    return {};
   },
 
-  toJSON(message: MsgCreateDIDResponse): unknown {
+  toJSON(_: MsgRegisterDIDResponse): unknown {
     const obj: any = {};
-    message.id !== undefined && (obj.id = message.id);
     return obj;
   },
 
-  fromPartial(object: DeepPartial<MsgCreateDIDResponse>): MsgCreateDIDResponse {
-    const message = { ...baseMsgCreateDIDResponse } as MsgCreateDIDResponse;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = object.id;
-    } else {
-      message.id = 0;
-    }
+  create<I extends Exact<DeepPartial<MsgRegisterDIDResponse>, I>>(base?: I): MsgRegisterDIDResponse {
+    return MsgRegisterDIDResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRegisterDIDResponse>, I>>(_: I): MsgRegisterDIDResponse {
+    const message = createBaseMsgRegisterDIDResponse();
     return message;
   },
 };
 
-const baseMsgUpdateDID: object = { version_id: "", creator: "" };
+function createBaseMsgUpdateDID(): MsgUpdateDID {
+  return {};
+}
 
 export const MsgUpdateDID = {
-  encode(message: MsgUpdateDID, writer: Writer = Writer.create()): Writer {
-    if (message.didDocString !== undefined) {
-      Did.encode(message.didDocString, writer.uint32(10).fork()).ldelim();
+  encode(message: MsgUpdateDID, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.didDocument !== undefined) {
+      DidDocument.encode(message.didDocument, writer.uint32(10).fork()).ldelim();
     }
-    if (message.version_id !== "") {
-      writer.uint32(18).string(message.version_id);
+    if (message.didDocumentProofs !== undefined && message.didDocumentProofs.length !== 0) {
+      for (const v of message.didDocumentProofs) {
+        DocumentProof.encode(v!, writer.uint32(18).fork()).ldelim();
+      }
     }
-    for (const v of message.signatures) {
-      SignInfo.encode(v!, writer.uint32(26).fork()).ldelim();
+    if (message.versionId !== undefined && message.versionId !== "") {
+      writer.uint32(26).string(message.versionId);
     }
-    if (message.creator !== "") {
-      writer.uint32(34).string(message.creator);
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      writer.uint32(34).string(message.txAuthor);
     }
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): MsgUpdateDID {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdateDID {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseMsgUpdateDID } as MsgUpdateDID;
-    message.signatures = [];
+    const message = createBaseMsgUpdateDID();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.didDocString = Did.decode(reader, reader.uint32());
-          break;
+          if (tag !== 10) {
+            break;
+          }
+
+          message.didDocument = DidDocument.decode(reader, reader.uint32());
+          continue;
         case 2:
-          message.version_id = reader.string();
-          break;
+          if (tag !== 18) {
+            break;
+          }
+
+          if (message.didDocumentProofs === undefined) {
+            message.didDocumentProofs = [];
+          }
+          message.didDocumentProofs!.push(DocumentProof.decode(reader, reader.uint32()));
+          continue;
         case 3:
-          message.signatures.push(SignInfo.decode(reader, reader.uint32()));
-          break;
+          if (tag !== 26) {
+            break;
+          }
+
+          message.versionId = reader.string();
+          continue;
         case 4:
-          message.creator = reader.string();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          if (tag !== 34) {
+            break;
+          }
+
+          message.txAuthor = reader.string();
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
 
   fromJSON(object: any): MsgUpdateDID {
-    const message = { ...baseMsgUpdateDID } as MsgUpdateDID;
-    message.signatures = [];
-    if (object.didDocString !== undefined && object.didDocString !== null) {
-      message.didDocString = Did.fromJSON(object.didDocString);
-    } else {
-      message.didDocString = undefined;
-    }
-    if (object.version_id !== undefined && object.version_id !== null) {
-      message.version_id = String(object.version_id);
-    } else {
-      message.version_id = "";
-    }
-    if (object.signatures !== undefined && object.signatures !== null) {
-      for (const e of object.signatures) {
-        message.signatures.push(SignInfo.fromJSON(e));
-      }
-    }
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = String(object.creator);
-    } else {
-      message.creator = "";
-    }
-    return message;
+    return {
+      didDocument: isSet(object.didDocument) ? DidDocument.fromJSON(object.didDocument) : undefined,
+      didDocumentProofs: globalThis.Array.isArray(object?.didDocumentProofs)
+        ? object.didDocumentProofs.map((e: any) => DocumentProof.fromJSON(e))
+        : undefined,
+      versionId: isSet(object.versionId) ? globalThis.String(object.versionId) : undefined,
+      txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+    };
   },
 
   toJSON(message: MsgUpdateDID): unknown {
     const obj: any = {};
-    message.didDocString !== undefined &&
-      (obj.didDocString = message.didDocString
-        ? Did.toJSON(message.didDocString)
-        : undefined);
-    message.version_id !== undefined && (obj.version_id = message.version_id);
-    if (message.signatures) {
-      obj.signatures = message.signatures.map((e) =>
-        e ? SignInfo.toJSON(e) : undefined
-      );
-    } else {
-      obj.signatures = [];
+    if (message.didDocument !== undefined) {
+      obj.didDocument = DidDocument.toJSON(message.didDocument);
     }
-    message.creator !== undefined && (obj.creator = message.creator);
+    if (message.didDocumentProofs?.length) {
+      obj.didDocumentProofs = message.didDocumentProofs.map((e) => DocumentProof.toJSON(e));
+    }
+    if (message.versionId !== undefined && message.versionId !== "") {
+      obj.versionId = message.versionId;
+    }
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      obj.txAuthor = message.txAuthor;
+    }
     return obj;
   },
 
-  fromPartial(object: DeepPartial<MsgUpdateDID>): MsgUpdateDID {
-    const message = { ...baseMsgUpdateDID } as MsgUpdateDID;
-    message.signatures = [];
-    if (object.didDocString !== undefined && object.didDocString !== null) {
-      message.didDocString = Did.fromPartial(object.didDocString);
-    } else {
-      message.didDocString = undefined;
-    }
-    if (object.version_id !== undefined && object.version_id !== null) {
-      message.version_id = object.version_id;
-    } else {
-      message.version_id = "";
-    }
-    if (object.signatures !== undefined && object.signatures !== null) {
-      for (const e of object.signatures) {
-        message.signatures.push(SignInfo.fromPartial(e));
-      }
-    }
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = object.creator;
-    } else {
-      message.creator = "";
-    }
+  create<I extends Exact<DeepPartial<MsgUpdateDID>, I>>(base?: I): MsgUpdateDID {
+    return MsgUpdateDID.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgUpdateDID>, I>>(object: I): MsgUpdateDID {
+    const message = createBaseMsgUpdateDID();
+    message.didDocument = (object.didDocument !== undefined && object.didDocument !== null)
+      ? DidDocument.fromPartial(object.didDocument)
+      : undefined;
+    message.didDocumentProofs = object.didDocumentProofs?.map((e) => DocumentProof.fromPartial(e)) || undefined;
+    message.versionId = object.versionId ?? undefined;
+    message.txAuthor = object.txAuthor ?? undefined;
     return message;
   },
 };
 
-const baseMsgUpdateDIDResponse: object = { updateId: "" };
+function createBaseMsgUpdateDIDResponse(): MsgUpdateDIDResponse {
+  return {};
+}
 
 export const MsgUpdateDIDResponse = {
-  encode(
-    message: MsgUpdateDIDResponse,
-    writer: Writer = Writer.create()
-  ): Writer {
-    if (message.updateId !== "") {
-      writer.uint32(10).string(message.updateId);
-    }
+  encode(_: MsgUpdateDIDResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): MsgUpdateDIDResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdateDIDResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseMsgUpdateDIDResponse } as MsgUpdateDIDResponse;
+    const message = createBaseMsgUpdateDIDResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 1:
-          message.updateId = reader.string();
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
 
-  fromJSON(object: any): MsgUpdateDIDResponse {
-    const message = { ...baseMsgUpdateDIDResponse } as MsgUpdateDIDResponse;
-    if (object.updateId !== undefined && object.updateId !== null) {
-      message.updateId = String(object.updateId);
-    } else {
-      message.updateId = "";
-    }
-    return message;
+  fromJSON(_: any): MsgUpdateDIDResponse {
+    return {};
   },
 
-  toJSON(message: MsgUpdateDIDResponse): unknown {
+  toJSON(_: MsgUpdateDIDResponse): unknown {
     const obj: any = {};
-    message.updateId !== undefined && (obj.updateId = message.updateId);
     return obj;
   },
 
-  fromPartial(object: DeepPartial<MsgUpdateDIDResponse>): MsgUpdateDIDResponse {
-    const message = { ...baseMsgUpdateDIDResponse } as MsgUpdateDIDResponse;
-    if (object.updateId !== undefined && object.updateId !== null) {
-      message.updateId = object.updateId;
-    } else {
-      message.updateId = "";
-    }
+  create<I extends Exact<DeepPartial<MsgUpdateDIDResponse>, I>>(base?: I): MsgUpdateDIDResponse {
+    return MsgUpdateDIDResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgUpdateDIDResponse>, I>>(_: I): MsgUpdateDIDResponse {
+    const message = createBaseMsgUpdateDIDResponse();
     return message;
   },
 };
 
-const baseMsgCreateSchema: object = { creator: "" };
-
-export const MsgCreateSchema = {
-  encode(message: MsgCreateSchema, writer: Writer = Writer.create()): Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
-    }
-    if (message.schemaDoc !== undefined) {
-      SchemaDocument.encode(
-        message.schemaDoc,
-        writer.uint32(18).fork()
-      ).ldelim();
-    }
-    if (message.schemaProof !== undefined) {
-      SchemaProof.encode(
-        message.schemaProof,
-        writer.uint32(26).fork()
-      ).ldelim();
-    }
-    if (message.clientSpec !== undefined) {
-      ClientSpec.encode(message.clientSpec, writer.uint32(34).fork()).ldelim();
-    }
-    return writer;
-  },
-
-  decode(input: Reader | Uint8Array, length?: number): MsgCreateSchema {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseMsgCreateSchema } as MsgCreateSchema;
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.creator = reader.string();
-          break;
-        case 2:
-          message.schemaDoc = SchemaDocument.decode(reader, reader.uint32());
-          break;
-        case 3:
-          message.schemaProof = SchemaProof.decode(reader, reader.uint32());
-          break;
-        case 4:
-          message.clientSpec = ClientSpec.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): MsgCreateSchema {
-    const message = { ...baseMsgCreateSchema } as MsgCreateSchema;
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = String(object.creator);
-    } else {
-      message.creator = "";
-    }
-    if (object.schemaDoc !== undefined && object.schemaDoc !== null) {
-      message.schemaDoc = SchemaDocument.fromJSON(object.schemaDoc);
-    } else {
-      message.schemaDoc = undefined;
-    }
-    if (object.schemaProof !== undefined && object.schemaProof !== null) {
-      message.schemaProof = SchemaProof.fromJSON(object.schemaProof);
-    } else {
-      message.schemaProof = undefined;
-    }
-    if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = ClientSpec.fromJSON(object.clientSpec);
-    } else {
-      message.clientSpec = undefined;
-    }
-    return message;
-  },
-
-  toJSON(message: MsgCreateSchema): unknown {
-    const obj: any = {};
-    message.creator !== undefined && (obj.creator = message.creator);
-    message.schemaDoc !== undefined &&
-      (obj.schemaDoc = message.schemaDoc
-        ? SchemaDocument.toJSON(message.schemaDoc)
-        : undefined);
-    message.schemaProof !== undefined &&
-      (obj.schemaProof = message.schemaProof
-        ? SchemaProof.toJSON(message.schemaProof)
-        : undefined);
-    message.clientSpec !== undefined &&
-      (obj.clientSpec = message.clientSpec
-        ? ClientSpec.toJSON(message.clientSpec)
-        : undefined);
-    return obj;
-  },
-
-  fromPartial(object: DeepPartial<MsgCreateSchema>): MsgCreateSchema {
-    const message = { ...baseMsgCreateSchema } as MsgCreateSchema;
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = object.creator;
-    } else {
-      message.creator = "";
-    }
-    if (object.schemaDoc !== undefined && object.schemaDoc !== null) {
-      message.schemaDoc = SchemaDocument.fromPartial(object.schemaDoc);
-    } else {
-      message.schemaDoc = undefined;
-    }
-    if (object.schemaProof !== undefined && object.schemaProof !== null) {
-      message.schemaProof = SchemaProof.fromPartial(object.schemaProof);
-    } else {
-      message.schemaProof = undefined;
-    }
-    if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = ClientSpec.fromPartial(object.clientSpec);
-    } else {
-      message.clientSpec = undefined;
-    }
-    return message;
-  },
-};
-
-const baseMsgCreateSchemaResponse: object = { id: 0 };
-
-export const MsgCreateSchemaResponse = {
-  encode(
-    message: MsgCreateSchemaResponse,
-    writer: Writer = Writer.create()
-  ): Writer {
-    if (message.id !== 0) {
-      writer.uint32(8).uint64(message.id);
-    }
-    return writer;
-  },
-
-  decode(input: Reader | Uint8Array, length?: number): MsgCreateSchemaResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseMsgCreateSchemaResponse,
-    } as MsgCreateSchemaResponse;
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          message.id = longToNumber(reader.uint64() as Long);
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
-      }
-    }
-    return message;
-  },
-
-  fromJSON(object: any): MsgCreateSchemaResponse {
-    const message = {
-      ...baseMsgCreateSchemaResponse,
-    } as MsgCreateSchemaResponse;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = Number(object.id);
-    } else {
-      message.id = 0;
-    }
-    return message;
-  },
-
-  toJSON(message: MsgCreateSchemaResponse): unknown {
-    const obj: any = {};
-    message.id !== undefined && (obj.id = message.id);
-    return obj;
-  },
-
-  fromPartial(
-    object: DeepPartial<MsgCreateSchemaResponse>
-  ): MsgCreateSchemaResponse {
-    const message = {
-      ...baseMsgCreateSchemaResponse,
-    } as MsgCreateSchemaResponse;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = object.id;
-    } else {
-      message.id = 0;
-    }
-    return message;
-  },
-};
-
-const baseMsgDeactivateDID: object = { creator: "", didId: "", version_id: "" };
+function createBaseMsgDeactivateDID(): MsgDeactivateDID {
+  return {};
+}
 
 export const MsgDeactivateDID = {
-  encode(message: MsgDeactivateDID, writer: Writer = Writer.create()): Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+  encode(message: MsgDeactivateDID, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.didDocumentId !== undefined && message.didDocumentId !== "") {
+      writer.uint32(10).string(message.didDocumentId);
     }
-    if (message.didId !== "") {
-      writer.uint32(18).string(message.didId);
+    if (message.didDocumentProofs !== undefined && message.didDocumentProofs.length !== 0) {
+      for (const v of message.didDocumentProofs) {
+        DocumentProof.encode(v!, writer.uint32(18).fork()).ldelim();
+      }
     }
-    if (message.version_id !== "") {
-      writer.uint32(26).string(message.version_id);
+    if (message.versionId !== undefined && message.versionId !== "") {
+      writer.uint32(26).string(message.versionId);
     }
-    for (const v of message.signatures) {
-      SignInfo.encode(v!, writer.uint32(34).fork()).ldelim();
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      writer.uint32(34).string(message.txAuthor);
     }
     return writer;
   },
 
-  decode(input: Reader | Uint8Array, length?: number): MsgDeactivateDID {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgDeactivateDID {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = { ...baseMsgDeactivateDID } as MsgDeactivateDID;
-    message.signatures = [];
+    const message = createBaseMsgDeactivateDID();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.creator = reader.string();
-          break;
+          if (tag !== 10) {
+            break;
+          }
+
+          message.didDocumentId = reader.string();
+          continue;
         case 2:
-          message.didId = reader.string();
-          break;
+          if (tag !== 18) {
+            break;
+          }
+
+          if (message.didDocumentProofs === undefined) {
+            message.didDocumentProofs = [];
+          }
+          message.didDocumentProofs!.push(DocumentProof.decode(reader, reader.uint32()));
+          continue;
         case 3:
-          message.version_id = reader.string();
-          break;
+          if (tag !== 26) {
+            break;
+          }
+
+          message.versionId = reader.string();
+          continue;
         case 4:
-          message.signatures.push(SignInfo.decode(reader, reader.uint32()));
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          if (tag !== 34) {
+            break;
+          }
+
+          message.txAuthor = reader.string();
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
 
   fromJSON(object: any): MsgDeactivateDID {
-    const message = { ...baseMsgDeactivateDID } as MsgDeactivateDID;
-    message.signatures = [];
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = String(object.creator);
-    } else {
-      message.creator = "";
-    }
-    if (object.didId !== undefined && object.didId !== null) {
-      message.didId = String(object.didId);
-    } else {
-      message.didId = "";
-    }
-    if (object.version_id !== undefined && object.version_id !== null) {
-      message.version_id = String(object.version_id);
-    } else {
-      message.version_id = "";
-    }
-    if (object.signatures !== undefined && object.signatures !== null) {
-      for (const e of object.signatures) {
-        message.signatures.push(SignInfo.fromJSON(e));
-      }
-    }
-    return message;
+    return {
+      didDocumentId: isSet(object.didDocumentId) ? globalThis.String(object.didDocumentId) : undefined,
+      didDocumentProofs: globalThis.Array.isArray(object?.didDocumentProofs)
+        ? object.didDocumentProofs.map((e: any) => DocumentProof.fromJSON(e))
+        : undefined,
+      versionId: isSet(object.versionId) ? globalThis.String(object.versionId) : undefined,
+      txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+    };
   },
 
   toJSON(message: MsgDeactivateDID): unknown {
     const obj: any = {};
-    message.creator !== undefined && (obj.creator = message.creator);
-    message.didId !== undefined && (obj.didId = message.didId);
-    message.version_id !== undefined && (obj.version_id = message.version_id);
-    if (message.signatures) {
-      obj.signatures = message.signatures.map((e) =>
-        e ? SignInfo.toJSON(e) : undefined
-      );
-    } else {
-      obj.signatures = [];
+    if (message.didDocumentId !== undefined && message.didDocumentId !== "") {
+      obj.didDocumentId = message.didDocumentId;
+    }
+    if (message.didDocumentProofs?.length) {
+      obj.didDocumentProofs = message.didDocumentProofs.map((e) => DocumentProof.toJSON(e));
+    }
+    if (message.versionId !== undefined && message.versionId !== "") {
+      obj.versionId = message.versionId;
+    }
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      obj.txAuthor = message.txAuthor;
     }
     return obj;
   },
 
-  fromPartial(object: DeepPartial<MsgDeactivateDID>): MsgDeactivateDID {
-    const message = { ...baseMsgDeactivateDID } as MsgDeactivateDID;
-    message.signatures = [];
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = object.creator;
-    } else {
-      message.creator = "";
-    }
-    if (object.didId !== undefined && object.didId !== null) {
-      message.didId = object.didId;
-    } else {
-      message.didId = "";
-    }
-    if (object.version_id !== undefined && object.version_id !== null) {
-      message.version_id = object.version_id;
-    } else {
-      message.version_id = "";
-    }
-    if (object.signatures !== undefined && object.signatures !== null) {
-      for (const e of object.signatures) {
-        message.signatures.push(SignInfo.fromPartial(e));
-      }
-    }
+  create<I extends Exact<DeepPartial<MsgDeactivateDID>, I>>(base?: I): MsgDeactivateDID {
+    return MsgDeactivateDID.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgDeactivateDID>, I>>(object: I): MsgDeactivateDID {
+    const message = createBaseMsgDeactivateDID();
+    message.didDocumentId = object.didDocumentId ?? undefined;
+    message.didDocumentProofs = object.didDocumentProofs?.map((e) => DocumentProof.fromPartial(e)) || undefined;
+    message.versionId = object.versionId ?? undefined;
+    message.txAuthor = object.txAuthor ?? undefined;
     return message;
   },
 };
 
-const baseMsgDeactivateDIDResponse: object = { id: 0 };
+function createBaseMsgDeactivateDIDResponse(): MsgDeactivateDIDResponse {
+  return {};
+}
 
 export const MsgDeactivateDIDResponse = {
-  encode(
-    message: MsgDeactivateDIDResponse,
-    writer: Writer = Writer.create()
-  ): Writer {
-    if (message.id !== 0) {
-      writer.uint32(8).uint64(message.id);
-    }
+  encode(_: MsgDeactivateDIDResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
     return writer;
   },
 
-  decode(
-    input: Reader | Uint8Array,
-    length?: number
-  ): MsgDeactivateDIDResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgDeactivateDIDResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseMsgDeactivateDIDResponse,
-    } as MsgDeactivateDIDResponse;
+    const message = createBaseMsgDeactivateDIDResponse();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
-        case 1:
-          message.id = longToNumber(reader.uint64() as Long);
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
 
-  fromJSON(object: any): MsgDeactivateDIDResponse {
-    const message = {
-      ...baseMsgDeactivateDIDResponse,
-    } as MsgDeactivateDIDResponse;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = Number(object.id);
-    } else {
-      message.id = 0;
-    }
-    return message;
+  fromJSON(_: any): MsgDeactivateDIDResponse {
+    return {};
   },
 
-  toJSON(message: MsgDeactivateDIDResponse): unknown {
+  toJSON(_: MsgDeactivateDIDResponse): unknown {
     const obj: any = {};
-    message.id !== undefined && (obj.id = message.id);
     return obj;
   },
 
-  fromPartial(
-    object: DeepPartial<MsgDeactivateDIDResponse>
-  ): MsgDeactivateDIDResponse {
-    const message = {
-      ...baseMsgDeactivateDIDResponse,
-    } as MsgDeactivateDIDResponse;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = object.id;
-    } else {
-      message.id = 0;
-    }
+  create<I extends Exact<DeepPartial<MsgDeactivateDIDResponse>, I>>(base?: I): MsgDeactivateDIDResponse {
+    return MsgDeactivateDIDResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgDeactivateDIDResponse>, I>>(_: I): MsgDeactivateDIDResponse {
+    const message = createBaseMsgDeactivateDIDResponse();
     return message;
   },
 };
 
-const baseMsgRegisterCredentialStatus: object = { creator: "" };
+function createBaseMsgRegisterCredentialSchema(): MsgRegisterCredentialSchema {
+  return {};
+}
 
-export const MsgRegisterCredentialStatus = {
-  encode(
-    message: MsgRegisterCredentialStatus,
-    writer: Writer = Writer.create()
-  ): Writer {
-    if (message.creator !== "") {
-      writer.uint32(10).string(message.creator);
+export const MsgRegisterCredentialSchema = {
+  encode(message: MsgRegisterCredentialSchema, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.credentialSchemaDocument !== undefined) {
+      CredentialSchemaDocument.encode(message.credentialSchemaDocument, writer.uint32(10).fork()).ldelim();
     }
-    if (message.credentialStatus !== undefined) {
-      CredentialStatus.encode(
-        message.credentialStatus,
-        writer.uint32(18).fork()
-      ).ldelim();
+    if (message.credentialSchemaProof !== undefined) {
+      DocumentProof.encode(message.credentialSchemaProof, writer.uint32(18).fork()).ldelim();
     }
-    if (message.proof !== undefined) {
-      CredentialProof.encode(message.proof, writer.uint32(26).fork()).ldelim();
-    }
-    if (message.clientSpec !== undefined) {
-      ClientSpec.encode(message.clientSpec, writer.uint32(34).fork()).ldelim();
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      writer.uint32(26).string(message.txAuthor);
     }
     return writer;
   },
 
-  decode(
-    input: Reader | Uint8Array,
-    length?: number
-  ): MsgRegisterCredentialStatus {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRegisterCredentialSchema {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseMsgRegisterCredentialStatus,
-    } as MsgRegisterCredentialStatus;
+    const message = createBaseMsgRegisterCredentialSchema();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.creator = reader.string();
-          break;
+          if (tag !== 10) {
+            break;
+          }
+
+          message.credentialSchemaDocument = CredentialSchemaDocument.decode(reader, reader.uint32());
+          continue;
         case 2:
-          message.credentialStatus = CredentialStatus.decode(
-            reader,
-            reader.uint32()
-          );
-          break;
+          if (tag !== 18) {
+            break;
+          }
+
+          message.credentialSchemaProof = DocumentProof.decode(reader, reader.uint32());
+          continue;
         case 3:
-          message.proof = CredentialProof.decode(reader, reader.uint32());
-          break;
-        case 4:
-          message.clientSpec = ClientSpec.decode(reader, reader.uint32());
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          if (tag !== 26) {
+            break;
+          }
+
+          message.txAuthor = reader.string();
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgRegisterCredentialSchema {
+    return {
+      credentialSchemaDocument: isSet(object.credentialSchemaDocument)
+        ? CredentialSchemaDocument.fromJSON(object.credentialSchemaDocument)
+        : undefined,
+      credentialSchemaProof: isSet(object.credentialSchemaProof)
+        ? DocumentProof.fromJSON(object.credentialSchemaProof)
+        : undefined,
+      txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+    };
+  },
+
+  toJSON(message: MsgRegisterCredentialSchema): unknown {
+    const obj: any = {};
+    if (message.credentialSchemaDocument !== undefined) {
+      obj.credentialSchemaDocument = CredentialSchemaDocument.toJSON(message.credentialSchemaDocument);
+    }
+    if (message.credentialSchemaProof !== undefined) {
+      obj.credentialSchemaProof = DocumentProof.toJSON(message.credentialSchemaProof);
+    }
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      obj.txAuthor = message.txAuthor;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRegisterCredentialSchema>, I>>(base?: I): MsgRegisterCredentialSchema {
+    return MsgRegisterCredentialSchema.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRegisterCredentialSchema>, I>>(object: I): MsgRegisterCredentialSchema {
+    const message = createBaseMsgRegisterCredentialSchema();
+    message.credentialSchemaDocument =
+      (object.credentialSchemaDocument !== undefined && object.credentialSchemaDocument !== null)
+        ? CredentialSchemaDocument.fromPartial(object.credentialSchemaDocument)
+        : undefined;
+    message.credentialSchemaProof =
+      (object.credentialSchemaProof !== undefined && object.credentialSchemaProof !== null)
+        ? DocumentProof.fromPartial(object.credentialSchemaProof)
+        : undefined;
+    message.txAuthor = object.txAuthor ?? undefined;
+    return message;
+  },
+};
+
+function createBaseMsgRegisterCredentialSchemaResponse(): MsgRegisterCredentialSchemaResponse {
+  return {};
+}
+
+export const MsgRegisterCredentialSchemaResponse = {
+  encode(_: MsgRegisterCredentialSchemaResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRegisterCredentialSchemaResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRegisterCredentialSchemaResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgRegisterCredentialSchemaResponse {
+    return {};
+  },
+
+  toJSON(_: MsgRegisterCredentialSchemaResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRegisterCredentialSchemaResponse>, I>>(
+    base?: I,
+  ): MsgRegisterCredentialSchemaResponse {
+    return MsgRegisterCredentialSchemaResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRegisterCredentialSchemaResponse>, I>>(
+    _: I,
+  ): MsgRegisterCredentialSchemaResponse {
+    const message = createBaseMsgRegisterCredentialSchemaResponse();
+    return message;
+  },
+};
+
+function createBaseMsgUpdateCredentialSchema(): MsgUpdateCredentialSchema {
+  return {};
+}
+
+export const MsgUpdateCredentialSchema = {
+  encode(message: MsgUpdateCredentialSchema, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.credentialSchemaDocument !== undefined) {
+      CredentialSchemaDocument.encode(message.credentialSchemaDocument, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.credentialSchemaProof !== undefined) {
+      DocumentProof.encode(message.credentialSchemaProof, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      writer.uint32(26).string(message.txAuthor);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdateCredentialSchema {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgUpdateCredentialSchema();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.credentialSchemaDocument = CredentialSchemaDocument.decode(reader, reader.uint32());
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.credentialSchemaProof = DocumentProof.decode(reader, reader.uint32());
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.txAuthor = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(object: any): MsgUpdateCredentialSchema {
+    return {
+      credentialSchemaDocument: isSet(object.credentialSchemaDocument)
+        ? CredentialSchemaDocument.fromJSON(object.credentialSchemaDocument)
+        : undefined,
+      credentialSchemaProof: isSet(object.credentialSchemaProof)
+        ? DocumentProof.fromJSON(object.credentialSchemaProof)
+        : undefined,
+      txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+    };
+  },
+
+  toJSON(message: MsgUpdateCredentialSchema): unknown {
+    const obj: any = {};
+    if (message.credentialSchemaDocument !== undefined) {
+      obj.credentialSchemaDocument = CredentialSchemaDocument.toJSON(message.credentialSchemaDocument);
+    }
+    if (message.credentialSchemaProof !== undefined) {
+      obj.credentialSchemaProof = DocumentProof.toJSON(message.credentialSchemaProof);
+    }
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      obj.txAuthor = message.txAuthor;
+    }
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgUpdateCredentialSchema>, I>>(base?: I): MsgUpdateCredentialSchema {
+    return MsgUpdateCredentialSchema.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgUpdateCredentialSchema>, I>>(object: I): MsgUpdateCredentialSchema {
+    const message = createBaseMsgUpdateCredentialSchema();
+    message.credentialSchemaDocument =
+      (object.credentialSchemaDocument !== undefined && object.credentialSchemaDocument !== null)
+        ? CredentialSchemaDocument.fromPartial(object.credentialSchemaDocument)
+        : undefined;
+    message.credentialSchemaProof =
+      (object.credentialSchemaProof !== undefined && object.credentialSchemaProof !== null)
+        ? DocumentProof.fromPartial(object.credentialSchemaProof)
+        : undefined;
+    message.txAuthor = object.txAuthor ?? undefined;
+    return message;
+  },
+};
+
+function createBaseMsgUpdateCredentialSchemaResponse(): MsgUpdateCredentialSchemaResponse {
+  return {};
+}
+
+export const MsgUpdateCredentialSchemaResponse = {
+  encode(_: MsgUpdateCredentialSchemaResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdateCredentialSchemaResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgUpdateCredentialSchemaResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgUpdateCredentialSchemaResponse {
+    return {};
+  },
+
+  toJSON(_: MsgUpdateCredentialSchemaResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgUpdateCredentialSchemaResponse>, I>>(
+    base?: I,
+  ): MsgUpdateCredentialSchemaResponse {
+    return MsgUpdateCredentialSchemaResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgUpdateCredentialSchemaResponse>, I>>(
+    _: I,
+  ): MsgUpdateCredentialSchemaResponse {
+    const message = createBaseMsgUpdateCredentialSchemaResponse();
+    return message;
+  },
+};
+
+function createBaseMsgRegisterCredentialStatus(): MsgRegisterCredentialStatus {
+  return {};
+}
+
+export const MsgRegisterCredentialStatus = {
+  encode(message: MsgRegisterCredentialStatus, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.credentialStatusDocument !== undefined) {
+      CredentialStatusDocument.encode(message.credentialStatusDocument, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.credentialStatusProof !== undefined) {
+      DocumentProof.encode(message.credentialStatusProof, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      writer.uint32(26).string(message.txAuthor);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRegisterCredentialStatus {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRegisterCredentialStatus();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.credentialStatusDocument = CredentialStatusDocument.decode(reader, reader.uint32());
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.credentialStatusProof = DocumentProof.decode(reader, reader.uint32());
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.txAuthor = reader.string();
+          continue;
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
 
   fromJSON(object: any): MsgRegisterCredentialStatus {
-    const message = {
-      ...baseMsgRegisterCredentialStatus,
-    } as MsgRegisterCredentialStatus;
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = String(object.creator);
-    } else {
-      message.creator = "";
-    }
-    if (
-      object.credentialStatus !== undefined &&
-      object.credentialStatus !== null
-    ) {
-      message.credentialStatus = CredentialStatus.fromJSON(
-        object.credentialStatus
-      );
-    } else {
-      message.credentialStatus = undefined;
-    }
-    if (object.proof !== undefined && object.proof !== null) {
-      message.proof = CredentialProof.fromJSON(object.proof);
-    } else {
-      message.proof = undefined;
-    }
-    if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = ClientSpec.fromJSON(object.clientSpec);
-    } else {
-      message.clientSpec = undefined;
-    }
-    return message;
+    return {
+      credentialStatusDocument: isSet(object.credentialStatusDocument)
+        ? CredentialStatusDocument.fromJSON(object.credentialStatusDocument)
+        : undefined,
+      credentialStatusProof: isSet(object.credentialStatusProof)
+        ? DocumentProof.fromJSON(object.credentialStatusProof)
+        : undefined,
+      txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+    };
   },
 
   toJSON(message: MsgRegisterCredentialStatus): unknown {
     const obj: any = {};
-    message.creator !== undefined && (obj.creator = message.creator);
-    message.credentialStatus !== undefined &&
-      (obj.credentialStatus = message.credentialStatus
-        ? CredentialStatus.toJSON(message.credentialStatus)
-        : undefined);
-    message.proof !== undefined &&
-      (obj.proof = message.proof
-        ? CredentialProof.toJSON(message.proof)
-        : undefined);
-    message.clientSpec !== undefined &&
-      (obj.clientSpec = message.clientSpec
-        ? ClientSpec.toJSON(message.clientSpec)
-        : undefined);
+    if (message.credentialStatusDocument !== undefined) {
+      obj.credentialStatusDocument = CredentialStatusDocument.toJSON(message.credentialStatusDocument);
+    }
+    if (message.credentialStatusProof !== undefined) {
+      obj.credentialStatusProof = DocumentProof.toJSON(message.credentialStatusProof);
+    }
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      obj.txAuthor = message.txAuthor;
+    }
     return obj;
   },
 
-  fromPartial(
-    object: DeepPartial<MsgRegisterCredentialStatus>
-  ): MsgRegisterCredentialStatus {
-    const message = {
-      ...baseMsgRegisterCredentialStatus,
-    } as MsgRegisterCredentialStatus;
-    if (object.creator !== undefined && object.creator !== null) {
-      message.creator = object.creator;
-    } else {
-      message.creator = "";
-    }
-    if (
-      object.credentialStatus !== undefined &&
-      object.credentialStatus !== null
-    ) {
-      message.credentialStatus = CredentialStatus.fromPartial(
-        object.credentialStatus
-      );
-    } else {
-      message.credentialStatus = undefined;
-    }
-    if (object.proof !== undefined && object.proof !== null) {
-      message.proof = CredentialProof.fromPartial(object.proof);
-    } else {
-      message.proof = undefined;
-    }
-    if (object.clientSpec !== undefined && object.clientSpec !== null) {
-      message.clientSpec = ClientSpec.fromPartial(object.clientSpec);
-    } else {
-      message.clientSpec = undefined;
-    }
+  create<I extends Exact<DeepPartial<MsgRegisterCredentialStatus>, I>>(base?: I): MsgRegisterCredentialStatus {
+    return MsgRegisterCredentialStatus.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRegisterCredentialStatus>, I>>(object: I): MsgRegisterCredentialStatus {
+    const message = createBaseMsgRegisterCredentialStatus();
+    message.credentialStatusDocument =
+      (object.credentialStatusDocument !== undefined && object.credentialStatusDocument !== null)
+        ? CredentialStatusDocument.fromPartial(object.credentialStatusDocument)
+        : undefined;
+    message.credentialStatusProof =
+      (object.credentialStatusProof !== undefined && object.credentialStatusProof !== null)
+        ? DocumentProof.fromPartial(object.credentialStatusProof)
+        : undefined;
+    message.txAuthor = object.txAuthor ?? undefined;
     return message;
   },
 };
 
-const baseMsgRegisterCredentialStatusResponse: object = { id: 0 };
+function createBaseMsgRegisterCredentialStatusResponse(): MsgRegisterCredentialStatusResponse {
+  return {};
+}
 
 export const MsgRegisterCredentialStatusResponse = {
-  encode(
-    message: MsgRegisterCredentialStatusResponse,
-    writer: Writer = Writer.create()
-  ): Writer {
-    if (message.id !== 0) {
-      writer.uint32(8).uint64(message.id);
+  encode(_: MsgRegisterCredentialStatusResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgRegisterCredentialStatusResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgRegisterCredentialStatusResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgRegisterCredentialStatusResponse {
+    return {};
+  },
+
+  toJSON(_: MsgRegisterCredentialStatusResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgRegisterCredentialStatusResponse>, I>>(
+    base?: I,
+  ): MsgRegisterCredentialStatusResponse {
+    return MsgRegisterCredentialStatusResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgRegisterCredentialStatusResponse>, I>>(
+    _: I,
+  ): MsgRegisterCredentialStatusResponse {
+    const message = createBaseMsgRegisterCredentialStatusResponse();
+    return message;
+  },
+};
+
+function createBaseMsgUpdateCredentialStatus(): MsgUpdateCredentialStatus {
+  return {};
+}
+
+export const MsgUpdateCredentialStatus = {
+  encode(message: MsgUpdateCredentialStatus, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.credentialStatusDocument !== undefined) {
+      CredentialStatusDocument.encode(message.credentialStatusDocument, writer.uint32(10).fork()).ldelim();
+    }
+    if (message.credentialStatusProof !== undefined) {
+      DocumentProof.encode(message.credentialStatusProof, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      writer.uint32(26).string(message.txAuthor);
     }
     return writer;
   },
 
-  decode(
-    input: Reader | Uint8Array,
-    length?: number
-  ): MsgRegisterCredentialStatusResponse {
-    const reader = input instanceof Uint8Array ? new Reader(input) : input;
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdateCredentialStatus {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
     let end = length === undefined ? reader.len : reader.pos + length;
-    const message = {
-      ...baseMsgRegisterCredentialStatusResponse,
-    } as MsgRegisterCredentialStatusResponse;
+    const message = createBaseMsgUpdateCredentialStatus();
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
         case 1:
-          message.id = longToNumber(reader.uint64() as Long);
-          break;
-        default:
-          reader.skipType(tag & 7);
-          break;
+          if (tag !== 10) {
+            break;
+          }
+
+          message.credentialStatusDocument = CredentialStatusDocument.decode(reader, reader.uint32());
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.credentialStatusProof = DocumentProof.decode(reader, reader.uint32());
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.txAuthor = reader.string();
+          continue;
       }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
     }
     return message;
   },
 
-  fromJSON(object: any): MsgRegisterCredentialStatusResponse {
-    const message = {
-      ...baseMsgRegisterCredentialStatusResponse,
-    } as MsgRegisterCredentialStatusResponse;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = Number(object.id);
-    } else {
-      message.id = 0;
-    }
-    return message;
+  fromJSON(object: any): MsgUpdateCredentialStatus {
+    return {
+      credentialStatusDocument: isSet(object.credentialStatusDocument)
+        ? CredentialStatusDocument.fromJSON(object.credentialStatusDocument)
+        : undefined,
+      credentialStatusProof: isSet(object.credentialStatusProof)
+        ? DocumentProof.fromJSON(object.credentialStatusProof)
+        : undefined,
+      txAuthor: isSet(object.txAuthor) ? globalThis.String(object.txAuthor) : undefined,
+    };
   },
 
-  toJSON(message: MsgRegisterCredentialStatusResponse): unknown {
+  toJSON(message: MsgUpdateCredentialStatus): unknown {
     const obj: any = {};
-    message.id !== undefined && (obj.id = message.id);
+    if (message.credentialStatusDocument !== undefined) {
+      obj.credentialStatusDocument = CredentialStatusDocument.toJSON(message.credentialStatusDocument);
+    }
+    if (message.credentialStatusProof !== undefined) {
+      obj.credentialStatusProof = DocumentProof.toJSON(message.credentialStatusProof);
+    }
+    if (message.txAuthor !== undefined && message.txAuthor !== "") {
+      obj.txAuthor = message.txAuthor;
+    }
     return obj;
   },
 
-  fromPartial(
-    object: DeepPartial<MsgRegisterCredentialStatusResponse>
-  ): MsgRegisterCredentialStatusResponse {
-    const message = {
-      ...baseMsgRegisterCredentialStatusResponse,
-    } as MsgRegisterCredentialStatusResponse;
-    if (object.id !== undefined && object.id !== null) {
-      message.id = object.id;
-    } else {
-      message.id = 0;
-    }
+  create<I extends Exact<DeepPartial<MsgUpdateCredentialStatus>, I>>(base?: I): MsgUpdateCredentialStatus {
+    return MsgUpdateCredentialStatus.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgUpdateCredentialStatus>, I>>(object: I): MsgUpdateCredentialStatus {
+    const message = createBaseMsgUpdateCredentialStatus();
+    message.credentialStatusDocument =
+      (object.credentialStatusDocument !== undefined && object.credentialStatusDocument !== null)
+        ? CredentialStatusDocument.fromPartial(object.credentialStatusDocument)
+        : undefined;
+    message.credentialStatusProof =
+      (object.credentialStatusProof !== undefined && object.credentialStatusProof !== null)
+        ? DocumentProof.fromPartial(object.credentialStatusProof)
+        : undefined;
+    message.txAuthor = object.txAuthor ?? undefined;
     return message;
   },
 };
 
-/** Msg defines the Msg service. */
-export interface Msg {
-  CreateDID(request: MsgCreateDID): Promise<MsgCreateDIDResponse>;
-  UpdateDID(request: MsgUpdateDID): Promise<MsgUpdateDIDResponse>;
-  CreateSchema(request: MsgCreateSchema): Promise<MsgCreateSchemaResponse>;
-  DeactivateDID(request: MsgDeactivateDID): Promise<MsgDeactivateDIDResponse>;
-  RegisterCredentialStatus(
-    request: MsgRegisterCredentialStatus
-  ): Promise<MsgRegisterCredentialStatusResponse>;
+function createBaseMsgUpdateCredentialStatusResponse(): MsgUpdateCredentialStatusResponse {
+  return {};
 }
 
+export const MsgUpdateCredentialStatusResponse = {
+  encode(_: MsgUpdateCredentialStatusResponse, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): MsgUpdateCredentialStatusResponse {
+    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseMsgUpdateCredentialStatusResponse();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+      reader.skipType(tag & 7);
+    }
+    return message;
+  },
+
+  fromJSON(_: any): MsgUpdateCredentialStatusResponse {
+    return {};
+  },
+
+  toJSON(_: MsgUpdateCredentialStatusResponse): unknown {
+    const obj: any = {};
+    return obj;
+  },
+
+  create<I extends Exact<DeepPartial<MsgUpdateCredentialStatusResponse>, I>>(
+    base?: I,
+  ): MsgUpdateCredentialStatusResponse {
+    return MsgUpdateCredentialStatusResponse.fromPartial(base ?? ({} as any));
+  },
+  fromPartial<I extends Exact<DeepPartial<MsgUpdateCredentialStatusResponse>, I>>(
+    _: I,
+  ): MsgUpdateCredentialStatusResponse {
+    const message = createBaseMsgUpdateCredentialStatusResponse();
+    return message;
+  },
+};
+
+export interface Msg {
+  RegisterDID(request: MsgRegisterDID): Promise<MsgRegisterDIDResponse>;
+  UpdateDID(request: MsgUpdateDID): Promise<MsgUpdateDIDResponse>;
+  DeactivateDID(request: MsgDeactivateDID): Promise<MsgDeactivateDIDResponse>;
+  RegisterCredentialSchema(request: MsgRegisterCredentialSchema): Promise<MsgRegisterCredentialSchemaResponse>;
+  UpdateCredentialSchema(request: MsgUpdateCredentialSchema): Promise<MsgUpdateCredentialSchemaResponse>;
+  RegisterCredentialStatus(request: MsgRegisterCredentialStatus): Promise<MsgRegisterCredentialStatusResponse>;
+  UpdateCredentialStatus(request: MsgUpdateCredentialStatus): Promise<MsgUpdateCredentialStatusResponse>;
+}
+
+export const MsgServiceName = "hypersign.ssi.v1.Msg";
 export class MsgClientImpl implements Msg {
   private readonly rpc: Rpc;
-  constructor(rpc: Rpc) {
+  private readonly service: string;
+  constructor(rpc: Rpc, opts?: { service?: string }) {
+    this.service = opts?.service || MsgServiceName;
     this.rpc = rpc;
+    this.RegisterDID = this.RegisterDID.bind(this);
+    this.UpdateDID = this.UpdateDID.bind(this);
+    this.DeactivateDID = this.DeactivateDID.bind(this);
+    this.RegisterCredentialSchema = this.RegisterCredentialSchema.bind(this);
+    this.UpdateCredentialSchema = this.UpdateCredentialSchema.bind(this);
+    this.RegisterCredentialStatus = this.RegisterCredentialStatus.bind(this);
+    this.UpdateCredentialStatus = this.UpdateCredentialStatus.bind(this);
   }
-  CreateDID(request: MsgCreateDID): Promise<MsgCreateDIDResponse> {
-    const data = MsgCreateDID.encode(request).finish();
-    const promise = this.rpc.request(
-      "hypersignprotocol.hidnode.ssi.Msg",
-      "CreateDID",
-      data
-    );
-    return promise.then((data) =>
-      MsgCreateDIDResponse.decode(new Reader(data))
-    );
+  RegisterDID(request: MsgRegisterDID): Promise<MsgRegisterDIDResponse> {
+    const data = MsgRegisterDID.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RegisterDID", data);
+    return promise.then((data) => MsgRegisterDIDResponse.decode(_m0.Reader.create(data)));
   }
 
   UpdateDID(request: MsgUpdateDID): Promise<MsgUpdateDIDResponse> {
     const data = MsgUpdateDID.encode(request).finish();
-    const promise = this.rpc.request(
-      "hypersignprotocol.hidnode.ssi.Msg",
-      "UpdateDID",
-      data
-    );
-    return promise.then((data) =>
-      MsgUpdateDIDResponse.decode(new Reader(data))
-    );
-  }
-
-  CreateSchema(request: MsgCreateSchema): Promise<MsgCreateSchemaResponse> {
-    const data = MsgCreateSchema.encode(request).finish();
-    const promise = this.rpc.request(
-      "hypersignprotocol.hidnode.ssi.Msg",
-      "CreateSchema",
-      data
-    );
-    return promise.then((data) =>
-      MsgCreateSchemaResponse.decode(new Reader(data))
-    );
+    const promise = this.rpc.request(this.service, "UpdateDID", data);
+    return promise.then((data) => MsgUpdateDIDResponse.decode(_m0.Reader.create(data)));
   }
 
   DeactivateDID(request: MsgDeactivateDID): Promise<MsgDeactivateDIDResponse> {
     const data = MsgDeactivateDID.encode(request).finish();
-    const promise = this.rpc.request(
-      "hypersignprotocol.hidnode.ssi.Msg",
-      "DeactivateDID",
-      data
-    );
-    return promise.then((data) =>
-      MsgDeactivateDIDResponse.decode(new Reader(data))
-    );
+    const promise = this.rpc.request(this.service, "DeactivateDID", data);
+    return promise.then((data) => MsgDeactivateDIDResponse.decode(_m0.Reader.create(data)));
   }
 
-  RegisterCredentialStatus(
-    request: MsgRegisterCredentialStatus
-  ): Promise<MsgRegisterCredentialStatusResponse> {
+  RegisterCredentialSchema(request: MsgRegisterCredentialSchema): Promise<MsgRegisterCredentialSchemaResponse> {
+    const data = MsgRegisterCredentialSchema.encode(request).finish();
+    const promise = this.rpc.request(this.service, "RegisterCredentialSchema", data);
+    return promise.then((data) => MsgRegisterCredentialSchemaResponse.decode(_m0.Reader.create(data)));
+  }
+
+  UpdateCredentialSchema(request: MsgUpdateCredentialSchema): Promise<MsgUpdateCredentialSchemaResponse> {
+    const data = MsgUpdateCredentialSchema.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateCredentialSchema", data);
+    return promise.then((data) => MsgUpdateCredentialSchemaResponse.decode(_m0.Reader.create(data)));
+  }
+
+  RegisterCredentialStatus(request: MsgRegisterCredentialStatus): Promise<MsgRegisterCredentialStatusResponse> {
     const data = MsgRegisterCredentialStatus.encode(request).finish();
-    const promise = this.rpc.request(
-      "hypersignprotocol.hidnode.ssi.Msg",
-      "RegisterCredentialStatus",
-      data
-    );
-    return promise.then((data) =>
-      MsgRegisterCredentialStatusResponse.decode(new Reader(data))
-    );
+    const promise = this.rpc.request(this.service, "RegisterCredentialStatus", data);
+    return promise.then((data) => MsgRegisterCredentialStatusResponse.decode(_m0.Reader.create(data)));
+  }
+
+  UpdateCredentialStatus(request: MsgUpdateCredentialStatus): Promise<MsgUpdateCredentialStatusResponse> {
+    const data = MsgUpdateCredentialStatus.encode(request).finish();
+    const promise = this.rpc.request(this.service, "UpdateCredentialStatus", data);
+    return promise.then((data) => MsgUpdateCredentialStatusResponse.decode(_m0.Reader.create(data)));
   }
 }
 
 interface Rpc {
-  request(
-    service: string,
-    method: string,
-    data: Uint8Array
-  ): Promise<Uint8Array>;
+  request(service: string, method: string, data: Uint8Array): Promise<Uint8Array>;
 }
 
-declare var self: any | undefined;
-declare var window: any | undefined;
-var globalThis: any = (() => {
-  if (typeof globalThis !== "undefined") return globalThis;
-  if (typeof self !== "undefined") return self;
-  if (typeof window !== "undefined") return window;
-  if (typeof global !== "undefined") return global;
-  throw "Unable to locate global object";
-})();
+type Builtin = Date | Function | Uint8Array | string | number | boolean | undefined;
 
-type Builtin = Date | Function | Uint8Array | string | number | undefined;
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepPartial<U>>
-  : T extends {}
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
+export type DeepPartial<T> = T extends Builtin ? T
+  : T extends globalThis.Array<infer U> ? globalThis.Array<DeepPartial<U>>
+  : T extends ReadonlyArray<infer U> ? ReadonlyArray<DeepPartial<U>>
+  : T extends {} ? { [K in keyof T]?: DeepPartial<T[K]> }
   : Partial<T>;
 
-function longToNumber(long: Long): number {
-  if (long.gt(Number.MAX_SAFE_INTEGER)) {
-    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
-  }
-  return long.toNumber();
-}
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+export type Exact<P, I extends P> = P extends Builtin ? P
+  : P & { [K in keyof P]: Exact<P[K], I[K]> } & { [K in Exclude<keyof I, KeysOfUnion<P>>]: never };
 
-// if (util.Long !== Long) {
-//   util.Long = Long as any;
-//   configure();
-// }
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
+}

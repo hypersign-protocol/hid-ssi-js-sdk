@@ -1,8 +1,11 @@
-import { ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema, ICredentialProof } from './ICredential';
-import { CredentialStatus, CredentialProof } from '../../libs/generated/ssi/credential';
+import { ICredentialMethods, IVerifiableCredential, ICredentialStatus, ISchema, ICredentialProof, IResolveCredential } from './ICredential';
+import { CredentialStatusDocument as CredentialStatus } from '../../libs/generated/ssi/credential_status';
+import { DocumentProof as CredentialProof } from '../../libs/generated/ssi/proof';
 import { DeliverTxResponse } from '@cosmjs/stargate';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { IClientSpec } from '../did/IDID';
+import HypersignBJJVerifiableCredential from './bjjvc';
+import Web3 from 'web3';
 export default class HypersignVerifiableCredential implements ICredentialMethods, IVerifiableCredential {
     '@context': Array<string>;
     id: string;
@@ -19,6 +22,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     private namespace;
     private hsSchema;
     private hsDid;
+    bjjVC: HypersignBJJVerifiableCredential;
     constructor(params?: {
         namespace?: string;
         offlineSigner?: OfflineSigner;
@@ -26,13 +30,12 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         nodeRestEndpoint?: string;
         entityApiSecretKey?: string;
     });
-    private _sign;
+    private _jsonLdSign;
     private _dateNow;
-    private _sha256Hash;
     private _getId;
     private _checkIfAllRequiredPropsAreSent;
     private _getCredentialSubject;
-    private _getCredentialContext;
+    private _toTitleCase;
     /**
      * Initialise the offlinesigner to interact with Hypersign blockchain
      */
@@ -102,11 +105,11 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
      * Resolves credential status from Hypersign Blokchain
      * @params
      *  - params.credentialId           : Verifiable credential id
-     * @returns {Promise<CredentialStatus>}
+     * @returns {Promise<IResolveCredential>}
      */
     resolveCredentialStatus(params: {
         credentialId: string;
-    }): Promise<CredentialStatus>;
+    }): Promise<IResolveCredential>;
     /**
      * Update credential status in blockchain Hypersign Blokchain
      * @params
@@ -125,7 +128,11 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         privateKeyMultibase: string;
         status: string;
         statusReason?: string;
-    }): Promise<DeliverTxResponse>;
+        readonly?: boolean;
+    }): Promise<DeliverTxResponse | {
+        credentialStatus: CredentialStatus;
+        proofValue: any;
+    }>;
     /**
      * Check status of credential on Hypersign Chain
      * @param
@@ -186,7 +193,8 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         issuerDid: string;
         verificationMethodId: string;
         type?: string;
-        web3Obj: any;
+        web3Obj?: Web3 | undefined;
+        privateKey?: string;
         registerCredential?: boolean;
         domain?: string;
         clientSpec?: IClientSpec;
@@ -206,7 +214,6 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
         credential: IVerifiableCredential;
         issuerDid: string;
         verificationMethodId: string;
-        web3Obj: any;
     }): Promise<object>;
 }
 //# sourceMappingURL=vc.d.ts.map

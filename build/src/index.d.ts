@@ -3,11 +3,14 @@ import HypersignVerifiableCredential from './credential/vc';
 import HypersignVerifiablePresentation from './presentation/vp';
 import HypersignSchema from './schema/schema';
 import { OfflineSigner } from '@cosmjs/proto-signing';
-import { IClientSpec, IKeyType, ISignInfo, IVerificationRelationships } from './did/IDID';
-import { Did } from '../libs/generated/ssi/did';
+import { IClientSpec, ISignInfo, SupportedPurpose } from './did/IDID';
+import { VerificationMethodTypes as IKeyType } from '../libs/generated/ssi/client/enums';
+import { VerificationMethodRelationships as IVerificationRelationships } from '../libs/generated/ssi/client/enums';
+import { DidDocument as Did } from '../libs/generated/ssi/did';
 import { IVerifiableCredential } from './credential/ICredential';
-import { Schema } from '../libs/generated/ssi/schema';
+import { CredentialSchemaDocument as Schema } from '../libs/generated/ssi/credential_schema';
 import { IVerifiablePresentation } from './presentation/IPresentation';
+import HypersignBJJVerifiableCredential from './credential/bjjvc';
 declare class HypersignSSISdk {
     did: HypersignDID;
     vc: HypersignVerifiableCredential;
@@ -27,5 +30,5 @@ declare class HypersignSSISdk {
     });
     init(): Promise<void>;
 }
-export { HypersignSSISdk, HypersignDID, HypersignSchema, HypersignVerifiableCredential, HypersignVerifiablePresentation, IVerificationRelationships, IKeyType, ISignInfo, IClientSpec, Did, IVerifiableCredential, IVerifiablePresentation, Schema, };
+export { HypersignSSISdk, HypersignDID, HypersignSchema, HypersignVerifiableCredential, HypersignVerifiablePresentation, IVerificationRelationships, HypersignBJJVerifiableCredential, IKeyType, ISignInfo, IClientSpec, Did, IVerifiableCredential, IVerifiablePresentation, Schema, SupportedPurpose, };
 //# sourceMappingURL=index.d.ts.map

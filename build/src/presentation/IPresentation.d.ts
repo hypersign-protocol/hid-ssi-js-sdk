@@ -1,9 +1,11 @@
 import { IVerifiableCredential } from '../credential/ICredential';
-export interface IVerifiablePresentation {
+export interface IVerifiableUnsignedPresentation {
     id: string;
     type: Array<string>;
-    verifiableCredential: Array<IVerifiableCredential> | Array<string>;
+    verifiableCredential: Array<IVerifiableCredential>;
     holder: string;
+}
+export interface IVerifiablePresentation extends IVerifiableUnsignedPresentation {
     proof: object;
 }
 export interface IPresentationMethods {
@@ -17,6 +19,7 @@ export interface IPresentationMethods {
         privateKeyMultibase: string;
         challenge: string;
         verificationMethodId: string;
+        domain?: string;
     }): Promise<object>;
     verify(params: {
         signedPresentation: IVerifiablePresentation;

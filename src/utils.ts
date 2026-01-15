@@ -1,4 +1,4 @@
-import { Did } from '../libs/generated/ssi/did';
+import { DidDocument as Did } from '../libs/generated/ssi/did';
 import * as constants from './constants';
 const { encode, decode } = require('base58-universal');
 import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
@@ -7,10 +7,7 @@ export default class Utils {
   public static async getUUID(): Promise<string> {
     const edKeyPair = await Ed25519VerificationKey2020.generate();
     const exportedKp = await edKeyPair.export({ publicKey: true });
-    const { publicKeyMultibase: publicKeyMultibase1 } = this.convertEd25519verificationkey2020toStableLibKeysInto({
-      publicKey: exportedKp.publicKeyMultibase,
-    });
-    return publicKeyMultibase1;
+    return exportedKp.publicKeyMultibase;
   }
 
   public static checkUrl(url: string) {
@@ -45,58 +42,6 @@ export default class Utils {
     return 'z' + encode(pubKeyBuf);
   }
 
-  // Converting 45byte public key to 48 by padding header
-  // Converting 88byte private key to 91 by padding header
-  public static convertedStableLibKeysIntoEd25519verificationkey2020(stableLibKp: {
-    privKey?: Uint8Array;
-    publicKey?: string;
-  }): { publicKeyMultibase: string; privateKeyMultibase: string } {
-    const result = {} as { publicKeyMultibase: string; privateKeyMultibase: string };
-    if (stableLibKp.publicKey) {
-      const stableLibPubKeyWithoutZ = stableLibKp.publicKey.substr(1);
-      const stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
-      result['publicKeyMultibase'] = Utils._encodeMbKey(
-        constants.KEY_HEADERS.MULTICODEC_ED25519_PUB_HEADER,
-        stableLibPubKeyWithoutZDecode
-      );
-    }
-
-    if (stableLibKp.privKey) {
-      result['privateKeyMultibase'] = Utils._encodeMbKey(
-        constants.KEY_HEADERS.MULTICODEC_ED25519_PRIV_HEADER,
-        stableLibKp.privKey
-      );
-    }
-
-    return result;
-  }
-
-  public static convertEd25519verificationkey2020toStableLibKeysInto(ed255192020VerKeys: {
-    privKey?: string;
-    publicKey?: string;
-  }): { publicKeyMultibase: string; privateKeyMultibase: string } {
-    const result = {} as { publicKeyMultibase: string; privateKeyMultibase: any };
-    if (ed255192020VerKeys.publicKey) {
-      const stableLibPubKeyWithoutZ = ed255192020VerKeys.publicKey.substr(1);
-      const stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
-      result['publicKeyMultibase'] = Utils._decodeMbPubKey(
-        constants.KEY_HEADERS.MULTICODEC_ED25519_PUB_HEADER,
-        stableLibPubKeyWithoutZDecode
-      );
-    }
-
-    // privateKeyMultibase = z + encode(header+original)
-    if (ed255192020VerKeys.privKey) {
-      const stableLibPrivKeyWithoutZ = ed255192020VerKeys.privKey.substr(1);
-      const stableLibPrivKeyWithoutZDecode = decode(stableLibPrivKeyWithoutZ);
-      result['privateKeyMultibase'] = Utils._decodeMbKey(
-        constants.KEY_HEADERS.MULTICODEC_ED25519_PRIV_HEADER,
-        stableLibPrivKeyWithoutZDecode
-      );
-    }
-
-    return result;
-  }
 
   public static jsonToLdConvertor(json: any) {
     const ld = {} as Did;
@@ -125,5 +70,42 @@ export default class Utils {
   // TODO: need to find a way to make it dynamic
   public static getFee() {
     return 'auto';
+  }
+
+  public static removeEmptyString(obj: object): object {
+    if (Array.isArray(obj)) {
+      for (let i = obj.length - 1; i >= 0; i--) {
+        if (obj[i] === '' || (typeof obj[i] === 'object' && Object.keys(obj[i]).length === 0)) {
+          obj.splice(i, 1);
+        } else if (typeof obj[i] === 'object') {
+          this.removeEmptyString(obj[i])
+        }
+      }
+    } else if (typeof obj === 'object' && obj !== null) {
+      for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          if (obj[key] === '') {
+            delete obj[key]
+          } else if (Array.isArray(obj[key])) {
+            this.removeEmptyString(obj[key]);
+          } else if (typeof obj[key] === 'object') {
+            this.removeEmptyString(obj[key])
+          }
+        }
+      }
+    }
+    return obj
+  }
+  public static async fetchFee(methodName: string,baseUrl) {
+    const url = constants.GAS_FEE_API_URL(baseUrl);
+    
+    const feeStructure = await fetch(url)
+    const fee = await feeStructure.json()
+    if (fee && fee[methodName]) {
+      const amount = fee[methodName].amount;
+      return amount;
+    } else {
+      throw new Error(`Fee not found for method: ${methodName}`);
+    }
   }
 }

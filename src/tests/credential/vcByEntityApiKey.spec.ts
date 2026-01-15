@@ -2,7 +2,7 @@ import { expect, should } from 'chai';
 import { HypersignDID, HypersignSchema, HypersignVerifiableCredential } from '../../index';
 import { createWallet, mnemonic, hidNodeEp, entityApiSecret } from '../config';
 import { ICredentialStatus, IVerifiableCredential } from '../../credential/ICredential';
-import { CredentialProof, CredentialStatus } from '../../../libs/generated/ssi/credential';
+// import { CredentialProof, CredentialStatus } from '../../../libs/generated/ssi/credential';
 let didDocument;
 let didDocId;
 let privateKeyMultibase;

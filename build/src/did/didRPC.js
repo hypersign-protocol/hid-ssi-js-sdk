@@ -45,6 +45,8 @@ const constants_1 = require("../constants");
 const generatedProto = __importStar(require("../../libs/generated/ssi/tx"));
 const axios_1 = __importDefault(require("axios"));
 const client_1 = require("../hid/client");
+const utils_1 = __importDefault(require("../utils"));
+const constants = __importStar(require("../constants"));
 class DIDRpc {
     constructor({ offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, }) {
         if (offlineSigner) {
@@ -53,8 +55,16 @@ class DIDRpc {
         else {
             this.hidClient = null;
         }
+        this.nodeRestEp = nodeRestEndpoint;
         this.didRestEp =
             (client_1.HIDClient.hidNodeRestEndpoint ? client_1.HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) + constants_1.HYPERSIGN_NETWORK_DID_PATH;
+    }
+    getSigningStargateClient() {
+        const client = client_1.HIDClient.getHidClient();
+        if (!client) {
+            throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
+        }
+        return client;
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -69,23 +79,37 @@ class DIDRpc {
             if (!this.hidClient) {
                 throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
             }
-            const typeUrl = `${constants_1.HID_COSMOS_MODULE}.${constants_1.HIDRpcEnums.MsgCreateDID}`;
+            delete didDoc['proof'];
+            const typeUrl = `${constants_1.HID_COSMOS_MODULE}.${constants_1.HIDRpcEnums.MsgRegisterDID}`;
             const txMessage = {
                 typeUrl,
-                value: generatedProto[constants_1.HIDRpcEnums.MsgCreateDID].fromPartial({
-                    didDocString: didDoc,
-                    signatures: signInfos,
-                    creator: client_1.HIDClient.getHidWalletAddress(),
+                value: generatedProto[constants_1.HIDRpcEnums.MsgRegisterDID].fromPartial({
+                    didDocument: didDoc,
+                    didDocumentProofs: signInfos,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
                 }),
             };
-            const fee = 'auto';
+            const amount = yield utils_1.default.fetchFee(constants.GAS_FEE_METHODS.Register_Did, this.nodeRestEp);
+            const fee = {
+                amount: [
+                    {
+                        denom: 'uhid',
+                        amount,
+                    },
+                ],
+                gas: '200000',
+            };
             const hidClient = client_1.HIDClient.getHidClient();
             const txResult = yield hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee);
+            if (txResult.code !== 0) {
+                throw new Error(`${txResult.rawLog}`);
+            }
             return txResult;
         });
     }
     updateDID(didDoc, signInfos, versionId) {
         return __awaiter(this, void 0, void 0, function* () {
+            delete didDoc['proof'];
             if (!this.hidClient) {
                 throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
             }
@@ -93,16 +117,27 @@ class DIDRpc {
             const txMessage = {
                 typeUrl,
                 value: generatedProto[constants_1.HIDRpcEnums.MsgUpdateDID].fromPartial({
-                    didDocString: didDoc,
-                    signatures: signInfos,
-                    creator: client_1.HIDClient.getHidWalletAddress(),
-                    version_id: versionId,
+                    didDocument: didDoc,
+                    didDocumentProofs: signInfos,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
+                    versionId: versionId,
                 }),
             };
-            // TODO: need to find a way to make it dynamic
-            const fee = 'auto';
-            const hidClient = client_1.HIDClient.getHidClient();
+            const amount = yield utils_1.default.fetchFee(constants.GAS_FEE_METHODS.Update_Did, this.nodeRestEp);
+            const fee = {
+                amount: [
+                    {
+                        denom: 'uhid',
+                        amount,
+                    },
+                ],
+                gas: '200000',
+            };
+            const hidClient = this.getSigningStargateClient();
             const txResult = yield hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee);
+            if (txResult.code !== 0) {
+                throw new Error(`${txResult.rawLog}`);
+            }
             return txResult;
         });
     }
@@ -115,22 +150,32 @@ class DIDRpc {
             const txMessage = {
                 typeUrl,
                 value: generatedProto[constants_1.HIDRpcEnums.MsgDeactivateDID].fromPartial({
-                    didId: did,
-                    signatures: signInfos,
-                    creator: client_1.HIDClient.getHidWalletAddress(),
-                    version_id: versionId,
+                    didDocumentId: did,
+                    didDocumentProofs: signInfos,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
+                    versionId: versionId,
                 }),
             };
-            // TODO: need to find a way to make it dynamic
-            const fee = 'auto';
+            const amount = yield utils_1.default.fetchFee(constants.GAS_FEE_METHODS.Deactivate_Did, this.nodeRestEp);
+            const fee = {
+                amount: [
+                    {
+                        denom: 'uhid',
+                        amount,
+                    },
+                ],
+                gas: '200000',
+            };
             const hidClient = client_1.HIDClient.getHidClient();
             const txResult = yield hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee);
+            if (txResult.code !== 0) {
+                throw new Error(`${txResult.rawLog}`);
+            }
             return txResult;
         });
     }
     resolveDID(did) {
         return __awaiter(this, void 0, void 0, function* () {
-            did = did + ':'; // TODO:  we need to sort this out ... need to remove later
             const get_didUrl = `${this.didRestEp}/${did}`;
             let response;
             try {

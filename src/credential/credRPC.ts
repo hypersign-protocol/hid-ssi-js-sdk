@@ -10,12 +10,19 @@ import { SigningStargateClient, DeliverTxResponse } from '@cosmjs/stargate';
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
 import { ICredentialRPC } from './ICredential';
-import { CredentialStatus, CredentialProof, Credential } from '../../libs/generated/ssi/credential';
+import {
+  CredentialStatusDocument as CredentialStatus,
+  CredentialStatusState as Credential,
+} from '../../libs/generated/ssi/credential_status';
+import { DocumentProof as CredentialProof } from '../../libs/generated/ssi/proof';
 import { OfflineSigner } from '@cosmjs/proto-signing';
+import Utils from '../utils';
+import * as constants from '../constants';
 
 export class CredentialRPC implements ICredentialRPC {
   public credentialRestEP: string;
   private hidClient: any;
+  private nodeRestEp: string;
 
   constructor({
     offlineSigner,
@@ -31,6 +38,7 @@ export class CredentialRPC implements ICredentialRPC {
     } else {
       this.hidClient = null;
     }
+    this.nodeRestEp = nodeRestEndpoint;
     this.credentialRestEP =
       (HIDClient.hidNodeRestEndpoint ? HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) +
       HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
@@ -64,19 +72,30 @@ export class CredentialRPC implements ICredentialRPC {
     const txMessage = {
       typeUrl, // Same as above
       value: generatedProto[HIDRpcEnums.MsgRegisterCredentialStatus].fromPartial({
-        credentialStatus,
-        proof,
-        creator: HIDClient.getHidWalletAddress(),
+        credentialStatusDocument: credentialStatus,
+        credentialStatusProof: proof,
+        txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-
-    const fee = 'auto';
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status, this.nodeRestEp);
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount: amount,
+        },
+      ],
+      gas: '200000',
+    };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult: DeliverTxResponse = await hidClient.signAndBroadcast(
       HIDClient.getHidWalletAddress(),
       [txMessage],
       fee
     );
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 
@@ -94,12 +113,11 @@ export class CredentialRPC implements ICredentialRPC {
     const txMessage = {
       typeUrl, // Same as above
       value: generatedProto[HIDRpcEnums.MsgRegisterCredentialStatus].fromPartial({
-        credentialStatus,
-        proof,
-        creator: HIDClient.getHidWalletAddress(),
+        credentialStatusDocument: credentialStatus,
+        credentialStatusProof: proof,
+        txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-
     return txMessage;
   }
 
@@ -107,14 +125,28 @@ export class CredentialRPC implements ICredentialRPC {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
     }
-
-    const fee = 'auto';
+    const txLenght = txMessages.length;
+    const amount = (
+      txLenght * parseInt(await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status, this.nodeRestEp))
+    ).toString();
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount: amount,
+        },
+      ],
+      gas: '200000',
+    };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult: DeliverTxResponse = await hidClient.signAndBroadcast(
       HIDClient.getHidWalletAddress(),
       txMessages,
       fee
     );
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 
@@ -127,8 +159,8 @@ export class CredentialRPC implements ICredentialRPC {
       if (!response.data) {
         throw new Error('Could not resolve credential status of credentialId ' + credentialId);
       }
-      const credStatus: Credential = response.data.credStatus;
-      if (!credStatus || !credStatus.claim || !credStatus.proof) {
+      const credStatus: Credential = response.data.credentialStatus;
+      if (!credStatus || !credStatus.credentialStatusDocument || !credStatus.credentialStatusProof) {
         throw new Error('No credential status found. Probably invalid credentialId');
       }
       return credStatus;
@@ -141,10 +173,54 @@ export class CredentialRPC implements ICredentialRPC {
         credentialHash: '',
         proof: null,
       } as any as Credential;
-      if (!credStatus || !credStatus.claim || !credStatus.proof) {
+      if (!credStatus || !credStatus.credentialStatusDocument || !credStatus.credentialStatusProof) {
         throw new Error('No credential status found. Probably invalid credentialId');
       }
       return credStatus;
     }
+  }
+  async updateCredentialStatus(credentialStatus: CredentialStatus, proof: CredentialProof): Promise<DeliverTxResponse> {
+    if (!credentialStatus) {
+      throw new Error('CredentialStatus must be passed as a param while registerting credential status');
+    }
+
+    if (!proof) {
+      throw new Error('Proof must be passed as a param while registering crdential status');
+    }
+
+    if (!this.hidClient) {
+      throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
+    }
+
+    const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgUpdateCredentialStatus}`;
+
+    const txMessage = {
+      typeUrl,
+      value: generatedProto[HIDRpcEnums.MsgUpdateCredentialStatus].fromPartial({
+        credentialStatusDocument: credentialStatus,
+        credentialStatusProof: proof,
+        txAuthor: HIDClient.getHidWalletAddress(),
+      }),
+    };
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Cred_Status, this.nodeRestEp);
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount: amount,
+        },
+      ],
+      gas: '200000',
+    };
+    const hidClient: SigningStargateClient = HIDClient.getHidClient();
+    const txResult: DeliverTxResponse = await hidClient.signAndBroadcast(
+      HIDClient.getHidWalletAddress(),
+      [txMessage],
+      fee
+    );
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
+    return txResult;
   }
 }

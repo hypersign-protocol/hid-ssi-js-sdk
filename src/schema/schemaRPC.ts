@@ -9,17 +9,22 @@ import * as generatedProto from '../../libs/generated/ssi/tx';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
-import { Schema, SchemaProof } from '../../libs/generated/ssi/schema';
+import { CredentialSchemaDocument, CredentialSchemaState as Schema } from '../../libs/generated/ssi/credential_schema';
+import { DocumentProof as SchemaProof } from '../../libs/generated/ssi/proof';
 import { DeliverTxResponse, SigningStargateClient } from '@cosmjs/stargate';
+import { CredentialSchemaDocument as SchemaDocument } from '../../libs/generated/ssi/credential_schema';
+import Utils from '../utils';
+import * as constants from '../constants';
 
 export interface ISchemaRPC {
-  createSchema(schema: Schema, proof: SchemaProof): Promise<object>;
+  registerSchema(schema: SchemaDocument, proof: SchemaProof): Promise<object>;
   resolveSchema(schemaId: string): Promise<object>;
 }
 
 export class SchemaRpc implements ISchemaRPC {
   public schemaRestEp: string;
   private hidClient: any;
+  private nodeRestEp: string;
 
   constructor({
     offlineSigner,
@@ -35,6 +40,8 @@ export class SchemaRpc implements ISchemaRPC {
     } else {
       this.hidClient = null;
     }
+
+    this.nodeRestEp = nodeRestEndpoint;
     this.schemaRestEp = HIDClient.hidNodeRestEndpoint + HYPERSIGN_NETWORK_SCHEMA_PATH;
   }
 
@@ -45,33 +52,48 @@ export class SchemaRpc implements ISchemaRPC {
     await this.hidClient.init();
   }
 
-  async createSchema(schema: Schema, proof: SchemaProof): Promise<DeliverTxResponse> {
+  async registerSchema(schema: CredentialSchemaDocument, proof: SchemaProof): Promise<DeliverTxResponse> {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: SchemaRpc class is not initialise with offlinesigner');
     }
-
-    const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateSchema}`;
-
+    const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgRegisterCredentialSchema}`;
     const txMessage = {
       typeUrl, // Same as above
-      value: generatedProto[HIDRpcEnums.MsgCreateSchema].fromJSON({
-        schemaDoc: schema,
-        schemaProof: proof,
-        creator: HIDClient.getHidWalletAddress(),
+      value: generatedProto[HIDRpcEnums.MsgRegisterCredentialSchema].fromPartial({
+        credentialSchemaDocument: schema,
+        credentialSchemaProof: proof,
+        txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-
-    // TODO: need to find a way to make it dynamic
-    const fee = 'auto';
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Schema, this.nodeRestEp);
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount,
+        },
+      ],
+      gas: '200000',
+    };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 
   async resolveSchema(schemaId: string): Promise<Array<object>> {
     const getSchemaUrl = `${this.schemaRestEp}/${schemaId}:`;
     const response = await axios.get(getSchemaUrl);
-    const { schema } = response.data;
-    return schema;
+
+    const { credentialSchemas } = response.data;
+
+    if (credentialSchemas === undefined) {
+      const { schema } = response.data;
+
+      return schema;
+    }
+    return credentialSchemas;
   }
 }

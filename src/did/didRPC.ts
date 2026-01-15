@@ -6,17 +6,20 @@
 
 import { HIDRpcEnums, HID_COSMOS_MODULE, HYPERSIGN_NETWORK_DID_PATH } from '../constants';
 import * as generatedProto from '../../libs/generated/ssi/tx';
-import { Did as IDidProto, SignInfo } from '../../libs/generated/ssi/did';
+import { DidDocument as IDidProto } from '../../libs/generated/ssi/did';
+import { DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
 import { SigningStargateClient } from '@cosmjs/stargate';
 
 import axios from 'axios';
 import { HIDClient } from '../hid/client';
-import { IClientSpec, IDIDResolve, IDIDRpc, IKeyType, DeliverTxResponse } from './IDID';
+import { IDIDResolve, IDIDRpc, DeliverTxResponse } from './IDID';
 import { OfflineSigner } from '@cosmjs/proto-signing';
-
+import Utils from '../utils';
+import * as constants from '../constants';
 export class DIDRpc implements IDIDRpc {
   private didRestEp: string;
   private hidClient: HIDClient | null;
+  private nodeRestEp: string;
   constructor({
     offlineSigner,
     nodeRpcEndpoint,
@@ -31,8 +34,17 @@ export class DIDRpc implements IDIDRpc {
     } else {
       this.hidClient = null;
     }
+    this.nodeRestEp = nodeRestEndpoint;
     this.didRestEp =
       (HIDClient.hidNodeRestEndpoint ? HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) + HYPERSIGN_NETWORK_DID_PATH;
+  }
+
+  private getSigningStargateClient() {
+    const client = HIDClient.getHidClient();
+    if (!client) {
+      throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
+    }
+    return client;
   }
 
   async init() {
@@ -46,24 +58,39 @@ export class DIDRpc implements IDIDRpc {
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
-
-    const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgCreateDID}`;
+    delete didDoc['proof'];
+    const typeUrl = `${HID_COSMOS_MODULE}.${HIDRpcEnums.MsgRegisterDID}`;
 
     const txMessage = {
       typeUrl, // Same as above
-      value: generatedProto[HIDRpcEnums.MsgCreateDID].fromPartial({
-        didDocString: didDoc,
-        signatures: signInfos,
-        creator: HIDClient.getHidWalletAddress(),
+      value: generatedProto[HIDRpcEnums.MsgRegisterDID].fromPartial({
+        didDocument: didDoc,
+        didDocumentProofs: signInfos,
+        txAuthor: HIDClient.getHidWalletAddress(),
       }),
     };
-    const fee = 'auto';
+
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Register_Did, this.nodeRestEp);
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount,
+        },
+      ],
+      gas: '200000',
+    };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
+
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 
   async updateDID(didDoc: IDidProto, signInfos: SignInfo[], versionId: string): Promise<DeliverTxResponse> {
+    delete didDoc['proof'];
     if (!this.hidClient) {
       throw new Error('HID-SSI-SDK:: Error: DIDRpc class is not initialise with offlinesigner');
     }
@@ -73,18 +100,28 @@ export class DIDRpc implements IDIDRpc {
     const txMessage = {
       typeUrl, // Same as above
       value: generatedProto[HIDRpcEnums.MsgUpdateDID].fromPartial({
-        didDocString: didDoc,
-        signatures: signInfos,
-        creator: HIDClient.getHidWalletAddress(),
-        version_id: versionId,
+        didDocument: didDoc,
+        didDocumentProofs: signInfos,
+        txAuthor: HIDClient.getHidWalletAddress(),
+        versionId: versionId,
       }),
     };
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Update_Did, this.nodeRestEp);
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount,
+        },
+      ],
+      gas: '200000',
+    };
 
-    // TODO: need to find a way to make it dynamic
-    const fee = 'auto';
-
-    const hidClient: SigningStargateClient = HIDClient.getHidClient();
+    const hidClient: SigningStargateClient = this.getSigningStargateClient();
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 
@@ -98,22 +135,32 @@ export class DIDRpc implements IDIDRpc {
     const txMessage = {
       typeUrl, // Same as above
       value: generatedProto[HIDRpcEnums.MsgDeactivateDID].fromPartial({
-        didId: did,
-        signatures: signInfos,
-        creator: HIDClient.getHidWalletAddress(),
-        version_id: versionId,
+        didDocumentId: did,
+        didDocumentProofs: signInfos,
+        txAuthor: HIDClient.getHidWalletAddress(),
+        versionId: versionId,
       }),
     };
-
-    // TODO: need to find a way to make it dynamic
-    const fee = 'auto';
+    const amount = await Utils.fetchFee(constants.GAS_FEE_METHODS.Deactivate_Did, this.nodeRestEp);
+    const fee = {
+      amount: [
+        {
+          denom: 'uhid',
+          amount,
+        },
+      ],
+      gas: '200000',
+    };
     const hidClient: SigningStargateClient = HIDClient.getHidClient();
+
     const txResult = await hidClient.signAndBroadcast(HIDClient.getHidWalletAddress(), [txMessage], fee);
+    if (txResult.code !== 0) {
+      throw new Error(`${txResult.rawLog}`);
+    }
     return txResult;
   }
 
   async resolveDID(did: string): Promise<IDIDResolve> {
-    did = did + ':'; // TODO:  we need to sort this out ... need to remove later
     const get_didUrl = `${this.didRestEp}/${did}`;
     let response;
     try {

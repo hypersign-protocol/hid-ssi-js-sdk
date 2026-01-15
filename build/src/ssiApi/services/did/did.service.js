@@ -12,7 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const IDID_1 = require("../../../did/IDID");
 const api_constant_1 = require("../../api-constant");
 const apiAuth_1 = require("../../apiAuth/apiAuth");
 const node_fetch_1 = __importDefault(require("node-fetch"));
@@ -83,7 +82,6 @@ class DidApiService {
     * @return {Promise<didDocument:Did, transactionHash: string>}
     */
     registerDid(params) {
-        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
             if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
                 throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to register a did');
@@ -100,18 +98,6 @@ class DidApiService {
                 for (const i in params.signInfos) {
                     if (!params.signInfos[i].verification_method_id) {
                         throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to register a did`);
-                    }
-                    // if (!params.signInfos[i].clientSpec) {
-                    //   throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].clientSpec is required to register a did`);
-                    // }
-                    // if (params.signInfos[i].clientSpec && !(params.signInfos[i].clientSpec.type in IClientSpec)) {
-                    //   throw new Error('HID-SSI-SDK:: Error: params.clientSpec is invalid');
-                    // }          
-                    if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
-                        if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
-                            ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
-                            throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].adr036SignerAddress is required to register a did, when clientSpec type is${(_d = params.signInfos[i].clientSpec) === null || _d === void 0 ? void 0 : _d.type} `);
-                        }
                     }
                     if (!params.signInfos[i].signature) {
                         throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].signature is required to register a did`);
@@ -185,9 +171,7 @@ class DidApiService {
       * @return {Promise<transactionHash: string>}
       */
     updateDid(params) {
-        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('did services');
             if (!params.didDocument || Object.keys(params.didDocument).length === 0) {
                 throw new Error('HID-SSI-SDK:: Error: params.didDocument is required to update a did');
             }
@@ -203,12 +187,6 @@ class DidApiService {
                 for (const i in params.signInfos) {
                     if (!params.signInfos[i].verification_method_id) {
                         throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].verification_method_id is required to update a did`);
-                    }
-                    if (((_a = params.signInfos[i].clientSpec) === null || _a === void 0 ? void 0 : _a.type) === IDID_1.IClientSpec['cosmos-ADR036']) {
-                        if (((_b = params.signInfos[i].clientSpec) === null || _b === void 0 ? void 0 : _b.adr036SignerAddress) === '' ||
-                            ((_c = params.signInfos[i].clientSpec) === null || _c === void 0 ? void 0 : _c.adr036SignerAddress) === undefined) {
-                            throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].adr036SignerAddress is required to update a did, when clientSpec type is${(_d = params.signInfos[i].clientSpec) === null || _d === void 0 ? void 0 : _d.type} `);
-                        }
                     }
                     if (!params.signInfos[i].signature) {
                         throw new Error(`HID-SSI-SDK:: Error: params.signInfos[${i}].signature is required to register a did`);

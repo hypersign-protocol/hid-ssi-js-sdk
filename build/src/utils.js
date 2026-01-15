@@ -40,10 +40,7 @@ class Utils {
         return __awaiter(this, void 0, void 0, function* () {
             const edKeyPair = yield ed25519_verification_key_2020_1.Ed25519VerificationKey2020.generate();
             const exportedKp = yield edKeyPair.export({ publicKey: true });
-            const { publicKeyMultibase: publicKeyMultibase1 } = this.convertEd25519verificationkey2020toStableLibKeysInto({
-                publicKey: exportedKp.publicKeyMultibase,
-            });
-            return publicKeyMultibase1;
+            return exportedKp.publicKeyMultibase;
         });
     }
     static checkUrl(url) {
@@ -74,35 +71,6 @@ class Utils {
     static _bufToMultibase(pubKeyBuf) {
         return 'z' + encode(pubKeyBuf);
     }
-    // Converting 45byte public key to 48 by padding header
-    // Converting 88byte private key to 91 by padding header
-    static convertedStableLibKeysIntoEd25519verificationkey2020(stableLibKp) {
-        const result = {};
-        if (stableLibKp.publicKey) {
-            const stableLibPubKeyWithoutZ = stableLibKp.publicKey.substr(1);
-            const stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
-            result['publicKeyMultibase'] = Utils._encodeMbKey(constants.KEY_HEADERS.MULTICODEC_ED25519_PUB_HEADER, stableLibPubKeyWithoutZDecode);
-        }
-        if (stableLibKp.privKey) {
-            result['privateKeyMultibase'] = Utils._encodeMbKey(constants.KEY_HEADERS.MULTICODEC_ED25519_PRIV_HEADER, stableLibKp.privKey);
-        }
-        return result;
-    }
-    static convertEd25519verificationkey2020toStableLibKeysInto(ed255192020VerKeys) {
-        const result = {};
-        if (ed255192020VerKeys.publicKey) {
-            const stableLibPubKeyWithoutZ = ed255192020VerKeys.publicKey.substr(1);
-            const stableLibPubKeyWithoutZDecode = decode(stableLibPubKeyWithoutZ);
-            result['publicKeyMultibase'] = Utils._decodeMbPubKey(constants.KEY_HEADERS.MULTICODEC_ED25519_PUB_HEADER, stableLibPubKeyWithoutZDecode);
-        }
-        // privateKeyMultibase = z + encode(header+original)
-        if (ed255192020VerKeys.privKey) {
-            const stableLibPrivKeyWithoutZ = ed255192020VerKeys.privKey.substr(1);
-            const stableLibPrivKeyWithoutZDecode = decode(stableLibPrivKeyWithoutZ);
-            result['privateKeyMultibase'] = Utils._decodeMbKey(constants.KEY_HEADERS.MULTICODEC_ED25519_PRIV_HEADER, stableLibPrivKeyWithoutZDecode);
-        }
-        return result;
-    }
     static jsonToLdConvertor(json) {
         const ld = {};
         for (const key in json) {
@@ -130,6 +98,48 @@ class Utils {
     // TODO: need to find a way to make it dynamic
     static getFee() {
         return 'auto';
+    }
+    static removeEmptyString(obj) {
+        if (Array.isArray(obj)) {
+            for (let i = obj.length - 1; i >= 0; i--) {
+                if (obj[i] === '' || (typeof obj[i] === 'object' && Object.keys(obj[i]).length === 0)) {
+                    obj.splice(i, 1);
+                }
+                else if (typeof obj[i] === 'object') {
+                    this.removeEmptyString(obj[i]);
+                }
+            }
+        }
+        else if (typeof obj === 'object' && obj !== null) {
+            for (const key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                    if (obj[key] === '') {
+                        delete obj[key];
+                    }
+                    else if (Array.isArray(obj[key])) {
+                        this.removeEmptyString(obj[key]);
+                    }
+                    else if (typeof obj[key] === 'object') {
+                        this.removeEmptyString(obj[key]);
+                    }
+                }
+            }
+        }
+        return obj;
+    }
+    static fetchFee(methodName, baseUrl) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const url = constants.GAS_FEE_API_URL(baseUrl);
+            const feeStructure = yield fetch(url);
+            const fee = yield feeStructure.json();
+            if (fee && fee[methodName]) {
+                const amount = fee[methodName].amount;
+                return amount;
+            }
+            else {
+                throw new Error(`Fee not found for method: ${methodName}`);
+            }
+        });
     }
 }
 exports.default = Utils;

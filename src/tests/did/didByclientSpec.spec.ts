@@ -7,7 +7,7 @@ import { createWallet, mnemonic, hidNodeEp } from '../config';
 import * as bip39 from 'bip39';
 
 let hypersignDID;
-let MMWalletAddress;
+const MMWalletAddress = "0x4457bCb9351c5677f892F9d8Be75493B8F7A7932";
 let MMPrivateKey;
 let MMPublicKey;
 let offlineSigner;
@@ -31,14 +31,12 @@ async function generateSignature() {
     const wallet = await HDNodeWallet.fromMnemonic(Mnemonics, `m/44'/60'/0'/0/${0}`);
     const web3 = new Web3();
     const account = await web3.eth.accounts.privateKeyToAccount(wallet.privateKey);
-    MMWalletAddress = account.address;
+    // MMWalletAddress = account.address;
     MMPrivateKey = wallet.privateKey;
     MMPublicKey = wallet.publicKey;
 }
 describe('DID Test scenarion for clientSpec', () => {
-
     describe('#createByClientSpec() this is to generate did using clientSpec', function () {
-
         const param = {
             methodSpecificId: "xyz",
             address: "xyz",
@@ -214,38 +212,69 @@ describe('DID Test scenarion for clientSpec', () => {
                 }).to.throw(Error, 'HID-SSI-SDK:: Error: params.web3 is required to sign')
             })
         })
-        it('should not be able to generate signature as clientSpec passed is of type "cosmos-ADR036" but chainId is not passed', async () => {
+        it('should not be able to generate signature as verificationMethodId is not passed', async () => {
             const web3 = new Web3(metamaskProvider)
 
             const params = {
                 didDocument: didDocumentByClientspec,
                 address: MMWalletAddress,
                 web3,
+                clientSpec: "eth-personalSign"
+            }
+            return hypersignDID.signByClientSpec(params).catch(function (err) {
+                expect(function () {
+                    throw err;
+                }).to.throw(Error, 'HID-SSI-SDK:: Error: params.verificationMethodId is required to sign')
+            })
+        })
+        it('should not be able to generate signature as verificationMethodId passed is invalid or not presnet in didDoc', async () => {
+            const web3 = new Web3(metamaskProvider)
+            const params = {
+                didDocument: didDocumentByClientspec,
+                address: MMWalletAddress,
+                web3,
+                clientSpec: "eth-personalSign",
+                verificationMethodId: didDocumentByClientspec.id + "e#key-1",
+
+
+            }
+            return hypersignDID.signByClientSpec(params).catch(function (err) {
+                expect(function () {
+                    throw err;
+                }).to.throw(Error, "HID-SSI_SDK:: Error: invalid verificationMethodId")
+            })
+        })
+
+        it('should not be able to generate signature as clientSpec passed is of type "cosmos-ADR036" but chainId is not passed', async () => {
+            const web3 = new Web3(metamaskProvider)
+            const params = {
+                didDocument: didDocumentByClientspec,
+                address: MMWalletAddress,
+                web3,
+                verificationMethodId: didDocumentByClientspec.verificationMethod[0].id,
                 clientSpec: "cosmos-ADR036"
             }
-
             return hypersignDID.signByClientSpec(params).catch(function (err) {
                 expect(function () {
                     throw err;
                 }).to.throw(Error, `HID-SSI-SDK:: Error:  params.chainId is required to sign for clientSpec ${params.clientSpec} and keyType EcdsaSecp256k1VerificationKey2019`)
             })
         })
-        // it('Should be able to generate signature for didDoc', async()=>{
-        //   const web3= new Web3(metamaskProvider)
-        //   console.log(web3.eth.personal.sign)
-        //   const params={
-        //     didDocument:didDocumentByClientspec,
-        //     address:MMWalletAddress,
-        //     clientSpec:"eth-personalSign",
-        //     web3:web3
-        //   }
-        //   const signedDidDocByClientSpec= await hypersignDID.signByClientSpec(params)
-        //   console.log(signedDidDocByClientSpec)
+        // it('Should be able to generate signature for didDoc', async () => {
+        //     const web3 = new Web3(metamaskProvider)
+        //     const params = {
+        //         didDocument: didDocumentByClientspec,
+        //         address: MMWalletAddress,//"0x4457bCb9351c5677f892F9d8Be75493B8F7A7932",
+        //         clientSpec: "eth-personalSign",
+        //         web3: web3,
+        //         verificationMethodId: didDocumentByClientspec.verificationMethod[0].id,
 
-        //   // error Cannot read properties of undefined (reading 'eth')
+        //     }
+        //     const signedDidDocByClientSpec = await hypersignDID.signByClientSpec(params)
+
+        //     // error Cannot read properties of undefined (reading 'eth')
         // })
     })
-
     describe("#registerByClientSpec() this is to register did generated using clientspec on the blockchain", function () {
         const signInfo = [{
             verification_method_id: "",
@@ -662,7 +691,7 @@ describe('DID Test scenarion for clientSpec', () => {
                 expect(function () {
                     throw err;
                 }).to.throw(Error,
-                    `HID-SSI-SDK:: Error: params.signInfos[${0}].adr036SignerAddress is required to deactivate a did, when clientSpec type is${params.signInfos[0].clientSpec?.type} `
+                    `HID-SSI-SDK:: Error: params.signInfos[${0}].adr036SignerAddress is required to deactivate a did, when clientSpec type is${params.signInfos[0].clientSpec?.type}`
                 )
             })
         })

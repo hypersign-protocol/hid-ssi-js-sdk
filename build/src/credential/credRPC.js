@@ -45,6 +45,8 @@ const constants_1 = require("../constants");
 const generatedProto = __importStar(require("../../libs/generated/ssi/tx"));
 const axios_1 = __importDefault(require("axios"));
 const client_1 = require("../hid/client");
+const utils_1 = __importDefault(require("../utils"));
+const constants = __importStar(require("../constants"));
 class CredentialRPC {
     constructor({ offlineSigner, nodeRpcEndpoint, nodeRestEndpoint, }) {
         if (offlineSigner) {
@@ -53,6 +55,7 @@ class CredentialRPC {
         else {
             this.hidClient = null;
         }
+        this.nodeRestEp = nodeRestEndpoint;
         this.credentialRestEP =
             (client_1.HIDClient.hidNodeRestEndpoint ? client_1.HIDClient.hidNodeRestEndpoint : nodeRestEndpoint) +
                 constants_1.HYPERSIGN_NETWORK_CREDENTIALSTATUS_PATH;
@@ -80,14 +83,26 @@ class CredentialRPC {
             const txMessage = {
                 typeUrl,
                 value: generatedProto[constants_1.HIDRpcEnums.MsgRegisterCredentialStatus].fromPartial({
-                    credentialStatus,
-                    proof,
-                    creator: client_1.HIDClient.getHidWalletAddress(),
+                    credentialStatusDocument: credentialStatus,
+                    credentialStatusProof: proof,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
                 }),
             };
-            const fee = 'auto';
+            const amount = yield utils_1.default.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status, this.nodeRestEp);
+            const fee = {
+                amount: [
+                    {
+                        denom: 'uhid',
+                        amount: amount,
+                    },
+                ],
+                gas: '200000',
+            };
             const hidClient = client_1.HIDClient.getHidClient();
             const txResult = yield hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee);
+            if (txResult.code !== 0) {
+                throw new Error(`${txResult.rawLog}`);
+            }
             return txResult;
         });
     }
@@ -103,9 +118,9 @@ class CredentialRPC {
             const txMessage = {
                 typeUrl,
                 value: generatedProto[constants_1.HIDRpcEnums.MsgRegisterCredentialStatus].fromPartial({
-                    credentialStatus,
-                    proof,
-                    creator: client_1.HIDClient.getHidWalletAddress(),
+                    credentialStatusDocument: credentialStatus,
+                    credentialStatusProof: proof,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
                 }),
             };
             return txMessage;
@@ -116,9 +131,22 @@ class CredentialRPC {
             if (!this.hidClient) {
                 throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
             }
-            const fee = 'auto';
+            const txLenght = txMessages.length;
+            const amount = (txLenght * parseInt(yield utils_1.default.fetchFee(constants.GAS_FEE_METHODS.Register_Cred_Status, this.nodeRestEp))).toString();
+            const fee = {
+                amount: [
+                    {
+                        denom: 'uhid',
+                        amount: amount,
+                    },
+                ],
+                gas: '200000',
+            };
             const hidClient = client_1.HIDClient.getHidClient();
             const txResult = yield hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), txMessages, fee);
+            if (txResult.code !== 0) {
+                throw new Error(`${txResult.rawLog}`);
+            }
             return txResult;
         });
     }
@@ -132,8 +160,8 @@ class CredentialRPC {
                 if (!response.data) {
                     throw new Error('Could not resolve credential status of credentialId ' + credentialId);
                 }
-                const credStatus = response.data.credStatus;
-                if (!credStatus || !credStatus.claim || !credStatus.proof) {
+                const credStatus = response.data.credentialStatus;
+                if (!credStatus || !credStatus.credentialStatusDocument || !credStatus.credentialStatusProof) {
                     throw new Error('No credential status found. Probably invalid credentialId');
                 }
                 return credStatus;
@@ -147,11 +175,49 @@ class CredentialRPC {
                     credentialHash: '',
                     proof: null,
                 };
-                if (!credStatus || !credStatus.claim || !credStatus.proof) {
+                if (!credStatus || !credStatus.credentialStatusDocument || !credStatus.credentialStatusProof) {
                     throw new Error('No credential status found. Probably invalid credentialId');
                 }
                 return credStatus;
             }
+        });
+    }
+    updateCredentialStatus(credentialStatus, proof) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!credentialStatus) {
+                throw new Error('CredentialStatus must be passed as a param while registerting credential status');
+            }
+            if (!proof) {
+                throw new Error('Proof must be passed as a param while registering crdential status');
+            }
+            if (!this.hidClient) {
+                throw new Error('HID-SSI-SDK:: Error: CredentialRPC class is not initialise with offlinesigner');
+            }
+            const typeUrl = `${constants_1.HID_COSMOS_MODULE}.${constants_1.HIDRpcEnums.MsgUpdateCredentialStatus}`;
+            const txMessage = {
+                typeUrl,
+                value: generatedProto[constants_1.HIDRpcEnums.MsgUpdateCredentialStatus].fromPartial({
+                    credentialStatusDocument: credentialStatus,
+                    credentialStatusProof: proof,
+                    txAuthor: client_1.HIDClient.getHidWalletAddress(),
+                }),
+            };
+            const amount = yield utils_1.default.fetchFee(constants.GAS_FEE_METHODS.Update_Cred_Status, this.nodeRestEp);
+            const fee = {
+                amount: [
+                    {
+                        denom: 'uhid',
+                        amount: amount,
+                    },
+                ],
+                gas: '200000',
+            };
+            const hidClient = client_1.HIDClient.getHidClient();
+            const txResult = yield hidClient.signAndBroadcast(client_1.HIDClient.getHidWalletAddress(), [txMessage], fee);
+            if (txResult.code !== 0) {
+                throw new Error(`${txResult.rawLog}`);
+            }
+            return txResult;
         });
     }
 }

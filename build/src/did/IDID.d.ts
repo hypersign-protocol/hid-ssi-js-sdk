@@ -3,46 +3,40 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
-import { Did as IDidProto, Metadata, VerificationMethod, Service, Did, SignInfo } from '../../libs/generated/ssi/did';
-import { ClientSpec } from '../../libs/generated/ssi/clientSpec';
+import { DidDocument as IDidProto, DidDocumentMetadata as Metadata, VerificationMethod, Service, DidDocument } from '../../libs/generated/ssi/did';
+import { DocumentProof as SignInfo } from '../../libs/generated/ssi/proof';
 import Web3 from 'web3';
+import { ProofTypes, VerificationMethodRelationships, VerificationMethodTypes } from '../../libs/generated/ssi/client/enums';
 export interface IPublicKey {
     '@context': string;
     id: string;
     type: string;
     publicKeyBase58: string;
 }
-export declare enum IVerificationRelationships {
-    authentication = "authentication",
-    assertionMethod = "assertionMethod",
-    keyAgreement = "keyAgreement",
-    capabilityInvocation = "capabilityInvocation",
-    capabilityDelegation = "capabilityDelegation"
-}
-export declare enum IKeyType {
-    Ed25519VerificationKey2020 = "Ed25519VerificationKey2020",
-    EcdsaSecp256k1VerificationKey2019 = "EcdsaSecp256k1VerificationKey2019",
-    EcdsaSecp256k1RecoveryMethod2020 = "EcdsaSecp256k1RecoveryMethod2020",
-    X25519KeyAgreementKey2020 = "X25519KeyAgreementKey2020",
-    X25519KeyAgreementKeyEIP5630 = "X25519KeyAgreementKeyEIP5630"
-}
 export declare enum IClientSpec {
     'eth-personalSign' = "eth-personalSign",
     'cosmos-ADR036' = "cosmos-ADR036"
 }
-export interface ExtendedClientSpec extends ClientSpec {
+export declare enum SupportedPurpose {
+    'assertionMethod' = "assertionMethod",
+    'authentication' = "authentication"
+}
+export interface ExtendedClientSpec {
     type: IClientSpec;
-    adr036SignerAddress: string;
+    adr036SignerAddress?: string;
 }
 export interface ISignInfo {
     verification_method_id: string;
     signature: string;
     clientSpec?: ExtendedClientSpec | undefined;
+    created: string;
+    type?: ProofTypes;
 }
 export interface IController {
     '@context': string;
     id: string;
-    authentication: Array<string>;
+    authentication?: Array<string>;
+    assertionMethod?: Array<string>;
 }
 export interface IParams {
     doc: object;
@@ -80,28 +74,31 @@ export interface IDID {
     generate(params: {
         methodSpecificId?: string;
         publicKeyMultibase: string;
-        verificationRelationships: IVerificationRelationships[];
-    }): Promise<Did>;
+        verificationRelationships: VerificationMethodRelationships[];
+    }): Promise<DidDocument>;
     register(params: {
-        didDocument: Did;
+        didDocument: DidDocument;
         privateKeyMultibase?: string;
         verificationMethodId?: string;
         signData?: ISignData[];
     }): Promise<{
-        didDocument: Did;
+        didDocument: DidDocument;
         transactionHash: string;
     }>;
     resolve(params: {
         did: string;
-        ed25519verificationkey2020?: boolean;
     }): Promise<IDIDResolve>;
     update(params: {
-        didDocument: Did;
+        didDocument: DidDocument;
         privateKeyMultibase: string;
         verificationMethodId: string;
         versionId: string;
     }): Promise<{
         transactionHash: string;
+    } | {
+        didDocument: any;
+        signInfos: any;
+        versionId: any;
     }>;
     deactivate(params: {
         didDocument: object;
@@ -112,7 +109,7 @@ export interface IDID {
         transactionHash: string;
     }>;
     sign(params: {
-        didDocument: Did;
+        didDocument: DidDocument;
         privateKeyMultibase: string;
         challenge: string;
         domain: string;
@@ -120,70 +117,73 @@ export interface IDID {
         verificationMethodId: string;
     }): Promise<ISignedDIDDocument>;
     verify(params: {
-        didDocument: Did;
+        didDocument: DidDocument;
         verificationMethodId: string;
         challenge: string;
         domain?: string;
     }): Promise<object>;
     addVerificationMethod(params: {
         did?: string;
-        didDocument?: Did;
-        type: IKeyType;
+        didDocument?: DidDocument;
+        type: VerificationMethodTypes;
         id?: string;
         controller?: string;
         publicKeyMultibase?: string;
         blockchainAccountId?: string;
-    }): Promise<Did>;
+    }): Promise<DidDocument>;
     createByClientSpec(params: {
         methodSpecificId: string;
         publicKey?: string;
         address: string;
         chainId: string;
         clientSpec: IClientSpec;
-        verificationRelationships?: IVerificationRelationships[];
-    }): Promise<Did>;
+        verificationRelationships?: VerificationMethodRelationships[];
+    }): Promise<DidDocument>;
     registerByClientSpec(params: {
-        didDocument: Did;
+        didDocument: DidDocument;
         signInfos: SignInfo[];
     }): Promise<{
-        didDocument: Did;
+        didDocument: DidDocument;
         transactionHash: string;
     }>;
     updateByClientSpec(params: {
-        didDocument: Did;
+        didDocument: DidDocument;
         versionId: string;
         signInfos: SignInfo[];
     }): Promise<{
         transactionHash: string;
     }>;
     deactivateByClientSpec(params: {
-        didDocument: Did;
+        didDocument: DidDocument;
         signInfos: SignInfo[];
         versionId: string;
     }): Promise<{
         transactionHash: string;
     }>;
     signAndRegisterByClientSpec(params: {
-        didDocument: Did;
+        didDocument: DidDocument;
         address: string;
         verificationMethodId: string;
         web3: Web3 | any;
         clientSpec: IClientSpec;
         chainId?: string;
     }): Promise<{
-        didDocument: Did;
+        didDocument: DidDocument;
         transactionHash: string;
     }>;
     signByClientSpec(params: {
-        didDocument: Did;
+        didDocument: DidDocument;
         clientSpec: IClientSpec;
         address: string;
         web3: Web3 | any;
         chainId?: string;
-    }): Promise<{
-        didDocument: Did;
-        signature: string;
-    }>;
+        verificationMethodId: any;
+    }): Promise<ISignedDIDDocument>;
+    createSignInfos(params: {
+        didDocument: DidDocument;
+        privateKeyMultibase: string;
+        verificationMethodId: string;
+    }): Promise<Array<ISignInfo>>;
 }
 export interface IDIDResolve {
     didDocument: IDidDocument;
@@ -226,7 +226,7 @@ export interface IDidDocument {
 export interface ISignData {
     verificationMethodId: string;
     privateKeyMultibase: string;
-    type: IKeyType;
+    type: VerificationMethodTypes;
 }
 export {};
 //# sourceMappingURL=IDID.d.ts.map

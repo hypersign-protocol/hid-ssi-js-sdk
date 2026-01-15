@@ -4,10 +4,12 @@
  * Author: Hypermine Core Team
  */
 import { IVerifiableCredential } from '../credential/ICredential';
-import { IPresentationMethods, IVerifiablePresentation } from './IPresentation';
+import { IPresentationMethods, IVerifiablePresentation, IVerifiableUnsignedPresentation } from './IPresentation';
+import HyperSignBJJVP from './bjjVp';
 export default class HypersignVerifiablePresentation implements IPresentationMethods, IVerifiablePresentation {
     private hsDid;
     private vc;
+    bjjVp: HyperSignBJJVP;
     id: string;
     type: Array<string>;
     verifiableCredential: Array<IVerifiableCredential>;
@@ -25,12 +27,12 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
      * @params
      *  - params.verifiableCredentials: Array of Verifiable Credentials
      *  - params.holderDid            : DID of the subject
-     * @returns {Promise<object>}
+     * @returns {Promise<IVerifiableUnsignedPresentation>}
      */
     generate(params: {
         verifiableCredentials: Array<IVerifiableCredential>;
         holderDid: string;
-    }): Promise<object>;
+    }): Promise<IVerifiableUnsignedPresentation>;
     /**
      * Signs a new presentation document
      * @params
@@ -40,6 +42,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
      *  - params.verificationMethodId : verificationMethodId of holder
      *  - params.privateKeyMultibase  : Private key associated with the verification method
      *  - params.challenge            : Any random challenge
+     *  - params.domain               : Domain url
      * @returns {Promise<IVerifiablePresentation>}
      */
     sign(params: {
@@ -49,6 +52,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
         verificationMethodId: string;
         privateKeyMultibase: string;
         challenge: string;
+        domain?: string;
     }): Promise<IVerifiablePresentation>;
     /**
      * Verifies signed presentation document
@@ -90,7 +94,7 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
         verificationMethodId: string;
         web3Obj: any;
         domain?: string;
-        challenge?: string;
+        challenge: string;
     }): Promise<IVerifiablePresentation>;
     /**
      * Verifies signed presentation document
