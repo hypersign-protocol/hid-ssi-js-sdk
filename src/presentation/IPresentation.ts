@@ -29,7 +29,6 @@ export interface IVerifiablePresentation extends IVerifiableUnsignedPresentation
   proof: object;
 }
 
-
 export interface IPresentationMethods {
   generate(params: { verifiableCredentials: Array<IVerifiableCredential>; holderDid: string }): Promise<object>;
 

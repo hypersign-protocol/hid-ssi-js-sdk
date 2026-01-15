@@ -76,7 +76,10 @@ export default class HypersignVerifiablePresentation implements IPresentationMet
    *  - params.holderDid            : DID of the subject
    * @returns {Promise<IVerifiableUnsignedPresentation>}
    */
-  async generate(params: { verifiableCredentials: Array<IVerifiableCredential>; holderDid: string }): Promise<IVerifiableUnsignedPresentation> {
+  async generate(params: {
+    verifiableCredentials: Array<IVerifiableCredential>;
+    holderDid: string;
+  }): Promise<IVerifiableUnsignedPresentation> {
     const id = await this._getId();
     const presentation = vc.createPresentation({
       verifiableCredential: params.verifiableCredentials,
