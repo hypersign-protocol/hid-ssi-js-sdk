@@ -1,0 +1,169 @@
+name: Build and Publish to npm
+on:
+  push:
+    tags:
+    - 'v*.*.*' # Triggers on version tags like v1.0.0
+    - 'v*.*.*-*' # Triggers on pre-release tags like v1.0.0-rc.1
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Fetch full history for changelog generation
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm test
+      continue-on-error: false
+
+    - name: Build package
+      run: npm run build
+
+    - name: Get tag version
+      id: tag
+      run: |
+        echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        echo "is_prerelease=$([[ ${GITHUB_REF#refs/tags/} =~ -.*$ ]] && echo true || echo false)" >> $GITHUB_OUTPUT
+
+    - name: Generate changelog (mandatory)
+      id: changelog
+      run: |
+        # Get the latest tag (before current one)
+        LATEST_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+
+        if [ -z "$LATEST_TAG" ]; then
+          # If no previous tag, use first commit
+          LATEST_TAG=$(git rev-list --max-parents=0 HEAD)
+          echo "## What's Changed" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          git log $LATEST_TAG..HEAD --pretty=format:"* %s (%h)" --reverse >> CHANGELOG.md
+        else
+          echo "## What's Changed" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          
+          # Generate changelog from commits between tags
+          git log $LATEST_TAG..HEAD --pretty=format:"* %s (%h)" --reverse | \
+          sed 's/^* feat:/* ✨ **Feature**: /g' | \
+          sed 's/^* fix:/* 🐛 **Fix**: /g' | \
+          sed 's/^* docs:/* 📚 **Documentation**: /g' | \
+          sed 's/^* style:/* 💄 **Style**: /g' | \
+          sed 's/^* refactor:/* ♻️ **Refactor**: /g' | \
+          sed 's/^* perf:/* ⚡ **Performance**: /g' | \
+          sed 's/^* test:/* 🧪 **Test**: /g' | \
+          sed 's/^* build:/* 🔨 **Build**: /g' | \
+          sed 's/^* ci:/* 👷 **CI**: /g' | \
+          sed 's/^* chore:/* 🔧 **Chore**: /g' >> CHANGELOG.md
+        fi
+
+        # Add additional release info
+        echo "" >> CHANGELOG.md
+        echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/$LATEST_TAG...${{ steps.tag.outputs.version }}" >> CHANGELOG.md
+
+        # Validate changelog was generated successfully
+        if [ ! -f "CHANGELOG.md" ] || [ ! -s "CHANGELOG.md" ]; then
+          echo "❌ Error: Changelog generation failed - file is missing or empty"
+          exit 1
+        fi
+
+        # Check if changelog has meaningful content (more than just headers)
+        CONTENT_LINES=$(grep -c "^\*" CHANGELOG.md || echo "0")
+        if [ "$CONTENT_LINES" -eq 0 ]; then
+          echo "❌ Error: No changes found to include in changelog"
+          echo "Please ensure there are commits between $LATEST_TAG and ${{ steps.tag.outputs.version }}"
+          exit 1
+        fi
+
+        echo "✅ Changelog generated successfully with $CONTENT_LINES changes"
+
+        # Set output for use in release
+        {
+          echo "changelog<<EOF"
+          cat CHANGELOG.md
+          echo "EOF"
+        } >> $GITHUB_OUTPUT
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.tag.outputs.version }}
+        name: Release ${{ steps.tag.outputs.version }}
+        body: ${{ steps.changelog.outputs.changelog }}
+        draft: false
+        prerelease: ${{ steps.tag.outputs.is_prerelease }}
+        generate_release_notes: false # We're providing our own changelog
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Create CHANGELOG.md in repo (mandatory)
+      run: |
+        # Create/update CHANGELOG.md file in the repository
+        if [ ! -f CHANGELOG.md ]; then
+          echo "# Changelog" > REPO_CHANGELOG.md
+          echo "" >> REPO_CHANGELOG.md
+          echo "All notable changes to this project will be documented in this file." >> REPO_CHANGELOG.md
+          echo "" >> REPO_CHANGELOG.md
+        else
+          cp CHANGELOG.md REPO_CHANGELOG.md
+        fi
+
+        # Prepend new changelog entry
+        echo "## [${{ steps.tag.outputs.version }}] - $(date +%Y-%m-%d)" > temp_changelog.md
+        echo "" >> temp_changelog.md
+        tail -n +3 CHANGELOG.md >> temp_changelog.md
+        echo "" >> temp_changelog.md
+
+        # If CHANGELOG.md exists, append it (skip header)
+        if [ -f CHANGELOG.md ] && [ $(wc -l < CHANGELOG.md) -gt 3 ]; then
+          tail -n +4 REPO_CHANGELOG.md >> temp_changelog.md
+        fi
+
+        mv temp_changelog.md REPO_CHANGELOG.md
+
+        # Commit the updated CHANGELOG.md back to the repository
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add REPO_CHANGELOG.md
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "chore: update CHANGELOG.md for ${{ steps.tag.outputs.version }} [skip ci]"
+          git push origin HEAD:main
+        fi
+
+        echo "✅ CHANGELOG.md updated successfully"
+    # - name: Publish to npm (after mandatory changelog)
+    #   run: |
+    #     echo "📦 Publishing to npm..."
+    #     if [[ "${{ steps.tag.outputs.is_prerelease }}" == "true" ]]; then
+    #       npm publish --tag beta
+    #       echo "✅ Published as pre-release with 'beta' tag"
+    #     else
+    #       npm publish
+    #       echo "✅ Published as stable release with 'latest' tag"
+    #     fi
+    #   env:
+    #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
