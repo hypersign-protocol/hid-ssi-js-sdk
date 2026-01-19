@@ -147,7 +147,7 @@ jobs:
           echo "No changes to commit"
         else
           git commit -m "chore: update CHANGELOG.md for ${{ steps.tag.outputs.version }} [skip ci]"
-          git push origin HEAD:main
+          git push origin HEAD:master
         fi
 
         echo "✅ CHANGELOG.md updated successfully"
