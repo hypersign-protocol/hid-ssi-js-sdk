@@ -13,19 +13,20 @@ import { ProofTypes, VerificationMethodRelationships } from '../../libs/generate
 const documentLoader = customLoader;
 
 let keyPair;
-export const mnemonic =
-  'verify sustain lumber boat demise parade special soft bargain scout spoil there addict move badge rebuild horn achieve hollow acquire glide bundle curious present';
 
+import { setEnvFromPrompt } from './promptValue';
+// Prompt if envs are missing
+if (!process.env.RPC_ENDPOINT || !process.env.REST_ENDPOINT || !process.env.NAMESPACE || !process.env.MNEMONIC) {
+  setEnvFromPrompt();
+}
+
+export const mnemonic = process.env.MNEMONIC!;
 export const hidNodeEp = {
-  rpc: 'https://rpc.prajna-1.hypersign.id',
-  rest: 'https://api.prajna-1.hypersign.id',
-  namespace: 'testnet',
+  rpc: process.env.RPC_ENDPOINT!,
+  rest: process.env.REST_ENDPOINT!,
+  namespace: process.env.NAMESPACE!
 };
-// export const hidNodeEp = {
-//   rpc: 'http://127.0.0.1:26657',
-//   rest: 'http://127.0.0.1:1317',
-//   namespace: 'testnet',
-// };
+
 export function makeCosmoshubPath(a) {
   return [
     Slip10RawIndex.hardened(44),
