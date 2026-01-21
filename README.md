@@ -11,16 +11,52 @@ npm run build
 
 ## Testing
 
+### Run Tests (with required configuration)
+
+Tests require blockchain configuration values. Pass them as environment variables:
+
 ```bash
-## Run this to test all features 
+## Run all tests with custom configuration
+RPC_ENDPOINT=https://rpc.prajna-1.hypersign.id \
+REST_ENDPOINT=https://api.prajna-1.hypersign.id \
+NAMESPACE=testnet \
+MNEMONIC="your-wallet-mnemonic" \
 npm run test
 
-## OR Run individual test cases 
+## OR Run individual test cases with configuration
+RPC_ENDPOINT=https://rpc.prajna-1.hypersign.id \
+REST_ENDPOINT=https://api.prajna-1.hypersign.id \
+NAMESPACE=testnet \
+MNEMONIC="your-wallet-mnemonic" \
 npm run test-did
+
+RPC_ENDPOINT=https://rpc.prajna-1.hypersign.id \
+REST_ENDPOINT=https://api.prajna-1.hypersign.id \
+NAMESPACE=testnet \
+MNEMONIC="your-wallet-mnemonic" \
 npm run test-schema
+
+RPC_ENDPOINT=https://rpc.prajna-1.hypersign.id \
+REST_ENDPOINT=https://api.prajna-1.hypersign.id \
+NAMESPACE=testnet \
+MNEMONIC="your-wallet-mnemonic" \
 npm run test-credential
+
+RPC_ENDPOINT=https://rpc.prajna-1.hypersign.id \
+REST_ENDPOINT=https://api.prajna-1.hypersign.id \
+NAMESPACE=testnet \
+MNEMONIC="your-wallet-mnemonic" \
 npm run test-presentation
 ```
+
+### Required Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `RPC_ENDPOINT` | Blockchain RPC endpoint | `https://rpc.prajna-1.hypersign.id` |
+| `REST_ENDPOINT` | Blockchain REST endpoint | `https://api.prajna-1.hypersign.id` |
+| `NAMESPACE` | Blockchain namespace | `testnet` |
+| `MNEMONIC` | Wallet mnemonic (must have balance for transactions) | `verify sustain lumber boat...` |
 
 ## Install
 

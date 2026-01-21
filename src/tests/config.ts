@@ -13,19 +13,15 @@ import { ProofTypes, VerificationMethodRelationships } from '../../libs/generate
 const documentLoader = customLoader;
 
 let keyPair;
-export const mnemonic =
-  'verify sustain lumber boat demise parade special soft bargain scout spoil there addict move badge rebuild horn achieve hollow acquire glide bundle curious present';
+
+// Read from environment variables or use defaults
+export const mnemonic = process.env.MNEMONIC;
 
 export const hidNodeEp = {
-  rpc: 'https://rpc.prajna-1.hypersign.id',
-  rest: 'https://api.prajna-1.hypersign.id',
-  namespace: 'testnet',
+  rpc: process.env.RPC_ENDPOINT,
+  rest: process.env.REST_ENDPOINT,
+  namespace: process.env.NAMESPACE,
 };
-// export const hidNodeEp = {
-//   rpc: 'http://127.0.0.1:26657',
-//   rest: 'http://127.0.0.1:1317',
-//   namespace: 'testnet',
-// };
 export function makeCosmoshubPath(a) {
   return [
     Slip10RawIndex.hardened(44),
@@ -35,8 +31,6 @@ export function makeCosmoshubPath(a) {
     Slip10RawIndex.normal(a),
   ];
 }
-const phrase = 'flat vessel crawl guess female tray breeze bachelor rare fragile pottery observe';
-
 export const createWallet = async (mnemonic) => {
   let options;
   if (!mnemonic) {
