@@ -24,7 +24,7 @@ export const mnemonic = process.env.MNEMONIC!;
 export const hidNodeEp = {
   rpc: process.env.RPC_ENDPOINT!,
   rest: process.env.REST_ENDPOINT!,
-  namespace: process.env.NAMESPACE!
+  namespace: process.env.NAMESPACE!,
 };
 
 export function makeCosmoshubPath(a) {
