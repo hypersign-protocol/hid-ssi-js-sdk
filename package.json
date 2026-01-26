@@ -34,7 +34,7 @@
   "dependencies": {
     "@cfworker/json-schema": "github:hypersign-protocol/json-schema",
     "@cosmjs/proto-signing": "^0.31.0",
-    "@cosmjs/stargate": "^0.31.0",
+    "@cosmjs/stargate": "^0.38.1",
     "@digitalbazaar/ed25519-signature-2020": "3.0.0",
     "crypto-ld": "6.0.0",
     "@digitalbazaar/ed25519-verification-key-2018": "3.1.2",
