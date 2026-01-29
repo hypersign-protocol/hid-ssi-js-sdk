@@ -5,7 +5,7 @@
   "main": "build/src/index.js",
   "scripts": {
     "test": "mocha -r ts-node/register 'src/tests/did/did.spec.ts' 'src/tests/schema/schema.spec.ts' 'src/tests/credential/vc.spec.ts' 'src/tests/presentation/vp.spec.ts' --exit --timeout 400000",
-    "test-bjj": "mocha -r ts-node/register 'src/tests/bjj/did/test-did-bjj.spec.ts' 'src/tests/bjj/schematest-schema-bjj.spec.ts' 'src/tests/bjj/credential/test-credential-bjj.spec.ts' 'src/tests/bjj/presentation/test-presentation-bjj.spec.ts' --exit --timeout 400000",
+    "test-bjj": "mocha -r ts-node/register 'src/tests/bjj/did/bjj_did.spec.ts' 'src/tests/bjj/schema/bjj_schema.spec.ts' 'src/tests/bjj/credential/bjj_credential.spec.ts' 'src/tests/bjj/presentation/bjj_vp.spec.ts' --exit --timeout 400000",
     "test-did": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/did/did.spec.ts' --exit --timeout 40000",
     "test-did-keyagreement": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/did/did_keyagreement.spec.ts' --exit --timeout 40000",
     "test-didByApiKey": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r  ts-node/register 'src/tests/did/didByEntityApiKey.spec.ts' --exit --timeout 400000",
