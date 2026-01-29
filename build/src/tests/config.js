@@ -26,17 +26,17 @@ const crypto_2 = __importDefault(require("crypto"));
 const enums_1 = require("../../libs/generated/ssi/client/enums");
 const documentLoader = v1_1.default;
 let keyPair;
-exports.mnemonic = 'verify sustain lumber boat demise parade special soft bargain scout spoil there addict move badge rebuild horn achieve hollow acquire glide bundle curious present';
+const promptValue_1 = require("./promptValue");
+// Prompt if envs are missing
+if (!process.env.RPC_ENDPOINT || !process.env.REST_ENDPOINT || !process.env.NAMESPACE || !process.env.MNEMONIC) {
+    (0, promptValue_1.setEnvFromPrompt)();
+}
+exports.mnemonic = process.env.MNEMONIC;
 exports.hidNodeEp = {
-    rpc: 'https://rpc.prajna-1.hypersign.id',
-    rest: 'https://api.prajna-1.hypersign.id',
-    namespace: 'testnet',
+    rpc: process.env.RPC_ENDPOINT,
+    rest: process.env.REST_ENDPOINT,
+    namespace: process.env.NAMESPACE,
 };
-// export const hidNodeEp = {
-//   rpc: 'http://127.0.0.1:26657',
-//   rest: 'http://127.0.0.1:1317',
-//   namespace: 'testnet',
-// };
 function makeCosmoshubPath(a) {
     return [
         crypto_1.Slip10RawIndex.hardened(44),
