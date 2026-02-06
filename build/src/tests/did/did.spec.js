@@ -31,6 +31,9 @@ let pubKey;
 let privKey;
 let didDocToReg;
 let DIdDOcWithMultiplVM;
+const prefix = config_1.hidNodeEp.namespace
+    ? `did:hid:${config_1.hidNodeEp.namespace}`
+    : `did:hid`;
 //add mnemonic of wallet that have balance
 beforeEach(function () {
     return __awaiter(this, void 0, void 0, function* () {
@@ -61,7 +64,7 @@ describe('DID Test scenarios', () => {
         });
         it('should return publickeyMultibase and privateKeyMultibase along with controller', function () {
             return __awaiter(this, void 0, void 0, function* () {
-                const controller = 'did:hid:testnet:controller';
+                const controller = `${prefix}:controller`;
                 const kpnew = yield hypersignDID.generateKeys({ controller });
                 (0, chai_1.expect)(kpnew).to.be.a('object');
                 (0, chai_1.should)().exist(kpnew.privateKeyMultibase);
@@ -170,7 +173,7 @@ describe('DID Test scenarios', () => {
                 const didDocument = yield hypersignDID.generate({ publicKeyMultibase, methodSpecificId });
                 const didDocId = didDocument['id'];
                 (0, chai_1.expect)(didDocument).to.be.a('object');
-                (0, chai_1.expect)(didDocId).to.be.equal('did:hid:testnet:' + methodSpecificId);
+                (0, chai_1.expect)(didDocId).to.be.equal(`${prefix}:` + methodSpecificId);
                 (0, chai_1.should)().exist(didDocument['@context']);
                 (0, chai_1.should)().exist(didDocument['id']);
                 (0, chai_1.should)().exist(didDocument['controller']);
@@ -206,7 +209,7 @@ describe('DID Test scenarios', () => {
                 const didDocument = yield hypersignDID.generate({ publicKeyMultibase, methodSpecificId });
                 const didDocId = didDocument['id'];
                 (0, chai_1.expect)(didDocument).to.be.a('object');
-                (0, chai_1.expect)(didDocId).to.be.equal('did:hid:testnet:' + methodSpecificId);
+                (0, chai_1.expect)(didDocId).to.be.equal(`${prefix}:` + methodSpecificId);
                 (0, chai_1.should)().exist(didDocument['@context']);
                 (0, chai_1.should)().exist(didDocument['id']);
                 (0, chai_1.should)().exist(didDocument['controller']);
@@ -233,7 +236,7 @@ describe('DID Test scenarios', () => {
             const params = {
                 didDocument: {},
                 type: 'X25519KeyAgreementKey2020',
-                id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+                id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
                 publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
             };
             return hypersignDID.addVerificationMethod(params).catch(function (err) {
@@ -245,7 +248,7 @@ describe('DID Test scenarios', () => {
         it('should not be able to add verificationMethod as type is not passed', () => __awaiter(this, void 0, void 0, function* () {
             const params = {
                 didDocument,
-                id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+                id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
                 publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
             };
             return hypersignDID.addVerificationMethod(params).catch(function (err) {
@@ -258,7 +261,7 @@ describe('DID Test scenarios', () => {
             const params = {
                 didDocument,
                 type: 'dsyifx',
-                id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+                id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
                 publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
             };
             return hypersignDID.addVerificationMethod(params).catch(function (err) {
@@ -269,9 +272,9 @@ describe('DID Test scenarios', () => {
         }));
         it('should not be able to add verificationMethod as params.did is passed but yet not registerd', () => __awaiter(this, void 0, void 0, function* () {
             const params = {
-                did: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY',
+                did: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY`,
                 type: enums_1.VerificationMethodTypes.Ed25519VerificationKey2020,
-                id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+                id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
                 publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
             };
             const hypersignDid = new index_1.HypersignDID({ namespace: 'testnet' });
@@ -285,7 +288,7 @@ describe('DID Test scenarios', () => {
             const params = {
                 didDocument,
                 type: 'EcdsaSecp256k1RecoveryMethod2020',
-                id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+                id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
                 publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
             };
             return hypersignDID.addVerificationMethod(params).catch(function (err) {
@@ -311,7 +314,7 @@ describe('DID Test scenarios', () => {
             const params = {
                 didDocument,
                 type: 'EcdsaSecp256k1VerificationKey2019',
-                id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+                id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
             };
             return hypersignDID.addVerificationMethod(params).catch(function (err) {
                 (0, chai_1.expect)(function () {
@@ -323,7 +326,7 @@ describe('DID Test scenarios', () => {
             const params = {
                 didDocument,
                 type: 'EcdsaSecp256k1VerificationKey2019',
-                id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+                id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
                 blockchainAccountId: 'eip155:1:23fer44374u3rmhvf47ri35ty',
             };
             return hypersignDID.addVerificationMethod(params).catch(function (err) {
@@ -336,7 +339,7 @@ describe('DID Test scenarios', () => {
             const params = {
                 didDocument,
                 type: 'EcdsaSecp256k1VerificationKey2019',
-                id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+                id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key - 1`,
                 blockchainAccountId: 'eip155:1:23fer44374u3rmhvf47ri35ty',
             };
             return hypersignDID.addVerificationMethod(params).catch(function (err) {
@@ -386,7 +389,7 @@ describe('DID Test scenarios', () => {
         //   expect(updatedDidDoc.verificationMethod.length).to.be.greaterThan(didDoc.verificationMethod.length);
         // });
         it('should be able to add verification method in didDocument without offlinesigner', () => __awaiter(this, void 0, void 0, function* () {
-            const hypersignDid = new index_1.HypersignDID({ namespace: 'testnet' });
+            const hypersignDid = new index_1.HypersignDID({ namespace: '' });
             const didDoc = JSON.parse(JSON.stringify(didDocument));
             const params = {
                 didDocument: didDoc,

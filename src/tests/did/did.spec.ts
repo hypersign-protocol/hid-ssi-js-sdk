@@ -22,7 +22,9 @@ let pubKey;
 let privKey;
 let didDocToReg;
 let DIdDOcWithMultiplVM;
-
+const prefix = hidNodeEp.namespace
+  ? `did:hid:${hidNodeEp.namespace}`
+  : `did:hid`;
 //add mnemonic of wallet that have balance
 
 beforeEach(async function () {
@@ -51,7 +53,7 @@ describe('DID Test scenarios', () => {
     });
 
     it('should return publickeyMultibase and privateKeyMultibase along with controller', async function () {
-      const controller = 'did:hid:testnet:controller';
+      const controller = `${prefix}:controller`;
       const kpnew = await hypersignDID.generateKeys({ controller });
       expect(kpnew).to.be.a('object');
       should().exist(kpnew.privateKeyMultibase);
@@ -163,7 +165,7 @@ describe('DID Test scenarios', () => {
       const didDocument = await hypersignDID.generate({ publicKeyMultibase, methodSpecificId });
       const didDocId = didDocument['id'];
       expect(didDocument).to.be.a('object');
-      expect(didDocId).to.be.equal('did:hid:testnet:' + methodSpecificId);
+      expect(didDocId).to.be.equal(`${prefix}:` + methodSpecificId);
       should().exist(didDocument['@context']);
       should().exist(didDocument['id']);
       should().exist(didDocument['controller']);
@@ -189,7 +191,6 @@ describe('DID Test scenarios', () => {
 
     it('should be able to generate didDocument with custom id using HypersignSSISDk instance', async function () {
       const methodSpecificId = 'e157620d69d003e12d935c37b8c21baa78d24898398829b39d943d253c006332';
-
       const params = {
         offlineSigner,
         nodeRestEndpoint: hidNodeEp.rest,
@@ -204,7 +205,7 @@ describe('DID Test scenarios', () => {
       const didDocument = await hypersignDID.generate({ publicKeyMultibase, methodSpecificId });
       const didDocId = didDocument['id'];
       expect(didDocument).to.be.a('object');
-      expect(didDocId).to.be.equal('did:hid:testnet:' + methodSpecificId);
+      expect(didDocId).to.be.equal(`${prefix}:` + methodSpecificId);
       should().exist(didDocument['@context']);
       should().exist(didDocument['id']);
       should().exist(didDocument['controller']);
@@ -233,7 +234,7 @@ describe('DID Test scenarios', () => {
       const params = {
         didDocument: {},
         type: 'X25519KeyAgreementKey2020',
-        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
         publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
       };
       return hypersignDID.addVerificationMethod(params).catch(function (err) {
@@ -248,7 +249,7 @@ describe('DID Test scenarios', () => {
     it('should not be able to add verificationMethod as type is not passed', async () => {
       const params = {
         didDocument,
-        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
         publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
       };
       return hypersignDID.addVerificationMethod(params).catch(function (err) {
@@ -261,7 +262,7 @@ describe('DID Test scenarios', () => {
       const params = {
         didDocument,
         type: 'dsyifx',
-        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
         publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
       };
       return hypersignDID.addVerificationMethod(params).catch(function (err) {
@@ -273,9 +274,9 @@ describe('DID Test scenarios', () => {
 
     it('should not be able to add verificationMethod as params.did is passed but yet not registerd', async () => {
       const params = {
-        did: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY',
+        did: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY`,
         type: VerificationMethodTypes.Ed25519VerificationKey2020,
-        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
         publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
       };
       const hypersignDid = new HypersignDID({ namespace: 'testnet' });
@@ -289,7 +290,7 @@ describe('DID Test scenarios', () => {
       const params = {
         didDocument,
         type: 'EcdsaSecp256k1RecoveryMethod2020',
-        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
         publicKeyMultibase: '23fer44374u3rmhvf47ri35ty',
       };
       return hypersignDID.addVerificationMethod(params).catch(function (err) {
@@ -317,7 +318,7 @@ describe('DID Test scenarios', () => {
       const params = {
         didDocument,
         type: 'EcdsaSecp256k1VerificationKey2019',
-        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
       };
       return hypersignDID.addVerificationMethod(params).catch(function (err) {
         expect(function () {
@@ -333,7 +334,7 @@ describe('DID Test scenarios', () => {
       const params = {
         didDocument,
         type: 'EcdsaSecp256k1VerificationKey2019',
-        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1`,
         blockchainAccountId: 'eip155:1:23fer44374u3rmhvf47ri35ty',
       };
       return hypersignDID.addVerificationMethod(params).catch(function (err) {
@@ -350,7 +351,7 @@ describe('DID Test scenarios', () => {
       const params = {
         didDocument,
         type: 'EcdsaSecp256k1VerificationKey2019',
-        id: 'did:hid:testnet:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key-1',
+        id: `${prefix}:z8wo3LVRR4JkEguESX6hf4EBc234refrdan5xVD49quCPV7fBHYdY#key - 1`,
         blockchainAccountId: 'eip155:1:23fer44374u3rmhvf47ri35ty',
       };
       return hypersignDID.addVerificationMethod(params).catch(function (err) {
@@ -405,7 +406,7 @@ describe('DID Test scenarios', () => {
     //   expect(updatedDidDoc.verificationMethod.length).to.be.greaterThan(didDoc.verificationMethod.length);
     // });
     it('should be able to add verification method in didDocument without offlinesigner', async () => {
-      const hypersignDid = new HypersignDID({ namespace: 'testnet' });
+      const hypersignDid = new HypersignDID({ namespace: '' });
       const didDoc = JSON.parse(JSON.stringify(didDocument));
       const params = {
         didDocument: didDoc,

@@ -10,14 +10,13 @@ export const promptForConfig = () => {
     hideEchoBack: true,
   });
 
-  const rpcEndpoint = rpcInput || process.env.RPC_ENDPOINT || 'https://rpc.prajna-1.hypersign.id';
-  const restEndpoint = restInput || process.env.REST_ENDPOINT || 'https://api.prajna-1.hypersign.id';
-  const namespace = namespaceInput || process.env.NAMESPACE || 'testnet';
+  const rpcEndpoint = rpcInput || process.env.RPC_ENDPOINT || 'https://rpc.atman.hypersign.id';
+  const restEndpoint = restInput || process.env.REST_ENDPOINT || 'https://api.atman.hypersign.id';
+  const namespace = namespaceInput || process.env.NAMESPACE || '';
   const mnemonic =
     mnemonicInput ||
     process.env.MNEMONIC ||
     'verify sustain lumber boat demise parade special soft bargain scout spoil there addict move badge rebuild horn achieve hollow acquire glide bundle curious present';
-
   console.log('\n=== Configuration Summary ===');
   console.log(`RPC Endpoint: ${rpcEndpoint}`);
   console.log(`REST Endpoint: ${restEndpoint}`);
