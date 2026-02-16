@@ -110,7 +110,6 @@ describe('#register() this is to register did on the blockchain', function () {
     should().exist(result.transactionHash);
   });
 });
-
 describe('#generate() method to create schema', function () {
   it('should not be able to create a new schema as author is not passed', function () {
     const tempSchemaBody = { ...schemaBody };

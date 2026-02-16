@@ -38,8 +38,7 @@ const promptForConfig = () => {
     const namespace = namespaceInput || process.env.NAMESPACE || '';
     const mnemonic = mnemonicInput ||
         process.env.MNEMONIC ||
-        // 'verify sustain lumber boat demise parade special soft bargain scout spoil there addict move badge rebuild horn achieve hollow acquire glide bundle curious present';
-        'cream lyrics abandon coach outside again paper admit until bean kingdom local ball practice bread degree input milk pretty put margin recall candy reflect';
+        'verify sustain lumber boat demise parade special soft bargain scout spoil there addict move badge rebuild horn achieve hollow acquire glide bundle curious present';
     console.log('\n=== Configuration Summary ===');
     console.log(`RPC Endpoint: ${rpcEndpoint}`);
     console.log(`REST Endpoint: ${restEndpoint}`);
