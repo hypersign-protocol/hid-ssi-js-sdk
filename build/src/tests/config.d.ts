@@ -2,7 +2,7 @@ import { DirectSecp256k1HdWallet } from '@cosmjs/proto-signing';
 import { Slip10RawIndex } from '@cosmjs/crypto';
 import Web3 from 'web3';
 import { ProofTypes, VerificationMethodRelationships } from '../../libs/generated/ssi/client/enums';
-export declare const mnemonic = "verify sustain lumber boat demise parade special soft bargain scout spoil there addict move badge rebuild horn achieve hollow acquire glide bundle curious present";
+export declare const mnemonic: string;
 export declare const hidNodeEp: {
     rpc: string;
     rest: string;
