@@ -324,6 +324,7 @@ describe('Credential Operation', () => {
                 tempCredentialBody.schemaId = schemaId;
                 tempCredentialBody.issuerDid = issuerDid;
                 tempCredentialBody['subjectDid'] = subjectDid;
+                delete tempCredentialBody['fields']['id'];
                 return hsSdk.vc.bjjVC.generate(tempCredentialBody).catch(function (err) {
                     (0, chai_1.expect)(function () {
                         throw err;
