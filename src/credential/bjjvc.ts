@@ -514,6 +514,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
    *  - params.credential             : Signed Hypersign credentail document of type IVerifiableCredential
    *  - params.issuerDid              : DID of the issuer
    *  - params.verificationMethodId   : Verifcation Method of Issuer
+   *  - params.credentialStatusCheck     : Check the status of the credential on Hypersign blockchain, default is true (if nothing passed its true only explicit false is false)
    * @returns {Promise<object>}
    */
   public async verify(params: {
@@ -521,7 +522,10 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     issuerDid?: string;
     issuerDidDocument?: Did;
     verificationMethodId: string;
+    credentialStatusCheck?: boolean;
   }): Promise<any> {
+    const checkCredentialStatus = params.credentialStatusCheck === undefined ? true : params.credentialStatusCheck;
+
     if (!params.credential) {
       throw new Error('HID-SSI-SDK:: params.credential is required to verify credential');
     }
@@ -586,8 +590,10 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
       documentLoader,
     });
 
-    const statusCheck = await thats.checkCredentialStatus({ credentialId: params.credential.id });
-    result.statusResult = statusCheck;
+    if (checkCredentialStatus) {
+      const statusCheck = await thats.checkCredentialStatus({ credentialId: params.credential.id });
+      result.statusResult = statusCheck;
+    }
 
     return result;
   }

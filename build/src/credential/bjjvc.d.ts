@@ -91,6 +91,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
      *  - params.credential             : Signed Hypersign credentail document of type IVerifiableCredential
      *  - params.issuerDid              : DID of the issuer
      *  - params.verificationMethodId   : Verifcation Method of Issuer
+     *  - params.credentialStatusCheck     : Check the status of the credential on Hypersign blockchain, default is true (if nothing passed its true only explicit false is false)
      * @returns {Promise<object>}
      */
     verify(params: {
@@ -98,6 +99,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
         issuerDid?: string;
         issuerDidDocument?: Did;
         verificationMethodId: string;
+        credentialStatusCheck?: boolean;
     }): Promise<any>;
     /**
      * Resolves credential status from Hypersign Blokchain
