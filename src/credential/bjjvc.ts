@@ -854,7 +854,9 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
     frame: object;
     verificationMethodId: string;
     issuerDid: string;
+    checkCredentialStatus?: boolean;
   }) {
+    const checkCredentialStatus = param.checkCredentialStatus === undefined ? true : param.checkCredentialStatus;
     if (!param.verifiableCredential) {
       throw new Error('HID-SSI-SDK:: verifiableCredential is required');
     }
@@ -886,6 +888,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
       credential: param.verifiableCredential,
       issuerDid: param.issuerDid,
       verificationMethodId: param.verificationMethodId,
+      credentialStatusCheck: checkCredentialStatus,
     });
 
     if (!verifyCredential.verified == true) {

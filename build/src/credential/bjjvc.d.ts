@@ -176,6 +176,7 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
         frame: object;
         verificationMethodId: string;
         issuerDid: string;
+        checkCredentialStatus?: boolean;
     }): Promise<any>;
 }
 //# sourceMappingURL=bjjvc.d.ts.map

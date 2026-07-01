@@ -709,6 +709,7 @@ class HypersignBJJVerifiableCredential {
     generateSeletiveDisclosure(param) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            const checkCredentialStatus = param.checkCredentialStatus === undefined ? true : param.checkCredentialStatus;
             if (!param.verifiableCredential) {
                 throw new Error('HID-SSI-SDK:: verifiableCredential is required');
             }
@@ -736,6 +737,7 @@ class HypersignBJJVerifiableCredential {
                 credential: param.verifiableCredential,
                 issuerDid: param.issuerDid,
                 verificationMethodId: param.verificationMethodId,
+                credentialStatusCheck: checkCredentialStatus,
             });
             if (!verifyCredential.verified == true) {
                 throw new Error('proofDocument cannot be verified');
