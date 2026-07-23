@@ -15,7 +15,7 @@ import { SchemaRpc } from './schemaRPC';
 import * as constants from '../constants';
 import jsonSigs from 'jsonld-signatures';
 const { AssertionProofPurpose } = jsonSigs.purposes;
-import { ISchemaFields, ISchemaMethods, IResolveSchema } from './ISchema';
+import { ISchemaFields, ISchemaMethods, IResolveSchema, ISignedSchema } from './ISchema';
 import Utils from '../utils';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import { DeliverTxResponse } from '@cosmjs/stargate';
@@ -221,13 +221,13 @@ export default class HypersignBJJSchema implements ISchemaMethods {
    *  - params.schema               : The schema document without proof
    *  - params.privateKeyMultibase  : Private Key to sign the doc
    *  - params.verificationMethodId : VerificationMethodId of the document
-   * @returns {Promise<IResolveSchema>} Schema with proof
+   * @returns {Promise<ISignedSchema>} Schema with proof
    */
   public async sign(params: {
     privateKeyMultibase: string;
     schema: SchemaDocument;
     verificationMethodId: string;
-  }): Promise<IResolveSchema> {
+  }): Promise<ISignedSchema> {
     if (!params.privateKeyMultibase) throw new Error('HID-SSI-SDK:: Error: params.privateKeyMultibase must be passed');
     if (!params.verificationMethodId)
       throw new Error('HID-SSI-SDK:: Error: params.verificationMethodId must be passed');
@@ -252,7 +252,7 @@ export default class HypersignBJJSchema implements ISchemaMethods {
     });
 
     schemaDoc['proof'] = {} as SchemaProof;
-    const schemaToReturn: IResolveSchema = schemaDoc as IResolveSchema;
+    const schemaToReturn: ISignedSchema = schemaDoc as ISignedSchema;
     if (proof) {
       schemaToReturn['proof'] = { ...schemaToReturn['proof'], ...proof };
     }
@@ -266,7 +266,7 @@ export default class HypersignBJJSchema implements ISchemaMethods {
    *  - params.schema               : The schema document with schemaProof
    * @returns {Promise<object>} Result of the registration
    */
-  public async register(params: { schema: IResolveSchema }): Promise<{ transactionHash: string }> {
+  public async register(params: { schema: ISignedSchema }): Promise<{ transactionHash: string }> {
     if (!params.schema) throw new Error('HID-SSI-SDK:: Error: schema must be passed');
     if (!params.schema['proof']) throw new Error('HID-SSI-SDK:: Error: schema.proof must be passed');
     if (!params.schema['proof'].created) throw new Error('HID-SSI-SDK:: Error: schema.proof must Contain created');
@@ -291,7 +291,7 @@ export default class HypersignBJJSchema implements ISchemaMethods {
       response.transactionHash = result.transactionHash;
     } else if (this.schemaApiService) {
       const result: { transactionHash: string } = await this.schemaApiService.registerSchema({
-        schemaDocument: params.schema,
+        schemaDocument: params.schema as SchemaDocument,
         schemaProof: params.schema['proof'],
       });
       response.transactionHash = result.transactionHash;
@@ -328,7 +328,15 @@ export default class HypersignBJJSchema implements ISchemaMethods {
     const response: IResolveSchema = {
       ...schema.credentialSchemaDocument,
       proof: schema.credentialSchemaProof as SchemaProof,
-    };
+    } as IResolveSchema;
+
+    if (typeof response.schema?.properties === 'string') {
+      try {
+        response.schema.properties = JSON.parse(response.schema.properties);
+      } catch (error) {
+        throw new Error('HID-SSI-SDK:: Error: Could not parse schema properties for schemaId = ' + params.schemaId);
+      }
+    }
 
     // Competable Schema  with https://www.w3.org/TR/vc-json-schema/#jsonschema    currently not used
 
@@ -337,7 +345,7 @@ export default class HypersignBJJSchema implements ISchemaMethods {
 
   public vcJsonSchema(schemaResolved: IResolveSchema) {
     const schemaWrapper = schemaResolved;
-    const properties = JSON.parse(schemaResolved.schema?.properties as string);
+    const properties = schemaResolved.schema?.properties || {};
     const ld = {};
     const schemaProp = {};
     Object.entries(properties).forEach((elm) => {

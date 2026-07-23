@@ -213,7 +213,7 @@ class HyperSignSchema {
      *  - params.schema               : The schema document without proof
      *  - params.privateKeyMultibase  : Private Key to sign the doc
      *  - params.verificationMethodId : VerificationMethodId of the document
-     * @returns {Promise<IResolveSchema>} Schema with proof
+     * @returns {Promise<ISignedSchema>} Schema with proof
      */
     sign(params) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -296,6 +296,7 @@ class HyperSignSchema {
      * @returns {Promise<IResolveSchema>} Returns schema document
      */
     resolve(params) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             if (!params.schemaId)
                 throw new Error('HID-SSI-SDK:: Error: SchemaId must be passed');
@@ -312,6 +313,14 @@ class HyperSignSchema {
                 credentialSchemaProof: schemaArr[0].proof ? schemaArr[0].proof : schemaT.credentialSchemaProof,
             };
             const response = Object.assign(Object.assign({}, schema.credentialSchemaDocument), { proof: schema.credentialSchemaProof });
+            if (typeof ((_a = response.schema) === null || _a === void 0 ? void 0 : _a.properties) === 'string') {
+                try {
+                    response.schema.properties = JSON.parse(response.schema.properties);
+                }
+                catch (error) {
+                    throw new Error('HID-SSI-SDK:: Error: Could not parse schema properties for schemaId = ' + params.schemaId);
+                }
+            }
             // Competable Schema  with https://www.w3.org/TR/vc-json-schema/#jsonschema    currently not used
             return response;
         });
@@ -319,7 +328,7 @@ class HyperSignSchema {
     vcJsonSchema(schemaResolved) {
         var _a, _b, _c;
         const schemaWrapper = schemaResolved;
-        const properties = JSON.parse((_a = schemaResolved.schema) === null || _a === void 0 ? void 0 : _a.properties);
+        const properties = ((_a = schemaResolved.schema) === null || _a === void 0 ? void 0 : _a.properties) || {};
         const ld = {};
         const schemaProp = {};
         Object.entries(properties).forEach((elm) => {

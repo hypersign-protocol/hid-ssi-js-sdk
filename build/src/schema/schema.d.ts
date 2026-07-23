@@ -5,7 +5,7 @@
  */
 import { CredentialSchemaDocument as SchemaDocument, CredentialSchemaProperty as SchemaProperty } from '../../libs/generated/ssi/credential_schema';
 import { SchemaRpc } from './schemaRPC';
-import { ISchemaFields, ISchemaMethods, IResolveSchema } from './ISchema';
+import { ISchemaFields, ISchemaMethods, IResolveSchema, ISignedSchema } from './ISchema';
 import { OfflineSigner } from '@cosmjs/proto-signing';
 import HypersignBJJSchema from './bjjSchema';
 export default class HyperSignSchema implements ISchemaMethods {
@@ -60,13 +60,13 @@ export default class HyperSignSchema implements ISchemaMethods {
      *  - params.schema               : The schema document without proof
      *  - params.privateKeyMultibase  : Private Key to sign the doc
      *  - params.verificationMethodId : VerificationMethodId of the document
-     * @returns {Promise<IResolveSchema>} Schema with proof
+     * @returns {Promise<ISignedSchema>} Schema with proof
      */
     sign(params: {
         privateKeyMultibase: string;
         schema: SchemaDocument;
         verificationMethodId: string;
-    }): Promise<IResolveSchema>;
+    }): Promise<ISignedSchema>;
     /**
      * Register a schema Document in Hypersign blockchain - an onchain activity
      * @params
@@ -74,7 +74,7 @@ export default class HyperSignSchema implements ISchemaMethods {
      * @returns {Promise<object>} Result of the registration
      */
     register(params: {
-        schema: IResolveSchema;
+        schema: ISignedSchema;
     }): Promise<{
         transactionHash: string;
     }>;
