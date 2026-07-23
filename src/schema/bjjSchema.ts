@@ -334,9 +334,7 @@ export default class HypersignBJJSchema implements ISchemaMethods {
       try {
         response.schema.properties = JSON.parse(response.schema.properties);
       } catch (error) {
-        throw new Error(
-          'HID-SSI-SDK:: Error: Could not parse schema properties for schemaId = ' + params.schemaId
-        );
+        throw new Error('HID-SSI-SDK:: Error: Could not parse schema properties for schemaId = ' + params.schemaId);
       }
     }
 

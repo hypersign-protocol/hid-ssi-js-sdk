@@ -3,8 +3,15 @@
  * All rights reserved.
  * Author: Hypermine Core Team
  */
-import { CredentialSchemaDocument as SchemaDocument } from '../../libs/generated/ssi/credential_schema';
+import { CredentialSchemaDocument as SchemaDocument, CredentialSchemaProperty as SchemaProperty } from '../../libs/generated/ssi/credential_schema';
 import { DocumentProof } from '../../libs/generated/ssi/proof';
+/**
+ * Schemas are serialized before they are stored on-chain. A resolved schema
+ * exposes its properties in their usable object form instead.
+ */
+export type IResolvedSchemaProperty = Omit<SchemaProperty, 'properties'> & {
+    properties?: Record<string, unknown>;
+};
 export interface ISchemaFields {
     type: string;
     format?: string;
@@ -23,9 +30,9 @@ export interface ISchemaMethods {
         privateKeyMultibase: string;
         schema: SchemaDocument;
         verificationMethodId: string;
-    }): Promise<IResolveSchema>;
+    }): Promise<ISignedSchema>;
     register(params: {
-        schema: IResolveSchema;
+        schema: ISignedSchema;
     }): Promise<{
         transactionHash: string;
     }>;
@@ -33,7 +40,11 @@ export interface ISchemaMethods {
         schemaId: string;
     }): Promise<IResolveSchema>;
 }
-export interface IResolveSchema extends SchemaDocument {
+export interface ISignedSchema extends SchemaDocument {
+    proof?: DocumentProof;
+}
+export interface IResolveSchema extends Omit<SchemaDocument, 'schema'> {
+    schema?: IResolvedSchemaProperty;
     proof?: DocumentProof;
 }
 //# sourceMappingURL=ISchema.d.ts.map
