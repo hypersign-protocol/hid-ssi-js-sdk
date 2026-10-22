@@ -601,6 +601,31 @@ describe('Verifiable Credential Opearations', () => {
                 (0, chai_1.should)().not.exist(credentialStatusRegistrationResult);
             });
         });
+        it('should be able to issue credential using a provided issuer DID document without resolving it on chain', function () {
+            return __awaiter(this, void 0, void 0, function* () {
+                const tempIssueCredentialBody = {
+                    credential: credentialDetail,
+                    issuerDid: didDocId,
+                    issuerDidDoc: didDocument,
+                    verificationMethodId,
+                    privateKeyMultibase,
+                    registerCredential: false,
+                };
+                const originalResolve = hypersignVC.hsDid.resolve;
+                hypersignVC.hsDid.resolve = () => __awaiter(this, void 0, void 0, function* () {
+                    throw new Error('Issuer DID should not be resolved on chain');
+                });
+                try {
+                    const issuedCredResult = yield hypersignVC.issue(tempIssueCredentialBody);
+                    (0, chai_1.expect)(issuedCredResult.signedCredential).to.be.a('object');
+                    (0, chai_1.should)().exist(issuedCredResult.signedCredential['proof']);
+                    (0, chai_1.should)().not.exist(issuedCredResult.credentialStatusRegistrationResult);
+                }
+                finally {
+                    hypersignVC.hsDid.resolve = originalResolve;
+                }
+            });
+        });
         it('should be able to issue credential without having the credential status registered on chain to test bulkRegistration', function () {
             return __awaiter(this, void 0, void 0, function* () {
                 const tempIssueCredentialBody = Object.assign({}, issueCredentialBody);

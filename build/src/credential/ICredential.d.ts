@@ -54,6 +54,8 @@ export interface ICredentialMethods {
     issue(params: {
         credential: IVerifiableCredential;
         issuerDid: string;
+        issuerDidDoc?: JSON;
+        verificationMethodId: string;
         privateKeyMultibase: string;
         registerCredential?: boolean;
     }): Promise<{

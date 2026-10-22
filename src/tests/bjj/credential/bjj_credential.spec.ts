@@ -542,6 +542,30 @@ describe('Credential Operation', () => {
       should().not.exist(credentialStatusRegistrationResult);
     });
 
+    it('should be able to issue credential using a provided issuer DID document without resolving it on chain', async function () {
+      const tempIssueCredentialBody = {
+        credential: credentialDetail,
+        issuerDid,
+        issuerDidDoc,
+        verificationMethodId: verificationMethod[0].id,
+        privateKeyMultibase: issuerPrivateKeyMultibase,
+        registerCredential: false,
+      };
+      const originalResolve = hsSdk.vc.bjjVC.hsDid.resolve;
+      hsSdk.vc.bjjVC.hsDid.resolve = async () => {
+        throw new Error('Issuer DID should not be resolved on chain');
+      };
+
+      try {
+        const issuedCredResult = await hsSdk.vc.bjjVC.issue(tempIssueCredentialBody);
+        expect(issuedCredResult.signedCredential).to.be.a('object');
+        should().exist(issuedCredResult.signedCredential['proof']);
+        should().not.exist(issuedCredResult.credentialStatusRegistrationResult);
+      } finally {
+        hsSdk.vc.bjjVC.hsDid.resolve = originalResolve;
+      }
+    });
+
     it('should be able to issue credential without having the credential status registered on chain to test bulkRegistration', async function () {
       const tempIssueCredentialBody = { ...issueCredentialBody };
       tempIssueCredentialBody.credential = credentialDetail2;

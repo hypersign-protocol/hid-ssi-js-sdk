@@ -383,11 +383,14 @@ class HypersignVerifiableCredential {
             if (params.registerCredential == undefined) {
                 params.registerCredential = true;
             }
-            const { didDocument: signerDidDoc } = yield this.hsDid.resolve({ did: params.issuerDid });
+            const signerDidDoc = (params.issuerDidDoc ? params.issuerDidDoc : (yield this.hsDid.resolve({ did: params.issuerDid })).didDocument);
             if (signerDidDoc === null || signerDidDoc === undefined)
                 throw new Error('HID-SSI-SDK:: Error: Could not resolve issuerDid = ' + params.issuerDid);
+            if (!Array.isArray(signerDidDoc.verificationMethod)) {
+                throw new Error('HID-SSI-SDK:: Error: Issuer DID document does not contain verification methods');
+            }
             const publicKeyId = params.verificationMethodId;
-            const publicKeyVerMethod = signerDidDoc['verificationMethod'].find((x) => x.id == publicKeyId);
+            const publicKeyVerMethod = signerDidDoc.verificationMethod.find((x) => x.id == publicKeyId);
             if (!publicKeyVerMethod) {
                 throw new Error('HID-SSI-SDK:: Error: Could not find verification method for id = ' + params.verificationMethodId);
             }
@@ -422,7 +425,9 @@ class HypersignVerifiableCredential {
                 verificationMethodId: params.verificationMethodId,
                 publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase,
             });
-            const { didDocument: issuerDID } = yield this.hsDid.resolve({ did: params.credential.issuer });
+            const issuerDID = (params.issuerDidDoc
+                ? params.issuerDidDoc
+                : (yield this.hsDid.resolve({ did: params.credential.issuer })).didDocument);
             if (issuerDID === null || issuerDID === undefined)
                 throw new Error('Could not resolve issuerDid = ' + params.credential.issuer);
             const credIssuerDidDoc = issuerDID;

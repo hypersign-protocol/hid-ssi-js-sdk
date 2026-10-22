@@ -79,6 +79,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
     issue(params: {
         credential: IVerifiableCredential;
         issuerDid: string;
+        issuerDidDoc?: JSON;
         verificationMethodId: string;
         privateKeyMultibase: string;
         registerCredential?: boolean;
