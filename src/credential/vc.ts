@@ -423,6 +423,7 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
   public async issue(params: {
     credential: IVerifiableCredential;
     issuerDid: string;
+    issuerDidDoc?: JSON;
     verificationMethodId: string; // vermethod of issuer for assestion
     privateKeyMultibase: string;
     registerCredential?: boolean;
@@ -458,12 +459,18 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       params.registerCredential = true;
     }
 
-    const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
+    const signerDidDoc: Did = (
+      params.issuerDidDoc ? params.issuerDidDoc : (await this.hsDid.resolve({ did: params.issuerDid })).didDocument
+    ) as Did;
     if (signerDidDoc === null || signerDidDoc === undefined)
       throw new Error('HID-SSI-SDK:: Error: Could not resolve issuerDid = ' + params.issuerDid);
 
+    if (!Array.isArray(signerDidDoc.verificationMethod)) {
+      throw new Error('HID-SSI-SDK:: Error: Issuer DID document does not contain verification methods');
+    }
+
     const publicKeyId = params.verificationMethodId;
-    const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
+    const publicKeyVerMethod: VerificationMethod = signerDidDoc.verificationMethod.find(
       (x) => x.id == publicKeyId
     ) as VerificationMethod;
 
@@ -511,7 +518,11 @@ export default class HypersignVerifiableCredential implements ICredentialMethods
       verificationMethodId: params.verificationMethodId,
       publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase as string,
     });
-    const { didDocument: issuerDID } = await this.hsDid.resolve({ did: params.credential.issuer });
+    const issuerDID: Did = (
+      params.issuerDidDoc
+        ? params.issuerDidDoc
+        : (await this.hsDid.resolve({ did: params.credential.issuer })).didDocument
+    ) as Did;
     if (issuerDID === null || issuerDID === undefined)
       throw new Error('Could not resolve issuerDid = ' + params.credential.issuer);
     const credIssuerDidDoc: Did = issuerDID as Did;

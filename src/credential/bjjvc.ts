@@ -388,22 +388,18 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
       params.registerCredential = true;
     }
 
-    // const { didDocument: signerDidDoc } = await this.hsDid.resolve({ did: params.issuerDid });
-
-    let signerDidDoc;
-    if (params.issuerDidDoc) {
-      console.log('Got issuerDID doc so no need to resolve');
-      signerDidDoc = params.issuerDidDoc;
-    } else {
-      console.log('Did not get issuerDID doc, need to resolve');
-      signerDidDoc = (await this.hsDid.resolve({ did: params.issuerDid })).didDocument;
-    }
-
+    const signerDidDoc: Did = (
+      params.issuerDidDoc ? params.issuerDidDoc : (await this.hsDid.resolve({ did: params.issuerDid })).didDocument
+    ) as Did;
     if (signerDidDoc === null || signerDidDoc === undefined)
       throw new Error('HID-SSI-SDK:: Error: Could not resolve issuerDid = ' + params.issuerDid);
 
+    if (!Array.isArray(signerDidDoc.verificationMethod)) {
+      throw new Error('HID-SSI-SDK:: Error: Issuer DID document does not contain verification methods');
+    }
+
     const publicKeyId = params.verificationMethodId;
-    const publicKeyVerMethod: VerificationMethod = signerDidDoc['verificationMethod'].find(
+    const publicKeyVerMethod: VerificationMethod = signerDidDoc.verificationMethod.find(
       (x) => x.id == publicKeyId
     ) as VerificationMethod;
 
@@ -455,15 +451,11 @@ export default class HypersignBJJVerifiableCredential implements ICredentialMeth
       publicKeyMultibase: publicKeyVerMethod.publicKeyMultibase as string,
     });
 
-    let issuerDID;
-    if (params.issuerDidDoc) {
-      console.log('Got issuerDID doc so no need to resolve');
-      issuerDID = params.issuerDidDoc;
-    } else {
-      console.log('Did not get issuerDID doc, need to resolve');
-      issuerDID = (await this.hsDid.resolve({ did: params.credential.issuer })).didDocument;
-    }
-
+    const issuerDID: Did = (
+      params.issuerDidDoc
+        ? params.issuerDidDoc
+        : (await this.hsDid.resolve({ did: params.credential.issuer })).didDocument
+    ) as Did;
     if (issuerDID === null || issuerDID === undefined)
       throw new Error('Could not resolve issuerDid = ' + params.credential.issuer);
     const credIssuerDidDoc: Did = issuerDID as Did;
